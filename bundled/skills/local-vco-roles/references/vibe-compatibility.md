@@ -8,7 +8,7 @@ This document defines how `local-vco-roles` integrates with local `vibe` behavio
 
 | Condition | Action |
 |---|---|
-| `/vibe` + M | Use lightweight single-agent analysis. Do not run TeamCreate workflow. |
+| `/vibe` + M | Use lightweight single-agent analysis. Do not run XL multi-agent workflow. |
 | `/vibe` + L | Use design-first flow and limited role decomposition. |
 | `/vibe` + XL | Use full role pack with lead + 4 analysts. |
 | User explicit tool command | Bypass role pack defaults and respect user command. |

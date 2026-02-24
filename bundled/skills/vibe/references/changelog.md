@@ -1,5 +1,29 @@
 # VCO Changelog
 
+## v2.0.9 (2026-02-24)
+
+- 删除 XL 设计中的 legacy compatibility orchestration 描述，统一为 Codex native agent runtime + ruflo 协作
+- team.md 移除 compatibility orchestration option，仅保留 Native+ruflo 与 Native-only 路径
+- fallback-chains.md 移除 compatibility Level，XL 仅保留 Native+ruflo -> Native-only -> L-grade sequential
+- conflict-rules.md Rule 1 移除 compatibility agent system 条目
+- tool-registry.md 移除 compatibility orchestration 集成描述，聚焦 ruflo 与 native team runtime
+
+## v2.0.8 (2026-02-24)
+
+- XL 标准路径明确为 `spawn_agent` / `send_input` / `wait` / `close_agent` 与 ruflo 协作（workflow/memory/consensus）
+- team.md orchestration options 调整为：A=Native+ruflo（首选），B=Native-only（ruflo 不可用）
+- fallback-chains.md 的 XL 链路更新为 Native+ruflo 优先，并补充 ruflo 不可用时的 native-only 降级
+- conflict-rules.md Rule 1 更新为 XL=Native+ruflo 主路径，补充 native-only 分支
+- team-templates.md 全量迁移为 native agent type (`default`/`explorer`/`worker`) 与 `send_input` 通信语义
+- review.md 移除 `Task tool + subagent_type` 的旧表述，改为单代理直接调用 code-reviewer
+
+## v2.0.7 (2026-02-24)
+
+- XL execution primary path switched to Codex native agent orchestration (`spawn_agent` / `send_input` / `wait` / `close_agent`)
+- Legacy compatibility fallback path downgraded from primary XL design
+- Added explicit `build-error-resolver -> error-resolver` compatibility mapping in fallback and tool-detection guidance
+- Updated team protocol role mapping to native agent types (`default`, `explorer`, `worker`)
+
 ## v2.0.6 (2026-02-22)
 
 - C1 修复 conflict-rules.md Rule 1 与 Tool Selection 矩阵矛盾——M 级从"Everything-CC agents"改为"single-agent tools（允许 sc:design/systematic-debugging 等 skill commands，禁止 subagent spawning）"

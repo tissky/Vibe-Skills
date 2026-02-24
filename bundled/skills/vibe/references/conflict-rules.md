@@ -12,11 +12,11 @@ NEVER use multiple agent systems for the same task.
 |-------|-------------|--------|
 | M | Single-agent tools (Everything-CC agents as primary; individual skill commands like sc:design, systematic-debugging permitted — no subagent spawning) | Lightweight, focused |
 | L | Superpowers subagent-driven-dev | Two-stage review (spec + quality) |
-| XL | TeamCreate + ruflo (hybrid) | Team lifecycle + workflow + memory |
-| XL (degraded) | TeamCreate only | When ruflo unavailable |
+| XL | Codex native team (`spawn_agent` family) + ruflo collaboration | Primary multi-agent orchestration |
+| XL (degraded) | Codex native team (`spawn_agent` family) only | When ruflo unavailable |
 
 Exceptions (specialized diagnostic agents may cross grade boundaries):
-- build-error-resolver: May be used at any grade for build failures
+- build-error-resolver: May be used at any grade for build failures (if unavailable, use local build-error-resolver -> error-resolver alias)
 - security-reviewer: May be used at any grade for security audits
 
 Fallback provision: 当某 grade 的主 agent 系统不可用时，严格按 references/fallback-chains.md 定义的路径降级，不视为违反 Rule 1。不得自行选择降级目标。
@@ -32,16 +32,16 @@ Fallback provision: 当某 grade 的主 agent 系统不可用时，严格按 ref
 **Review deconfliction:**
 - M -> Everything-CC code-reviewer (lightweight, auto-triggered)
 - L -> Superpowers two-stage review (spec + quality)
-- XL -> TeamCreate multi-agent review (parallel perspectives)
+- XL -> Codex native multi-agent review (parallel perspectives)
 - Security review -> Everything-CC security-reviewer (any grade, exempt)
 
 **Hook coexistence:**
 - All hooks from all plugins run. VCO does not disable any hooks.
 - Superpowers SessionStart: always runs, VCO respects skill-checking mandate
 - Everything-CC PreToolUse/PostToolUse: always runs, VCO leverages quality guards
-- Claude-flow hooks: run passively, VCO only actively calls ruflo for XL tasks
+- Claude-flow hooks: run passively, VCO calls ruflo only for XL enhancement
 - Ralph-loop Stop: only activates when user explicitly starts /ralph-loop
-- TeamCreate has no hooks (native tool, always available)
+- Codex native team tools are runtime primitives (no plugin hooks)
 
 ## Rule 2: Memory Division
 

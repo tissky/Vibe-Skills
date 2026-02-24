@@ -9,50 +9,41 @@ Activated for XL grade tasks that require:
 - Swarm or hive-mind coordination
 - Long-running iterative tasks
 
-## Hybrid Architecture: TeamCreate + ruflo
+## Hybrid Architecture: Codex Native Team + ruflo Collaboration
 
-TeamCreate manages agent lifecycle + task assignment.
-ruflo manages workflow definitions + vector memory + advanced coordination.
-Both are complementary -- ruflo unavailable means TeamCreate runs independently.
+Codex native agent APIs manage lifecycle + task assignment (primary path).
+ruflo remains optional for workflow/memory enhancements.
 
 ### Role Division
 
 | Concern | Provider | Tool |
 |---------|----------|------|
-| Agent spawning | TeamCreate | `Task` tool with `team_name` |
-| Task list & assignment | TeamCreate | `TaskCreate`, `TaskUpdate`, `TaskList` |
-| Agent messaging | TeamCreate | `SendMessage` (DM/broadcast) |
-| Agent shutdown | TeamCreate | `SendMessage` type=shutdown_request |
-| Workflow definition | ruflo | `workflow_create`, `workflow_execute` |
-| Vector memory | ruflo | `memory_store`, `memory_search` |
-| Session persistence | ruflo | `session_save`, `session_restore` |
-| Consensus algorithms | ruflo | `hive-mind_consensus` |
+| Agent spawning | Codex native | `spawn_agent` |
+| Task assignment & follow-up | Codex native | `send_input` |
+| Agent synchronization | Codex native | `wait` |
+| Agent shutdown | Codex native | `close_agent` |
+| Workflow definition (optional) | ruflo | `workflow_create`, `workflow_execute` |
+| Vector memory (optional) | ruflo | `memory_store`, `memory_search` |
+| Session persistence (optional) | ruflo | `session_save`, `session_restore` |
+| Consensus algorithms (optional) | ruflo | `hive-mind_consensus` |
 
 ## Orchestration Options
 
-### Option A: Full Hybrid (TeamCreate + ruflo) -- Preferred
-0. Load ruflo tools: `ToolSearch` to load required ruflo tools (workflow, memory, hive-mind) before first use — ruflo tools are deferred and unavailable until loaded
-1. Define workflow: ruflo `workflow_create`
-2. Create team: `TeamCreate` with descriptive `team_name`
-3. Create tasks: `TaskCreate` for each workflow step
-4. Spawn agents: `Task` tool with `team_name` + `subagent_type` per role
-5. Assign tasks: `TaskUpdate` with `owner`
-6. Coordinate: `SendMessage` for inter-agent communication
-7. Store state: ruflo `memory_store` for intermediate results
-8. Monitor: `TaskList` for progress
-9. Consensus: ruflo `hive-mind_consensus` when agents need to agree
-10. Shutdown: `SendMessage` type=shutdown_request, then `TeamDelete`
+### Option A: Codex Native Team + ruflo Collaboration (Preferred)
+1. Define decomposition plan (owners + interfaces + deliverables)
+2. Spawn agents via `spawn_agent` with role-specific prompts
+3. Assign work and clarifications via `send_input`
+4. Store intermediate state via ruflo `memory_store` (milestone summaries, handoff artifacts)
+5. Use ruflo `workflow_create` / `workflow_execute` when explicit step orchestration is needed
+6. Synchronize via `wait` at each milestone
+7. Use ruflo `hive-mind_consensus` when formal consensus is required
+8. Aggregate and reconcile outputs in lead agent/context
+9. Close agents via `close_agent`
 
-### Option B: TeamCreate Only (ruflo unavailable)
-1. Create team: `TeamCreate`
-2. Create tasks: `TaskCreate` with dependencies via `addBlockedBy`
-3. Spawn agents: `Task` tool with `team_name` + appropriate `subagent_type`
-4. Assign tasks: `TaskUpdate` with `owner`
-5. Coordinate: `SendMessage` for DMs, broadcast for team-wide
-6. Monitor: `TaskList` for progress tracking
-7. Shutdown: `SendMessage` type=shutdown_request, then `TeamDelete`
-
-Note: Without ruflo, use TodoWrite for state tracking.
+### Option B: Codex Native Team Only (When ruflo Unavailable)
+1. Run native lifecycle only: `spawn_agent` → `send_input` → `wait` → `close_agent`
+2. Use TodoWrite + conversation context for milestone state
+3. Keep the same staged confirmations and validation gates
 
 ### Option C: Ralph-loop (Iterative Tasks)
 When task requires repeated iteration on same prompt:
@@ -60,20 +51,20 @@ When task requires repeated iteration on same prompt:
 2. Define completion promise (exit condition)
 3. Set max iterations (safety limit)
 
-IMPORTANT: Ralph-loop is MUTUALLY EXCLUSIVE with TeamCreate/ruflo.
+IMPORTANT: Ralph-loop is MUTUALLY EXCLUSIVE with active team orchestration.
 
 ## Agent Type Selection
 
-| Role | subagent_type | Tools Available |
-|------|--------------|-----------------|
-| Researcher | `Explore` | Read-only: Glob, Grep, Read, WebSearch |
-| Planner | `Plan` | Read-only: Glob, Grep, Read |
-| Implementer | `general-purpose` | Full: Edit, Write, Bash, all tools |
-| Reviewer | `everything-claude-code:code-reviewer` | Read + Bash |
-| Security | `everything-claude-code:security-reviewer` | Read + Bash |
+| Role | Native Agent Type | Notes |
+|------|-------------------|-------|
+| Researcher | `explorer` | Read/search-heavy investigation |
+| Planner | `default` | Planning + decomposition |
+| Implementer | `worker` | Implementation ownership with isolated scope |
+| Reviewer | `worker` or `default` | Review prompt enforces bug/risk-first output |
+| Security | `worker` or `default` | Security-focused prompt and checklist |
 
 ## Team Templates
-See references/team-templates.md for 6 predefined compositions:
+See references/team-templates.md for 7 predefined compositions:
 - feature-team, debug-team, research-team, review-team, full-stack-team, dialectic-design
 
 If `local-vco-roles` is installed, you may also use:
@@ -125,7 +116,7 @@ Structured multi-perspective design analysis. Activated when `needs_dialectic = 
 - Trivial design choices (use think.md B2 Self-Check instead)
 - Debugging (use debug-team template)
 
-### XL Execution (TeamCreate)
+### XL Execution (Codex Native Team)
 
 Uses dialectic-design template from team-templates.md.
 
@@ -134,11 +125,10 @@ Lead reads relevant code/docs, formulates the design question, selects perspecti
 
 **Step 2 — Create team**
 ```
-TeamCreate: team_name = "dialectic-{topic}"
-TaskCreate × 4: one per thinker agent
+spawn_agent × 4: one per thinker agent
 ```
 
-**Step 3 — Spawn agents with prompt template**
+**Step 3 — Send role prompt template**
 Each agent receives this prompt (Lead fills `{placeholders}`):
 
 ```
@@ -152,10 +142,10 @@ Each agent receives this prompt (Lead fills `{placeholders}`):
 执行 6 阶段工作流：
 1. Propose: 基于你的视角，独立提出一个完整方案（含架构、关键决策、风险）
 2. Reflect: 列出你方案的 3 个最可能的生产环境失败模式
-3. Synthesize: 基于自我批判改进方案 → SendMessage 给组内伙伴
+3. Synthesize: 基于自我批判改进方案 → 通过 send_input 发给组内伙伴
 4. Compare: 收到伙伴方案后，分析两个方案的核心分歧点
 5. Reflect on comparison: 伙伴看到了什么你遗漏的？为什么会产生分歧？
-6. Final synthesis: 整合伙伴洞察，产出最终方案 → SendMessage 给 Lead
+6. Final synthesis: 整合伙伴洞察，产出最终方案 → 通过 send_input 发给 Lead
 
 输出格式（Phase 6）：
 - 方案摘要（≤200字）
@@ -170,14 +160,14 @@ Group B receives context slice emphasizing perspective B's concerns.
 Groups do NOT share context or communicate cross-group.
 
 **Step 5 — Execute**
-4 agents run 6-phase workflow. Intra-group communication via SendMessage (A1↔A2, B1↔B2). Max 1 round.
+4 agents run 6-phase workflow. Intra-group communication via `send_input` (A1↔A2, B1↔B2). Max 1 round.
 
 **Step 6 — Collect**
 Lead waits for 4 Phase-6 outputs.
 
 **Step 7 — Timeout handling**
 If any agent does not respond within reasonable time:
-- Send reminder via SendMessage
+- Send reminder via `send_input`
 - If still no response: proceed with available outputs (minimum 2 from different groups)
 - If <2 outputs: abort dialectic, fall back to think.md B2 Self-Check
 
@@ -202,15 +192,15 @@ Present synthesis to user. User may:
 - Request deeper analysis on specific divergence point
 
 **Step 10 — Shutdown**
-SendMessage type=shutdown_request to all 4 agents → TeamDelete.
+Close all 4 agents via `close_agent`.
 
 ### L-Grade Adaptation
 
-L grade cannot use TeamCreate (Rule 1). Instead, use Task tool to spawn 2 general-purpose agents sequentially (Plan agents are read-only and cannot execute Phase 3-5 interactions):
+L grade does not run XL team orchestration. Use 2 native agents sequentially:
 
 ```
-1. Agent-A: Task(subagent_type="general-purpose", prompt="{question} 从 {perspective_A} 视角分析")
-2. Agent-B: Task(subagent_type="general-purpose", prompt="{question} 从 {perspective_B} 视角分析")
+1. Agent-A: spawn_agent(agent_type="default" or "worker", prompt="{question} 从 {perspective_A} 视角分析")
+2. Agent-B: spawn_agent(agent_type="default" or "worker", prompt="{question} 从 {perspective_B} 视角分析")
 3. Lead synthesizes both outputs using the same output processing algorithm (Step 8)
 ```
 
@@ -223,8 +213,8 @@ Limitations vs XL: no intra-group dialogue (only 1 agent per perspective), no Ph
 - Dialectic Mode output feeds into writing-plans as the design foundation
 
 ## Conflict Avoidance
-- Do NOT use Everything-CC agents for XL tasks (use TeamCreate agents)
+- Do NOT use Everything-CC agents as the primary XL executor (use Codex native team)
 - Do NOT use Superpowers subagent-driven-dev for XL tasks
-- Ralph-loop and TeamCreate/ruflo are mutually exclusive
+- Ralph-loop and active team orchestration are mutually exclusive
 - Only one team active per project at a time
-- TeamCreate agents communicate via SendMessage, NOT via ruflo agent_spawn
+- Prefer native agent communication via `send_input`

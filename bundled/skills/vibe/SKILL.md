@@ -5,7 +5,7 @@ description: Vibe Code Orchestrator (VCO) routes development tasks by grade and 
 
 # VCO v2.0 — Vibe Code Orchestrator
 
-Unified entry point: classifies tasks via quick probe + user decision, selects optimal tools, coordinates 6 integrated plugins.
+Unified entry point: classifies tasks via quick probe + user decision, selects optimal tools, coordinates 6 integrated plugins + Codex native runtime, and uses Codex native agent-team orchestration for XL by default.
 
 ## When to Use
 
@@ -78,7 +78,7 @@ Otherwise, present probe results and recommended grade via AskUserQuestion:
 |-------|-----------------|------------|----------------|
 | M | 实现路径清晰，无需设计决策 | ≤5 files + 无 design 关键词 + 单模块 | Single agent: analyze + execute + review |
 | L | 需要设计决策或跨模块协调 | design 关键词 OR >5 files OR 多模块依赖 | Design first → plan → subagent → two-stage review |
-| XL | 可并行的独立工作流 | 用户请求 multi-agent OR 结构上可并行 | TeamCreate team coordination |
+| XL | 可并行的独立工作流 | 用户请求 multi-agent OR 结构上可并行 | Codex native team (`spawn_agent`/`send_input`/`wait`/`close_agent`) + ruflo 协作 |
 
 多个信号冲突时，以最高 grade 的信号为准。When in doubt between L and XL, default to L. XL requires explicit user signal or structural necessity.
 
@@ -86,14 +86,14 @@ Otherwise, present probe results and recommended grade via AskUserQuestion:
 
 | Task Type | M Grade | L Grade | XL Grade |
 |-----------|---------|---------|----------|
-| Planning | sc:design | brainstorming + writing-plans | dialectic-design† / TeamCreate team |
-| Coding | tdd-guide + code-reviewer | subagent-driven-dev | TeamCreate team |
-| Review | code-reviewer + security-reviewer | two-stage review (spec + quality) | TeamCreate multi-reviewer |
-| Debug | systematic-debugging | systematic-debugging + parallel investigation | TeamCreate debug team |
-| Research | sc:research or deep-research | deep-research | TeamCreate research team |
+| Planning | sc:design | brainstorming + writing-plans | dialectic-design† / Codex native team |
+| Coding | tdd-guide + code-reviewer | subagent-driven-dev | Codex native team |
+| Review | code-reviewer + security-reviewer | two-stage review (spec + quality) | Codex native multi-reviewer |
+| Debug | systematic-debugging | systematic-debugging + parallel investigation | Codex native debug team |
+| Research | sc:research or deep-research | deep-research | Codex native research team |
 
 Specialized agents available at ANY grade (exempt from agent boundary rule):
-- build-error-resolver: build-specific errors
+- build-error-resolver: build-specific errors (compat alias: local `error-resolver`)
 - security-reviewer: security audits
 - dialectic-design: multi-perspective design analysis (see team.md Dialectic Mode)
 
@@ -135,11 +135,11 @@ L grade always follows: design → plan → user approval → subagent execution
 
 ### XL Grade: Read protocols/team.md
 
-Full TeamCreate orchestration. See protocols/team.md for:
-- Hybrid architecture (TeamCreate + ruflo)
+Full Codex native team orchestration + ruflo collaboration. See protocols/team.md for:
+- Primary architecture (`spawn_agent` / `send_input` / `wait` / `close_agent`) + ruflo workflow/memory
 - Team templates (references/team-templates.md)
 - Staged confirmation points
-- Agent lifecycle management
+- Degraded path when ruflo is unavailable (native orchestration only)
 
 ## 4. Memory Rules (Inline)
 
@@ -163,7 +163,7 @@ Enhanced tier (XL): see protocols/team.md.
 
 3 rules. Full specification: references/conflict-rules.md
 
-**Rule 1 — Agent Boundary**: M=single-agent tools (no subagent spawning; individual skill commands permitted), L=Superpowers subagent, XL=TeamCreate. One system per task.
+**Rule 1 — Agent Boundary**: M=single-agent tools (no subagent spawning; individual skill commands permitted), L=Superpowers subagent, XL=Codex native team (`spawn_agent` family) + optional ruflo collaboration. One system per task.
 **Rule 2 — Memory Division**: TodoWrite=state, ruflo=vectors, Serena=project, instincts=behavior.
 **Rule 3 — Command Priority**: User explicit command > VCO routing > plugin defaults.
 
@@ -172,7 +172,13 @@ Enhanced tier (XL): see protocols/team.md.
 Detect availability AFTER routing selects a tool, BEFORE invoking:
 - MCP connection error → tool unavailable, use fallback
 - Skill not found → plugin missing, use fallback
-- TeamCreate + TodoWrite = always available (native tools)
+- XL runtime probe order:
+  - Primary: native team tools (`spawn_agent`, `send_input`, `wait`, `close_agent`)
+  - Enhancement: ruflo workflow/memory tools when MCP is available
+  - If native APIs unavailable: follow XL Level 3 fallback (sequential L-grade)
+- build-error-resolver resolution:
+  - Try `everything-claude-code:build-error-resolver`
+  - If unavailable, use local `build-error-resolver` alias skill (delegates to `error-resolver`)
 - See references/fallback-chains.md for complete fallback paths
 
 ## Protocols (on-demand loading)
@@ -192,7 +198,7 @@ Detect availability AFTER routing selects a tool, BEFORE invoking:
 | conflict-rules.md | 3 conflict avoidance rules |
 | fallback-chains.md | Error recovery (M/L=2-level, XL=3-level) |
 | tool-registry.md | Tool capabilities + verification status |
-| team-templates.md | 6 predefined team compositions |
+| team-templates.md | 7 predefined team compositions |
 | extending-vco.md | Guide for adding/updating tools |
 | changelog.md | Version history |
 | index.md | Navigation index |
@@ -212,12 +218,12 @@ Detect availability AFTER routing selects a tool, BEFORE invoking:
 ### Example 3: Large-Scale Refactoring (XL Grade)
 - Input: "Refactor the entire data layer"
 - Probe: cross-module, parallelizable → XL recommended → user confirms
-- Flow: protocols/team.md → TeamCreate → spawn agents → coordinate → shutdown
+- Flow: protocols/team.md → spawn_agent team → send_input coordination + ruflo memory/workflow → wait aggregation → close_agent cleanup
 
 ## Maintenance
 
-- Version: 2.0.6
-- Updated: 2026-02-22
+- Version: 2.0.9
+- Updated: 2026-02-24
 - Sources: Source code analysis of 6 plugins (2026-02-18)
 - Changelog: references/changelog.md
 - Known limits:

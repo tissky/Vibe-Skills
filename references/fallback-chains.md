@@ -41,7 +41,7 @@ Fallback triggers:
 
 | Grade | Primary | Fallback |
 |-------|---------|----------|
-| M | superpowers:systematic-debugging | everything-claude-code:build-error-resolver |
+| M | superpowers:systematic-debugging | everything-claude-code:build-error-resolver (or local build-error-resolver -> error-resolver alias) |
 | L | systematic-debugging + dispatching-parallel-agents | systematic-debugging (single) |
 
 ### Research Tasks
@@ -63,13 +63,13 @@ If both levels fail: fall back to direct Claude reasoning (no tool).
 ## XL Grade Fallback Chain (3-Level)
 
 ```
-Level 1: TeamCreate + ruflo (full hybrid)
+Level 1: Codex native team + ruflo collaboration (preferred)
   |
-  v (ruflo MCP unavailable)
-Level 2: TeamCreate only (no vector memory, use TodoWrite for state)
+  v (ruflo unavailable, native APIs still available)
+Level 1 (degraded): Codex native team only (TodoWrite + conversation state)
   |
-  v (TeamCreate also fails)
-Level 3: Sequential L-grade execution (Superpowers subagent system)
+  v (native team APIs unavailable or orchestration failure)
+Level 2: Sequential L-grade execution (Superpowers subagent system)
   |
   v (all multi-agent fails)
 Direct: Single-agent execution with direct Claude reasoning
@@ -79,10 +79,10 @@ Direct: Single-agent execution with direct Claude reasoning
 
 | Task Type | Level 1 | Level 2 | Level 3 |
 |-----------|---------|---------|---------|
-| Planning | TeamCreate + ruflo workflow | TeamCreate only | superpowers:writing-plans |
-| Coding | TeamCreate + ruflo memory | TeamCreate only | superpowers:subagent-driven-dev |
-| Review | TeamCreate multi-reviewer | TeamCreate only | superpowers:dispatching-parallel-agents |
-| Research | TeamCreate + ruflo embeddings | TeamCreate only | claude-code-settings:deep-research |
+| Planning | Codex native planning team + ruflo workflow/memory | Codex native planning team only | superpowers:writing-plans |
+| Coding | Codex native implementer team + ruflo handoff memory | Codex native implementer team only | superpowers:subagent-driven-dev |
+| Review | Codex native multi-reviewer + optional ruflo consensus | Codex native multi-reviewer only | superpowers:dispatching-parallel-agents |
+| Research | Codex native research team + ruflo memory | Codex native research team only | claude-code-settings:deep-research |
 
 ## Memory System Fallbacks
 
@@ -99,7 +99,14 @@ Direct: Single-agent execution with direct Claude reasoning
 2. Agent failure: Task agent returns error or empty result
 3. Quality failure: Output doesn't address the task (requires judgment)
 4. Plugin missing: Skill invocation returns "skill not found"
-5. TeamCreate failure: Team creation or agent spawn fails
+5. Native team failure: spawn/send/wait/close orchestration fails
+
+## build-error-resolver Compatibility
+
+Resolution order for build-specific debugging:
+1. `everything-claude-code:build-error-resolver`
+2. local `build-error-resolver` alias skill
+3. `error-resolver` skill
 
 ## Fallback Protocol
 

@@ -121,5 +121,5 @@ When task is purely research (no implementation):
 ## Transition to Implementation
 After design is approved:
 1. L grade: Switch to vibe-do with Superpowers subagent-driven-dev
-2. XL grade: Switch to vibe-team protocol (TeamCreate + ruflo hybrid)
+2. XL grade: Switch to vibe-team protocol (Codex native team + optional ruflo collaboration)
 3. Always carry the plan document forward as context

@@ -13,7 +13,7 @@ Activated when the task requires evaluating existing code:
 
 ### M Grade (Quick Review)
 Tool: Everything-CC code-reviewer agent
-1. Invoke via Task tool with subagent_type `everything-claude-code:code-reviewer`
+1. Invoke Everything-CC `code-reviewer` directly as a single-agent review tool
 2. Lightweight review: bugs, style, correctness
 3. Auto-triggered after code changes via PostToolUse hooks
 
@@ -24,13 +24,13 @@ Tool: Superpowers two-stage review
 3. Invoke via `superpowers:requesting-code-review`
 
 ### XL Grade (Multi-Agent Review)
-Tool: TeamCreate multi-agent review team
-1. Create team via `TeamCreate` with reviewer roles
-2. Spawn reviewer agents via `Task` tool (subagent_type per perspective)
+Tool: Codex native multi-agent review team
+1. Spawn reviewer agents via `spawn_agent` (role prompt per perspective)
+2. Coordinate review rounds via `send_input`
 3. Parallel perspectives: security, performance, architecture, style
-4. Aggregate findings via `SendMessage` + `TaskList`
-5. With ruflo: use `hive-mind_consensus` for aggregation
-6. Without ruflo: team lead collects and synthesizes via SendMessage
+4. Aggregate findings via `wait` + lead synthesis
+5. Optional: use ruflo `hive-mind_consensus` for formal aggregation
+6. Cleanup: `close_agent` for all spawned reviewers
 
 ## Security Review (Any Grade)
 Always available as an independent check:
@@ -59,7 +59,7 @@ Review findings categorized by severity:
 ## Conflict Avoidance
 - M review: Everything-CC code-reviewer ONLY
 - L review: Superpowers two-stage review ONLY
-- XL review: TeamCreate multi-agent team ONLY (with optional ruflo consensus)
+- XL review: Codex native multi-agent team ONLY
 - Security review: Everything-CC security-reviewer at ANY grade (exempt from mutual exclusion)
 
 ## Transition After Review

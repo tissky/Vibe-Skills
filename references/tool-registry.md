@@ -1,6 +1,6 @@
 # VCO Tool Registry
 
-Complete reference of all 6 integrated tools, their capabilities, APIs, state paths, and verification status.
+Complete reference of VCO execution tools, their capabilities, APIs, state paths, and verification status.
 
 ## Tool Overview
 
@@ -11,7 +11,8 @@ Complete reference of all 6 integrated tools, their capabilities, APIs, state pa
 | 3 | Ralph-loop | Plugin (hooks + skills) | Stop | .claude/ralph-loop.local.md | ✅ |
 | 4 | Claude-code-settings | Plugin (skills + agents) | None | .specify/, .kiro/, .autonomous/ | ✅ |
 | 5 | Everything-claude-code | Plugin (hooks + skills + agents) | SessionStart, PreToolUse, PostToolUse, Stop | ~/.claude/sessions/, ~/.claude/homunculus/ | ✅ |
-| 6 | Claude-flow/ruflo + TeamCreate | MCP Server + Native | PreToolUse, PostToolUse, PreCompact, Stop | .claude-flow/ + ~/.claude/teams/ | ⚠️ MCP依赖 |
+| 6 | Claude-flow/ruflo (collaboration backend) | MCP Server | PreToolUse, PostToolUse, PreCompact, Stop | .claude-flow/ | ⚠️ MCP依赖 |
+| 7 | Codex native team runtime | Native runtime APIs | None | Session runtime | ✅ |
 
 ## Verification Status Legend
 
@@ -176,7 +177,7 @@ Complete reference of all 6 integrated tools, their capabilities, APIs, state pa
 
 ---
 
-## 6. Claude-flow/ruflo + TeamCreate (ruvnet/claude-flow + native)
+## 6. Claude-flow/ruflo (Collaboration Backend)
 
 **Version**: 3.1.0-alpha.41
 **MCP Server**: ruflo ⚠️ MCP 依赖
@@ -214,17 +215,20 @@ Complete reference of all 6 integrated tools, their capabilities, APIs, state pa
 - File-based state in .claude-flow/ (per-project)
 - No API keys required (local embeddings)
 
-### TeamCreate Native Integration
+---
 
-TeamCreate is a built-in Claude Code tool (always available, no MCP dependency). ✅
+## 7. Codex Native Team Runtime (Primary XL Executor)
 
-| Tool | Purpose | Verified |
-|------|---------|----------|
-| TeamCreate | Create team + task list | ✅ Always available |
-| Task (with team_name) | Spawn teammate agents | ✅ Always available |
-| TaskCreate / TaskUpdate / TaskList | Task management + assignment | ✅ Always available |
-| SendMessage | Inter-agent DM, broadcast, shutdown | ✅ Always available |
-| TeamDelete | Clean up team resources | ✅ Always available |
+Runtime-native APIs for multi-agent orchestration:
 
-TeamCreate manages agent lifecycle; ruflo provides workflow engine + vector memory.
-When ruflo is unavailable, TeamCreate operates independently (degraded mode).
+| API | Purpose | Verified |
+|-----|---------|----------|
+| `spawn_agent` | Create specialized agents | ✅ |
+| `send_input` | Assign/follow-up work to specific agent | ✅ |
+| `wait` | Synchronize and collect results | ✅ |
+| `close_agent` | Explicit lifecycle cleanup | ✅ |
+
+Characteristics:
+- No MCP dependency
+- Primary XL path in VCO
+- Works with role-specialized prompts and ownership boundaries

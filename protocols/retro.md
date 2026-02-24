@@ -184,7 +184,7 @@ Store via Serena write_memory(retro/YYYY-MM-DD, report).
 
 ## Conflict Avoidance
 - Phase 2 analysis agents run sequentially to avoid mutual exclusion
-- Exception: XL grade uses TeamCreate team for parallel analysis
+- Exception: XL grade uses Codex native team for parallel analysis
 - hookify conversation-analyzer is an analysis tool -- safe at any grade
 - deep-reflector is a diagnostic agent -- exempt from Rule 1
 - Phase 5 actions are sequential: hooks first, then skills, then config

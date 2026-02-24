@@ -27,6 +27,6 @@ Thin adapter for `/vibe` dialectic routing. Keep this skill lightweight and defe
 
 ## Compatibility Notes
 
-- M grade: prefer lightweight self-check (no TeamCreate orchestration)
+- M grade: prefer lightweight self-check (no XL multi-agent orchestration)
 - L grade: 2-perspective adaptation
-- XL grade: TeamCreate dialectic workflow
+- XL grade: Codex native dialectic workflow (`spawn_agent` / `send_input` / `wait` / `close_agent`)

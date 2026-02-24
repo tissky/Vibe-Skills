@@ -30,7 +30,7 @@ Activated when the task requires writing or modifying code:
 4. Final review with Superpowers verification-before-completion
 
 ### XL Grade
-Defer to vibe-team protocol (TeamCreate + ruflo hybrid).
+Defer to vibe-team protocol (Codex native team orchestration + optional ruflo collaboration).
 
 ## Debug Mode
 
@@ -40,7 +40,7 @@ Defer to vibe-team protocol (TeamCreate + ruflo hybrid).
 | L | Parallel investigation | systematic-debugging + dispatching-parallel-agents |
 | Any | Build-specific errors | everything-claude-code:build-error-resolver* |
 
-*build-error-resolver is a specialized diagnostic agent exempt from agent boundary rule.
+*If unavailable, fall back to local build-error-resolver alias skill (delegates to error-resolver).
 
 ## Browser Testing
 When UI testing is needed:
@@ -96,7 +96,7 @@ Before marking code task complete:
 4. No console.log left in production code
 
 ## Conflict Avoidance
-- Do NOT use ruflo agent_spawn or TeamCreate for M/L coding tasks
+- Do NOT use ruflo agent_spawn for M/L coding tasks
 - Do NOT use SuperClaude sc:implement (use VCO flow)
 - Everything-CC hooks always run -- do not disable
 - For L grade, use Superpowers subagent system, NOT Everything-CC agents. Fallback provision: when Superpowers is unavailable, strictly follow fallback-chains.md defined degradation path

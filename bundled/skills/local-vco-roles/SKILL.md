@@ -11,14 +11,14 @@ Codex-local role pack for dialectic multi-agent reviews, designed to be compatib
 
 Use this skill when:
 1. You run `/vibe` and need a stable role set for dialectic review.
-2. You want reproducible multi-role analysis using TeamCreate-style orchestration.
+2. You want reproducible multi-role analysis using Codex native team orchestration style.
 3. You need standardized outputs across team-lead / bug / architecture / integration / usability roles.
 
 ## Vibe Compatibility Contract (Must Follow)
 
 1. Grade handshake:
-- M/L: do NOT force TeamCreate orchestration.
-- XL: TeamCreate workflow is allowed.
+- M/L: do NOT force XL multi-agent orchestration.
+- XL: native team workflow is allowed (`spawn_agent` / `send_input` / `wait` / `close_agent`).
 
 2. Rule-1 boundary:
 - Never mix multiple agent systems for the same task.
