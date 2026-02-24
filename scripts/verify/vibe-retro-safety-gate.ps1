@@ -27,7 +27,7 @@ function Invoke-CheckScript {
         return Assert-True -Condition $false -Message "[$Name] script exists"
     }
 
-    & $ScriptPath | Out-Null
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $ScriptPath | Out-Null
     $exitCode = $LASTEXITCODE
     return Assert-True -Condition ($exitCode -eq 0) -Message "[$Name] exit code is 0"
 }
@@ -128,7 +128,7 @@ $deltaJsonPath = Join-Path $outputRoot "delta.json"
 
 $cerCompareScript = Join-Path $verifyRoot "cer-compare.ps1"
 if (Test-Path -LiteralPath $cerCompareScript) {
-    & $cerCompareScript `
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $cerCompareScript `
         -BaselineCerPath $baselinePath `
         -CurrentCerPath $currentPath `
         -OutputMarkdownPath $deltaMdPath `

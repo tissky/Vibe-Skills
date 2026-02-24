@@ -10,6 +10,7 @@ This directory stores optional verification scripts for CI and local smoke check
 - `vibe-retro-context-regression-matrix.ps1`: fixed-case regression matrix for retro trigger thresholds and CF-1..CF-6 classification stability.
 - `cer-compare.ps1`: compares two CER JSON reports and outputs Markdown/JSON delta summaries (pattern/fallback/stability/context-pressure/gap).
 - `vibe-retro-safety-gate.ps1`: full retro safety gate (trigger/classification/routing/pack smoke + protected-file hash invariance) to prove retro flow does not degrade VCO configs/protocols.
+- `vibe-external-corpus-gate.ps1`: baseline vs candidate gate for external-corpus-driven skill-index updates, with optional smoke chain execution.
 
 ## Quick Start (Retro Checks)
 
@@ -37,3 +38,39 @@ Interpretation:
 - `stability` delta > 0 is better.
 - `context_pressure` delta < 0 is better.
 - `route_gap` delta > 0 usually means better route separability.
+
+## External Corpus Gate
+
+Build candidate suggestions from external prompt corpus and evaluate them safely:
+
+```powershell
+& "..\research\extract-prompt-signals.ps1" `
+  -SourceRoot "..\..\third_party\system-prompts-mirror" `
+  -OutputPath "..\..\outputs\external-corpus\prompt-signals.json"
+
+& "..\research\generate-vco-suggestions.ps1" `
+  -SignalPath "..\..\outputs\external-corpus\prompt-signals.json" `
+  -SourceRoot "..\..\third_party\system-prompts-mirror" `
+  -OutputDirectory "..\..\outputs\external-corpus"
+
+& ".\vibe-external-corpus-gate.ps1" `
+  -CandidateSkillIndexPath "..\..\outputs\external-corpus\skill-keyword-index.candidate.json" `
+  -RunExistingSmoke
+```
+
+For strict CI mode (smoke errors block merge):
+
+```powershell
+& ".\vibe-external-corpus-gate.ps1" `
+  -CandidateSkillIndexPath "..\..\outputs\external-corpus\skill-keyword-index.candidate.json" `
+  -RunExistingSmoke `
+  -FailOnSmokeError
+```
+
+Output artifacts:
+- `outputs/external-corpus/prompt-signals.json`
+- `outputs/external-corpus/vco-suggestions.json`
+- `outputs/external-corpus/vco-suggestions.md`
+- `outputs/external-corpus/skill-keyword-index.candidate.json`
+- `outputs/external-corpus/external-corpus-gate.json`
+- `outputs/external-corpus/external-corpus-gate.md`
