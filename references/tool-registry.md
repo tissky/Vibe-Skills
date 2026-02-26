@@ -20,6 +20,7 @@ Complete reference of VCO execution tools, their capabilities, APIs, state paths
 | 12 | ivy (optional framework interop backend) | Python library / optional CLI | None | Python runtime / interop artifacts | ⚠️ Optional |
 | 13 | Made-With-ML lifecycle patterns (optional governance source) | Methodology overlay | None | Config-driven advisory metadata | ⚠️ Optional |
 | 14 | clean-code-python patterns (optional Python quality source) | Methodology overlay | None | Config-driven advisory metadata | ⚠️ Optional |
+| 15 | system-design-primer patterns (optional architecture source) | Methodology overlay | None | Config-driven advisory metadata | ⚠️ Optional |
 
 ## Verification Status Legend
 
@@ -368,3 +369,21 @@ Characteristics:
 - Does not replace `code-reviewer`, `tdd-guide`, or `quality-debt-overlay`.
 - Does not mutate route selection; only emits Python clean-code advice metadata.
 - Designed for automatic `.py/.pyi` signal detection with mode-gated confirm advice.
+
+---
+
+## 15. system-design-primer Patterns (Optional Architecture Source)
+
+**Package/Repo**: `donnemartin/system-design-primer`  
+**Integration Type**: architecture methodology source (non-executable dependency)
+
+### Key Capabilities Imported into VCO
+- Architecture-first decomposition for distributed system planning (requirements, trade-offs, bottlenecks)
+- Coverage-driven design checklist (capacity, consistency/availability, caching, partitioning, failure recovery, observability, cost)
+- Design-review prompts that reduce under-specified architecture plans before implementation
+
+### VCO Integration Boundary
+- Integrated through `system-design-overlay` as post-route advice only.
+- Does not replace OpenSpec governance or pack routing decisions.
+- Does not mutate route selection; only emits architecture-coverage advice metadata.
+- Suppresses interview-only prompts via negative keywords to avoid noisy production routing.

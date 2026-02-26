@@ -41,6 +41,7 @@ check_path "vibe quality debt overlay config" "${TARGET_ROOT}/skills/vibe/config
 check_path "vibe framework interop overlay config" "${TARGET_ROOT}/skills/vibe/config/framework-interop-overlay.json"
 check_path "vibe ml lifecycle overlay config" "${TARGET_ROOT}/skills/vibe/config/ml-lifecycle-overlay.json"
 check_path "vibe python clean code overlay config" "${TARGET_ROOT}/skills/vibe/config/python-clean-code-overlay.json"
+check_path "vibe system design overlay config" "${TARGET_ROOT}/skills/vibe/config/system-design-overlay.json"
 for n in brainstorming writing-plans subagent-driven-development systematic-debugging; do
   check_path "workflow/${n}" "${TARGET_ROOT}/skills/${n}/SKILL.md"
 done

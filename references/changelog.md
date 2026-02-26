@@ -1,5 +1,31 @@
 # VCO Changelog
 
+## v2.3.12 (2026-02-26)
+
+- 新增 System Design Overlay（system-design-primer 增强，post-route advice-only，不替代 Pack 路由）：
+  - 新增配置（main + bundled）：
+    - `config/system-design-overlay.json`
+    - `bundled/skills/vibe/config/system-design-overlay.json`
+  - 路由器输出新增：
+    - `system_design_advice`
+  - 核心信号：
+    - 架构语义关键词（可扩展、吞吐/延迟、一致性、分片、容灾、观测性等）
+    - 架构覆盖维度评分（requirements/NFR/capacity/cache/partition/recovery/observability/cost）
+    - interview-only 语义抑制，减少误触发
+  - 语义行为：
+    - `shadow`：仅建议，不改 selected pack/skill
+    - `soft`：覆盖不足或风险较高时给出 `confirm_recommended`
+    - `strict`：严格范围内且覆盖分不足时输出 `confirm_required` advice（仍不改路由分配）
+- 新增验证门禁：
+  - `scripts/verify/vibe-system-design-overlay-gate.ps1`
+  - `scripts/verify/vibe-config-parity-gate.ps1` 纳入 `system-design-overlay` main/bundled parity
+- 健康检查增强：
+  - `check.ps1`、`check.sh` 新增 `system-design-overlay` 配置存在性检查
+- 新增设计文档：
+  - `docs/system-design-overlay-integration.md`（main + bundled）
+- 文档同步：
+  - `README.md`、`SKILL.md`、`references/index.md`、`references/tool-registry.md` 更新 system-design overlay 说明
+
 ## v2.3.11 (2026-02-25)
 
 - 新增 Python Clean Code Overlay（clean-code-python 增强，post-route advice-only，不替代 Pack 路由）：

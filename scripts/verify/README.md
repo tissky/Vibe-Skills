@@ -22,6 +22,7 @@ This directory stores optional verification scripts for CI and local smoke check
 - `vibe-framework-interop-gate.ps1`: validates Ivy framework-interop overlay semantics (cross-framework migration signal detection + strict confirm advice + optional analyzer graceful degradation + route invariance).
 - `vibe-ml-lifecycle-overlay-gate.ps1`: validates Made-With-ML inspired lifecycle overlay semantics (stage detection + artifact evidence checks + strict confirm advice + route invariance).
 - `vibe-python-clean-code-overlay-gate.ps1`: validates Python clean-code overlay semantics (Python file auto-trigger + principle/anti-pattern scoring + strict confirm advice + route invariance).
+- `vibe-system-design-overlay-gate.ps1`: validates system-design-primer overlay semantics (architecture signal + coverage dimensions + strict confirm advice + route invariance).
 
 Related rollout utility:
 
@@ -111,6 +112,12 @@ Run Python clean-code overlay trigger gate:
 
 ```powershell
 & ".\vibe-python-clean-code-overlay-gate.ps1"
+```
+
+Run System design overlay trigger gate:
+
+```powershell
+& ".\vibe-system-design-overlay-gate.ps1"
 ```
 
 Keep generated fixture files for manual inspection:

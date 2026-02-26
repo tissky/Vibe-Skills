@@ -112,6 +112,14 @@
       "integration_mode": "methodology-overlay",
       "local_rewrite_required": false,
       "notes": "Python clean-code methodology source for python-clean-code-overlay (post-route advisory integration)"
+    },
+    {
+      "id": "donnemartin/system-design-primer",
+      "upstream_repo": "https://github.com/donnemartin/system-design-primer",
+      "upstream_ref": "master",
+      "integration_mode": "methodology-overlay",
+      "local_rewrite_required": false,
+      "notes": "Architecture methodology source for system-design-overlay (post-route advisory integration)"
     }
   ]
 }

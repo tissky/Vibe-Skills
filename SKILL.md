@@ -109,6 +109,7 @@ When `config/quality-debt-overlay.json` is enabled, router emits `quality_debt_a
 When `config/framework-interop-overlay.json` is enabled, router emits `framework_interop_advice` to expose Ivy-style cross-framework migration guidance in a post-route, advice-first way.
 When `config/ml-lifecycle-overlay.json` is enabled, router emits `ml_lifecycle_advice` to expose Made-With-ML lifecycle readiness guidance in a post-route, advice-first way.
 When `config/python-clean-code-overlay.json` is enabled, router emits `python_clean_code_advice` to expose Python clean-code guidance with automatic `.py` signal detection in a post-route, advice-first way.
+When `config/system-design-overlay.json` is enabled, router emits `system_design_advice` to expose system-design-primer architecture coverage guidance in a post-route, advice-first way.
 
 Specialized agents available at ANY grade (exempt from agent boundary rule):
 - build-error-resolver: build-specific errors (compat alias: local `error-resolver`)
@@ -245,6 +246,7 @@ Detect availability AFTER routing selects a tool, BEFORE invoking:
 | docs/framework-interop-overlay-integration.md | Framework-interop overlay integration (ivy-inspired cross-framework advisory) |
 | docs/ml-lifecycle-overlay-integration.md | ML lifecycle overlay integration (Made-With-ML inspired stage/evidence advisory) |
 | docs/python-clean-code-overlay-integration.md | Python clean-code overlay integration (clean-code-python inspired post-route advisory) |
+| docs/system-design-overlay-integration.md | System-design overlay integration (system-design-primer inspired architecture coverage advisory) |
 | docs/skills-consolidation-roadmap.md | Pack consolidation phases and gates |
 | changelog.md | Version history |
 | index.md | Navigation index |
@@ -268,8 +270,8 @@ Detect availability AFTER routing selects a tool, BEFORE invoking:
 
 ## Maintenance
 
-- Version: 2.3.11
-- Updated: 2026-02-25
+- Version: 2.3.12
+- Updated: 2026-02-26
 - Sources: Source code analysis of 6 plugins (2026-02-18) + Agent-Skills-for-Context-Engineering (2026-02-24)
 - Changelog: references/changelog.md
 - Known limits:
