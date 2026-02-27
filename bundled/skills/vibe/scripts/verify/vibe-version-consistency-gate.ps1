@@ -84,7 +84,8 @@ $changelogHeadOk = $false
 if ($changelogExists) {
     $changelog = Read-Text -Path $changelogPath
     $expectedHeader = "## v$releaseVersion ($releaseUpdated)"
-    $changelogHeadOk = $changelog -match ("(?m)^" + [regex]::Escape($expectedHeader) + "$")
+    # Accept both LF and CRLF line endings to avoid false negatives across platforms.
+    $changelogHeadOk = $changelog -match ("(?m)^" + [regex]::Escape($expectedHeader) + "\r?$")
 }
 $assertions += Assert-True -Condition $changelogExists -Message "[changelog] exists"
 $assertions += Assert-True -Condition $changelogHeadOk -Message "[changelog] release header exists"
