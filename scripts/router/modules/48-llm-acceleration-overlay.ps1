@@ -355,18 +355,18 @@ function New-LlmAccelerationInputText {
     $text += $json
 
     return ($text -join "`n")
-}
+	}
 
-function Invoke-LlmAccelerationProvider {
-    param(
-        [object]$PolicyResolved,
-        [string]$RepoRoot,
-        [string]$InputText
-    )
+	function Invoke-LlmAccelerationProvider {
+	    param(
+	        [object]$PolicyResolved,
+	        [string]$RepoRoot,
+	        [string]$InputText
+	    )
 
-    $providerType = if ($PolicyResolved -and $PolicyResolved.provider -and $PolicyResolved.provider.type) { [string]$PolicyResolved.provider.type } else { "openai" }
+	    $providerType = if ($PolicyResolved -and $PolicyResolved.provider -and $PolicyResolved.provider.type) { [string]$PolicyResolved.provider.type } else { "openai" }
 
-    if ($providerType -eq "mock") {
+	    if ($providerType -eq "mock") {
         $mockRel = if ($PolicyResolved.provider.mock_response_path) { [string]$PolicyResolved.provider.mock_response_path } else { "" }
         if (-not $mockRel) {
             return [pscustomobject]@{
@@ -399,20 +399,20 @@ function Invoke-LlmAccelerationProvider {
             latency_ms = 0
             output_text = $raw
             error = $null
-        }
-    }
+	        }
+	    }
 
-    $schema = Get-LlmAccelerationJsonSchema
-    $textFormat = [ordered]@{
-        type = "json_schema"
-        name = "vco_llm_acceleration"
-        strict = $true
-        schema = $schema
-    }
+	    $schema = Get-LlmAccelerationJsonSchema
+	    $textFormat = [ordered]@{
+	        type = "json_schema"
+	        name = "vco_llm_acceleration"
+	        strict = $true
+	        schema = $schema
+	    }
 
-    $input = @(
-        [ordered]@{
-            role = "user"
+	    $input = @(
+	        [ordered]@{
+	            role = "user"
             content = @(
                 [ordered]@{
                     type = "input_text"
@@ -420,22 +420,82 @@ function Invoke-LlmAccelerationProvider {
                 }
             )
         }
-    )
+	    )
 
-    $instructions = "Return ONLY JSON that matches the JSON Schema. No markdown. No extra keys."
+	    $instructions = "Return ONLY JSON that matches the JSON Schema. No markdown. No extra keys."
 
-    return Invoke-OpenAiResponsesCreate `
-        -Model ([string]$PolicyResolved.provider.model) `
-        -BaseUrl ([string]$PolicyResolved.provider.base_url) `
-        -Input $input `
-        -TextFormat $textFormat `
-        -Instructions $instructions `
-        -MaxOutputTokens ([int]$PolicyResolved.provider.max_output_tokens) `
-        -Temperature ([double]$PolicyResolved.provider.temperature) `
-        -TopP ([double]$PolicyResolved.provider.top_p) `
-        -TimeoutMs ([int]$PolicyResolved.provider.timeout_ms) `
-        -Store:([bool]$PolicyResolved.provider.store)
-}
+	    $model = [string]$PolicyResolved.provider.model
+	    $baseUrl = if ($PolicyResolved.provider.base_url) { [string]$PolicyResolved.provider.base_url } else { "" }
+	    $timeoutMs = [int]$PolicyResolved.provider.timeout_ms
+
+	    $chatResponseFormat = [ordered]@{
+	        type = "json_schema"
+	        json_schema = [ordered]@{
+	            name = "vco_llm_acceleration"
+	            strict = $true
+	            schema = $schema
+	        }
+	    }
+
+	    $chatMessages = @(
+	        [ordered]@{ role = "system"; content = $instructions },
+	        [ordered]@{ role = "user"; content = $InputText }
+	    )
+
+	    $preferChat = $false
+	    if ($baseUrl -and ($baseUrl -notmatch "openai\.com")) {
+	        # For most OpenAI-compatible gateways, /chat/completions is the safest baseline.
+	        $preferChat = $true
+	    }
+
+	    $invokeResponses = {
+	        $r = Invoke-OpenAiResponsesCreate `
+	            -Model $model `
+	            -BaseUrl $baseUrl `
+	            -Input $input `
+	            -TextFormat $textFormat `
+	            -Instructions $instructions `
+	            -MaxOutputTokens ([int]$PolicyResolved.provider.max_output_tokens) `
+	            -Temperature ([double]$PolicyResolved.provider.temperature) `
+	            -TopP ([double]$PolicyResolved.provider.top_p) `
+	            -TimeoutMs $timeoutMs `
+	            -Store:([bool]$PolicyResolved.provider.store)
+	        $r | Add-Member -NotePropertyName api -NotePropertyValue "responses" -Force
+	        return $r
+	    }
+
+	    $invokeChat = {
+	        $r = Invoke-OpenAiChatCompletionsCreate `
+	            -Model $model `
+	            -BaseUrl $baseUrl `
+	            -Messages $chatMessages `
+	            -ResponseFormat $chatResponseFormat `
+	            -MaxTokens ([int]$PolicyResolved.provider.max_output_tokens) `
+	            -Temperature ([double]$PolicyResolved.provider.temperature) `
+	            -TopP ([double]$PolicyResolved.provider.top_p) `
+	            -TimeoutMs $timeoutMs
+	        $r | Add-Member -NotePropertyName api -NotePropertyValue "chat_completions" -Force
+	        return $r
+	    }
+
+	    $primary = $null
+	    $fallback = $null
+
+	    if ($preferChat) {
+	        $primary = & $invokeChat
+	        if ([bool]$primary.ok -and (-not [bool]$primary.abstained) -and $primary.output_text) { return $primary }
+	        $fallback = & $invokeResponses
+	        if ([bool]$fallback.ok -and (-not [bool]$fallback.abstained) -and $fallback.output_text) { return $fallback }
+	        return $primary
+	    }
+
+	    $primary = & $invokeResponses
+	    if ([bool]$primary.ok -and (-not [bool]$primary.abstained) -and $primary.output_text) { return $primary }
+	    if ([string]$primary.reason -eq "missing_openai_api_key") { return $primary }
+	    $fallback = & $invokeChat
+	    if ([bool]$fallback.ok -and (-not [bool]$fallback.abstained) -and $fallback.output_text) { return $fallback }
+	    return $primary
+	}
 
 function Get-DeterministicSampleValueForLlm {
     param([string]$SeedText)
@@ -463,6 +523,7 @@ function Get-LlmAccelerationAdvice {
 
     $providerSummary = [pscustomobject]@{
         type = [string]$policyResolved.provider.type
+        api = "none"
         model = [string]$policyResolved.provider.model
         abstained = $true
         reason = "not_invoked"
@@ -515,6 +576,7 @@ function Get-LlmAccelerationAdvice {
 
         $providerSummary = [pscustomobject]@{
             type = [string]$policyResolved.provider.type
+            api = if ($providerResult.api) { [string]$providerResult.api } else { "unknown" }
             model = [string]$policyResolved.provider.model
             abstained = [bool]$providerResult.abstained
             reason = [string]$providerResult.reason
