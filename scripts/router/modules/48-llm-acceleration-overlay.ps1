@@ -34,6 +34,39 @@ function Get-LlmAccelerationPolicyDefaults {
             store = $false
             mock_response_path = ""
         }
+        enhancements = [pscustomobject]@{
+            diff_digest = [pscustomobject]@{
+                enabled = $false
+                min_diff_chars = 1800
+                max_digest_chars = 1200
+                model = ""
+                max_output_tokens = 520
+                temperature = 0.1
+                timeout_ms = 8000
+                replace_diff_in_context = $true
+                include_raw_diff_in_context = $false
+            }
+            committee = [pscustomobject]@{
+                enabled = $false
+                members = 3
+                min_success_members = 2
+                member_temperatures = @()
+                member_max_output_tokens = 1400
+                member_timeout_ms = 12000
+                judge_enabled = $true
+                judge_temperature = 0.05
+                judge_max_output_tokens = 1600
+                judge_timeout_ms = 12000
+            }
+            confirm_question_booster = [pscustomobject]@{
+                enabled = $false
+                only_when_confirm_required = $true
+                max_questions = 3
+                max_output_tokens = 340
+                temperature = 0.1
+                timeout_ms = 6000
+            }
+        }
         context = [pscustomobject]@{
             mode = "prompt_only" # none|prompt_only|diff_snippets_ok
             include_git_status = $true
@@ -43,6 +76,13 @@ function Get-LlmAccelerationPolicyDefaults {
             vector_diff = [pscustomobject]@{
                 enabled = $false
                 embedding_model = "text-embedding-3-small"
+                embedding_provider = [pscustomobject]@{
+                    type = "openai" # openai|volc_ark
+                    base_url = ""
+                    endpoint_path = ""
+                    api_key_env = ""
+                    timeout_ms = 6000
+                }
                 min_diff_chars_for_vector = 6000
                 max_chunks = 12
                 chunk_max_chars = 1400
@@ -78,10 +118,15 @@ function Get-LlmAccelerationPolicy {
     $scope = if ($Policy.scope) { $Policy.scope } else { $defaults.scope }
     $trigger = if ($Policy.trigger) { $Policy.trigger } else { $defaults.trigger }
     $provider = if ($Policy.provider) { $Policy.provider } else { $defaults.provider }
+    $enhancements = if ($Policy.enhancements) { $Policy.enhancements } else { $defaults.enhancements }
     $context = if ($Policy.context) { $Policy.context } else { $defaults.context }
     $safety = if ($Policy.safety) { $Policy.safety } else { $defaults.safety }
     $rollout = if ($Policy.rollout) { $Policy.rollout } else { $defaults.rollout }
     $vectorDiff = if ($context -and $context.vector_diff) { $context.vector_diff } else { $defaults.context.vector_diff }
+    $embeddingProvider = if ($vectorDiff -and $vectorDiff.embedding_provider) { $vectorDiff.embedding_provider } else { $defaults.context.vector_diff.embedding_provider }
+    $diffDigest = if ($enhancements -and $enhancements.diff_digest) { $enhancements.diff_digest } else { $defaults.enhancements.diff_digest }
+    $committee = if ($enhancements -and $enhancements.committee) { $enhancements.committee } else { $defaults.enhancements.committee }
+    $confirmBoost = if ($enhancements -and $enhancements.confirm_question_booster) { $enhancements.confirm_question_booster } else { $defaults.enhancements.confirm_question_booster }
 
     return [pscustomobject]@{
         enabled = $enabled
@@ -111,6 +156,39 @@ function Get-LlmAccelerationPolicy {
             store = if ($provider.store -ne $null) { [bool]$provider.store } else { [bool]$defaults.provider.store }
             mock_response_path = if ($provider.mock_response_path) { [string]$provider.mock_response_path } else { [string]$defaults.provider.mock_response_path }
         }
+        enhancements = [pscustomobject]@{
+            diff_digest = [pscustomobject]@{
+                enabled = if ($diffDigest.enabled -ne $null) { [bool]$diffDigest.enabled } else { [bool]$defaults.enhancements.diff_digest.enabled }
+                min_diff_chars = if ($diffDigest.min_diff_chars -ne $null) { [int]$diffDigest.min_diff_chars } else { [int]$defaults.enhancements.diff_digest.min_diff_chars }
+                max_digest_chars = if ($diffDigest.max_digest_chars -ne $null) { [int]$diffDigest.max_digest_chars } else { [int]$defaults.enhancements.diff_digest.max_digest_chars }
+                model = if ($diffDigest.model -ne $null) { [string]$diffDigest.model } else { [string]$defaults.enhancements.diff_digest.model }
+                max_output_tokens = if ($diffDigest.max_output_tokens -ne $null) { [int]$diffDigest.max_output_tokens } else { [int]$defaults.enhancements.diff_digest.max_output_tokens }
+                temperature = if ($diffDigest.temperature -ne $null) { [double]$diffDigest.temperature } else { [double]$defaults.enhancements.diff_digest.temperature }
+                timeout_ms = if ($diffDigest.timeout_ms -ne $null) { [int]$diffDigest.timeout_ms } else { [int]$defaults.enhancements.diff_digest.timeout_ms }
+                replace_diff_in_context = if ($diffDigest.replace_diff_in_context -ne $null) { [bool]$diffDigest.replace_diff_in_context } else { [bool]$defaults.enhancements.diff_digest.replace_diff_in_context }
+                include_raw_diff_in_context = if ($diffDigest.include_raw_diff_in_context -ne $null) { [bool]$diffDigest.include_raw_diff_in_context } else { [bool]$defaults.enhancements.diff_digest.include_raw_diff_in_context }
+            }
+            committee = [pscustomobject]@{
+                enabled = if ($committee.enabled -ne $null) { [bool]$committee.enabled } else { [bool]$defaults.enhancements.committee.enabled }
+                members = if ($committee.members -ne $null) { [int]$committee.members } else { [int]$defaults.enhancements.committee.members }
+                min_success_members = if ($committee.min_success_members -ne $null) { [int]$committee.min_success_members } else { [int]$defaults.enhancements.committee.min_success_members }
+                member_temperatures = if ($committee.member_temperatures) { @($committee.member_temperatures) } else { @($defaults.enhancements.committee.member_temperatures) }
+                member_max_output_tokens = if ($committee.member_max_output_tokens -ne $null) { [int]$committee.member_max_output_tokens } else { [int]$defaults.enhancements.committee.member_max_output_tokens }
+                member_timeout_ms = if ($committee.member_timeout_ms -ne $null) { [int]$committee.member_timeout_ms } else { [int]$defaults.enhancements.committee.member_timeout_ms }
+                judge_enabled = if ($committee.judge_enabled -ne $null) { [bool]$committee.judge_enabled } else { [bool]$defaults.enhancements.committee.judge_enabled }
+                judge_temperature = if ($committee.judge_temperature -ne $null) { [double]$committee.judge_temperature } else { [double]$defaults.enhancements.committee.judge_temperature }
+                judge_max_output_tokens = if ($committee.judge_max_output_tokens -ne $null) { [int]$committee.judge_max_output_tokens } else { [int]$defaults.enhancements.committee.judge_max_output_tokens }
+                judge_timeout_ms = if ($committee.judge_timeout_ms -ne $null) { [int]$committee.judge_timeout_ms } else { [int]$defaults.enhancements.committee.judge_timeout_ms }
+            }
+            confirm_question_booster = [pscustomobject]@{
+                enabled = if ($confirmBoost.enabled -ne $null) { [bool]$confirmBoost.enabled } else { [bool]$defaults.enhancements.confirm_question_booster.enabled }
+                only_when_confirm_required = if ($confirmBoost.only_when_confirm_required -ne $null) { [bool]$confirmBoost.only_when_confirm_required } else { [bool]$defaults.enhancements.confirm_question_booster.only_when_confirm_required }
+                max_questions = if ($confirmBoost.max_questions -ne $null) { [int]$confirmBoost.max_questions } else { [int]$defaults.enhancements.confirm_question_booster.max_questions }
+                max_output_tokens = if ($confirmBoost.max_output_tokens -ne $null) { [int]$confirmBoost.max_output_tokens } else { [int]$defaults.enhancements.confirm_question_booster.max_output_tokens }
+                temperature = if ($confirmBoost.temperature -ne $null) { [double]$confirmBoost.temperature } else { [double]$defaults.enhancements.confirm_question_booster.temperature }
+                timeout_ms = if ($confirmBoost.timeout_ms -ne $null) { [int]$confirmBoost.timeout_ms } else { [int]$defaults.enhancements.confirm_question_booster.timeout_ms }
+            }
+        }
         context = [pscustomobject]@{
             mode = if ($context.mode) { [string]$context.mode } else { [string]$defaults.context.mode }
             include_git_status = if ($context.include_git_status -ne $null) { [bool]$context.include_git_status } else { [bool]$defaults.context.include_git_status }
@@ -120,6 +198,13 @@ function Get-LlmAccelerationPolicy {
             vector_diff = [pscustomobject]@{
                 enabled = if ($vectorDiff -and $vectorDiff.enabled -ne $null) { [bool]$vectorDiff.enabled } else { [bool]$defaults.context.vector_diff.enabled }
                 embedding_model = if ($vectorDiff -and $vectorDiff.embedding_model) { [string]$vectorDiff.embedding_model } else { [string]$defaults.context.vector_diff.embedding_model }
+                embedding_provider = [pscustomobject]@{
+                    type = if ($embeddingProvider -and $embeddingProvider.type) { [string]$embeddingProvider.type } else { [string]$defaults.context.vector_diff.embedding_provider.type }
+                    base_url = if ($embeddingProvider -and $embeddingProvider.base_url) { [string]$embeddingProvider.base_url } else { [string]$defaults.context.vector_diff.embedding_provider.base_url }
+                    endpoint_path = if ($embeddingProvider -and $embeddingProvider.endpoint_path) { [string]$embeddingProvider.endpoint_path } else { [string]$defaults.context.vector_diff.embedding_provider.endpoint_path }
+                    api_key_env = if ($embeddingProvider -and $embeddingProvider.api_key_env) { [string]$embeddingProvider.api_key_env } else { [string]$defaults.context.vector_diff.embedding_provider.api_key_env }
+                    timeout_ms = if ($embeddingProvider -and $embeddingProvider.timeout_ms -ne $null) { [int]$embeddingProvider.timeout_ms } else { [int]$defaults.context.vector_diff.embedding_provider.timeout_ms }
+                }
                 min_diff_chars_for_vector = if ($vectorDiff -and $vectorDiff.min_diff_chars_for_vector -ne $null) { [int]$vectorDiff.min_diff_chars_for_vector } else { [int]$defaults.context.vector_diff.min_diff_chars_for_vector }
                 max_chunks = if ($vectorDiff -and $vectorDiff.max_chunks -ne $null) { [int]$vectorDiff.max_chunks } else { [int]$defaults.context.vector_diff.max_chunks }
                 chunk_max_chars = if ($vectorDiff -and $vectorDiff.chunk_max_chars -ne $null) { [int]$vectorDiff.chunk_max_chars } else { [int]$defaults.context.vector_diff.chunk_max_chars }
@@ -868,6 +953,9 @@ function New-LlmAccelerationInputText {
             repo_root = if ($GitContext) { $GitContext.repo_root } else { $null }
             status = if ($GitContext) { $GitContext.status } else { $null }
             diff = if ($GitContext) { $GitContext.diff } else { $null }
+            diff_raw = if ($GitContext -and $GitContext.diff_raw) { $GitContext.diff_raw } else { $null }
+            diff_digest = if ($GitContext -and $GitContext.diff_digest) { $GitContext.diff_digest } else { $null }
+            diff_digest_used = if ($GitContext -and ($GitContext.diff_digest_used -ne $null)) { [bool]$GitContext.diff_digest_used } else { $false }
             diff_truncated = if ($GitContext) { [bool]$GitContext.diff_truncated } else { $false }
             diff_mode = if ($GitContext) { $GitContext.diff_mode } else { $null }
             diff_selected_chunks = if ($GitContext) { $GitContext.diff_selected_chunks } else { 0 }
@@ -891,6 +979,677 @@ function New-LlmAccelerationInputText {
 
     return ($text -join "`n")
 	}
+
+function Get-LlmDiffDigestJsonSchema {
+    $schema = [ordered]@{
+        type = "object"
+        additionalProperties = $false
+        required = @("digest")
+        properties = [ordered]@{
+            digest = [ordered]@{ type = "string" }
+        }
+    }
+
+    return $schema
+}
+
+function New-LlmDiffDigestInputText {
+    param(
+        [string]$PromptText,
+        [object]$PromptNormalization,
+        [string]$Grade,
+        [string]$TaskType,
+        [object]$GitContext,
+        [int]$MaxDigestChars
+    )
+
+    $maxChars = [Math]::Max(200, [int]$MaxDigestChars)
+    $ctx = [ordered]@{
+        vco = [ordered]@{
+            grade = $Grade
+            task_type = $TaskType
+        }
+        prompt = [ordered]@{
+            original = $PromptText
+            normalized = if ($PromptNormalization -and $PromptNormalization.normalized) { [string]$PromptNormalization.normalized } else { $PromptText }
+        }
+        git = [ordered]@{
+            present = [bool]($GitContext -and $GitContext.git_present)
+            status = if ($GitContext) { $GitContext.status } else { $null }
+            diff = if ($GitContext) { $GitContext.diff } else { $null }
+            diff_mode = if ($GitContext) { $GitContext.diff_mode } else { $null }
+            diff_truncated = if ($GitContext) { [bool]$GitContext.diff_truncated } else { $false }
+            diff_selected_chunks = if ($GitContext) { [int]$GitContext.diff_selected_chunks } else { 0 }
+        }
+        constraints = [ordered]@{
+            max_digest_chars = $maxChars
+        }
+    }
+
+    $json = ($ctx | ConvertTo-Json -Depth 12 -Compress)
+
+    $text = @()
+    $text += "You are generating a compact Git diff digest for VCO TurboMax."
+    $text += ""
+    $text += "Constraints:"
+    $text += "- Output MUST be valid JSON that matches the provided JSON Schema."
+    $text += "- Keep digest under {0} characters." -f $maxChars
+    $text += "- Do NOT include large raw diff excerpts; summarize intent, impact, and risk instead."
+    $text += "- Include: key files/areas changed, high-level intent, risk/edge cases, suggested tests."
+    $text += ""
+    $text += "Context(JSON):"
+    $text += $json
+
+    return ($text -join "`n")
+}
+
+function Invoke-LlmDiffDigestProvider {
+    param(
+        [object]$PolicyResolved,
+        [string]$RepoRoot,
+        [string]$InputText,
+        [int]$MaxDigestChars
+    )
+
+    $providerType = if ($PolicyResolved -and $PolicyResolved.provider -and $PolicyResolved.provider.type) { [string]$PolicyResolved.provider.type } else { "openai" }
+    if ($providerType -ne "openai") {
+        return [pscustomobject]@{
+            ok = $false
+            abstained = $true
+            reason = "unsupported_provider"
+            api = "none"
+            latency_ms = 0
+            digest = $null
+            error = $null
+        }
+    }
+
+    if (-not (Get-OpenAiApiKey)) {
+        return [pscustomobject]@{
+            ok = $false
+            abstained = $true
+            reason = "missing_openai_api_key"
+            api = "none"
+            latency_ms = 0
+            digest = $null
+            error = $null
+        }
+    }
+
+    $digestCfg = $null
+    try { $digestCfg = $PolicyResolved.enhancements.diff_digest } catch { }
+
+    $model = [string]$PolicyResolved.provider.model
+    try {
+        if ($digestCfg -and $digestCfg.model) { $model = [string]$digestCfg.model }
+    } catch { }
+
+    $maxTokens = [int]$PolicyResolved.provider.max_output_tokens
+    $temperature = [double]$PolicyResolved.provider.temperature
+    $timeoutMs = [int]$PolicyResolved.provider.timeout_ms
+
+    try {
+        if ($digestCfg -and $digestCfg.max_output_tokens -ne $null) { $maxTokens = [int]$digestCfg.max_output_tokens }
+    } catch { }
+    try {
+        if ($digestCfg -and $digestCfg.temperature -ne $null) { $temperature = [double]$digestCfg.temperature }
+    } catch { }
+    try {
+        if ($digestCfg -and $digestCfg.timeout_ms -ne $null) { $timeoutMs = [int]$digestCfg.timeout_ms }
+    } catch { }
+
+    $schema = Get-LlmDiffDigestJsonSchema
+
+    $textFormat = [ordered]@{
+        type = "json_schema"
+        name = "vco_diff_digest"
+        strict = $true
+        schema = $schema
+    }
+
+    $input = @(
+        [ordered]@{
+            role = "user"
+            content = @(
+                [ordered]@{
+                    type = "input_text"
+                    text = $InputText
+                }
+            )
+        }
+    )
+
+    $instructions = "Return ONLY JSON that matches the JSON Schema. No markdown. No extra keys."
+
+    $baseUrl = if ($PolicyResolved.provider.base_url) { [string]$PolicyResolved.provider.base_url } else { "" }
+    $timeoutMsSafe = [Math]::Max(500, [int]$timeoutMs)
+
+    $chatResponseFormat = [ordered]@{
+        type = "json_schema"
+        json_schema = [ordered]@{
+            name = "vco_diff_digest"
+            strict = $true
+            schema = $schema
+        }
+    }
+
+    $chatMessages = @(
+        [ordered]@{ role = "system"; content = $instructions },
+        [ordered]@{ role = "user"; content = $InputText }
+    )
+
+    $preferChat = $false
+    if ($baseUrl -and ($baseUrl -notmatch "openai\.com")) { $preferChat = $true }
+
+    $invokeResponses = {
+        $r = Invoke-OpenAiResponsesCreate `
+            -Model $model `
+            -BaseUrl $baseUrl `
+            -Input $input `
+            -TextFormat $textFormat `
+            -Instructions $instructions `
+            -MaxOutputTokens $maxTokens `
+            -Temperature $temperature `
+            -TopP ([double]$PolicyResolved.provider.top_p) `
+            -TimeoutMs $timeoutMsSafe `
+            -Store:([bool]$PolicyResolved.provider.store)
+        $r | Add-Member -NotePropertyName api -NotePropertyValue "responses" -Force
+        return $r
+    }
+
+    $invokeChat = {
+        $r = Invoke-OpenAiChatCompletionsCreate `
+            -Model $model `
+            -BaseUrl $baseUrl `
+            -Messages $chatMessages `
+            -ResponseFormat $chatResponseFormat `
+            -MaxTokens $maxTokens `
+            -Temperature $temperature `
+            -TopP ([double]$PolicyResolved.provider.top_p) `
+            -TimeoutMs $timeoutMsSafe
+        $r | Add-Member -NotePropertyName api -NotePropertyValue "chat_completions" -Force
+        return $r
+    }
+
+    $providerResult = $null
+    if ($preferChat) {
+        $providerResult = & $invokeChat
+        if (-not ([bool]$providerResult.ok -and (-not [bool]$providerResult.abstained) -and $providerResult.output_text)) {
+            $providerResult = & $invokeResponses
+        }
+    } else {
+        $providerResult = & $invokeResponses
+        if (-not ([bool]$providerResult.ok -and (-not [bool]$providerResult.abstained) -and $providerResult.output_text)) {
+            if ([string]$providerResult.reason -ne "missing_openai_api_key") {
+                $providerResult = & $invokeChat
+            }
+        }
+    }
+
+    if (-not $providerResult -or -not [bool]$providerResult.ok -or [bool]$providerResult.abstained -or (-not $providerResult.output_text)) {
+        $reason = if ($providerResult -and $providerResult.reason) { [string]$providerResult.reason } else { "provider_abstained" }
+        return [pscustomobject]@{
+            ok = $false
+            abstained = $true
+            reason = $reason
+            api = if ($providerResult -and $providerResult.api) { [string]$providerResult.api } else { "unknown" }
+            latency_ms = if ($providerResult -and $providerResult.latency_ms -ne $null) { [int]$providerResult.latency_ms } else { 0 }
+            digest = $null
+            error = if ($providerResult -and $providerResult.error) { [string]$providerResult.error } else { $null }
+        }
+    }
+
+    $digest = $null
+    try {
+        $obj = ($providerResult.output_text.Trim() | ConvertFrom-Json)
+        if ($obj -and $obj.digest) { $digest = [string]$obj.digest }
+    } catch { }
+
+    if (-not $digest) {
+        return [pscustomobject]@{
+            ok = $false
+            abstained = $true
+            reason = "digest_parse_error"
+            api = if ($providerResult.api) { [string]$providerResult.api } else { "unknown" }
+            latency_ms = if ($providerResult.latency_ms -ne $null) { [int]$providerResult.latency_ms } else { 0 }
+            digest = $null
+            error = $null
+        }
+    }
+
+    $limit = [Math]::Max(200, [int]$MaxDigestChars)
+    if ($digest.Length -gt $limit) { $digest = $digest.Substring(0, $limit) }
+
+    return [pscustomobject]@{
+        ok = $true
+        abstained = $false
+        reason = "ok"
+        api = if ($providerResult.api) { [string]$providerResult.api } else { "unknown" }
+        latency_ms = if ($providerResult.latency_ms -ne $null) { [int]$providerResult.latency_ms } else { 0 }
+        digest = $digest.Trim()
+        error = $null
+    }
+}
+
+function Get-LlmConfirmQuestionBoosterJsonSchema {
+    $schema = [ordered]@{
+        type = "object"
+        additionalProperties = $false
+        required = @("confirm_questions")
+        properties = [ordered]@{
+            confirm_questions = [ordered]@{
+                type = "array"
+                maxItems = 3
+                items = [ordered]@{ type = "string" }
+            }
+        }
+    }
+
+    return $schema
+}
+
+function New-LlmConfirmQuestionBoosterInputText {
+    param(
+        [string]$PromptText,
+        [object]$PromptNormalization,
+        [string]$Grade,
+        [string]$TaskType,
+        [string[]]$ExistingConfirmQuestions,
+        [int]$MaxQuestions
+    )
+
+    $maxQ = [Math]::Max(1, [Math]::Min(3, [int]$MaxQuestions))
+    $ctx = [ordered]@{
+        vco = [ordered]@{
+            grade = $Grade
+            task_type = $TaskType
+        }
+        prompt = [ordered]@{
+            original = $PromptText
+            normalized = if ($PromptNormalization -and $PromptNormalization.normalized) { [string]$PromptNormalization.normalized } else { $PromptText }
+        }
+        existing_confirm_questions = @($ExistingConfirmQuestions | Where-Object { $_ } | Select-Object -First 5)
+        constraints = [ordered]@{
+            max_questions = $maxQ
+        }
+    }
+
+    $json = ($ctx | ConvertTo-Json -Depth 8 -Compress)
+
+    $text = @()
+    $text += "You are improving confirm_questions for a user request."
+    $text += ""
+    $text += "Rules:"
+    $text += "- Return ONLY JSON that matches the JSON Schema. No markdown. No extra keys."
+    $text += "- Provide <= {0} questions." -f $maxQ
+    $text += "- Questions must be short, high-signal, and non-redundant."
+    $text += "- Prefer questions that enable immediate execution (repo/path, expected output, constraints, and acceptance criteria)."
+    $text += ""
+    $text += "Context(JSON):"
+    $text += $json
+
+    return ($text -join "`n")
+}
+
+function Invoke-LlmConfirmQuestionBoosterProvider {
+    param(
+        [object]$PolicyResolved,
+        [string]$RepoRoot,
+        [string]$InputText,
+        [int]$MaxQuestions
+    )
+
+    $providerType = if ($PolicyResolved -and $PolicyResolved.provider -and $PolicyResolved.provider.type) { [string]$PolicyResolved.provider.type } else { "openai" }
+    if ($providerType -ne "openai") {
+        return [pscustomobject]@{
+            ok = $false
+            abstained = $true
+            reason = "provider_not_openai"
+            api = "none"
+            latency_ms = 0
+            confirm_questions = @()
+            error = $null
+        }
+    }
+
+    $cfg = $null
+    try { $cfg = $PolicyResolved.enhancements.confirm_question_booster } catch { }
+    $maxTokens = 340
+    $temperature = 0.1
+    $timeoutMsSafe = [int]$PolicyResolved.provider.timeout_ms
+    try { if ($cfg -and $cfg.max_output_tokens -ne $null) { $maxTokens = [int]$cfg.max_output_tokens } } catch { }
+    try { if ($cfg -and $cfg.temperature -ne $null) { $temperature = [double]$cfg.temperature } } catch { }
+    try { if ($cfg -and $cfg.timeout_ms -ne $null) { $timeoutMsSafe = [int]$cfg.timeout_ms } } catch { }
+
+    $maxTokens = [Math]::Max(80, [int]$maxTokens)
+    $temperature = [Math]::Max(0.0, [Math]::Min(1.0, [double]$temperature))
+    $timeoutMsSafe = [Math]::Max(500, [int]$timeoutMsSafe)
+
+    $schema = Get-LlmConfirmQuestionBoosterJsonSchema
+    $textFormat = [ordered]@{
+        type = "json_schema"
+        name = "vco_confirm_question_booster"
+        strict = $true
+        schema = $schema
+    }
+
+    $input = @(
+        [ordered]@{
+            role = "user"
+            content = @(
+                [ordered]@{
+                    type = "input_text"
+                    text = $InputText
+                }
+            )
+        }
+    )
+
+    $instructions = "Return ONLY JSON that matches the JSON Schema. No markdown. No extra keys."
+
+    $model = [string]$PolicyResolved.provider.model
+    $baseUrl = if ($PolicyResolved.provider.base_url) { [string]$PolicyResolved.provider.base_url } else { "" }
+
+    $chatResponseFormat = [ordered]@{
+        type = "json_schema"
+        json_schema = [ordered]@{
+            name = "vco_confirm_question_booster"
+            strict = $true
+            schema = $schema
+        }
+    }
+
+    $chatMessages = @(
+        [ordered]@{ role = "system"; content = $instructions },
+        [ordered]@{ role = "user"; content = $InputText }
+    )
+
+    $preferChat = $false
+    if ($baseUrl -and ($baseUrl -notmatch "openai\\.com")) {
+        $preferChat = $true
+    }
+
+    $invokeResponses = {
+        $r = Invoke-OpenAiResponsesCreate `
+            -Model $model `
+            -BaseUrl $baseUrl `
+            -Input $input `
+            -TextFormat $textFormat `
+            -Instructions $instructions `
+            -MaxOutputTokens $maxTokens `
+            -Temperature $temperature `
+            -TopP ([double]$PolicyResolved.provider.top_p) `
+            -TimeoutMs $timeoutMsSafe `
+            -Store:([bool]$PolicyResolved.provider.store)
+        $r | Add-Member -NotePropertyName api -NotePropertyValue "responses" -Force
+        return $r
+    }
+
+    $invokeChat = {
+        $r = Invoke-OpenAiChatCompletionsCreate `
+            -Model $model `
+            -BaseUrl $baseUrl `
+            -Messages $chatMessages `
+            -ResponseFormat $chatResponseFormat `
+            -MaxTokens $maxTokens `
+            -Temperature $temperature `
+            -TopP ([double]$PolicyResolved.provider.top_p) `
+            -TimeoutMs $timeoutMsSafe
+        $r | Add-Member -NotePropertyName api -NotePropertyValue "chat_completions" -Force
+        return $r
+    }
+
+    $providerResult = $null
+    if ($preferChat) {
+        $providerResult = & $invokeChat
+        if (-not ([bool]$providerResult.ok -and (-not [bool]$providerResult.abstained) -and $providerResult.output_text)) {
+            $providerResult = & $invokeResponses
+        }
+    } else {
+        $providerResult = & $invokeResponses
+        if (-not ([bool]$providerResult.ok -and (-not [bool]$providerResult.abstained) -and $providerResult.output_text)) {
+            if ([string]$providerResult.reason -ne "missing_openai_api_key") {
+                $providerResult = & $invokeChat
+            }
+        }
+    }
+
+    if (-not $providerResult -or -not [bool]$providerResult.ok -or [bool]$providerResult.abstained -or (-not $providerResult.output_text)) {
+        $reason = if ($providerResult -and $providerResult.reason) { [string]$providerResult.reason } else { "provider_abstained" }
+        return [pscustomobject]@{
+            ok = $false
+            abstained = $true
+            reason = $reason
+            api = if ($providerResult -and $providerResult.api) { [string]$providerResult.api } else { "unknown" }
+            latency_ms = if ($providerResult -and $providerResult.latency_ms -ne $null) { [int]$providerResult.latency_ms } else { 0 }
+            confirm_questions = @()
+            error = if ($providerResult -and $providerResult.error) { [string]$providerResult.error } else { $null }
+        }
+    }
+
+    $questions = @()
+    try {
+        $obj = ($providerResult.output_text.Trim() | ConvertFrom-Json)
+        if ($obj -and $obj.confirm_questions) {
+            $questions = @($obj.confirm_questions | Where-Object { $_ } | Select-Object -First ([Math]::Max(1, [Math]::Min(3, [int]$MaxQuestions))))
+        }
+    } catch { }
+
+    if (-not $questions -or $questions.Count -eq 0) {
+        return [pscustomobject]@{
+            ok = $false
+            abstained = $true
+            reason = "confirm_questions_parse_error"
+            api = if ($providerResult.api) { [string]$providerResult.api } else { "unknown" }
+            latency_ms = if ($providerResult.latency_ms -ne $null) { [int]$providerResult.latency_ms } else { 0 }
+            confirm_questions = @()
+            error = $null
+        }
+    }
+
+    return [pscustomobject]@{
+        ok = $true
+        abstained = $false
+        reason = "ok"
+        api = if ($providerResult.api) { [string]$providerResult.api } else { "unknown" }
+        latency_ms = if ($providerResult.latency_ms -ne $null) { [int]$providerResult.latency_ms } else { 0 }
+        confirm_questions = @($questions)
+        error = $null
+    }
+}
+
+function New-LlmAccelerationProviderPolicyOverride {
+    param(
+        [object]$PolicyResolved,
+        [double]$Temperature,
+        [int]$MaxOutputTokens,
+        [int]$TimeoutMs
+    )
+
+    $prov = $PolicyResolved.provider
+    return [pscustomobject]@{
+        provider = [pscustomobject]@{
+            type = if ($prov.type) { [string]$prov.type } else { "openai" }
+            model = if ($prov.model) { [string]$prov.model } else { "" }
+            base_url = if ($prov.base_url) { [string]$prov.base_url } else { "" }
+            timeout_ms = [Math]::Max(500, [int]$TimeoutMs)
+            max_output_tokens = [Math]::Max(200, [int]$MaxOutputTokens)
+            temperature = [Math]::Max(0.0, [Math]::Min(1.0, [double]$Temperature))
+            top_p = if ($prov.top_p -ne $null) { [double]$prov.top_p } else { 1.0 }
+            store = if ($prov.store -ne $null) { [bool]$prov.store } else { $false }
+            mock_response_path = if ($prov.mock_response_path) { [string]$prov.mock_response_path } else { "" }
+        }
+    }
+}
+
+function Get-LlmAccelerationCommitteeMemberFocus {
+    param([int]$MemberIndex)
+
+    switch ($MemberIndex) {
+        1 { return "Focus on rerank quality: only suggest overrides when clearly better and within top_candidates; be conservative." }
+        2 { return "Focus on clarification: generate the minimal set of confirm_questions (<=3) that would remove ambiguity fast." }
+        3 { return "Focus on QA/testing: propose the most valuable tests/checks for this stage; keep them actionable." }
+        default { return "Be balanced: rerank only if needed; ask good confirm questions; include QA recommendations." }
+    }
+}
+
+function New-LlmAccelerationJudgeInputText {
+    param(
+        [string]$BaseInputText,
+        [object[]]$MemberParsedOutputs
+    )
+
+    $rows = @()
+    $i = 0
+    foreach ($m in @($MemberParsedOutputs)) {
+        $i++
+        if (-not $m) { continue }
+        $rows += [ordered]@{
+            member = $i
+            output = $m
+        }
+    }
+
+    $json = ($rows | ConvertTo-Json -Depth 12 -Compress)
+
+    $text = @()
+    $text += "You are judging committee outputs for VCO LLM Acceleration."
+    $text += ""
+    $text += "Goal:"
+    $text += "- Produce the single best final JSON output (must match the JSON Schema)."
+    $text += ""
+    $text += "Rules:"
+    $text += "- If suggesting a pack/skill override, it MUST be one of the provided top_candidates pack_id and skill candidates."
+    $text += "- Prefer fewer, higher-signal confirm_questions (<=3)."
+    $text += "- Always include QA recommendations."
+    $text += "- If uncertain, abstain."
+    $text += ""
+    $text += "Original input:"
+    $text += $BaseInputText
+    $text += ""
+    $text += "Committee outputs(JSON):"
+    $text += $json
+
+    return ($text -join "`n")
+}
+
+function Invoke-LlmAccelerationProviderCommittee {
+    param(
+        [object]$PolicyResolved,
+        [string]$RepoRoot,
+        [string]$InputText
+    )
+
+    $providerType = if ($PolicyResolved -and $PolicyResolved.provider -and $PolicyResolved.provider.type) { [string]$PolicyResolved.provider.type } else { "openai" }
+    if ($providerType -ne "openai") {
+        return (Invoke-LlmAccelerationProvider -PolicyResolved $PolicyResolved -RepoRoot $RepoRoot -InputText $InputText)
+    }
+
+    $cfg = $null
+    try { $cfg = $PolicyResolved.enhancements.committee } catch { }
+    $enabled = [bool]($cfg -and $cfg.enabled)
+    if (-not $enabled) {
+        return (Invoke-LlmAccelerationProvider -PolicyResolved $PolicyResolved -RepoRoot $RepoRoot -InputText $InputText)
+    }
+
+    $members = 3
+    $minSuccess = 2
+    $memberTemps = @()
+    $memberMaxTokens = [int]$PolicyResolved.provider.max_output_tokens
+    $memberTimeout = [int]$PolicyResolved.provider.timeout_ms
+    $judgeEnabled = $true
+    $judgeTemp = 0.05
+    $judgeMaxTokens = [int]$PolicyResolved.provider.max_output_tokens
+    $judgeTimeout = [int]$PolicyResolved.provider.timeout_ms
+
+    try { if ($cfg.members -ne $null) { $members = [int]$cfg.members } } catch { }
+    try { if ($cfg.min_success_members -ne $null) { $minSuccess = [int]$cfg.min_success_members } } catch { }
+    try { if ($cfg.member_temperatures) { $memberTemps = @($cfg.member_temperatures) } } catch { }
+    try { if ($cfg.member_max_output_tokens -ne $null) { $memberMaxTokens = [int]$cfg.member_max_output_tokens } } catch { }
+    try { if ($cfg.member_timeout_ms -ne $null) { $memberTimeout = [int]$cfg.member_timeout_ms } } catch { }
+    try { if ($cfg.judge_enabled -ne $null) { $judgeEnabled = [bool]$cfg.judge_enabled } } catch { }
+    try { if ($cfg.judge_temperature -ne $null) { $judgeTemp = [double]$cfg.judge_temperature } } catch { }
+    try { if ($cfg.judge_max_output_tokens -ne $null) { $judgeMaxTokens = [int]$cfg.judge_max_output_tokens } } catch { }
+    try { if ($cfg.judge_timeout_ms -ne $null) { $judgeTimeout = [int]$cfg.judge_timeout_ms } } catch { }
+
+    $membersSafe = [Math]::Max(1, [Math]::Min(6, [int]$members))
+    if ($membersSafe -le 1) {
+        return (Invoke-LlmAccelerationProvider -PolicyResolved $PolicyResolved -RepoRoot $RepoRoot -InputText $InputText)
+    }
+
+    $minSuccessSafe = [Math]::Max(1, [Math]::Min($membersSafe, [int]$minSuccess))
+
+    if (-not $memberTemps -or $memberTemps.Count -lt $membersSafe) {
+        $base = [double]$PolicyResolved.provider.temperature
+        $memberTemps = @()
+        for ($i = 0; $i -lt $membersSafe; $i++) {
+            $memberTemps += [Math]::Min(1.0, [Math]::Max(0.0, ($base + ($i * 0.1))))
+        }
+    }
+
+    $memberParsed = @()
+    $memberResults = @()
+    $totalLatency = 0
+
+    for ($i = 0; $i -lt $membersSafe; $i++) {
+        $temp = [double]$memberTemps[$i]
+        $focus = Get-LlmAccelerationCommitteeMemberFocus -MemberIndex ($i + 1)
+        $memberInput = $InputText + "`n`n[committee_member {0}] {1}" -f ($i + 1), $focus
+        $policyOverride = New-LlmAccelerationProviderPolicyOverride -PolicyResolved $PolicyResolved -Temperature $temp -MaxOutputTokens $memberMaxTokens -TimeoutMs $memberTimeout
+
+        $r = Invoke-LlmAccelerationProvider -PolicyResolved $policyOverride -RepoRoot $RepoRoot -InputText $memberInput
+        $memberResults += $r
+        try { if ($r -and $r.latency_ms -ne $null) { $totalLatency += [int]$r.latency_ms } } catch { }
+
+        if ($r -and [bool]$r.ok -and (-not [bool]$r.abstained) -and $r.output_text) {
+            try {
+                $obj = ($r.output_text.Trim() | ConvertFrom-Json)
+                if ($obj) { $memberParsed += $obj }
+            } catch { }
+        }
+    }
+
+    if ($memberParsed.Count -lt $minSuccessSafe) {
+        $single = Invoke-LlmAccelerationProvider -PolicyResolved $PolicyResolved -RepoRoot $RepoRoot -InputText $InputText
+        $single | Add-Member -NotePropertyName committee_used -NotePropertyValue $false -Force
+        $single | Add-Member -NotePropertyName committee_reason -NotePropertyValue "insufficient_success_members" -Force
+        return $single
+    }
+
+    if (-not $judgeEnabled) {
+        $chosen = $memberResults | Where-Object { $_ -and [bool]$_.ok -and (-not [bool]$_.abstained) -and $_.output_text } | Select-Object -First 1
+        if (-not $chosen) { $chosen = Invoke-LlmAccelerationProvider -PolicyResolved $PolicyResolved -RepoRoot $RepoRoot -InputText $InputText }
+        $chosen | Add-Member -NotePropertyName committee_used -NotePropertyValue $true -Force
+        $chosen | Add-Member -NotePropertyName committee_members -NotePropertyValue $membersSafe -Force
+        $chosen | Add-Member -NotePropertyName committee_successes -NotePropertyValue $memberParsed.Count -Force
+        $chosen | Add-Member -NotePropertyName committee_judge_used -NotePropertyValue $false -Force
+        return $chosen
+    }
+
+    $judgeInput = New-LlmAccelerationJudgeInputText -BaseInputText $InputText -MemberParsedOutputs $memberParsed
+    $judgePolicy = New-LlmAccelerationProviderPolicyOverride -PolicyResolved $PolicyResolved -Temperature $judgeTemp -MaxOutputTokens $judgeMaxTokens -TimeoutMs $judgeTimeout
+    $judgeResult = Invoke-LlmAccelerationProvider -PolicyResolved $judgePolicy -RepoRoot $RepoRoot -InputText $judgeInput
+    try { if ($judgeResult -and $judgeResult.latency_ms -ne $null) { $totalLatency += [int]$judgeResult.latency_ms } } catch { }
+
+    if ($judgeResult -and [bool]$judgeResult.ok -and (-not [bool]$judgeResult.abstained) -and $judgeResult.output_text) {
+        $judgeResult | Add-Member -NotePropertyName committee_used -NotePropertyValue $true -Force
+        $judgeResult | Add-Member -NotePropertyName committee_members -NotePropertyValue $membersSafe -Force
+        $judgeResult | Add-Member -NotePropertyName committee_successes -NotePropertyValue $memberParsed.Count -Force
+        $judgeResult | Add-Member -NotePropertyName committee_judge_used -NotePropertyValue $true -Force
+        $judgeResult | Add-Member -NotePropertyName latency_ms_total -NotePropertyValue $totalLatency -Force
+        return $judgeResult
+    }
+
+    $fallback = $memberResults | Where-Object { $_ -and [bool]$_.ok -and (-not [bool]$_.abstained) -and $_.output_text } | Select-Object -First 1
+    if (-not $fallback) { $fallback = Invoke-LlmAccelerationProvider -PolicyResolved $PolicyResolved -RepoRoot $RepoRoot -InputText $InputText }
+    $fallback | Add-Member -NotePropertyName committee_used -NotePropertyValue $true -Force
+    $fallback | Add-Member -NotePropertyName committee_members -NotePropertyValue $membersSafe -Force
+    $fallback | Add-Member -NotePropertyName committee_successes -NotePropertyValue $memberParsed.Count -Force
+    $fallback | Add-Member -NotePropertyName committee_judge_used -NotePropertyValue $false -Force
+    $fallback | Add-Member -NotePropertyName committee_reason -NotePropertyValue "judge_abstained" -Force
+    $fallback | Add-Member -NotePropertyName latency_ms_total -NotePropertyValue $totalLatency -Force
+    return $fallback
+}
 
 	function Invoke-LlmAccelerationProvider {
 	    param(
@@ -1117,6 +1876,62 @@ function Get-LlmAccelerationAdvice {
             $queryText = if ($PromptNormalization -and $PromptNormalization.normalized) { [string]$PromptNormalization.normalized } else { [string]$PromptText }
             $gitContext = Get-VcoGitContextSnippet -PolicyResolved $policyResolved -VcoRepoRoot $RepoRoot -QueryText $queryText
 
+            # TurboMax: optionally digest diff once, then feed digest (not raw diff) into downstream LLM calls.
+            $diffDigestMeta = [pscustomobject]@{ used = $false; reason = "disabled"; latency_ms = 0; api = "none"; chars = 0 }
+            try {
+                $dd = $policyResolved.enhancements.diff_digest
+                $ddEnabled = [bool]($dd -and $dd.enabled)
+                $minChars = if ($dd -and $dd.min_diff_chars -ne $null) { [int]$dd.min_diff_chars } else { 0 }
+                $maxChars = if ($dd -and $dd.max_digest_chars -ne $null) { [int]$dd.max_digest_chars } else { 1200 }
+                $replace = if ($dd -and $dd.replace_diff_in_context -ne $null) { [bool]$dd.replace_diff_in_context } else { $true }
+                $includeRaw = if ($dd -and $dd.include_raw_diff_in_context -ne $null) { [bool]$dd.include_raw_diff_in_context } else { $false }
+
+                if ($ddEnabled -and $gitContext -and $gitContext.diff -and ([string]$gitContext.diff).Length -ge $minChars) {
+                    $diffTextBefore = [string]$gitContext.diff
+                    $digestInput = New-LlmDiffDigestInputText `
+                        -PromptText $PromptText `
+                        -PromptNormalization $PromptNormalization `
+                        -Grade $Grade `
+                        -TaskType $TaskType `
+                        -GitContext $gitContext `
+                        -MaxDigestChars $maxChars
+
+                    $digestResult = Invoke-LlmDiffDigestProvider -PolicyResolved $policyResolved -RepoRoot $RepoRoot -InputText $digestInput -MaxDigestChars $maxChars
+                    if ([bool]$digestResult.ok -and (-not [bool]$digestResult.abstained) -and $digestResult.digest) {
+                        $gitContext | Add-Member -NotePropertyName diff_digest -NotePropertyValue ([string]$digestResult.digest) -Force
+                        $gitContext | Add-Member -NotePropertyName diff_digest_used -NotePropertyValue $true -Force
+
+                        if ($includeRaw) {
+                            $gitContext | Add-Member -NotePropertyName diff_raw -NotePropertyValue $diffTextBefore -Force
+                        }
+
+                        if ($replace) {
+                            $gitContext | Add-Member -NotePropertyName diff -NotePropertyValue ("[diff_digest]`n{0}" -f [string]$digestResult.digest) -Force
+                        }
+
+                        $diffDigestMeta = [pscustomobject]@{
+                            used = $true
+                            reason = "ok"
+                            latency_ms = [int]$digestResult.latency_ms
+                            api = [string]$digestResult.api
+                            chars = ([string]$digestResult.digest).Length
+                        }
+                    } else {
+                        $diffDigestMeta = [pscustomobject]@{
+                            used = $false
+                            reason = if ($digestResult -and $digestResult.reason) { [string]$digestResult.reason } else { "abstained" }
+                            latency_ms = if ($digestResult -and $digestResult.latency_ms -ne $null) { [int]$digestResult.latency_ms } else { 0 }
+                            api = if ($digestResult -and $digestResult.api) { [string]$digestResult.api } else { "unknown" }
+                            chars = 0
+                        }
+                    }
+                } else {
+                    $diffDigestMeta = [pscustomobject]@{ used = $false; reason = "not_applicable"; latency_ms = 0; api = "none"; chars = 0 }
+                }
+            } catch {
+                $diffDigestMeta = [pscustomobject]@{ used = $false; reason = "digest_error"; latency_ms = 0; api = "none"; chars = 0 }
+            }
+
         $inputText = New-LlmAccelerationInputText `
             -PromptText $PromptText `
             -PromptNormalization $PromptNormalization `
@@ -1128,7 +1943,16 @@ function Get-LlmAccelerationAdvice {
             -TopK $topK `
             -GitContext $gitContext
 
-        $providerResult = Invoke-LlmAccelerationProvider -PolicyResolved $policyResolved -RepoRoot $RepoRoot -InputText $inputText
+        $providerResult = Invoke-LlmAccelerationProviderCommittee -PolicyResolved $policyResolved -RepoRoot $RepoRoot -InputText $inputText
+
+        $latencyMs = 0
+        try {
+            if ($providerResult -and $providerResult.latency_ms_total -ne $null) {
+                $latencyMs = [int]$providerResult.latency_ms_total
+            } elseif ($providerResult -and $providerResult.latency_ms -ne $null) {
+                $latencyMs = [int]$providerResult.latency_ms
+            }
+        } catch { }
 
         $providerSummary = [pscustomobject]@{
             type = [string]$policyResolved.provider.type
@@ -1136,8 +1960,19 @@ function Get-LlmAccelerationAdvice {
             model = [string]$policyResolved.provider.model
             abstained = [bool]$providerResult.abstained
             reason = [string]$providerResult.reason
-            latency_ms = if ($providerResult.latency_ms -ne $null) { [int]$providerResult.latency_ms } else { 0 }
+            latency_ms = $latencyMs
             error = if ($providerResult.error) { [string]$providerResult.error } else { $null }
+            committee_used = if ($providerResult -and ($providerResult.committee_used -ne $null)) { [bool]$providerResult.committee_used } else { $false }
+            committee_members = if ($providerResult -and ($providerResult.committee_members -ne $null)) { [int]$providerResult.committee_members } else { 0 }
+            committee_successes = if ($providerResult -and ($providerResult.committee_successes -ne $null)) { [int]$providerResult.committee_successes } else { 0 }
+            committee_judge_used = if ($providerResult -and ($providerResult.committee_judge_used -ne $null)) { [bool]$providerResult.committee_judge_used } else { $false }
+            diff_digest = $diffDigestMeta
+            diff_context = [pscustomobject]@{
+                mode = if ($gitContext -and $gitContext.diff_mode) { [string]$gitContext.diff_mode } else { $null }
+                truncated = if ($gitContext -and ($gitContext.diff_truncated -ne $null)) { [bool]$gitContext.diff_truncated } else { $false }
+                selected_chunks = if ($gitContext -and ($gitContext.diff_selected_chunks -ne $null)) { [int]$gitContext.diff_selected_chunks } else { 0 }
+                vector_reason = if ($gitContext -and $gitContext.diff_vector_reason) { [string]$gitContext.diff_vector_reason } else { $null }
+            }
         }
 
         if (-not [bool]$providerResult.abstained -and $providerResult.output_text) {
@@ -1180,6 +2015,54 @@ function Get-LlmAccelerationAdvice {
     } elseif ($providerSummary.reason -ne "ok") {
         $reason = "provider_abstained"
     }
+
+    # TurboMax: confirm question booster (extra small call; replaces confirm_questions only when beneficial).
+    $confirmBoostMeta = [pscustomobject]@{ used = $false; reason = "disabled"; latency_ms = 0; api = "none"; questions = 0 }
+    try {
+        $cb = $policyResolved.enhancements.confirm_question_booster
+        $cbEnabled = [bool]($cb -and $cb.enabled)
+        $onlyWhenConfirm = if ($cb -and ($cb.only_when_confirm_required -ne $null)) { [bool]$cb.only_when_confirm_required } else { $true }
+        $maxQ = if ($cb -and ($cb.max_questions -ne $null)) { [int]$cb.max_questions } else { 3 }
+        $maxQ = [Math]::Max(1, [Math]::Min(3, $maxQ))
+
+        $shouldBoost = $cbEnabled -and $parsed -and (-not $parseError)
+        if ($onlyWhenConfirm) { $shouldBoost = $shouldBoost -and [bool]$confirmRequired }
+
+        if ($shouldBoost) {
+            $boostInput = New-LlmConfirmQuestionBoosterInputText `
+                -PromptText $PromptText `
+                -PromptNormalization $PromptNormalization `
+                -Grade $Grade `
+                -TaskType $TaskType `
+                -ExistingConfirmQuestions $confirmQuestions `
+                -MaxQuestions $maxQ
+
+            $boostResult = Invoke-LlmConfirmQuestionBoosterProvider -PolicyResolved $policyResolved -RepoRoot $RepoRoot -InputText $boostInput -MaxQuestions $maxQ
+            if ($boostResult -and [bool]$boostResult.ok -and (-not [bool]$boostResult.abstained) -and $boostResult.confirm_questions -and $boostResult.confirm_questions.Count -gt 0) {
+                $confirmQuestions = @($boostResult.confirm_questions | Where-Object { $_ } | Select-Object -First $maxQ)
+                $confirmBoostMeta = [pscustomobject]@{
+                    used = $true
+                    reason = "ok"
+                    latency_ms = if ($boostResult.latency_ms -ne $null) { [int]$boostResult.latency_ms } else { 0 }
+                    api = if ($boostResult.api) { [string]$boostResult.api } else { "unknown" }
+                    questions = $confirmQuestions.Count
+                }
+            } else {
+                $confirmBoostMeta = [pscustomobject]@{
+                    used = $false
+                    reason = if ($boostResult -and $boostResult.reason) { [string]$boostResult.reason } else { "abstained" }
+                    latency_ms = if ($boostResult -and $boostResult.latency_ms -ne $null) { [int]$boostResult.latency_ms } else { 0 }
+                    api = if ($boostResult -and $boostResult.api) { [string]$boostResult.api } else { "unknown" }
+                    questions = 0
+                }
+            }
+        } else {
+            $confirmBoostMeta = [pscustomobject]@{ used = $false; reason = "not_applicable"; latency_ms = 0; api = "none"; questions = 0 }
+        }
+    } catch {
+        $confirmBoostMeta = [pscustomobject]@{ used = $false; reason = "boost_error"; latency_ms = 0; api = "none"; questions = 0 }
+    }
+    try { $providerSummary | Add-Member -NotePropertyName confirm_question_booster -NotePropertyValue $confirmBoostMeta -Force } catch { }
 
     $topPackIds = @()
     if ($Ranked) {

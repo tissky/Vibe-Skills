@@ -28,6 +28,39 @@
     "store": false,
     "mock_response_path": ""
   },
+  "enhancements": {
+    "diff_digest": {
+      "enabled": true,
+      "min_diff_chars": 1800,
+      "max_digest_chars": 1200,
+      "model": "",
+      "max_output_tokens": 520,
+      "temperature": 0.1,
+      "timeout_ms": 8000,
+      "replace_diff_in_context": true,
+      "include_raw_diff_in_context": false
+    },
+    "committee": {
+      "enabled": true,
+      "members": 3,
+      "min_success_members": 2,
+      "member_temperatures": [0.15, 0.25, 0.35],
+      "member_max_output_tokens": 1400,
+      "member_timeout_ms": 12000,
+      "judge_enabled": true,
+      "judge_temperature": 0.05,
+      "judge_max_output_tokens": 1600,
+      "judge_timeout_ms": 12000
+    },
+    "confirm_question_booster": {
+      "enabled": true,
+      "only_when_confirm_required": true,
+      "max_questions": 3,
+      "max_output_tokens": 340,
+      "temperature": 0.1,
+      "timeout_ms": 6000
+    }
+  },
   "context": {
     "mode": "diff_snippets_ok",
     "include_git_status": true,
@@ -65,6 +98,7 @@
     "max_live_apply_rate": 1.0
   }
 }
+
 
 
 

@@ -58,6 +58,22 @@
   - `safety.allow_route_override=false`
   - `provider.store=false`
 
+### TurboMax 方案 A（多调用换更少返工）
+
+在 Vector‑First 的基础上叠加三项增强（均为 advice-first，失败自动退化）：
+
+1. `enhancements.diff_digest`
+   - 场景：diff/selected chunks 仍较大、噪声偏高。
+   - 策略：先用一次小调用生成摘要，再把摘要替换/补充到 `git.diff` 上下文。
+   - 目的：降低上下文腐烂风险，让 rerank/确认问题更稳定。
+2. `enhancements.committee`
+   - 场景：top1/top2 gap 小、跨域混杂、或对确认问题质量要求更高。
+   - 策略：多成员采样（不同 focus/temperature）+ 可选 judge 裁决。
+   - 目的：用更多调用换取更少“误建议→返工”的时间成本。
+3. `enhancements.confirm_question_booster`
+   - 场景：`confirm_required=true` 且需要更短更准的确认问题（≤3）。
+   - 策略：二次小调用只产出 confirm questions；失败则保留原 questions。
+
 ## 失败与退化（Fallback）
 
 1. embeddings 调用失败 / model 不支持 / 无 API key：
@@ -70,7 +86,8 @@
 
 ## 可观测性（Observability）
 
-- 将 diff 选择模式（full/head/vector/fallback）记录到 `llm_acceleration_advice` 的 provider/notes 中（便于调参）。
+- 将 diff 选择模式（full/head/vector/fallback）记录到 `llm_acceleration_advice.provider.diff_context` 中（便于调参）。
+- 若启用 `diff_digest`：将摘要是否使用/耗时记录到 `llm_acceleration_advice.provider.diff_digest` 中。
 - embeddings cache 仅写入 `outputs/runtime/`（gitignore），不入库。
 
 ## 风险与控制
