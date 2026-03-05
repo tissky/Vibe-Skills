@@ -73,6 +73,94 @@ function Try-InvokeRestJson {
     }
 }
 
+function To-GitRemoteUrl {
+    param([string]$RepoUrl)
+    $u = Normalize-GitHubRepoUrl -Url $RepoUrl
+    if ([string]::IsNullOrWhiteSpace($u)) { return "" }
+    if ($u.EndsWith(".git")) { return $u }
+    return ("{0}.git" -f $u)
+}
+
+function Try-ParseSemVer {
+    param([string]$TagName)
+    if ([string]::IsNullOrWhiteSpace($TagName)) { return $null }
+    $t = $TagName.Trim()
+    if ($t -match '^v?(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$') {
+        return [pscustomobject]@{
+            name  = $TagName
+            major = [int]$Matches[1]
+            minor = [int]$Matches[2]
+            patch = [int]$Matches[3]
+        }
+    }
+    return $null
+}
+
+function Try-GitLsRemoteHead {
+    param([string]$RepoUrl)
+    $remote = To-GitRemoteUrl -RepoUrl $RepoUrl
+    if ([string]::IsNullOrWhiteSpace($remote)) { return $null }
+
+    try {
+        $lines = @(git ls-remote --symref $remote HEAD 2>$null)
+    } catch {
+        return $null
+    }
+
+    $branch = ""
+    $sha = ""
+    foreach ($l in $lines) {
+        if (-not $l) { continue }
+        if ($l -match '^ref:\s+refs/heads/([^ ]+)\s+HEAD$') {
+            $branch = [string]$Matches[1]
+            continue
+        }
+        if ($l -match '^([a-f0-9]{40})\s+HEAD$') {
+            $sha = [string]$Matches[1]
+            continue
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($sha)) { return $null }
+    return [pscustomobject]@{ branch = $branch; sha = $sha }
+}
+
+function Try-GitLsRemoteLatestTag {
+    param([string]$RepoUrl)
+    $remote = To-GitRemoteUrl -RepoUrl $RepoUrl
+    if ([string]::IsNullOrWhiteSpace($remote)) { return "" }
+
+    $tagNames = New-Object System.Collections.Generic.List[string]
+    try {
+        $lines = @(git ls-remote --tags --refs $remote 2>$null)
+        foreach ($l in $lines) {
+            if (-not $l) { continue }
+            if ($l -match '^[a-f0-9]{40}\s+refs/tags/(.+)$') {
+                $tagNames.Add([string]$Matches[1]) | Out-Null
+            }
+        }
+    } catch {
+        return ""
+    }
+
+    if ($tagNames.Count -eq 0) { return "" }
+
+    $best = $null
+    foreach ($t in $tagNames) {
+        $p = Try-ParseSemVer -TagName $t
+        if (-not $p) { continue }
+        if (-not $best) { $best = $p; continue }
+        if ($p.major -gt $best.major) { $best = $p; continue }
+        if ($p.major -lt $best.major) { continue }
+        if ($p.minor -gt $best.minor) { $best = $p; continue }
+        if ($p.minor -lt $best.minor) { continue }
+        if ($p.patch -gt $best.patch) { $best = $p; continue }
+    }
+
+    if ($best) { return [string]$best.name }
+    return [string](@($tagNames | Sort-Object | Select-Object -Last 1))
+}
+
 function Try-GetInstalledPluginEntry {
     param(
         [object]$Installed,
@@ -204,6 +292,7 @@ foreach ($repoUrl in $repoUrls) {
     $releaseInfo = $null
     $tagInfo = $null
     $headInfo = $null
+    $defaultBranch = ""
 
     if (-not $NoGitHub) {
         $repoInfo = Try-InvokeRestJson -Url ("https://api.github.com/repos/{0}/{1}" -f $owner, $name) -Headers $githubHeaders
@@ -236,10 +325,30 @@ foreach ($repoUrl in $repoUrls) {
         }
     }
 
+    # Fallback for environments where GitHub API is blocked (e.g., 403) but git over HTTPS works.
+    if ([string]::IsNullOrWhiteSpace($headSha) -or [string]::IsNullOrWhiteSpace($defaultBranch)) {
+        $lsHead = Try-GitLsRemoteHead -RepoUrl $repoUrl
+        if ($lsHead) {
+            if ([string]::IsNullOrWhiteSpace($defaultBranch) -and $lsHead.branch) {
+                $defaultBranch = [string]$lsHead.branch
+            }
+            if ([string]::IsNullOrWhiteSpace($headSha) -and $lsHead.sha) {
+                $headSha = [string]$lsHead.sha
+                # No reliable commit date without API; leave headDate empty.
+            }
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($latestTag)) {
+        $lsTag = Try-GitLsRemoteLatestTag -RepoUrl $repoUrl
+        if (-not [string]::IsNullOrWhiteSpace($lsTag)) {
+            $latestTag = [string]$lsTag
+        }
+    }
+
     $pushedAt = ""
-    $defaultBranch = ""
+    # $defaultBranch may already be set (API or ls-remote fallback)
     if ($repoInfo) {
-        $defaultBranch = [string]$repoInfo.default_branch
         $pushedAt = [string]$repoInfo.pushed_at
     }
 
