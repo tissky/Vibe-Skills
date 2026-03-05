@@ -22,6 +22,7 @@ Complete reference of VCO execution tools, their capabilities, APIs, state paths
 | 14 | clean-code-python patterns (optional Python quality source) | Methodology overlay | None | Config-driven advisory metadata | ⚠️ Optional |
 | 15 | system-design-primer patterns (optional architecture source) | Methodology overlay | None | Config-driven advisory metadata | ⚠️ Optional |
 | 16 | LeetCUDA patterns (optional CUDA optimization source) | Methodology overlay | None | Config-driven advisory metadata | ⚠️ Optional |
+| 17 | Scrapling (optional) | External CLI + MCP server | None | None (writes user-specified output files) | ⚠️ Optional |
 
 ## Verification Status Legend
 
@@ -406,3 +407,20 @@ Characteristics:
 - Does not replace `data-ml` pack routing or generic code-quality routing.
 - Does not mutate route selection; only emits CUDA optimization advice metadata.
 - License-safe boundary: methodology-level advisory only, no upstream code vendoring (`LeetCUDA` upstream is GPL-3.0).
+
+---
+
+## 17. Scrapling (optional web scraping CLI + MCP server)
+
+**Type**: External CLI + optional MCP server  
+**Primary Use**: Web scraping / targeted extraction (CSS selector / XPath), pre-extract page content before handing to the LLM to reduce tokens and speed up workflows.  
+**Invocation**:
+- CLI: `scrapling ...`
+- MCP server (optional): `scrapling mcp` (stdio)
+
+**State Location**: None (stateless). Outputs are written to user-specified files/paths only.
+
+**Verified**: ⚠️ Optional  
+Notes:
+- Requires user environment install (e.g. `pip install "scrapling[ai]"` for MCP features).
+- If unavailable or blocked by anti-bot / interactive flows, fall back to `playwright` (real browser automation).

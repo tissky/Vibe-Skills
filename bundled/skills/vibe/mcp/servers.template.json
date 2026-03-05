@@ -13,6 +13,15 @@
       "mode": "plugin",
       "required": false
     },
+    "scrapling": {
+      "mode": "stdio",
+      "command": "scrapling",
+      "args": [
+        "mcp"
+      ],
+      "required": false,
+      "note": "Requires: python -m pip install \"scrapling[ai]\""
+    },
     "claude-flow": {
       "mode": "stdio",
       "command": "claude-flow",
