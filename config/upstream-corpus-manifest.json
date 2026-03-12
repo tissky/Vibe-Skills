@@ -1,4 +1,4 @@
-{
+﻿{
     "version":  1,
     "updated":  "2026-03-08",
     "governance_plane":  "upstream_corpus",
@@ -81,7 +81,7 @@
                              "pass_rule":  "at_least_one_required_root_with_scope_coverage_and_matching_heads",
                              "warn_on_partial_live_root":  true,
                              "allow_non_git_live_root":  true,
-                             "notes":  "Freshness is evaluated against the in-repo live mirror for the 15 mirror-managed upstream sources. Shadow-only policy sources remain registered in the manifest but are intentionally excluded from mirror freshness coverage.",
+                             "notes":  "Freshness is evaluated against the 15 mirror-managed upstream sources. The installed runtime mirror is the current required baseline; any repo-local mirror remains informational until it is fully rehydrated.",
                              "scope_slugs":  [
                                                  "activepieces",
                                                  "agent-squad",
@@ -104,6 +104,13 @@
                          {
                              "id":  "workspace_live",
                              "path":  "third_party/vco-ecosystem-mirror",
+                             "role":  "working_mirror",
+                             "expected_entry_count":  15,
+                             "required_for_freshness_gate":  false
+                         },
+                         {
+                             "id":  "installed_runtime",
+                             "path":  "C:/Users/羽裳/.codex/skills/vibe/third_party/vco-ecosystem-mirror",
                              "role":  "freshness_baseline",
                              "expected_entry_count":  15,
                              "required_for_freshness_gate":  true
@@ -138,7 +145,7 @@
                         "owner":  "vco/desktopops",
                         "integration_role":  "desktop shadow contract and replay-source reference",
                         "next_action":  "Keep Agent-S in shadow-first posture and distill replay / failure-handling improvements into DesktopOps contracts only.",
-                        "observed_head_sha":  "HEAD_FROM_UPSTREAM_LOCK",
+                        "observed_head_sha":  "5caa76cb19c6a6b947a524f74995c45848c2efbc",
                         "canonical_assets":  [
                                                  "docs/desktopops-soft-rollout-governance.md",
                                                  "docs/desktopops-replay-governance.md",
@@ -311,7 +318,7 @@
                         "owner":  "vco/browserops",
                         "integration_role":  "browser provider candidate and open-world browsing evaluation source",
                         "next_action":  "Retain browser-use as an advice/shadow-first provider candidate and keep provider takeover forbidden.",
-                        "observed_head_sha":  "HEAD_FROM_UPSTREAM_LOCK",
+                        "observed_head_sha":  "5991c7ff8677caace735bddc75cc2ef2d46ae81a",
                         "canonical_assets":  [
                                                  "docs/browserops-soft-rollout-governance.md",
                                                  "docs/browserops-provider-integration.md",
@@ -379,7 +386,7 @@
                         "owner":  "vco/memory-governance",
                         "integration_role":  "memory-policy vocabulary and conformance contract source",
                         "next_action":  "Keep Letta as a policy / vocabulary source only and convert remaining retention / conformance slices into auditable eval assets.",
-                        "observed_head_sha":  "HEAD_FROM_UPSTREAM_LOCK",
+                        "observed_head_sha":  "4cb2f21c65d571d807d7466335e51432826749ba",
                         "canonical_assets":  [
                                                  "docs/letta-policy-conformance.md",
                                                  "docs/letta-policy-integration.md",
@@ -396,7 +403,7 @@
                         "owner":  "vco/memory-governance",
                         "integration_role":  "optional preference-memory backend candidate under single-owner memory governance",
                         "next_action":  "Keep mem0 opt-in and replayable, never as canonical session or project truth-source.",
-                        "observed_head_sha":  "HEAD_FROM_UPSTREAM_LOCK",
+                        "observed_head_sha":  "861cbb72897825cc4a51b9586219dfd52a395879",
                         "canonical_assets":  [
                                                  "docs/mem0-soft-rollout-governance.md",
                                                  "docs/mem0-optin-backend-integration.md",

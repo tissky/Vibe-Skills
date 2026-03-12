@@ -45,10 +45,11 @@ pwsh -NoProfile -File .\..\governance\phase-end-cleanup.ps1 -WriteArtifacts -Inc
 
 - **Runtime Integrity / Packaging**：`vibe-bom-frontmatter-gate.ps1`、`vibe-version-consistency-gate.ps1`、`vibe-version-packaging-gate.ps1`、`vibe-config-parity-gate.ps1`、`vibe-installed-runtime-freshness-gate.ps1`。
 - **Cleanliness / Outputs / Mirror Hygiene**：`vibe-repo-cleanliness-gate.ps1`、`vibe-output-artifact-boundary-gate.ps1`、`vibe-mirror-edit-hygiene-gate.ps1`、`vibe-nested-bundled-parity-gate.ps1`。
+- **Developer Entry / Contributor UX**：`vibe-developer-entry-gate.ps1`；验证 root README -> `CONTRIBUTING.md` -> zone / proof / plan surface 的开发者入口主链路。
 - **Routing Core / Retro / Probe**：routing smoke / stability / retro / probe family。
 - **Memory / Prompt / Overlay Governance**：memory、prompt、retrieval、data-scale、framework-interop、quality-debt、system-design、CUDA overlay family。
 - **Plane Governance**：browserops、desktopops、docling、document、connector、discovery family。
-- **Capability / Upstream / Release**：capability、role-pack、upstream value ops、promotion、release、observability family。
+- **Capability / Upstream / Release**：capability、role-pack、upstream value ops、promotion、release、observability family；upstream/distribution governance 新增 `vibe-third-party-disclosure-parity-gate.ps1`、`vibe-upstream-lock-coverage-gate.ps1`、`vibe-origin-provenance-gate.ps1`。
 
 详见：`gate-family-index.md`
 **Managed Runtime / Process Hygiene**: `vibe-node-zombie-gate.ps1` validates VCO-managed Node ownership, stale-process classification, and report-only cleanup safety boundaries.
@@ -191,6 +192,16 @@ Run repo cleanliness gate (local hygiene first):
 & ".\vibe-repo-cleanliness-gate.ps1" -WriteArtifacts
 & ".\vibe-output-artifact-boundary-gate.ps1" -WriteArtifacts
 ```
+
+Run developer-entry gate (contributor entry surface only):
+
+```powershell
+& ".\vibe-developer-entry-gate.ps1" -WriteArtifacts
+```
+
+Notes:
+- This gate validates the documentation entry contract only; it does not mutate runtime state.
+- Current contract source: `..\..\references\developer-entry-contract.md`
 
 Run installed runtime freshness gate (canonical repo only):
 
@@ -488,6 +499,9 @@ Upstream corpus / productization / release-closure additions:
 ```powershell
 & ".\vibe-upstream-corpus-manifest-gate.ps1" -WriteArtifacts
 & ".\vibe-upstream-mirror-freshness-gate.ps1" -WriteArtifacts
+& ".\vibe-third-party-disclosure-parity-gate.ps1" -WriteArtifacts
+& ".\vibe-upstream-lock-coverage-gate.ps1" -WriteArtifacts
+& ".\vibe-origin-provenance-gate.ps1" -WriteArtifacts
 & ".\vibe-docling-contract-gate.ps1" -WriteArtifacts
 & ".\vibe-connector-admission-gate.ps1" -WriteArtifacts
 & ".\vibe-role-pack-governance-gate.ps1" -WriteArtifacts
@@ -500,6 +514,9 @@ Upstream corpus / productization / release-closure additions:
 Operational notes:
 
 - `vibe-upstream-corpus-manifest-gate.ps1` and `vibe-upstream-mirror-freshness-gate.ps1` together define the 15-project corpus baseline plus runtime mirror freshness evidence.
+- `vibe-third-party-disclosure-parity-gate.ps1` validates that public disclosure stays traceable to canonical upstream registries.
+- `vibe-upstream-lock-coverage-gate.ps1` validates upstream-lock governance metadata coverage (license / tier / redistribution posture / disclosure flags).
+- `vibe-origin-provenance-gate.ps1` validates the `ORIGIN.md` provenance contract and allows policy-only mode while `vendor/**` contains scaffolding only.
 - `vibe-docling-contract-gate.ps1`, `vibe-connector-admission-gate.ps1`, `vibe-role-pack-governance-gate.ps1`, and `vibe-capability-catalog-gate.ps1` validate that absorbed value lands as governance/product surfaces rather than second execution owners.
 - `vibe-promotion-board-gate.ps1` is the bridge from Wave31-38 governance assets into Wave39 release evidence; it should be part of release-cut, not an optional afterthought.
 - `vibe-pilot-scenarios.ps1` covers the execution-plane fixtures plus `pilot-deep-extraction.json`; `vibe-deep-extraction-pilot-gate.ps1` is the release-closure rollup gate.

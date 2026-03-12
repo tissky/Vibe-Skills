@@ -28,4 +28,4 @@
 
 - Never overwrite bundled local rewrites with raw upstream content.
 - Upstream updates must be reviewed and merged manually.
-- `config/upstream-lock.json` records upstream references for traceability only.
+- `config/upstream-lock.json` records upstream references plus distribution-governance metadata; it remains a traceability surface, not a second runtime owner.

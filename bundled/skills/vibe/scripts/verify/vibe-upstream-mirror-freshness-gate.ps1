@@ -5,24 +5,25 @@
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot '..\common\vibe-governance-helpers.ps1')
 
-function Assert-Collect {
+function Add-Assertion {
     param(
+        [System.Collections.Generic.List[object]]$Collection,
         [bool]$Condition,
         [string]$Message,
         [object]$Details = $null
     )
 
     if ($Condition) {
-        Write-Host "[PASS] $Message"
+        Write-Host ('[PASS] ' + $Message) -ForegroundColor Green
     } else {
-        Write-Host "[FAIL] $Message" -ForegroundColor Red
+        Write-Host ('[FAIL] ' + $Message) -ForegroundColor Red
     }
 
-    return [pscustomobject]@{
-        pass = $Condition
+    [void]$Collection.Add([pscustomobject]@{
+        pass = [bool]$Condition
         message = $Message
         details = $Details
-    }
+    })
 }
 
 function Resolve-ManifestPath {
@@ -38,12 +39,74 @@ function Resolve-ManifestPath {
     return [System.IO.Path]::GetFullPath((Join-Path $RepoRoot $PathValue))
 }
 
+function Get-HeadSha {
+    param([string]$RepoDir)
+
+    try {
+        $head = git -C $RepoDir rev-parse HEAD 2>$null | Select-Object -First 1
+        return [string]$head
+    } catch {
+        return ''
+    }
+}
+
+function Write-GateArtifacts {
+    param(
+        [string]$RepoRoot,
+        [psobject]$Artifact
+    )
+
+    $outDir = Join-Path $RepoRoot 'outputs\verify'
+    New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+
+    $jsonPath = Join-Path $outDir 'vibe-upstream-mirror-freshness-gate.json'
+    $mdPath = Join-Path $outDir 'vibe-upstream-mirror-freshness-gate.md'
+
+    Write-VgoUtf8NoBomText -Path $jsonPath -Content ($Artifact | ConvertTo-Json -Depth 100)
+
+    $lines = New-Object System.Collections.Generic.List[string]
+    $null = $lines.Add('# VCO Upstream Mirror Freshness Gate')
+    $null = $lines.Add('')
+    $null = $lines.Add('- Gate Result: **' + $Artifact.gate_result + '**')
+    $null = $lines.Add('- Assertions: total=' + $Artifact.summary.total_assertions + ', passed=' + $Artifact.summary.passed_assertions + ', failed=' + $Artifact.summary.failed_assertions)
+    $null = $lines.Add('')
+    $null = $lines.Add('## Root Results')
+    $null = $lines.Add('')
+
+    foreach ($root in @($Artifact.root_results)) {
+        $null = $lines.Add(('- root={0}; required={1}; exists={2}; expected={3}; present={4}; matched={5}; missing={6}; non_git={7}; drift={8}; full_coverage={9}' -f $root.id, $root.required_for_freshness_gate, $root.exists, $root.expected_entry_count, $root.present_count, $root.matched_count, @($root.missing).Count, @($root.non_git).Count, @($root.drift).Count, $root.full_coverage_and_match))
+    }
+
+    Write-VgoUtf8NoBomText -Path $mdPath -Content ($lines -join "`n")
+}
+
 $context = Get-VgoGovernanceContext -ScriptPath $PSCommandPath -EnforceExecutionContext
 $repoRoot = $context.repoRoot
 $manifestPath = Join-Path $repoRoot 'config\upstream-corpus-manifest.json'
-$results = New-Object System.Collections.Generic.List[object]
-[void]$results.Add((Assert-Collect -Condition (Test-Path -LiteralPath $manifestPath) -Message '存在 upstream corpus manifest'))
+
+$results = [System.Collections.Generic.List[object]]::new()
+Add-Assertion -Collection $results -Condition (Test-Path -LiteralPath $manifestPath) -Message 'manifest exists' -Details $manifestPath
+
 if (@($results | Where-Object { -not $_.pass }).Count -gt 0) {
+    $artifact = [pscustomobject]@{
+        gate = 'vibe-upstream-mirror-freshness-gate'
+        repo_root = $repoRoot
+        generated_at = [DateTime]::UtcNow.ToString('o')
+        gate_result = 'FAIL'
+        summary = [pscustomobject]@{
+            total_assertions = @($results).Count
+            passed_assertions = @($results | Where-Object { $_.pass }).Count
+            failed_assertions = @($results | Where-Object { -not $_.pass }).Count
+        }
+        manifest_path = $manifestPath
+        root_results = @()
+        results = @($results)
+    }
+
+    if ($WriteArtifacts) {
+        Write-GateArtifacts -RepoRoot $repoRoot -Artifact $artifact
+    }
+
     exit 1
 }
 
@@ -58,164 +121,130 @@ $scopeEntries = foreach ($slug in $scopeSlugs) {
         $entryLookup[$slug]
     }
 }
+$entries = @($scopeEntries)
 $roots = @($manifest.mirror_roots)
-[void]$results.Add((Assert-Collect -Condition ($scopeSlugs.Count -eq 15) -Message 'manifest freshness scope 包含 15 个 mirror-managed slugs'))
-[void]$results.Add((Assert-Collect -Condition ($scopeEntries.Count -eq $scopeSlugs.Count) -Message 'manifest freshness scope slugs 均可解析到 entry'))
-[void]$results.Add((Assert-Collect -Condition ($roots.Count -ge 1) -Message 'manifest 至少声明了一个 mirror root'))
+$expectedEntries = $scopeSlugs.Count
 
-$rootResults = @()
-$requiredPassCount = 0
-$requiredRootCount = 0
+Add-Assertion -Collection $results -Condition ($scopeSlugs.Count -eq 15) -Message 'manifest freshness scope contains 15 mirror-managed slugs' -Details $scopeSlugs
+Add-Assertion -Collection $results -Condition ($entries.Count -eq $expectedEntries) -Message 'manifest freshness scope resolves to expected entries' -Details ([ordered]@{ actual = $entries.Count; expected = $expectedEntries })
+Add-Assertion -Collection $results -Condition ($roots.Count -ge 1) -Message 'manifest declares at least one mirror root' -Details $roots.Count
+
+$requiredRoots = @($roots | Where-Object { [bool]$_.required_for_freshness_gate })
+Add-Assertion -Collection $results -Condition ($requiredRoots.Count -ge 1) -Message 'manifest declares at least one required freshness root' -Details $requiredRoots.Count
+
+$rootResults = New-Object System.Collections.Generic.List[object]
+$requiredRootPassCount = 0
 
 foreach ($root in $roots) {
+    $rootId = [string]$root.id
     $resolvedPath = Resolve-ManifestPath -RepoRoot $repoRoot -PathValue ([string]$root.path)
+    $rootExists = Test-Path -LiteralPath $resolvedPath
     $required = [bool]$root.required_for_freshness_gate
-    if ($required) {
-        $requiredRootCount++
-    }
 
     $missing = New-Object System.Collections.Generic.List[string]
     $nonGit = New-Object System.Collections.Generic.List[string]
     $drift = New-Object System.Collections.Generic.List[object]
-    $matched = New-Object System.Collections.Generic.List[string]
-    $present = New-Object System.Collections.Generic.List[string]
+    $presentCount = 0
+    $matchedCount = 0
 
-    [void]$results.Add((Assert-Collect -Condition ([int]$root.expected_entry_count -eq $scopeEntries.Count) -Message ('root {0} expected_entry_count 与 freshness scope 一致' -f $root.id) -Details ([ordered]@{ expected_entry_count = [int]$root.expected_entry_count; scope_count = $scopeEntries.Count })))
+    if ($rootExists) {
+        foreach ($entry in $entries) {
+            $slug = [string]$entry.slug
+            $expectedHead = [string]$entry.observed_head_sha
+            $repoDir = Join-Path $resolvedPath $slug
 
-    foreach ($entry in $scopeEntries) {
-        $slug = [string]$entry.slug
-        $expected = [string]$entry.observed_head_sha
-        $repoDir = Join-Path $resolvedPath $slug
+            if (-not (Test-Path -LiteralPath $repoDir)) {
+                [void]$missing.Add($slug)
+                continue
+            }
 
-        if (-not (Test-Path -LiteralPath $repoDir)) {
-            [void]$missing.Add($slug)
-            continue
-        }
+            $presentCount++
 
-        [void]$present.Add($slug)
-        if (-not (Test-Path -LiteralPath (Join-Path $repoDir '.git'))) {
-            [void]$nonGit.Add($slug)
-            continue
-        }
+            if (-not (Test-Path -LiteralPath (Join-Path $repoDir '.git'))) {
+                [void]$nonGit.Add($slug)
+                continue
+            }
 
-        $actual = ''
-        try {
-            $actual = [string](git -C $repoDir rev-parse HEAD 2>$null | Select-Object -First 1)
-        } catch {
-            $actual = ''
-        }
+            $actualHead = Get-HeadSha -RepoDir $repoDir
+            if ([string]::IsNullOrWhiteSpace($actualHead)) {
+                [void]$nonGit.Add($slug)
+                continue
+            }
 
-        if ([string]::IsNullOrWhiteSpace($actual)) {
-            [void]$nonGit.Add($slug)
-            continue
-        }
-
-        if ($actual -eq $expected) {
-            [void]$matched.Add($slug)
-        } else {
-            [void]$drift.Add([pscustomobject]@{
+            if ($actualHead -eq $expectedHead) {
+                $matchedCount++
+            } else {
+                [void]$drift.Add([pscustomobject]@{
                     slug = $slug
-                    expected = $expected
-                    actual = $actual
+                    expected = $expectedHead
+                    actual = $actualHead
                 })
+            }
         }
     }
 
-    $fullCoverage = (Test-Path -LiteralPath $resolvedPath) -and
-        ($missing.Count -eq 0) -and
-        ($nonGit.Count -eq 0) -and
-        ($drift.Count -eq 0) -and
-        ($matched.Count -eq $scopeEntries.Count)
+    $expectedCountForRoot = if ($root.PSObject.Properties.Name -contains 'expected_entry_count') { [int]$root.expected_entry_count } else { $expectedEntries }
+    Add-Assertion -Collection $results -Condition ($expectedCountForRoot -eq $expectedEntries) -Message ('root expected_entry_count matches freshness scope: ' + $rootId) -Details ([ordered]@{ expected_entry_count = $expectedCountForRoot; scope_count = $expectedEntries })
+    $fullCoverage = $rootExists -and ($presentCount -eq $entries.Count) -and ($missing.Count -eq 0) -and ($nonGit.Count -eq 0) -and ($drift.Count -eq 0) -and ($matchedCount -eq $entries.Count)
 
     if ($required -and $fullCoverage) {
-        $requiredPassCount++
+        $requiredRootPassCount++
     }
 
-    $rootResults += [pscustomobject]@{
-        id = [string]$root.id
+    $rootResult = [pscustomobject]@{
+        id = $rootId
         role = [string]$root.role
         path = $resolvedPath
         required_for_freshness_gate = $required
-        exists = [bool](Test-Path -LiteralPath $resolvedPath)
-        expected_entry_count = [int]$root.expected_entry_count
-        present_count = $present.Count
-        matched_count = $matched.Count
+        exists = [bool]$rootExists
+        expected_entry_count = $expectedCountForRoot
+        present_count = [int]$presentCount
+        matched_count = [int]$matchedCount
         missing = [string[]]$missing.ToArray()
         non_git = [string[]]$nonGit.ToArray()
         drift = [object[]]$drift.ToArray()
-        full_coverage_and_match = $fullCoverage
+        full_coverage_and_match = [bool]$fullCoverage
     }
+
+    [void]$rootResults.Add($rootResult)
 
     if ($required) {
-        [void]$results.Add((Assert-Collect -Condition (Test-Path -LiteralPath $resolvedPath) -Message ('required root {0} 存在' -f $root.id) -Details $resolvedPath))
-        [void]$results.Add((Assert-Collect -Condition $fullCoverage -Message ('required root {0} 满足全量 coverage + HEAD match' -f $root.id)))
+        Add-Assertion -Collection $results -Condition $rootExists -Message ('required root exists: ' + $rootId) -Details $resolvedPath
+        Add-Assertion -Collection $results -Condition $fullCoverage -Message ('required root has full coverage and matching HEADs: ' + $rootId) -Details $rootResult
     } else {
-        $info = [ordered]@{
-            path = $resolvedPath
-            present_count = $present.Count
-            missing_count = $missing.Count
-            non_git_count = $nonGit.Count
-            drift_count = $drift.Count
-        }
-        [void]$results.Add((Assert-Collect -Condition $true -Message ('non-required root {0} 已记录为 informational state' -f $root.id) -Details $info))
+        Add-Assertion -Collection $results -Condition $true -Message ('non-required root recorded for information: ' + $rootId) -Details $rootResult
     }
 }
 
-[void]$results.Add((Assert-Collect -Condition ($requiredRootCount -ge 1) -Message '至少配置了一个 required freshness root'))
-[void]$results.Add((Assert-Collect -Condition ($requiredPassCount -ge 1) -Message '至少一个 required freshness root 完整且 HEAD 对齐'))
+Add-Assertion -Collection $results -Condition ($requiredRootPassCount -ge 1) -Message 'at least one required freshness root passes full coverage and HEAD alignment' -Details $requiredRootPassCount
 
-$total = $results.Count
-$passed = @($results | Where-Object { $_.pass }).Count
-$failed = $total - $passed
-$gatePass = ($failed -eq 0)
-$gateResultText = if ($gatePass) { 'PASS' } else { 'FAIL' }
+$totalAssertions = @($results).Count
+$passedAssertions = @($results | Where-Object { $_.pass }).Count
+$failedAssertions = @($results | Where-Object { -not $_.pass }).Count
+$gateResult = if ($failedAssertions -eq 0) { 'PASS' } else { 'FAIL' }
 
-Write-Host ''
-Write-Host '=== Summary ==='
-Write-Host ('Total assertions: ' + $total)
-Write-Host ('Passed: ' + $passed)
-Write-Host ('Failed: ' + $failed)
-Write-Host ('Gate Result: ' + $gateResultText)
+$artifact = [pscustomobject]@{
+    gate = 'vibe-upstream-mirror-freshness-gate'
+    repo_root = $repoRoot
+    generated_at = [DateTime]::UtcNow.ToString('o')
+    gate_result = $gateResult
+    summary = [pscustomobject]@{
+        total_assertions = $totalAssertions
+        passed_assertions = $passedAssertions
+        failed_assertions = $failedAssertions
+        manifest_entry_count = $entries.Count
+        required_root_count = $requiredRoots.Count
+        required_root_pass_count = $requiredRootPassCount
+    }
+    manifest_path = $manifestPath
+    root_results = [object[]]$rootResults.ToArray()
+    results = @($results)
+}
 
 if ($WriteArtifacts) {
-    $outDir = Join-Path $repoRoot 'outputs\verify'
-    New-Item -ItemType Directory -Force -Path $outDir | Out-Null
-
-    $jsonPath = Join-Path $outDir 'vibe-upstream-mirror-freshness-gate.json'
-    $mdPath = Join-Path $outDir 'vibe-upstream-mirror-freshness-gate.md'
-    $assertionSummary = @{
-        total = $total
-        passed = $passed
-        failed = $failed
-    }
-
-    $artifact = @{
-        generated_at = [DateTime]::UtcNow.ToString('o')
-        gate_result = $gateResultText
-        assertions = $assertionSummary
-        manifest_path = $manifestPath
-        root_results = [object[]]$rootResults
-        results = [object[]]$results
-    }
-
-    Write-VgoUtf8NoBomText -Path $jsonPath -Content ($artifact | ConvertTo-Json -Depth 50)
-
-    $mdLines = @()
-    $mdLines += "# VCO Upstream Mirror Freshness Gate"
-    $mdLines += ""
-    $mdLines += "- Gate Result: **$($artifact.gate_result)**"
-    $mdLines += "- Assertions: total=$total, passed=$passed, failed=$failed"
-    $mdLines += ""
-    $mdLines += "## Root Results"
-    $mdLines += ""
-
-    foreach ($rootResult in $rootResults) {
-        $mdLines += "- Root $($rootResult.id): required=$($rootResult.required_for_freshness_gate), present=$($rootResult.present_count), matched=$($rootResult.matched_count), missing=$($rootResult.missing.Count), non_git=$($rootResult.non_git.Count), drift=$($rootResult.drift.Count), full_coverage=$($rootResult.full_coverage_and_match)"
-    }
-
-    Write-VgoUtf8NoBomText -Path $mdPath -Content ($mdLines -join [Environment]::NewLine)
+    Write-GateArtifacts -RepoRoot $repoRoot -Artifact $artifact
 }
 
-if (-not $gatePass) {
+if ($failedAssertions -gt 0) {
     exit 1
 }

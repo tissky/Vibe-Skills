@@ -1,33 +1,73 @@
-# Third-Party Licenses and Boundaries
+# Third-Party Licenses and Distribution Boundaries
 
-This repository is licensed under **Apache-2.0** (see `LICENSE`).
+This repository is licensed under **Apache-2.0**. See [`LICENSE`](./LICENSE).
 
-This file documents notable upstream sources used in the VCO ecosystem and how they are integrated.
+This file is the human-readable disclosure surface for third-party and upstream
+sources tracked canonically in [`config/upstream-lock.json`](./config/upstream-lock.json).
+It does not relicense upstream code, prompts, datasets, or services.
 
-## Upstream Sources
+## Canonical Rules
 
-| Upstream Project | Upstream License | How VCO Uses It | Distribution Boundary |
-|---|---|---|---|
-| `SynkraAI/aios-core` | Upstream project license applies | Methodology and role-pattern integration into the `aios-core` pack and routing config | Use follows upstream license terms; review upstream repo for exact obligations |
-| `f/prompts.chat` | Upstream project license applies | Prompt asset lookup/refine/publish integration via `prompt-lookup` and `prompt-overlay` policy | Treated as optional external service/MCP capability; review upstream terms before redistribution |
-| `GokuMohandas/Made-With-ML` | Upstream project license applies | ML lifecycle methodology source for `ml-lifecycle-overlay` stage/evidence advisory design | Used as governance methodology reference (post-route advisory); review upstream terms before redistribution |
-| `zedr/clean-code-python` | Upstream project license applies | Python clean-code methodology source for `python-clean-code-overlay` principle/anti-pattern advisory design | Used as methodology reference (post-route advisory); review upstream terms before redistribution |
-| `donnemartin/system-design-primer` | CC BY 4.0 (upstream) | Architecture methodology source for `system-design-overlay` coverage/quality advisory design | Used as methodology reference (post-route advisory); preserve attribution and review CC BY obligations before redistribution |
-| `xlite-dev/LeetCUDA` | GPL-3.0 (upstream) | CUDA optimization methodology source for `cuda-kernel-overlay` coverage/evidence advisory design | Methodology-level advisory only; do not vendor/copy upstream GPL source into Apache-2.0 core without separate compliance review |
-| `x1xhlol/system-prompts-and-models-of-ai-tools` | GPL-3.0 (upstream) | Read-only external corpus input for signal extraction (`scripts/research/*`) and candidate routing suggestions | Raw upstream prompt corpus is not bundled as distributable VCO runtime content; if mirrored locally under `third_party/`, users are responsible for GPL compliance |
-| `muratcankoylan/Agent-Skills-for-Context-Engineering` | MIT (upstream) | Advisory knowledge source for Context Retro Advisor and CER-based retrospectives | Attribution and license notice should be preserved when redistributing derived integrations |
-| `SuperClaude-Org/SuperClaude_Framework` | Upstream project license applies | Optional external enhancement (`sc` command compatibility) | Installed optionally; review upstream license before redistribution |
-| `ruvnet/claude-flow` | Upstream project license applies | Optional external runtime enhancement | Installed optionally; review upstream license before redistribution |
+1. The canonical machine-readable source of truth is
+   [`config/upstream-lock.json`](./config/upstream-lock.json).
+2. This file must disclose every lock entry that has `disclosure_required: true`.
+3. `reference-only` entries are governance, research, or methodology sources and
+   must not be treated as redistributable upstream code.
+4. `external-optional` entries are optional providers, CLIs, services, or
+   operator-local mirrors and are not shipped by default unless explicitly stated.
+5. `distributed-local` entries are local bundled integrations that require
+   notice preservation and provenance tracking.
 
-## Policy
+## Upstream Disclosure Matrix
 
-1. Core VCO repository content is released under Apache-2.0.
-2. Third-party projects keep their own licenses; this file does not relicense upstream code or content.
-3. External corpora are treated as research inputs by default; avoid committing verbatim third-party prompt sets into core orchestration files.
-4. Before distributing bundled third-party files, ensure compatible license obligations are met.
+| Upstream Project | SPDX License | Canonical Slug | Distribution Tier | Distribution Boundary |
+|---|---|---|---|---|
+| `obra/superpowers` | `MIT` | `superpowers` | `distributed-local` | Bundled/local distribution allowed with notice preservation |
+| `frankbria/ralph-claude-code` | `MIT` | `ralph-claude-code` | `distributed-local` | Bundled/local distribution allowed with notice preservation |
+| `f/prompts.chat` | `CC0-1.0` | `prompts-chat` | `external-optional` | External service only; follow provider terms |
+| `SuperClaude-Org/SuperClaude_Framework` | `MIT` | `superclaude-framework` | `external-optional` | Optional external install; not shipped by default |
+| `feiskyer/claude-code-settings` | `MIT` | `claude-code-settings` | `distributed-local` | Bundled/local distribution allowed with notice preservation |
+| `github/spec-kit` | `MIT` | `spec-kit` | `distributed-local` | Bundled/local distribution allowed with notice preservation |
+| `ruvnet/claude-flow` | `MIT` | `claude-flow` | `external-optional` | Optional external install; not shipped by default |
+| `medialab/xan` | `Unlicense` | `xan` | `external-optional` | Optional external install; not shipped by default |
+| `Done-0/fuck-u-code` | `MIT` | `fuck-u-code` | `external-optional` | Optional external install; not shipped by default |
+| `ivy-llc/ivy` | `NOASSERTION` | `ivy` | `external-optional` | Optional external install; not shipped by default |
+| `GokuMohandas/Made-With-ML` | `MIT` | `made-with-ml` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `zedr/clean-code-python` | `MIT` | `clean-code-python` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `donnemartin/system-design-primer` | `NOASSERTION` | `system-design-primer` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `xlite-dev/LeetCUDA` | `GPL-3.0` | `leetcuda` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `RUC-NLPIR/FlashRAG` | `MIT` | `flashrag` | `external-optional` | Operator-local retention only; not shipped by default |
+| `RUC-NLPIR/WebThinker` | `MIT` | `webthinker` | `external-optional` | Operator-local retention only; not shipped by default |
+| `RUC-NLPIR/DeepAgent` | `MIT` | `deepagent` | `external-optional` | Operator-local retention only; not shipped by default |
+| `mem0ai/mem0` | `Apache-2.0` | `mem0` | `external-optional` | Optional external backend; not canonical truth source |
+| `letta-ai/letta` | `Apache-2.0` | `letta` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `dair-ai/Prompt-Engineering-Guide` | `MIT` | `prompt-engineering-guide` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `browser-use/browser-use` | `MIT` | `browser-use` | `external-optional` | Optional external provider; VCO stays control plane |
+| `simular-ai/Agent-S` | `Apache-2.0` | `agent-s` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `SynkraAI/aios-core` | `NOASSERTION` | `aios-core` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `x1xhlol/system-prompts-and-models-of-ai-tools` | `GPL-3.0` | `system-prompts-and-models-of-ai-tools` | `reference-only` | Reference-only; no upstream code redistribution in core |
+| `muratcankoylan/Agent-Skills-for-Context-Engineering` | `MIT` | `agent-skills-for-context-engineering` | `reference-only` | Reference-only; no upstream code redistribution in core |
+
+## Operator Notes
+
+- `NOASSERTION` means the canonical registry does not currently assert an SPDX
+  identifier. Inspect the upstream repository before vendoring or redistributing
+  any upstream material.
+- `GPL-3.0` sources in this repository are tracked as reference-only inputs. Do
+  not fold raw GPL corpus or source into Apache-2.0 distributed runtime assets
+  without a separate compliance review and explicit redistribution boundary.
+- Operator-local mirrors and vendored clones must keep upstream notices, commit
+  provenance, and origin records under the governed vendor surface.
 
 ## Operational References
 
-- External corpus workflow: `docs/external-corpus-integration.md`
-- Upstream mapping lockfile: `config/upstream-lock.json`
-- Third-party notice: `third_party/NOTICE.md`
+- Distribution governance policy:
+  [`docs/distribution-governance.md`](./docs/distribution-governance.md)
+- Upstream governance policy:
+  [`docs/upstream-distribution-governance.md`](./docs/upstream-distribution-governance.md)
+- Provenance policy:
+  [`docs/origin-provenance-policy.md`](./docs/origin-provenance-policy.md)
+- Canonical upstream registry:
+  [`config/upstream-lock.json`](./config/upstream-lock.json)
+- Third-party notice:
+  [`third_party/NOTICE.md`](./third_party/NOTICE.md)

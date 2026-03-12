@@ -2,14 +2,14 @@
 
 # VibeSkills
 
-> 终结 skills 混乱状态的 skills 基座。
+> 终结 skills 混乱状态的 skills 基座。  
 > 让通用大模型从“会调用技能”，进化为“能稳定完成任务”。
 
 VibeSkills 是一个面向通用大模型的开源 skills 生态。
 
 它以 Vibe Code Orchestrator `VCO` 为控制面，不只是收集 skills，而是通过智能路由、框架治理、质量门禁、多技能组合与多智能体协作，把离散能力组织成一个更安全、更规范、更稳定、更可靠的执行外骨骼。
 
-我们想做的，不是另一个 skills 仓库。
+我们想做的，不是另一个 skills 仓库。  
 我们想做的是一个通用的智能大模型 skills 基座。
 
 ## 为什么要做 VibeSkills
@@ -24,12 +24,12 @@ VibeSkills 是一个面向通用大模型的开源 skills 生态。
 - 自己写 skills 缺少规范，生态越长越乱
 - 大模型即使很强，也缺少一个能够长期运行、持续治理的能力框架
 
-VibeSkills 想改变的，不是某一个 skill 的表现。
+VibeSkills 想改变的，不是某一个 skill 的表现。  
 我们想改变的是整个 skills 生态的使用方式。
 
 ## 我们的主张
 
-未来不是更多 skills。
+未来不是更多 skills。  
 未来是对 skills 的治理能力。
 
 VibeSkills 想成为一个通用的智能大模型 skills 基座：
@@ -40,8 +40,8 @@ VibeSkills 想成为一个通用的智能大模型 skills 基座：
 - 让复杂任务拥有清晰的边界、协议和质量门禁
 - 让 agent 从单体执行进化到 team 协同
 
-我们不是在做另一个 prompt 集合。
-我们不是在做另一个工具清单。
+我们不是在做另一个 prompt 集合。  
+我们不是在做另一个工具清单。  
 我们是在为通用智能建立一层真正可治理、可组合、可演进的能力基础设施。
 
 ## 它和普通 skills / agent 框架有什么不同
@@ -60,7 +60,7 @@ VibeSkills 更关心的是：
 - 能不能在复杂任务中进行多智能体 team 协作
 - 能不能在不同场景下保持一致的质量、边界与可靠性
 
-不是“更多功能”。
+不是“更多功能”。  
 而是“更可靠的执行系统”。
 
 ## 这套生态里有什么
@@ -74,7 +74,7 @@ VibeSkills 更关心的是：
 - Bundled Skills Mirrors：为离线、兼容与可重复安装提供基线
 - Optional Integrations：AIOS-Core、OpenSpec、GSD-Lite、prompts.chat、GitNexus、claude-flow、ralph-loop 等增强能力
 
-VibeSkills 的目标不是把这些组件堆在一起。
+VibeSkills 的目标不是把这些组件堆在一起。  
 而是让它们在一个统一治理面下协同工作。
 
 ## Manifesto
@@ -115,6 +115,36 @@ pwsh -File .\scripts\verify\vibe-routing-stability-gate.ps1 -Strict
 - [`references/index.md`](./references/index.md)：contracts / registries / matrices / ledgers / overlays 导航入口
 - [`scripts/README.md`](./scripts/README.md)：router / governance / verify / overlay / setup surfaces 总入口
 
+## 贡献入口
+
+如果你准备参与开发，不要直接猜哪些文件能改。
+
+先从这里进入：
+
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md)：贡献流程、禁止随意修改的区域、proof 预期
+- [`docs/developer-change-governance.md`](./docs/developer-change-governance.md)：开发者变更治理规则
+- [`references/contributor-zone-decision-table.md`](./references/contributor-zone-decision-table.md)：可改区 / 受保护区决策表
+- [`references/change-proof-matrix.md`](./references/change-proof-matrix.md)：不同类型改动需要补哪些验证证据
+
+默认的 contributor-safe 变更面是增量治理层，例如：
+
+- `docs/**`
+- `references/**`（fixture 除外）
+- `scripts/governance/**`
+- `scripts/verify/**`
+- `templates/**`
+
+不要在没有完成分区判断与验证设计前，随意修改这些高风险面：
+
+- `install.*`
+- `check.*`
+- `protocols/**`
+- `scripts/router/**`
+- `bundled/**`
+- 已跟踪的 `outputs/**`
+- `third_party/**`
+- `vendor/**`
+
 ## 为什么值得 Star
 
 如果你相信：
@@ -125,8 +155,8 @@ pwsh -File .\scripts\verify\vibe-routing-stability-gate.ps1 -Strict
 
 那么这个项目值得你关注。
 
-Star 它，不只是收藏一个仓库。
-而是加入一个方向：
+Star 它，不只是收藏一个仓库。  
+而是加入一个方向：  
 把 skills 从零散插件，推进成通用智能的可靠基座。
 
 ## 欢迎加入

@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$WriteArtifacts,
     [string]$OutputDirectory = ''
 )
@@ -156,6 +156,8 @@ if (@($results | Where-Object { -not $_.pass }).Count -gt 0) {
 }
 
 $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+$upstreamLockPath = Join-Path $repoRoot 'config\upstream-lock.json'
+$upstreamLock = Get-Content -LiteralPath $upstreamLockPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $aliases = Get-Content -LiteralPath $aliasPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $opsBoard = Get-Content -LiteralPath $boardPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $governanceDoc = Get-Content -LiteralPath $governanceDocPath -Raw -Encoding UTF8
@@ -171,6 +173,13 @@ foreach ($slug in $uniqueSlugs) {
 }
 $freshnessScopeSlugs = @($manifest.freshness_policy.scope_slugs | ForEach-Object { [string]$_ })
 $uniqueFreshnessScopeSlugs = @($freshnessScopeSlugs | Sort-Object -Unique)
+$lockCanonicalSlugLookup = @{}
+foreach ($dep in @($upstreamLock.dependencies)) {
+    $canonicalSlug = [string]$dep.canonical_slug
+    if (-not [string]::IsNullOrWhiteSpace($canonicalSlug)) {
+        $lockCanonicalSlugLookup[$canonicalSlug] = $true
+    }
+}
 
 $requiredTopLevelFields = @($manifest.schema.required_top_level_fields)
 foreach ($field in $requiredTopLevelFields) {
@@ -225,7 +234,8 @@ Add-Assertion -Collection $results -Condition ($aliases.canonical_form -eq 'lowe
 Add-Assertion -Collection $results -Condition ($aliasKeys.Count -ge 1) -Message 'alias registry contains aliases'
 foreach ($aliasKey in $aliasKeys) {
     $canonicalSlug = [string]$aliasMap[$aliasKey]
-    Add-Assertion -Collection $results -Condition ($slugLookup.ContainsKey($canonicalSlug)) -Message ('alias resolves to manifest slug: {0} -> {1}' -f $aliasKey, $canonicalSlug) -Details $canonicalSlug
+    $resolvesToCanonicalRegistry = $slugLookup.ContainsKey($canonicalSlug) -or $lockCanonicalSlugLookup.ContainsKey($canonicalSlug)
+    Add-Assertion -Collection $results -Condition $resolvesToCanonicalRegistry -Message ('alias resolves to canonical registry slug: {0} -> {1}' -f $aliasKey, $canonicalSlug) -Details $canonicalSlug
     Add-Assertion -Collection $results -Condition ($canonicalSlug -match $slugRegex) -Message ('alias target is canonical lower-kebab-case: ' + $canonicalSlug) -Details $canonicalSlug
 }
 $conflictingAliasKeys = @($aliasKeys | Where-Object { ($_ -match $slugRegex) -and $slugLookup.ContainsKey($_) -and ($aliasMap[$_] -ne $_) })

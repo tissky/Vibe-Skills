@@ -1,11 +1,11 @@
 # Verify Gate Family Index
 
-`scripts/verify/` 是 VCO 的 evidence-running surface。这个索引负责 gate family 分组、典型运行顺序，以及把操作者引到定义 proof contract 的页面。
+`scripts/verify/` 是 VCO 的 evidence-running surface。这个索引负责 gate family 分组、典型运行顺序，以及把操作者引到 proof contract 的正式页面。
 
 ## Start Here
 
 - minimum closure proof contract: [`../../docs/status/non-regression-proof-bundle.md`](../../docs/status/non-regression-proof-bundle.md)
-- operator-oriented verify entrypoint: [`README.md`](README.md)
+- operator-oriented verify entrypoint: [`README.md`](./README.md)
 - broader operator surface: [`../governance/README.md`](../governance/README.md)
 
 ## What This Page Owns
@@ -53,7 +53,7 @@ The authoritative requirement set for closure remains [`../../docs/status/non-re
 | Managed Runtime / Process Hygiene | `vibe-node-zombie-gate.ps1` | managed Node ownership, stale-process classification, report-only cleanup safety |
 | Cleanliness / Outputs / Mirror Hygiene | `vibe-repo-cleanliness-gate.ps1`, `vibe-output-artifact-boundary-gate.ps1`, `vibe-mirror-edit-hygiene-gate.ps1`, `vibe-nested-bundled-parity-gate.ps1` | canonical cleanup batches, sync-before or sync-after, fixture migrations |
 | Plane Governance | `vibe-browserops-*.ps1`, `vibe-desktopops-*.ps1`, `vibe-docling-*.ps1`, `vibe-connector-*.ps1` | plane contract, rollout, replay, sandbox, benchmark changes |
-| Capability / Role / Upstream Value Ops | `vibe-capability-*.ps1`, `vibe-role-pack-*.ps1`, `vibe-upstream-*.ps1`, `vibe-skill-harvest-v2-gate.ps1` | upstream distillation, role-pack closure, and capability closure |
+| Capability / Role / Upstream Value Ops | `vibe-capability-*.ps1`, `vibe-role-pack-*.ps1`, `vibe-upstream-*.ps1`, `vibe-third-party-disclosure-parity-gate.ps1`, `vibe-upstream-lock-coverage-gate.ps1`, `vibe-origin-provenance-gate.ps1`, `vibe-skill-harvest-v2-gate.ps1` | upstream distillation, disclosure parity, provenance, role-pack and capability closure |
 | Release / Promotion / Observability | `vibe-promotion-board-gate.ps1`, `vibe-release-evidence-bundle-gate.ps1`, `vibe-release-train-v2-gate.ps1`, `vibe-ops-cockpit-gate.ps1` | release, promotion, observability, and cockpit updates |
 | Operator Preview / Apply Safety | `vibe-operator-preview-contract-gate.ps1`, `vibe-manual-apply-policy-gate.ps1` | preview or apply contract changes for write-capable governance scripts |
 | Execution-Context / Wave Runner | `vibe-wave121-upstream-mapping-gate.ps1`, `vibe-wave124-ops-cockpit-v2-gate.ps1`, `vibe-wave125-gate-family-convergence-gate.ps1` | manifest families, wave-runner coverage, and execution-context lock hardening |

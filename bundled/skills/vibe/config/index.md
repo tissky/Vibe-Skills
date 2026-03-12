@@ -20,6 +20,10 @@
 | [`skill-alias-map.json`](skill-alias-map.json) | 兼容旧技能名与新 pack/skill 名的映射 |
 | [`repo-cleanliness-policy.json`](repo-cleanliness-policy.json) | local noise / managed workset / mirror pressure 的分类规则 |
 | [`outputs-boundary-policy.json`](outputs-boundary-policy.json) | `outputs/**` legacy allowlist 与 fixture migration 规则 |
+| [`upstream-lock.json`](upstream-lock.json) | runtime / distribution upstream canonical registry |
+| [`upstream-corpus-manifest.json`](upstream-corpus-manifest.json) | corpus / watchlist / value-extraction canonical registry |
+| [`upstream-source-aliases.json`](upstream-source-aliases.json) | canonical slug alias registry for upstream governance |
+| [`distribution-tiers.json`](distribution-tiers.json) | distribution tier taxonomy used by upstream-lock governance |
 | [`frontmatter-integrity-policy.json`](frontmatter-integrity-policy.json) | BOM / byte-0 frontmatter 保护面 |
 | [`version-governance.json`](version-governance.json) | canonical / bundled / nested / installed runtime 的版本与 packaging contract |
 | [`operator-preview-contract.json`](operator-preview-contract.json) | governance operator preview receipt contract |
@@ -33,6 +37,7 @@
 - **Overlay / capability policy**：`prompt-overlay.json`, `memory-governance.json`, `observability-policy.json`, `role-pack-policy.json`, `browserops-provider-policy.json` 等。
 - **Cleanliness / runtime / packaging**：`repo-cleanliness-policy.json`, `outputs-boundary-policy.json`, `frontmatter-integrity-policy.json`, `version-governance.json`, `execution-context-status.json`.
 - **Boards / scorecards / lifecycle**：`candidate-quality-board.json`, `promotion-board.json`, `capability-catalog.json`, `capability-lifecycle-policy.json`, `role-pack-scorecard.json`.
+- **Upstream / distribution governance**：`upstream-lock.json`, `upstream-corpus-manifest.json`, `upstream-source-aliases.json`, `distribution-tiers.json`.
 - **Wave / rollout state**：`wave*-manifest.json`, `wave*-board.json`, `openspec-policy.json`, `gsd-overlay.json`, `upstream-value-ops-board.json`.
 
 ## Reading Order
