@@ -142,6 +142,54 @@ json_query_scalar_from_file() {
   json_query_lines_from_file "$json_path" "$expr" | head -n 1
 }
 
+pick_python() {
+  if command -v python3 >/dev/null 2>&1; then
+    echo "python3"
+    return 0
+  fi
+  if command -v python >/dev/null 2>&1; then
+    echo "python"
+    return 0
+  fi
+  return 1
+}
+
+run_runtime_neutral_freshness_gate() {
+  local gate_path="${SCRIPT_DIR}/scripts/verify/runtime_neutral/freshness_gate.py"
+  local python_bin=""
+  if [[ ! -f "${gate_path}" ]]; then
+    return 127
+  fi
+  if ! python_bin="$(pick_python)"; then
+    return 127
+  fi
+  "${python_bin}" "${gate_path}" --target-root "${TARGET_ROOT}"
+}
+
+run_runtime_neutral_coherence_gate() {
+  local gate_path="${SCRIPT_DIR}/scripts/verify/runtime_neutral/coherence_gate.py"
+  local python_bin=""
+  if [[ ! -f "${gate_path}" ]]; then
+    return 127
+  fi
+  if ! python_bin="$(pick_python)"; then
+    return 127
+  fi
+  "${python_bin}" "${gate_path}" --target-root "${TARGET_ROOT}"
+}
+
+run_runtime_neutral_bootstrap_doctor() {
+  local gate_path="${SCRIPT_DIR}/scripts/verify/runtime_neutral/bootstrap_doctor.py"
+  local python_bin=""
+  if [[ ! -f "${gate_path}" ]]; then
+    return 127
+  fi
+  if ! python_bin="$(pick_python)"; then
+    return 127
+  fi
+  "${python_bin}" "${gate_path}" --target-root "${TARGET_ROOT}" --write-artifacts
+}
+
 validate_runtime_receipt() {
   local target_rel="skills/vibe"
   local receipt_rel="skills/vibe/outputs/runtime-freshness-receipt.json"
@@ -252,11 +300,6 @@ run_runtime_freshness_gate() {
     return
   fi
 
-  if ! command -v pwsh >/dev/null 2>&1; then
-    warn_note 'runtime freshness gate skipped: pwsh is required to execute vibe-installed-runtime-freshness-gate.ps1.'
-    return
-  fi
-
   local governance_path="${SCRIPT_DIR}/config/version-governance.json"
   local gate_rel='scripts/verify/vibe-installed-runtime-freshness-gate.ps1'
   if [[ -f "$governance_path" ]]; then
@@ -274,9 +317,21 @@ run_runtime_freshness_gate() {
     return
   fi
 
-  if pwsh -NoProfile -File "$gate_path" -TargetRoot "$TARGET_ROOT"; then
+  if run_runtime_neutral_freshness_gate; then
     echo "[OK] vibe installed runtime freshness gate"
     PASS=$((PASS+1))
+  elif [[ $? -eq 127 ]]; then
+    if ! command -v pwsh >/dev/null 2>&1; then
+      warn_note 'runtime freshness gate skipped: neither Python runtime-neutral gate nor pwsh fallback is available.'
+      return
+    fi
+    if pwsh -NoProfile -File "$gate_path" -TargetRoot "$TARGET_ROOT"; then
+      echo "[OK] vibe installed runtime freshness gate"
+      PASS=$((PASS+1))
+    else
+      echo "[FAIL] vibe installed runtime freshness gate"
+      FAIL=$((FAIL+1))
+    fi
   else
     echo "[FAIL] vibe installed runtime freshness gate"
     FAIL=$((FAIL+1))
@@ -286,11 +341,6 @@ run_runtime_freshness_gate() {
 run_runtime_coherence_gate() {
   if [[ ! -d "${SCRIPT_DIR}/.git" ]]; then
     warn_note 'runtime coherence gate skipped: run canonical repo check.sh to execute coherence verification.'
-    return
-  fi
-
-  if ! command -v pwsh >/dev/null 2>&1; then
-    warn_note 'runtime coherence gate skipped: pwsh is required to execute vibe-release-install-runtime-coherence-gate.ps1.'
     return
   fi
 
@@ -311,9 +361,21 @@ run_runtime_coherence_gate() {
     return
   fi
 
-  if pwsh -NoProfile -File "$gate_path" -TargetRoot "$TARGET_ROOT"; then
+  if run_runtime_neutral_coherence_gate; then
     echo "[OK] vibe release/install/runtime coherence gate"
     PASS=$((PASS+1))
+  elif [[ $? -eq 127 ]]; then
+    if ! command -v pwsh >/dev/null 2>&1; then
+      warn_note 'runtime coherence gate skipped: neither Python runtime-neutral gate nor pwsh fallback is available.'
+      return
+    fi
+    if pwsh -NoProfile -File "$gate_path" -TargetRoot "$TARGET_ROOT"; then
+      echo "[OK] vibe release/install/runtime coherence gate"
+      PASS=$((PASS+1))
+    else
+      echo "[FAIL] vibe release/install/runtime coherence gate"
+      FAIL=$((FAIL+1))
+    fi
   else
     echo "[FAIL] vibe release/install/runtime coherence gate"
     FAIL=$((FAIL+1))
@@ -400,17 +462,23 @@ if [[ "${DEEP}" == "true" ]]; then
   if [[ ! -f "${doctor_path}" ]]; then
     echo "[FAIL] vibe bootstrap doctor gate -> ${doctor_path}"
     FAIL=$((FAIL+1))
-  elif ! command -v pwsh >/dev/null 2>&1; then
-    echo "[WARN] vibe bootstrap doctor gate skipped because pwsh is not available in this shell environment."
-    WARN=$((WARN+1))
-  else
-    if pwsh -NoProfile -File "${doctor_path}" -TargetRoot "${TARGET_ROOT}" -WriteArtifacts; then
+  elif run_runtime_neutral_bootstrap_doctor; then
+    echo "[OK] vibe bootstrap doctor gate"
+    PASS=$((PASS+1))
+  elif [[ $? -eq 127 ]]; then
+    if ! command -v pwsh >/dev/null 2>&1; then
+      echo "[WARN] vibe bootstrap doctor gate skipped because neither the Python runtime-neutral doctor nor pwsh is available in this shell environment."
+      WARN=$((WARN+1))
+    elif pwsh -NoProfile -File "${doctor_path}" -TargetRoot "${TARGET_ROOT}" -WriteArtifacts; then
       echo "[OK] vibe bootstrap doctor gate"
       PASS=$((PASS+1))
     else
       echo "[FAIL] vibe bootstrap doctor gate"
       FAIL=$((FAIL+1))
     fi
+  else
+    echo "[FAIL] vibe bootstrap doctor gate"
+    FAIL=$((FAIL+1))
   fi
 fi
 

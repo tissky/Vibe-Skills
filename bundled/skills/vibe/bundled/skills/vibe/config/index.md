@@ -3,7 +3,7 @@
 - Repo entry: [`../README.md`](../README.md)
 - Docs entry: [`../docs/README.md`](../docs/README.md)
 - References entry: [`../references/index.md`](../references/index.md)
-- Cleanup umbrella: [`../docs/plans/2026-03-08-repo-full-cleanup-master-plan.md`](../docs/plans/2026-03-08-repo-full-cleanup-master-plan.md)
+- Cleanup umbrella: [`../docs/plans/2026-03-11-vco-repo-simplification-remediation-plan.md`](../docs/plans/2026-03-11-vco-repo-simplification-remediation-plan.md)
 
 ## What Lives Here
 
@@ -20,6 +20,7 @@
 | [`skill-alias-map.json`](skill-alias-map.json) | 兼容旧技能名与新 pack/skill 名的映射 |
 | [`repo-cleanliness-policy.json`](repo-cleanliness-policy.json) | local noise / managed workset / mirror pressure 的分类规则 |
 | [`outputs-boundary-policy.json`](outputs-boundary-policy.json) | `outputs/**` legacy allowlist 与 fixture migration 规则 |
+| [`official-runtime-main-chain-policy.json`](official-runtime-main-chain-policy.json) | official runtime 主链冻结规则与受控迁移例外窗口 |
 | [`upstream-lock.json`](upstream-lock.json) | runtime / distribution upstream canonical registry |
 | [`upstream-corpus-manifest.json`](upstream-corpus-manifest.json) | corpus / watchlist / value-extraction canonical registry |
 | [`upstream-source-aliases.json`](upstream-source-aliases.json) | canonical slug alias registry for upstream governance |

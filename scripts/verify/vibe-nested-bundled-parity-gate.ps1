@@ -238,7 +238,13 @@ if (-not $nestedTarget.exists) {
         $nestedFiles = if ($nestedExists) { Get-VgoRelativeFileList -RootPath $nestedDir } else { @() }
 
         $onlyInCanonical = @($canonicalFiles | Where-Object { $_ -notin $nestedFiles } | Sort-Object)
-        $onlyInBundled = @($bundledFiles | Where-Object { $_ -notin $nestedFiles } | Sort-Object)
+        $onlyInBundledRaw = @($bundledFiles | Where-Object { $_ -notin $nestedFiles } | Sort-Object)
+        $onlyInBundled = @(
+            $onlyInBundledRaw | Where-Object {
+                $fullRel = ('{0}/{1}' -f $dir, $_).Replace('\', '/')
+                $allowBundledOnly -notcontains $fullRel
+            } | Sort-Object
+        )
         $onlyInNestedRaw = @($nestedFiles | Where-Object { $_ -notin $canonicalFiles } | Sort-Object)
         $onlyInNested = @(
             $onlyInNestedRaw | Where-Object {

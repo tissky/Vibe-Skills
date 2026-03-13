@@ -14,6 +14,14 @@ Every cleanup batch must name the proof it depends on before it modifies structu
 
 If a batch touches routing, mirror topology, install/runtime behavior, output boundary, or cleanliness policy, it must rerun the affected commands and verify the resulting receipts before claiming success.
 
+Protected official-runtime main-chain edits remain frozen by default.
+If a batch needs to touch those surfaces, it must also be covered by:
+
+- `config/official-runtime-main-chain-policy.json`
+- a plan-backed contract such as `docs/universalization/linux-full-authoritative-contract.md`
+
+Without those anchors, a green proof bundle is not enough to justify the change.
+
 ## Canonical Commands
 
 Run from the canonical repo root:

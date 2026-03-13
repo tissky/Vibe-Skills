@@ -110,6 +110,30 @@ json_query_scalar() {
   json_query_lines "${expr}" | head -n 1
 }
 
+pick_python() {
+  if command -v python3 >/dev/null 2>&1; then
+    echo "python3"
+    return 0
+  fi
+  if command -v python >/dev/null 2>&1; then
+    echo "python"
+    return 0
+  fi
+  return 1
+}
+
+run_runtime_neutral_freshness_gate() {
+  local gate_path="${SCRIPT_DIR}/scripts/verify/runtime_neutral/freshness_gate.py"
+  local python_bin=""
+  if [[ ! -f "${gate_path}" ]]; then
+    return 127
+  fi
+  if ! python_bin="$(pick_python)"; then
+    return 127
+  fi
+  "${python_bin}" "${gate_path}" --target-root "${TARGET_ROOT}" --write-receipt
+}
+
 run_runtime_freshness_gate() {
   if [[ "${SKIP_RUNTIME_FRESHNESS_GATE}" == "true" ]]; then
     echo "[WARN] Skipping runtime freshness gate by request."
@@ -133,12 +157,17 @@ run_runtime_freshness_gate() {
     return 1
   fi
 
-  if ! command -v pwsh >/dev/null 2>&1; then
-    echo "[WARN] pwsh not found; runtime freshness gate skipped."
-    return 0
+  if run_runtime_neutral_freshness_gate; then
+    :
+  elif [[ $? -eq 127 ]]; then
+    if ! command -v pwsh >/dev/null 2>&1; then
+      echo "[WARN] runtime freshness gate skipped: neither Python runtime-neutral gate nor pwsh fallback is available."
+      return 0
+    fi
+    pwsh -NoProfile -File "${gate_path}" -TargetRoot "${TARGET_ROOT}" -WriteReceipt
+  else
+    return 1
   fi
-
-  pwsh -NoProfile -File "${gate_path}" -TargetRoot "${TARGET_ROOT}" -WriteReceipt
 
   local receipt_rel receipt_path
   receipt_rel="$(json_query_scalar 'runtime.installed_runtime.receipt_relpath' 2>/dev/null || true)"

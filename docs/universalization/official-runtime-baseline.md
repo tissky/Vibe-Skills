@@ -33,6 +33,8 @@ The current Tier-1 official runtime remains the existing repository runtime root
 - `config/version-governance.json`
 
 During early universalization phases, these surfaces are frozen by governance and may only receive bug fixes or verification-safe hardening.
+Any broader migration on these surfaces must be declared in
+`config/official-runtime-main-chain-policy.json` as a file-scoped, plan-backed exception window.
 
 ## What "Official Runtime" Means (And Does Not Mean)
 

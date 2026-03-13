@@ -84,13 +84,23 @@ function Sync-ToMirrorTarget {
     $targetRoot = [string]$Target.fullPath
     $shouldCreate = [bool]$Target.required -or ([string]$Target.presence_policy -eq 'required')
     $targetExists = [bool]$Target.exists
+    $targetPathExists = Test-Path -LiteralPath $targetRoot
     if (-not $targetExists) {
-        if ($shouldCreate) {
+        if ($shouldCreate -or $targetPathExists) {
             if ($Preview) {
-                Add-PreviewAction -Collection $previewActions -Type 'create-target' -TargetId ([string]$Target.id) -RelativePath '.' -Message ('would create mirror root ' + $targetRoot)
+                $message = if ($targetPathExists) {
+                    'would materialize partial mirror root ' + $targetRoot
+                } else {
+                    'would create mirror root ' + $targetRoot
+                }
+                Add-PreviewAction -Collection $previewActions -Type 'create-target' -TargetId ([string]$Target.id) -RelativePath '.' -Message $message
             } else {
                 New-Item -ItemType Directory -Force -Path $targetRoot | Out-Null
-                Write-Host ("[CREATE] {0} -> {1}" -f $Target.id, $targetRoot)
+                if ($targetPathExists) {
+                    Write-Host ("[MATERIALIZE] {0} -> {1}" -f $Target.id, $targetRoot)
+                } else {
+                    Write-Host ("[CREATE] {0} -> {1}" -f $Target.id, $targetRoot)
+                }
             }
         } else {
             $message = ("skip missing optional target {0} ({1})" -f $Target.id, $Target.presence_policy)

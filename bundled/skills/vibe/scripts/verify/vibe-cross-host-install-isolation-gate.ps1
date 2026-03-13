@@ -50,11 +50,13 @@ function Write-GateArtifacts {
         ('- Gate Result: **{0}**' -f $Artifact.gate_result),
         ('- Repo Root: `{0}`' -f $Artifact.repo_root),
         ('- Changed paths examined: {0}' -f $Artifact.summary.changed_path_count),
+        ('- Approved protected-path changes: {0}' -f $Artifact.summary.approved_change_count),
         ('- Violations: {0}' -f $Artifact.summary.violation_count),
         '',
         '## Notes',
         '',
-        '- This gate enforces the Batch C non-regression rule: do not modify the official runtime main chain.',
+        '- This gate enforces the official-runtime main-chain freeze by default.',
+        '- Protected-path edits only pass when they are covered by an active, file-scoped policy window.',
         '- It is intentionally conservative and uses `git status --porcelain` as the evidence source.',
         '',
         '## Assertions',
@@ -63,6 +65,15 @@ function Write-GateArtifacts {
 
     foreach ($a in @($Artifact.assertions)) {
         $lines += ('- `{0}` {1}' -f $(if ($a.pass) { 'PASS' } else { 'FAIL' }), $a.message)
+    }
+
+    if (@($Artifact.approved_changes).Count -gt 0) {
+        $lines += ''
+        $lines += '## Approved Protected-Path Changes'
+        $lines += ''
+        foreach ($item in @($Artifact.approved_changes)) {
+            $lines += ('- {0} :: `{1}`' -f $item.window_id, $item.path)
+        }
     }
 
     if (@($Artifact.violations).Count -gt 0) {
@@ -107,11 +118,36 @@ function Get-GitStatusPaths {
     return @($paths)
 }
 
+function Test-PathMatch {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [AllowEmptyCollection()][string[]]$Exact = @(),
+        [AllowEmptyCollection()][string[]]$Prefixes = @()
+    )
+
+    $normalized = ([string]$Path).Replace('\', '/').ToLowerInvariant()
+    foreach ($exact in @($Exact)) {
+        if ($normalized -eq ([string]$exact).Replace('\', '/').ToLowerInvariant()) {
+            return $true
+        }
+    }
+
+    foreach ($prefix in @($Prefixes)) {
+        if ($normalized.StartsWith(([string]$prefix).Replace('\', '/').ToLowerInvariant())) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 $context = Get-VgoGovernanceContext -ScriptPath $PSCommandPath -EnforceExecutionContext
 $repoRoot = [string]$context.repoRoot
 
 $assertions = [System.Collections.Generic.List[object]]::new()
 $violations = [System.Collections.Generic.List[string]]::new()
+$approvedChanges = [System.Collections.Generic.List[object]]::new()
+$policyIssues = [System.Collections.Generic.List[string]]::new()
 
 $gitOk = $true
 try {
@@ -133,37 +169,81 @@ if ($gitOk) {
     }
 }
 
-$protectedPrefixes = @(
-    'scripts/router/'
-)
-$protectedExact = @(
-    'install.ps1',
-    'check.ps1',
-    'install.sh',
-    'check.sh',
-    'config/version-governance.json'
-)
+$policyPath = Join-Path $repoRoot 'config\official-runtime-main-chain-policy.json'
+$policyExists = Test-Path -LiteralPath $policyPath
+Add-Assertion -Assertions $assertions -Pass $policyExists -Message 'official-runtime main-chain policy exists' -Details 'config/official-runtime-main-chain-policy.json'
 
-foreach ($path in @($changed)) {
-    $p = ([string]$path).Replace('\', '/')
-    $pLower = $p.ToLowerInvariant()
+$protectedPrefixes = @('scripts/router/', 'scripts/bootstrap/')
+$protectedExact = @('install.ps1', 'check.ps1', 'install.sh', 'check.sh', 'config/version-governance.json')
+$approvedWindows = @()
 
-    $isProtected = $false
-    foreach ($prefix in $protectedPrefixes) {
-        if ($pLower.StartsWith($prefix)) { $isProtected = $true; break }
-    }
-    if (-not $isProtected) {
-        foreach ($exact in $protectedExact) {
-            if ($pLower -eq $exact) { $isProtected = $true; break }
-        }
-    }
-
-    if ($isProtected) {
-        [void]$violations.Add($p)
+if ($policyExists) {
+    try {
+        $policy = Get-Content -LiteralPath $policyPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($null -ne $policy.protected_prefixes) { $protectedPrefixes = @($policy.protected_prefixes) }
+        if ($null -ne $policy.protected_exact) { $protectedExact = @($policy.protected_exact) }
+        if ($null -ne $policy.approved_change_windows) { $approvedWindows = @($policy.approved_change_windows) }
+        Add-Assertion -Assertions $assertions -Pass $true -Message 'official-runtime main-chain policy parsed' -Details $null
+    } catch {
+        Add-Assertion -Assertions $assertions -Pass $false -Message 'official-runtime main-chain policy parsed' -Details $_.Exception.Message
     }
 }
 
-Add-Assertion -Assertions $assertions -Pass ($violations.Count -eq 0) -Message 'no official-runtime main-chain files changed' -Details ($violations -join ',')
+foreach ($window in @($approvedWindows)) {
+    $windowId = [string]$window.id
+    if ([string]::IsNullOrWhiteSpace($windowId)) {
+        [void]$policyIssues.Add('approved change window has no id')
+        continue
+    }
+
+    $planRel = [string]$window.plan
+    if ([string]::IsNullOrWhiteSpace($planRel)) {
+        [void]$policyIssues.Add(("window '{0}' is missing plan reference" -f $windowId))
+    } else {
+        $planPath = ConvertTo-VgoFullPath -BasePath $repoRoot -RelativePath $planRel
+        if (-not (Test-Path -LiteralPath $planPath)) {
+            [void]$policyIssues.Add(("window '{0}' references missing plan '{1}'" -f $windowId, $planRel))
+        }
+    }
+
+    foreach ($evidenceRel in @($window.required_evidence)) {
+        $evidencePath = ConvertTo-VgoFullPath -BasePath $repoRoot -RelativePath ([string]$evidenceRel)
+        if (-not (Test-Path -LiteralPath $evidencePath)) {
+            [void]$policyIssues.Add(("window '{0}' references missing evidence file '{1}'" -f $windowId, [string]$evidenceRel))
+        }
+    }
+}
+
+Add-Assertion -Assertions $assertions -Pass ($policyIssues.Count -eq 0) -Message 'official-runtime main-chain policy windows are valid' -Details ($policyIssues -join '; ')
+
+foreach ($path in @($changed)) {
+    $p = ([string]$path).Replace('\', '/')
+    $isProtected = Test-PathMatch -Path $p -Exact $protectedExact -Prefixes $protectedPrefixes
+
+    if ($isProtected) {
+        $approvedWindow = $null
+        foreach ($window in @($approvedWindows)) {
+            if ([string]$window.status -ne 'active') { continue }
+            if (Test-PathMatch -Path $p -Exact @($window.allowed_paths) -Prefixes @()) {
+                $approvedWindow = $window
+                break
+            }
+        }
+
+        if ($null -ne $approvedWindow) {
+            [void]$approvedChanges.Add([pscustomobject]@{
+                path = $p
+                window_id = [string]$approvedWindow.id
+                plan = [string]$approvedWindow.plan
+            })
+        } else {
+            [void]$violations.Add($p)
+        }
+    }
+}
+
+Add-Assertion -Assertions $assertions -Pass ($approvedChanges.Count -eq 0 -or $policyIssues.Count -eq 0) -Message 'approved protected-path changes are backed by a valid change window' -Details (($approvedChanges | ForEach-Object { "{0}::{1}" -f $_.window_id, $_.path }) -join ',')
+Add-Assertion -Assertions $assertions -Pass ($violations.Count -eq 0) -Message 'no unapproved official-runtime main-chain files changed' -Details ($violations -join ',')
 
 $failureCount = @($assertions | Where-Object { -not $_.pass }).Count
 $gateResult = if ($failureCount -eq 0) { 'PASS' } else { 'FAIL' }
@@ -175,9 +255,11 @@ $artifact = [pscustomobject]@{
     generated_at = (Get-Date).ToString('s')
     gate_result = $gateResult
     assertions = @($assertions)
+    approved_changes = @($approvedChanges)
     violations = @($violations)
     summary = [pscustomobject]@{
         changed_path_count = @($changed).Count
+        approved_change_count = $approvedChanges.Count
         violation_count = $violations.Count
     }
 }

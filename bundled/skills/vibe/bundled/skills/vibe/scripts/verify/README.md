@@ -5,6 +5,20 @@ For a single entrypoint that ties route probing, semantic expansion, threshold t
 
 ## Start Here
 
+### Bootstrap Readiness
+
+For the one-shot install/bootstrap path, the primary readiness gate is:
+
+```powershell
+pwsh -NoProfile -File .\vibe-bootstrap-doctor-gate.ps1 -TargetRoot "$env:USERPROFILE\.codex" -WriteArtifacts
+```
+
+Pair it with MCP profile materialization when you need a fresh active MCP file:
+
+```powershell
+pwsh -NoProfile -File ..\setup\materialize-codex-mcp-profile.ps1 -TargetRoot "$env:USERPROFILE\.codex" -Force
+```
+
 - `gate-family-index.md`：verify family 导航入口；先按治理主题找 gate，再进入具体脚本。
 - `../../docs/docs-information-architecture.md`：`docs/` 的正式信息架构与 cleanup-first 导航规则。
 - `../../references/reference-asset-taxonomy.md`：`references/` 的 contract / registry / matrix / ledger 分类。
@@ -54,6 +68,8 @@ pwsh -NoProfile -File .\..\governance\phase-end-cleanup.ps1 -WriteArtifacts -Inc
 详见：`gate-family-index.md`
 **Managed Runtime / Process Hygiene**: `vibe-node-zombie-gate.ps1` validates VCO-managed Node ownership, stale-process classification, and report-only cleanup safety boundaries.
 
+**Platform Promotion Proof**: `vibe-platform-support-contract-gate.ps1`, `vibe-platform-doctor-parity-gate.ps1`, `vibe-linux-pwsh-proof-gate.ps1`, and `vibe-platform-promotion-bundle.ps1` form the platform-proof closure chain. They validate evidence wiring and truth-contract alignment; they do not auto-promote a platform lane.
+
 ## Fixture Taxonomy
 
 - **Wave28 canonical pilot fixtures**: `fixtures/pilot-memory.json`, `fixtures/pilot-prompt.json`, `fixtures/pilot-browserops.json`, `fixtures/pilot-desktopops.json`. These are the only pilot inputs consumed by `vibe-pilot-scenarios.ps1` and referenced by `config/promotion-board.json`.
@@ -75,6 +91,7 @@ pwsh -NoProfile -File .\..\governance\phase-end-cleanup.ps1 -WriteArtifacts -Inc
 - `vibe-repo-cleanliness-gate.ps1`: classifies dirty working-tree entries, blocks visible local noise/runtime artifacts, and reports governed workset pressure separately from local hygiene.
 - `vibe-output-artifact-boundary-gate.ps1`: governs the legacy tracked `outputs/**` allowlist so runtime outputs and long-term fixtures stay explicitly separated.
 - `vibe-installed-runtime-freshness-gate.ps1`: validates installed runtime freshness between canonical root and `${TARGET_ROOT}/skills/vibe`, and can write a runtime freshness receipt after install.
+- `vibe-bootstrap-doctor-gate.ps1`: classifies one-shot bootstrap readiness across settings, plugins, external tools, MCP surfaces, and secret-bound follow-up actions.
 - `vibe-context-retro-smoke.ps1`: validates Context Retro Advisor integration in SKILL/protocol/fallback docs and main/bundled sync for retro-critical files.
 - `vibe-retro-context-regression-matrix.ps1`: fixed-case regression matrix for retro trigger thresholds and CF-1..CF-6 classification stability.
 - `cer-compare.ps1`: compares two CER JSON reports and outputs Markdown/JSON delta summaries (pattern/fallback/stability/context-pressure/gap).
@@ -215,6 +232,18 @@ Notes:
 - Installed-runtime directory comparisons inherit `packaging.allow_bundled_only`, so intentionally packaged bundled-only files remain allowed after install.
 - `check.ps1` / `check.sh` now verify the runtime freshness receipt and invoke the freshness gate when canonical repo execution is available.
 - In shell-only environments without `pwsh`, `check.sh` warns and skips authoritative runtime freshness execution instead of emitting a false receipt hard-fail.
+
+Run Linux promotion proof gates (evidence closure only, no implied promotion):
+
+```powershell
+& ".\vibe-linux-pwsh-proof-gate.ps1" -WriteArtifacts
+& ".\vibe-platform-promotion-bundle.ps1" -WriteArtifacts
+```
+
+Notes:
+- These gates verify that Linux promotion prerequisites, replay contracts, and proof-bundle wiring are aligned.
+- They do not by themselves upgrade `codex/linux` to `full-authoritative`.
+- Actual promotion still requires frozen fresh-machine Linux evidence and replay allowlist synchronization.
 
 Run OpenSpec governance gate:
 

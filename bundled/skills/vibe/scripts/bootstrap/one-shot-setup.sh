@@ -293,6 +293,9 @@ echo "- Re-run deep doctor anytime with: bash ./check.sh --profile ${PROFILE} --
 echo "- MCP active file: ${TARGET_ROOT}/mcp/servers.active.json"
 echo "- Doctor artifacts: ${REPO_ROOT}/outputs/verify"
 if ! command -v pwsh >/dev/null 2>&1; then
-  echo "[WARN] pwsh is not installed. Core install and MCP materialization completed, but the authoritative PowerShell doctor gates were skipped."
-  echo "[WARN] Install PowerShell 7 to reach the full verification path on Linux/macOS."
+  if ! command -v python3 >/dev/null 2>&1 && ! command -v python >/dev/null 2>&1; then
+    echo "[WARN] Neither pwsh nor Python is available. Deep authoritative doctor coverage remains unavailable in this shell environment."
+  else
+    echo "[INFO] pwsh is not installed, but the shell runtime-neutral verification path was used where supported."
+  fi
 fi

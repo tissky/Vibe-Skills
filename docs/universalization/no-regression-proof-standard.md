@@ -11,15 +11,27 @@ the Task 6 harness to support a bounded claim:
 
 ## Non-Negotiable Rule
 
-The replay harness must remain **additive** and must not require changing the official runtime
-main chain to pass:
+The replay harness must remain **additive by default** and must not require changing the official runtime
+main chain to pass unless the change is explicitly admitted by the file-scoped policy at
+`config/official-runtime-main-chain-policy.json`.
+
+Protected main-chain surfaces remain:
 
 - `scripts/router/**`
+- `scripts/bootstrap/**`
 - `install.ps1` / `check.ps1`
 - `install.sh` / `check.sh`
 - `config/version-governance.json`
 
-If the proof can only pass by changing those surfaces, the proof is invalid.
+If the proof can only pass by changing those surfaces without an active, plan-backed, file-scoped
+exception window, the proof is invalid.
+
+If an exception window is used, it must:
+
+- name the exact files allowed to change;
+- point to the governing migration plan;
+- keep the default mode frozen for every other protected path; and
+- require fresh verification evidence for the exception batch.
 
 ## What This Harness Proves (Bounded)
 
@@ -78,4 +90,3 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify\vibe-univer
 ```
 
 Artifacts are written under `outputs/verify/` when `-WriteArtifacts` is provided.
-

@@ -68,6 +68,8 @@ pwsh -NoProfile -File .\..\governance\phase-end-cleanup.ps1 -WriteArtifacts -Inc
 详见：`gate-family-index.md`
 **Managed Runtime / Process Hygiene**: `vibe-node-zombie-gate.ps1` validates VCO-managed Node ownership, stale-process classification, and report-only cleanup safety boundaries.
 
+**Platform Promotion Proof**: `vibe-platform-support-contract-gate.ps1`, `vibe-platform-doctor-parity-gate.ps1`, `vibe-linux-pwsh-proof-gate.ps1`, and `vibe-platform-promotion-bundle.ps1` form the platform-proof closure chain. They validate evidence wiring and truth-contract alignment; they do not auto-promote a platform lane.
+
 ## Fixture Taxonomy
 
 - **Wave28 canonical pilot fixtures**: `fixtures/pilot-memory.json`, `fixtures/pilot-prompt.json`, `fixtures/pilot-browserops.json`, `fixtures/pilot-desktopops.json`. These are the only pilot inputs consumed by `vibe-pilot-scenarios.ps1` and referenced by `config/promotion-board.json`.
@@ -230,6 +232,18 @@ Notes:
 - Installed-runtime directory comparisons inherit `packaging.allow_bundled_only`, so intentionally packaged bundled-only files remain allowed after install.
 - `check.ps1` / `check.sh` now verify the runtime freshness receipt and invoke the freshness gate when canonical repo execution is available.
 - In shell-only environments without `pwsh`, `check.sh` warns and skips authoritative runtime freshness execution instead of emitting a false receipt hard-fail.
+
+Run Linux promotion proof gates (evidence closure only, no implied promotion):
+
+```powershell
+& ".\vibe-linux-pwsh-proof-gate.ps1" -WriteArtifacts
+& ".\vibe-platform-promotion-bundle.ps1" -WriteArtifacts
+```
+
+Notes:
+- These gates verify that Linux promotion prerequisites, replay contracts, and proof-bundle wiring are aligned.
+- They do not by themselves upgrade `codex/linux` to `full-authoritative`.
+- Actual promotion still requires frozen fresh-machine Linux evidence and replay allowlist synchronization.
 
 Run OpenSpec governance gate:
 
