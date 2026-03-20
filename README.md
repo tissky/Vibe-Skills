@@ -1,226 +1,175 @@
-[English](./README.en.md)
+<div align="right">
+  <a href="./README.en.md">🇬🇧 English</a> | <b>🇨🇳 中文</b>
+</div>
+
+<div align="center">
+  <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills">
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=45&pause=1000&color=7B61FF&center=true&vCenter=true&width=600&height=100&lines=Vibe+Skills;Your+AI+OS" alt="VibeSkills Logo" />
+  </a>
+
+  <p align="center">
+    <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/stargazers">
+      <img src="https://img.shields.io/github/stars/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=github&color=7B61FF&label=STARS" alt="stars">
+    </a>
+    <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/network/members">
+      <img src="https://img.shields.io/github/forks/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=git&color=45a1ff&label=FORKS" alt="forks">
+    </a>
+    <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/pulse">
+      <img src="https://img.shields.io/github/last-commit/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=git-lfs&color=32CD32&label=MOMENTUM" alt="last commit">
+    </a>
+  </p>
+  
+  
+  
+  <p align="center">
+    <img src="https://komarev.com/ghpvc/?username=vibe-skills-foryourhealth&label=NODES%20ACTIVE&color=0078d7&style=flat-square" alt="Visitors">
+    <img src="https://img.shields.io/badge/Architecture-VCO_Runtime-orange?style=flat-square" alt="Arch">
+    <img src="https://img.shields.io/badge/Skills-340%2B-blueviolet?style=flat-square" alt="Skills Count">
+  </p>
+
+  <br/>
+<img src="./logo.png" width="300px" alt="VibeSkills Logo">
+  <h3 align="center"><b>不只是技能集合，更是你的个人 AI 操作系统</b></h3>
+  <p align="center">
+    集成数百个 Skills、MCP 入口与治理规则的工业级运行时框架。
+  </p>
+
+  <p align="center">
+    <sub>🧠 规划 · 🛠️ 工程 · 🤖 AI · 🔬 科研 · 🧬 生命科学 · 🎨 可视化 · 🎬 多媒体</sub>
+  </p>
+</div>
+
+---
+
+<br/>
+
+> [!IMPORTANT]  
+> **🎯 我们的核心愿景**
+> 消除面对新技术的认知焦虑与高昂的学习成本。在这里，无论你是否具备深厚的编程基础，都能以极低的门槛，直接调用当今最前沿的 AI 技术集合。**让每个人都能享受 AI 带来的生产力飞跃。**
+
+### 📊 为什么说它强大？
+**VibeSkills** 背后的运行时核心是 **VCO**。它绝不仅仅是一个单点工具或只会“补代码”的脚本，而是一个已经完成高度整合与治理的**超级能力网络**：
+
+| 🧩 技能模块 | 🌍 生态融合 | ⚖️ 治理规则 |
+| :---: | :---: | :---: |
+| **340+** | **19+** | **129 条** |
+| 可直接调用的 Skills，覆盖从需求规划到生命科学的完整链路 | 吸收与借鉴高价值上游开源项目与最佳实践来源 | 基于配置的策略与契约，确保执行稳定、可溯源、防发散 |
+
+---
+
+## ✦ 全景能力地图：你的全能工作台
+
+如果把这 340 个 skills 按“真实工作流”展开，VibeSkills 已经为你铺设好了一条端到端的能力链。
+
+| 能力域 | 覆盖工作面 | 代表能力引擎 |
+| :--- | :--- | :--- |
+| **💡 需求与澄清** | 拒绝黑盒开局：把模糊想法转为边界清晰、可验收的问题定义 | `brainstorming`, `speckit-clarify` |
+| **📋 规划与拆解** | 将宏大目标拆解为 spec、plan、tasks、里程碑与执行流 | `writing-plans`, `speckit-specify`, `aios-po` |
+| **🏗️ 架构与选型** | 设计前后端边界、接口、数据层、部署层与技术路线对比 | `aios-architect`, `architecture-patterns` |
+| **💻 开发与实现** | 新功能开发、脚手架搭建、工程化集成和跨文件精准落地 | `autonomous-builder`, `speckit-implement` |
+| **🔧 调试与重构** | 告别表面缝补：定位报错、分析根因、恢复项目级可维护性 | `error-resolver`, `systematic-debugging` |
+| **🛡️ 测试与品控** | 单元测试、回归验证、质量门禁，实现“完成前强制核验” | `tdd-guide`, `aios-qa`, `code-review` |
+| **🚀 协作与发布** | 接管 Issue/PR、CI 修复、Review 处理与自动化部署 | `aios-devops`, `gh-fix-ci`, `vercel-deploy` |
+| **🤖 复合工作流** | 冻结需求、任务分派、多 Agent 协同、执行留痕与环境清理 | `vibe`, `swarm_*`, `hive-mind-advanced` |
+| **🔌 外部生态接入** | 打通浏览器、网页抓取、设计稿、第三方服务与上下文记忆 | `mcp-integration`, `playwright`, `scrapling` |
+| **📊 数据与 AI 工程** | 涵盖 EDA、清洗统计，到模型训练、RAG 检索与实验跟踪 | `senior-ml-engineer`, `statistical-analysis` |
+| **🔬 科研与生命科学** | **强势领域**：文献检索综述、生信分析、单细胞、药物发现 | `literature-review`, `biopython`, `scanpy` |
+| **📐 数学与专业计算** | 符号推导、贝叶斯建模、多目标优化、仿真乃至量子计算 | `sympy`, `pymc-bayesian-modeling`, `qiskit` |
+| **🎨 多媒体与展示** | 交互图表、科研绘图、图片生成、语音合成与视频素材生产 | `plotly`, `generate-image`, `video-studio` |
+
+---
+
+## 🧭 能力簇深入拆解：拒绝“孤立的点”
+
+VibeSkills 最大的优势在于**系统性的治理与规范化**。这里不是零散技能的堆砌，而是紧密衔接的上下游工作链。
+
+* **🧩 规划、架构与工程实现**
+    从需求访谈、约束收集开始，经过 tasks 拆解与架构选型，最终落实到跨文件修改；同时严守质量门禁，涵盖根因级重构修复与长期可维护性代码评审。
+* **🔗 协作治理与能力激活**
+    解决“能力沉睡”痛点。通过**智能路由**与**受管工作流**，在正确阶段唤起正确的 MCP/插件。执行过程完整留痕，并自动沉淀为高质量知识文档。
+* **🔬 数据、科研与高门槛专业计算**
+    跨越常规编码边界，提供链路完整的**科研学术写作闭环**、深度集成的**生命科学工具链**，以及支撑复杂建模的科学计算引擎。
+
+---
+
+## 📦 集众家之所长：资源整合与全量矩阵
+
+我们深知，闭门造车无法适应飞速演进的 AI 时代。VibeSkills 的核心底气，来自于持续吸收开源社区最成熟的方法与架构，并将它们纳入同一套统一治理的调度系统中。
+
+> 🙏 **特别鸣谢与致敬** > 本项目持续整合、吸收并治理了以下优秀开源项目的核心优势：
+> 
+> `superpower` · `claude-scientific-skills` · `get-shit-done` · `aios-core` · `OpenSpec` · `ralph-claude-code` · `SuperClaude_Framework` · `spec-kit` · `Agent-S` · `mem0` · `scrapling` · `claude-flow` · `serena` · `everything-claude-code` · `DeepAgent` 等等
+> 
+> *感谢各位作者的无私奉献，没有这些璀璨的星光，就没有 VibeSkills 的诞生。在吸纳众多优秀仓库的过程中，我们已竭尽全力做好版权的分发与署名。若百密一疏出现纰漏，请在 Issue 中向我们提出，我们将第一时间进行修正与补充！*
 
-# VibeSkills
+<br/>
 
-> 🐙 一个把多个上游项目、数百个 skills、MCP 入口、插件能力和治理规则整合进同一运行时的 AI 能力栈。
+<details>
+<summary><b>👉 点击展开：探索 VibeSkills 完整的 340+ 全栈能力矩阵详解</b></summary>
+<br/>
+<blockquote>
+<i>💡 <b>治理的意义</b>：以下庞大的技能库不是孤立的脚本死水，而是一个被 VCO 运行时接管的生态。通过领域矩阵分类，系统会在正确的上下文节点自动唤起正确的工具，无需你手动遍历调用。</i>
+</blockquote>
 
-VibeSkills 是这个仓库对外展示的名字，背后的运行时核心是 VCO。它不是单点工具，也不是只会“补代码”的技能集合，而是一套已经完成整合和治理的能力系统：目前沉淀了 340 个可直接调用的 skills 模块，吸收和借鉴了 19 个高价值上游项目与实践来源，并通过 129 条基于配置的策略、契约与规则，把 skills、MCP、插件、工作流和验证机制收进同一套可治理运行时。
+| 领域分类 | 涵盖的 Skills 矩阵 (全量归档) | 核心能力说明 |
+| :--- | :--- | :--- |
+| **🧠 需求、规划与产品管理** | `.system`, `aios-pm`, `aios-po`, `aios-sm`, `aios-squad-creator`, `aios-ux-design-expert`, `brainstorming`, `create-plan`, `designing-experiments`, `planning-with-files`, `shared-templates`, `speckit-analyze`, `speckit-checklist`, `speckit-clarify`, `speckit-constitution`, `speckit-plan`, `speckit-specify`, `speckit-tasks`, `speckit-taskstoissues`, `subagent-driven-development`, `think-harder`, `treatment-plans`, `ux-researcher-designer`, `writing-plans` | **让大想法变得可落地**。负责需求洞察、问题定义、Sprint 规划、任务切分与约束收集。确保在写下第一行代码前，方向清晰、边界明确且具有可验收的里程碑。 |
+| **🛠️ 软件工程与架构设计** | `aios-architect`, `aios-dev`, `aios-master`, `architecture-patterns`, `autonomous-builder`, `cancel-ralph`, `coding-tutor`, `context-fundamentals`, `context-hunter`, `cs-foundations`, `deepagent-memory-fold`, `deepagent-toolchain-plan`, `evaluating-code-models`, `get-available-resources`, `hive-mind-advanced`, `local-vco-roles`, `node-zombie-guardian`, `nowait-reasoning-optimizer`, `prompt-lookup`, `ralph-loop`, `skill-creator`, `skill-lookup`, `spec-kit-vibe-compat`, `speckit-implement`, `superclaude-framework-compat`, `theme-factory`, `vibe`, `webthinker-deep-research` | **真正的工程化构建底座**。从脚手架搭建、跨文件修改、API 接口设计到微服务架构评估。不仅产出代码，更负责上下文记忆、工具链编排与智能 Agent 的多阶段协同执行。 |
+| **🔧 调试、测试与质量保证** | `aios-qa`, `build-error-resolver`, `code-review`, `code-review-excellence`, `code-reviewer`, `data-quality-checker`, `data-quality-frameworks`, `debugging-strategies`, `deslop`, `detecting-performance-regressions`, `error-resolver`, `evals-context`, `experiment-failure-analysis`, `generating-test-reports`, `ml-data-leakage-guard`, `performance-testing`, `property-based-testing`, `providing-performance-optimization-advice`, `receiving-code-review`, `requesting-code-review`, `reviewing-code`, `security-best-practices`, `security-ownership-map`, `security-reviewer`, `security-threat-model`, `systematic-debugging`, `tdd-guide`, `verification-before-completion`, `verification-quality-assurance`, `windows-hook-debugging` | **守住代码和系统的生命线**。涵盖单元测试、根因分析、依赖冲突解决、安全漏洞审查与全套 TDD 测试驱动指南，确保系统告别“改完就崩”的黑盒状态。 |
+| **📊 数据分析与统计建模** | `aios-data-engineer`, `anomaly-detector`, `correlation-analyzer`, `dask`, `data-artist`, `data-exploration-visualization`, `data-normalization-tool`, `detecting-data-anomalies`, `excel-analysis`, `exploratory-data-analysis`, `feature-importance-analyzer`, `geopandas`, `hypothesis-testing`, `metric-calculator`, `networkx`, `performing-causal-analysis`, `performing-regression-analysis`, `polars`, `preprocessing-data-with-automated-pipelines`, `regression-analysis-helper`, `running-clustering-algorithms`, `scientific-data-preprocessing`, `splitting-datasets`, `spreadsheet`, `statistical-analysis`, `statistics-math`, `statsmodels`, `usfiscaldata`, `vaex`, `xlsx` | **让数据讲述事实**。提供从数据清洗、缺失值处理、探索性分析（EDA）到高级统计检验、回归模型、时序预测的一站式数据处理引擎。 |
+| **🤖 机器学习与 AI 工程** | `LQF_Machine_Learning_Expert_Guide`, `aeon`, `datamol`, `deepchem`, `embedding-strategies`, `engineering-features-for-machine-learning`, `evaluating-llms-harness`, `evaluating-machine-learning-models`, `explaining-machine-learning-models`, `geniml`, `ml-pipeline-workflow`, `openai-knowledge`, `pufferlib`, `pytorch-lightning`, `scikit-learn`, `scikit-survival`, `senior-computer-vision`, `senior-data-scientist`, `senior-ml-engineer`, `senior-prompt-engineer`, `shap`, `similarity-search-patterns`, `sparse-autoencoder-training`, `stable-baselines3`, `tensorboard`, `timesfm-forecasting`, `torch-geometric`, `torch_geometric`, `torchdrug`, `training-machine-learning-models`, `transformer-lens-interpretability`, `transformers`, `umap-learn`, `unsloth`, `weights-and-biases` | **全链路 AI 模型开发栈**。不止于调用 API，更深入特征工程、模型训练、微调（Fine-tuning）、可解释性分析（SHAP）、大模型评估（Evals）与强化学习训练工作流。 |
+| **🧬 生命科学与生信计算** | `adaptyv`, `alphafold-database`, `anndata`, `arboreto`, `benchling-integration`, `biopython`, `bioservices`, `cellxgene-census`, `cobrapy`, `deeptools`, `diffdock`, `dnanexus-integration`, `esm`, `etetoolkit`, `flowio`, `gene-database`, `gget`, `ginkgo-cloud-lab`, `gtars`, `histolab`, `imaging-data-commons`, `labarchive-integration`, `lamindb`, `latchbio-integration`, `matchms`, `medchem`, `molfeat`, `neurokit2`, `neuropixels-analysis`, `omero-integration`, `opentrons-integration`, `pathml`, `protocolsio-integration`, `pydeseq2`, `pydicom`, `pyhealth`, `pylabrobot`, `pyopenms`, `pysam`, `pytdc`, `rdkit`, `scanpy`, `scikit-bio`, `scvi-tools`, `tiledbvcf` | **极其强悍的跨学科硬核利器**。深度集成单细胞测序分析、蛋白质结构折叠、药物分子发现、基因组学比对，并无缝对接各类云端生物实验室系统。 |
+| **🔬 科学计算与数学逻辑** | `astropy`, `cirq`, `dialectic`, `fluidsim`, `gradient-methods`, `math`, `math-model-selector`, `math-tools`, `mathematical-logic-expert`, `matlab`, `pennylane`, `pymatgen`, `pymc`, `pymc-bayesian-modeling`, `pymoo`, `propositional-logic`, `qiskit`, `qutip`, `rowan`, `simpy`, `sympy`, `xan` | **精确推导与复杂系统仿真**。提供符号数学演算、贝叶斯概率编程、量子计算模拟、多目标优化计算以及严格的命题逻辑与数理证明辅助。 |
+| **📚 科研文献与学术写作** | `bgpt-paper-search`, `biorxiv-database`, `brenda-database`, `chembl-database`, `citation-management`, `clinical-decision-support`, `clinical-reports`, `clinicaltrials-database`, `clinpgx-database`, `clinvar-database`, `comprehensive-research-agent`, `content-research-writer`, `cosmic-database`, `datacommons-client`, `documentation-lookup`, `drugbank-database`, `ena-database`, `ensembl-database`, `fda-database`, `geo-database`, `gwas-database`, `hmdb-database`, `hypothesis-generation`, `kegg-database`, `literature-matrix`, `literature-review`, `manuscript-as-code`, `market-research-reports`, `metabolomics-workbench-database`, `open-notebook`, `openalex-database`, `opentargets-database`, `paper-2-web`, `pdb-database`, `peer-review`, `pubchem-database`, `pubmed-database`, `pyzotero`, `reactome-database`, `research-grants`, `research-lookup`, `scholar-evaluation`, `scholarly-publishing`, `scientific-brainstorming`, `scientific-critical-thinking`, `scientific-reporting`, `scientific-writing`, `string-database`, `submission-checklist`, `uniprot-database`, `uspto-database`, `zinc-database` | **学术生产力的高速公路**。横跨 PubMed/arXiv 等数十个科研数据库的精准检索、综述矩阵整理、引文管理系统，以及从论文起草、修改到同行评审的完整出版物流程。 |
+| **🎨 多媒体、可视化与文档** | `algorithmic-art`, `creating-data-visualizations`, `data-storytelling`, `datavis`, `doc`, `docs-review`, `docs-write`, `document-skills`, `docx`, `docx-comment-reply`, `figma`, `figma-implement-design`, `file-organizer`, `g2-legend-expert`, `generate-image`, `imagegen`, `infographics`, `latex-posters`, `latex-submission-pipeline`, `markdown-mermaid-writing`, `markitdown`, `matplotlib`, `pdf`, `plotly`, `pptx-posters`, `report-generator`, `scientific-schematics`, `scientific-slides`, `scientific-visualization`, `screenshot`, `seaborn`, `slides-as-code`, `smart-file-writer`, `speech`, `structured-content-storage`, `transcribe`, `venue-templates`, `video-studio`, `visualization-best-practices`, `vscode-release-notes-writer`, `writing-docs` | **让知识与数据变得“可看见”**。涵盖交互式图表生成、科研出版级绘图、幻灯片生成、音视频生产，以及对 Word、PDF 等办公文档的深度读写与解析。 |
+| **🔌 外部集成、自动化与部署** | `aios-devops`, `alpha-vantage`, `claude-skills`, `commit-with-reflection`, `denario`, `digital-brain`, `edgartools`, `flashrag-evidence`, `fred-economic-data`, `geomaster`, `gh-address-comments`, `gh-fix-ci`, `hedgefundmonitor`, `hypogenic`, `iso-13485-certification`, `jupyter-notebook`, `knowledge-steward`, `mcp-integration`, `modal`, `modal-labs`, `netlify-deploy`, `openai-docs`, `perplexity-search`, `playwright`, `prowler-docs`, `scrapling`, `sentry`, `skypilot-multi-cloud-orchestration`, `vercel-deploy` | **打破运行时的局限**。通过 MCP 协议、Playwright 自动化框架无缝对接外部浏览器、设计平台与云端服务，并支持 CI/CD 流水线与一键自动化部署。 |
 
-<p align="center">
-  <sub>🧠 规划 · 🛠️ 工程 · 🤖 AI · 🔬 科研 · 🧬 生命科学 · 🎨 可视化 · 🎬 多媒体</sub>
-</p>
+</details>
 
-## ✦ 这个仓库一开始就能帮你做什么
+---
 
-如果把这 340 个 skills 按“真实工作”而不是按“仓库目录”来看，VibeSkills 已经覆盖了从需求理解、方案设计、编码实现、测试验证，到文档沉淀、数据分析、科研支持、生命科学工具链和多媒体生成的一整条能力链。下面这张总表先给你一个可快速扫读的能力地图。
+## ✨ 为什么它与众不同？
 
-| 能力域 | 覆盖工作 | 代表能力 |
-| --- | --- | --- |
-| 需求洞察与问题澄清 | 把模糊想法整理成边界清晰、可验收的问题定义 | brainstorming、create-plan、speckit-clarify、aios-analyst、aios-pm |
-| 产品规划与任务拆解 | 把想法拆成 spec、plan、tasks、里程碑和执行顺序 | writing-plans、speckit-specify、speckit-plan、speckit-tasks、aios-po、aios-sm |
-| 架构设计与技术选型 | 设计前后端、接口、数据层、部署层与技术路线 | aios-architect、architecture-patterns、context-fundamentals、aios-master |
-| 软件开发与代码实现 | 新功能开发、脚手架搭建、工程化集成和跨文件落地 | aios-dev、autonomous-builder、speckit-implement |
-| 调试、修复与重构 | 定位报错、分析根因、修补行为错误并恢复可维护性 | error-resolver、debugging-strategies、systematic-debugging、deslop |
-| 测试与质量保证 | 单元测试、回归验证、质量门禁、完成前核验 | tdd-guide、aios-qa、code-review、verification-before-completion |
-| GitHub 与发布协作 | issue / PR、CI 修复、review comment、部署与发布 | aios-devops、gh-fix-ci、github_*、workflow_*、vercel-deploy |
-| 受管工作流与多 Agent 协作 | 冻结需求、编排步骤、分派任务、留痕与 cleanup | vibe、swarm_*、task_*、agent_*、hive-mind-advanced |
-| Skills 激活与能力路由 | 在正确阶段拉起正确 skill、MCP、插件和规则 | vibe、deepagent-toolchain-plan、hooks_route、semantic-router |
-| MCP 与外部系统接入 | 浏览器、抓取、设计稿、第三方服务与外部上下文接入 | mcp-integration、playwright、scrapling、figma |
-| 文档与知识沉淀 | README、技术文档、操作手册、图示、知识记录与报告 | docs-write、docs-review、markdown-mermaid-writing、knowledge-steward |
-| 办公文档与文件处理 | Word、PDF、Excel、CSV、批注回复与格式保留 | docx、pdf、xlsx、spreadsheet、markitdown |
-| 数据分析与统计建模 | EDA、回归、假设检验、可视化、清洗与统计报告 | statistical-analysis、statsmodels、scikit-learn、polars、dask |
-| 机器学习与 AI 工程 | 从数据准备到训练、评估、解释、检索与实验跟踪 | senior-ml-engineer、training-machine-learning-models、shap、embedding-strategies |
-| 可视化与展示表达 | 图表、交互可视化、科研图、Slides、网页展示 | plotly、matplotlib、seaborn、datavis、scientific-slides |
-| 科研检索与学术写作 | 文献检索、综述整理、引用管理、论文成稿与投稿支持 | research-lookup、literature-review、citation-management、scientific-writing |
-| 生命科学与生物医药 | 生信、单细胞、蛋白质、药物发现、数据库与实验平台 | biopython、scanpy、scvi-tools、alphafold-database、drugbank-database |
-| 数学、优化与科学计算 | 符号推导、贝叶斯建模、多目标优化、仿真和量子计算 | math-tools、sympy、pymc-bayesian-modeling、pymoo、qiskit |
-| 图像、音频、视频与内容生产 | 图片、语音、字幕、视频和多媒体素材生成 | generate-image、imagegen、speech、transcribe、video-studio |
+传统的 Skills 仓库在回答：*“我这里有什么工具？”* 而 VibeSkills 正面迎击的是重度 AI 用户的核心痛点：*“我该怎么稳定地完成工作？”*
 
-这张表不再追求把每一列都塞满，而是先把能力面铺开，让你一眼知道仓库到底能覆盖哪些工作类型。
+| ❌ 传统痛点（你可能经历过） | ✅ VibeSkills 解法（我们正在做） |
+| :--- | :--- |
+| **技能沉睡**：仓库里几百个能力，真实场景下 AI 根本想不起来用，激活率极低。 | **🧠 智能路由**：现在该调什么，系统会根据上下文和逻辑自动路由拉起，无需你翻背技能表。 |
+| **黑盒狂奔**：AI 不澄清需求就直接开做，速度快但方向偏，项目逐渐变成黑盒。 | **🧭 受管工作流**：先做什么再做什么被严格约束。将澄清、验证、留痕收进统一流程，每步可溯源。 |
+| **互相冲突**：不同插件和工作流之间缺乏统筹，导致环境污染或死循环。 | **🧩 全局治理**：通过 129 条契约规则，设定安全边界与回退机制，保障整个运行时的长期稳定性。 |
 
-## 🧭 如果把这些能力再往下拆
+---
 
-上面的总表适合快速浏览。继续往下看，才能更准确地理解这个仓库不是“很多技能的集合”，而是一整条工作流的不同工作面。下面按更大的工作簇展开。
+## 👥 适用人群
 
-### 🧩 规划、架构与工程实现
+* 🎯 **追求稳定交付的普通用户**：想让 AI 成为可靠的帮手，而不是脱缰的野马。
+* ⚡ **重度依赖 AI/Agent 的进阶极客**：需要一个能承载庞大工作流的统一底座。
+* 🏢 **规范化要求高的小型团队**：希望把 AI 工作流变得更具可维护性和传承性。
+* 😩 **被“技能堆砌”折磨的实践者**：已经厌倦了找工具，只想要一套开箱即用的解决方案。
 
-- **需求洞察与问题澄清**：覆盖需求访谈、问题定义、边界识别、约束收集、成功标准和风险预判。重点不是让 AI 直接开做，而是先把问题说清楚。
-- **产品规划与任务拆解**：覆盖 spec、plan、tasks、里程碑、依赖关系、优先级和交付顺序，让大想法可以被安排、被跟踪、被逐步交付。
-- **架构设计与技术选型**：覆盖前端结构、后端边界、接口设计、数据层、部署层、模式选择和技术比较，尽量把返工和结构漂移压到前面解决。
-- **软件开发与代码实现**：覆盖新功能开发、脚手架搭建、跨文件修改、模块整合、工程化落地和自动化实现，把计划真正落到可运行代码上。
-- **调试、修复与重构**：覆盖报错定位、根因分析、行为修复、冗余清理、结构重构和可维护性恢复，不只修表面现象。
-- **测试与质量保证**：覆盖单元测试、属性测试、回归验证、验收检查、质量门禁和完成前核对，让“改完能跑”升级为“有证据证明没破坏”。
-- **代码评审与工程规范**：覆盖 review、风险检查、可维护性评估、安全审阅、性能提示和修改建议，把代码从“可用”往“长期可接手、可迭代”推进。
+*如果你只想找个单一的小脚本，它可能过于庞大；但如果你想把 AI 用得更稳、更顺、更长远，它将是你不可或缺的利器。*
 
-### 🔗 协作治理、路由与外部能力接入
+---
 
-- **GitHub、仓库协作与发布**：覆盖 issue / PR 流程、CI 修复、review comment 处理、发布分支、部署记录和上线动作，不让交付停留在本地工作区。
-- **受管工作流与多 Agent 协作**：覆盖需求冻结、阶段执行、任务分派、proof、cleanup 和多 agent 协同，让复杂任务在治理框架里而不是在黑盒里完成。
-- **Skills 激活与能力路由**：覆盖规则路由、语义路由、阶段触发、能力编排和沉睡能力唤起，解决“明明有很多能力，但真实任务里触发不到”的问题。
-- **MCP 与外部系统接入**：覆盖浏览器自动化、网页抓取、设计稿到代码、第三方服务接入、插件入口和外部上下文获取，把分散工具收进同一运行时。
-- **文档与知识沉淀**：覆盖 README、技术说明、操作手册、规范文档、Mermaid 图、知识条目和报告，让结果能够继续被团队使用，而不是留在聊天记录里。
-- **办公文档与文件处理**：覆盖 Word、PDF、Excel、CSV、Markdown 转换、批注回复、格式保留和资料整理，补足真实工作里非常高频的一层。
+## 🚀 开启你的 Vibe 体验
 
-### 🔬 数据、AI、科研与专业能力
+⚠️ **调用说明**：为保证通用代理的适配性，本项目采用 **Skills 格式架构**。请通过宿主环境的 Skills 调用方式唤起，**不要**将其作为独立命令行程序直接运行。
+* 在 **Claude Code** 中，输入：`/vibe`
+* 在 **Codex** 中，输入：`$vibe`
 
-- **数据分析与统计建模**：覆盖 EDA、回归分析、假设检验、指标体系、清洗转换、分布分析和统计报告，把原始数据整理成可解释的分析结论。
-- **机器学习与 AI 工程**：覆盖模型训练、模型评估、特征工程、解释分析、embedding、RAG、实验跟踪和工作流规范化，不只是“会调模型”，而是完整的 AI 工程闭环。
-- **科研检索与学术写作**：覆盖文献搜索、综述整理、引用管理、论文写作、投稿准备、审稿回复和学术规范，这一块强调的是链路完整而不是单个工具。
-- **生命科学与生物医药**：覆盖生物信息学、单细胞分析、蛋白质结构、药物发现、临床试验数据、科研数据库和实验平台接入，这是仓库最有辨识度的强势区域之一。
-- **数学、优化与科学计算**：覆盖符号推导、贝叶斯建模、多目标优化、仿真计算、量子计算和科学建模，适合需要精确推导和复杂建模的场景。
+### 📚 导航与指引
 
-### 🎨 可视化、展示与内容生产
+**快速了解系统**
+* 📖 [了解系统架构与理念](./docs/quick-start.md)
+* 📜 [VibeSkills 宣言](./docs/manifesto.md)
 
-- **可视化与展示表达**：覆盖图表生成、交互可视化、科研图、演示文稿、网页展示和信息表达设计，把结果做成可读、可展示、可传播的可视成果。
-- **图像、音频、视频与内容生产**：覆盖图片生成、信息图、语音合成、转写字幕、视频生产和多媒体素材整理，支持从静态视觉到音视频内容的整套制作流程。
+**安装与配置指南**
+* ⚡️ [一步式快速安装 (Release 版推荐) ](./docs/install/one-click-install-release-copy.md)
+* 🛠 [推荐的完整安装路径](./docs/install/recommended-full-path.md)
+* 🧊 [冷启动与其他环境安装路径](./docs/cold-start-install-paths.md)
 
-如果把这些能力串起来看，这个仓库覆盖的其实是一条完整工作流：先理解需求，再做规划，再决定架构，再进入实现、验证、协作与发布，之后还能延伸到文档沉淀、数据分析、AI 工程、科研写作、生命科学和多媒体表达。也正因为覆盖面已经这么宽，它才更需要治理和规范化，而不是只靠“skills 数量很多”来支撑。
+---
 
-其中最能拉开差异的，依然是 AI 工程、科研写作和生命科学这三块。很多仓库会提到“支持机器学习”或“支持研究”，但更多只是停留在零散工具上；这里更不同的地方在于，它们已经被做成可衔接上下游的工作链，而不是彼此孤立的能力点。
-
-## 📦 我们已经整合了哪些资源
-
-这个仓库不是从零自造一切，而是在持续吸收成熟项目已经跑通的方法、结构和工作流。当前已经整合了 19 个高价值上游项目与实践来源，并把它们放进同一套治理体系里统一调度。
-
-| 资源类型 | 当前沉淀 | 意义 |
-| --- | --- | --- |
-| Skills 与能力模块 | 340 个可直接调用的 skills / 能力模块 | 覆盖从需求、规划、编码、验证到文档、数据、科研和多媒体生成的完整工作链 |
-| MCP / 插件 / 浏览器入口 | 多类外部工具接入能力 | 让外部服务、网页、设计稿、检索结果和自动化流程进入同一运行时 |
-| 上游项目与方法来源 | 19 个高价值项目与实践来源 | 把成熟项目的长处吸收进统一系统，而不是让用户自己手动拼装 |
-| 治理规则与契约 | 129 条基于配置的策略、契约与规则 | 约束澄清、规划、执行、验证、留痕、清理和回退，让系统长期可维护 |
-
-项目持续整合并治理 superpower、claude-scientific-skills、get-shit-done、aios-core、OpenSpec、ralph-claude-code、SuperClaude_Framework 等优秀项目，把它们在提示组织、技能沉淀、计划驱动、治理执行、科研辅助和工程协作上的优势吸收进同一套系统里。
-
-这也是 VibeSkills 和普通“提示词合集”或“技能目录仓库”的根本区别：这里展示的不是静态条目，而是一张已经完成整合、可被路由、可被治理、可被验证的能力网络。
-
-## ✨ 为什么它会让人立刻感到不一样
-
-很多 skills 仓库其实只是在回答一个问题：这里有什么能力？
-
-VibeSkills 更在意的是另外几个问题：
-
-- 现在该调用什么，而不是让你自己翻完整个技能表
-- 应该先做什么，而不是让 AI 直接跳进执行
-- 哪些能力可以安全组合，哪些地方必须设边界
-- 完成之后怎么验证、怎么留痕、怎么避免长期黑盒化
-
-它不是把能力堆得更多。
-它是在把“调用、治理、验证、回看”整合成一个真正能工作的系统。
-
-## 🎯 如果你直接提出需求，VibeSkills 会怎么接手
-
-下面这些不是抽象能力描述，而是更接近真实使用方式的例子。你不需要先背完整个 skills 表，只要把目标说清楚，VibeSkills 会尽量按正确的顺序把任务拆开、拉起合适的能力，并把结果做成能继续使用的交付物。
-
-### 🛠️ 面向研发工程师
-
-- **如果用户要求：** “帮我把这个老项目重构一下，顺便把 CI 红灯修掉。”
-  **VibeSkills 会：** 先澄清这次重构的边界，再梳理受影响模块、定位失败检查项，并按受管步骤推进修改和验证。
-  **会拉起：** `speckit-clarify`、`aios-dev`、`aios-devops`、`gh-fix-ci`、`verification-before-completion`
-  **最终交付：** 一组可审阅的代码改动、修复后的检查链路，以及可以回看的验证结果。
-
-- **如果用户要求：** “这个报错我看不懂，帮我定位根因并修好。”
-  **VibeSkills 会：** 先复现问题，再做系统化调试、缩小根因范围，补上最小修复与回归验证，而不是直接盲改代码。
-  **会拉起：** `error-resolver`、`systematic-debugging`、`debugging-strategies`、`tdd-guide`
-  **最终交付：** 根因说明、针对性修复、以及证明问题已被解决的验证证据。
-
-### 📈 面向产品与增长团队
-
-- **如果用户要求：** “帮我做一个竞品调研，看看这个赛道最近都在怎么做。”
-  **VibeSkills 会：** 先澄清调研范围与维度，再抓取公开信息、整理结构化对比，并生成更像真正工作文档的分析输出。
-  **会拉起：** `speckit-clarify`、`scrapling`、`playwright`、`aios-analyst`、`market-research-reports`
-  **最终交付：** 竞品差异总结、对比框架、重点判断和可直接继续使用的调研报告。
-
-- **如果用户要求：** “我只有一句模糊想法，帮我把它变成一个可执行的增长方案。”
-  **VibeSkills 会：** 先把目标人群、约束和成功标准说清楚，再拆成需求框架、分析路径和落地建议，而不是直接给一堆空泛点子。
-  **会拉起：** `brainstorming`、`aios-pm`、`aios-analyst`、`report-generator`
-  **最终交付：** 更清晰的问题定义、结构化策略建议，以及便于继续执行的方案文档。
-
-### 🔬 面向科研与生信用户
-
-- **如果用户要求：** “帮我做这个方向的文献综述，并整理成一个能继续研究的框架。”
-  **VibeSkills 会：** 先确定检索边界和问题焦点，再做文献检索、整理、引用管理和综述结构编排。
-  **会拉起：** `literature-review`、`research-lookup`、`citation-management`、`scientific-writing`
-  **最终交付：** 可继续扩写的综述框架、引用清单、以及后续研究切入点。
-
-- **如果用户要求：** “我有一批单细胞数据，想快速做分析并找到有价值的信号。”
-  **VibeSkills 会：** 先确认数据形态与分析目标，再进入单细胞分析链路，最后整理结果、可视化和初步解释。
-  **会拉起：** `scanpy`、`scvi-tools`、`anndata`、`scientific-visualization`
-  **最终交付：** 一套分析流程、关键图形结果，以及能够继续深挖的初步结论。
-
-## ⚠️ 它真正解决的痛点
-
-如果你已经在重度使用 AI，大概率已经遇到过这些问题：
-
-- skills 太多，不知道当前场景到底该用哪个
-- skills 激活率低，仓库里明明有很多能力，但真实任务里经常触发不到、想不起来、接不上流程
-- 项目、插件、工作流互相重叠，也互相冲突
-- AI 没澄清需求就直接开做，速度很快，方向却不稳
-- 做完之后没有验证、没有证据、没有回退面
-- 随着使用变深，整个工作流越来越像一个没人说得清的黑盒
-
-VibeSkills 不是假装这些问题不存在。
-它的价值就在于正面处理这些问题。
-
-VCO 生态也在解决一个很现实的问题：不是 skills 不够多，而是很多 skills 长期处在“沉睡”状态，真实任务里激活率太低。通过路由判断、MCP / 插件入口、工作流节点编排和治理规则，系统会尽量让合适的能力在合适的阶段被真正拉起，而不是一直躺在仓库里。
-
-## ⚙️ 它是怎么工作的
-
-你可以把它理解成三层：
-
-### 1. 🧠 智能路由
-
-在合适的场景下，AI 不需要你显式记住“这次该调用哪个 skill”。
-
-VibeSkills 会把逻辑路由和 AI 智能路由结合起来，尽量把合适的能力放到合适的场景里，让调用更自然，而不是靠你手动背技能表。VCO 生态要解决的也包括 skills 激活率低的问题，让更多能力在正确上下文和正确阶段进入执行面，而不是长期无法被真正使用。
-
-### 2. 🧭 受管工作流
-
-它不只是在“调工具”。
-它更关心工作怎么做才稳定。
-
-所以这套系统会尽量把需求澄清、确认、执行、验证、回顾、留痕这些步骤收进统一流程里，避免 AI 一上来就黑盒式开跑。
-
-### 3. 🧩 整合能力
-
-这里不只有 skills。
-
-还有插件、项目、工作流设计、AI 规范、安全边界、长期维护经验，以及我自己在实践里踩过的坑。VCO 负责把这些能力组织成一个更统一的运行时，而不是让它们继续散落在不同角落里。
-
-## 👥 它适合谁
-
-VibeSkills 主要适合这几类人：
-
-- 想让 AI 更稳定地帮自己做事的普通用户
-- 已经在重度使用 AI / Agent / 自动化的进阶用户
-- 想把 AI 工作流做得更规范、更可维护的个人或小团队
-- 已经厌倦“技能太多但不好用”的人
-
-如果你只是想找一个单点工具，这个仓库可能不是最轻的选择。
-如果你想把 AI 用得更稳、更顺、更长期，它会更有意义。
-
-## 🚀 开始了解它
-
-先说明一个关键点：这不是传统意义上的独立应用仓库，而是一个 **skills 格式项目**。实际使用时，应该按宿主里的 skills 调用方式来唤起它，而不是把它当作普通命令行程序直接运行。
-
-- 在 Claude Code 里，使用 `/vibe`
-- 在 Codex 里，使用 `$vibe`
-
-如果你想先快速理解这套系统，再决定走哪条路径：
-
-- [`docs/quick-start.md`](./docs/quick-start.md)
-- [`docs/manifesto.md`](./docs/manifesto.md)
-
-如果你已经准备开始安装，再进入一步式安装入口：
-
-- [`docs/install/one-click-install-release-copy.md`](./docs/install/one-click-install-release-copy.md)
-
-如果你已经是重度用户，想进一步看更完整的安装与路径说明：
-
-- [`docs/install/recommended-full-path.md`](./docs/install/recommended-full-path.md)
-- [`docs/cold-start-install-paths.md`](./docs/cold-start-install-paths.md)
-
-## 📐 项目理念
-
-VibeSkills 的核心要义是规范化。只有先把需求澄清、任务计划、执行、验证、留痕和回退做成可复用的秩序，人类对 AI 的描述才会更清晰，AI 的执行才会更稳定，后续维护与整体技术债才会维持在更低水平。
-
-这个项目想做的，不是让 AI 看起来更聪明，而是让用户主要负责表达目标，后续任务在规范化工作流中被持续地落地、验证和维护，最终把真实工作里最容易失控的部分变成一个更可调用、更可治理、也更可长期维护的系统。
+<div align="center">
+  <p><i>把真实工作里最容易失控的部分，变成一个更可调用、更可治理、也更可长期维护的系统。</i></p>
+</div>
