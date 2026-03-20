@@ -3,16 +3,43 @@
 </div>
 
 <div align="center">
-  <img src="./logo.png" width="300px" alt="VibeSkills Logo">
+  <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills">
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=45&pause=1000&color=7B61FF&center=true&vCenter=true&width=600&height=100&lines=Vibe+Skills;Your+AI+OS" alt="VibeSkills Logo" />
+  </a>
+
+  <p align="center">
+    <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/stargazers">
+      <img src="https://img.shields.io/github/stars/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=github&color=7B61FF&label=STARS" alt="stars">
+    </a>
+    <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/network/members">
+      <img src="https://img.shields.io/github/forks/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=git&color=45a1ff&label=FORKS" alt="forks">
+    </a>
+    <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/pulse">
+      <img src="https://img.shields.io/github/last-commit/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=git-lfs&color=32CD32&label=MOMENTUM" alt="last commit">
+    </a>
+  </p>
   
-  <h1>🐙 VibeSkills</h1>
-  <p><b>不只是技能集合，更是你的个人 AI 操作系统</b></p>
-  <p>一个将多个上游项目、数百个 Skills、MCP 入口、插件能力和治理规则，无缝整合进同一运行时的全能 AI 能力栈。</p>
   
-  <p>
+  
+  <p align="center">
+    <img src="https://komarev.com/ghpvc/?username=vibe-skills-foryourhealth&label=NODES%20ACTIVE&color=0078d7&style=flat-square" alt="Visitors">
+    <img src="https://img.shields.io/badge/Architecture-VCO_Runtime-orange?style=flat-square" alt="Arch">
+    <img src="https://img.shields.io/badge/Skills-340%2B-blueviolet?style=flat-square" alt="Skills Count">
+  </p>
+
+  <br/>
+<img src="./logo.png" width="300px" alt="VibeSkills Logo">
+  <h3 align="center"><b>不只是技能集合，更是你的个人 AI 操作系统</b></h3>
+  <p align="center">
+    集成数百个 Skills、MCP 入口与治理规则的工业级运行时框架。
+  </p>
+
+  <p align="center">
     <sub>🧠 规划 · 🛠️ 工程 · 🤖 AI · 🔬 科研 · 🧬 生命科学 · 🎨 可视化 · 🎬 多媒体</sub>
   </p>
 </div>
+
+---
 
 <br/>
 
