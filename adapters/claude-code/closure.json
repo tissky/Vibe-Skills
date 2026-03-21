@@ -7,11 +7,11 @@
   "repo_managed_payload": [
     "runtime core payload",
     "hooks/** for local scaffold use",
-    "settings.json from config/settings.template.claude.json if absent",
+    "settings.vibe.preview.json from config/settings.template.claude.json",
     "canonical vibe mirror under skills/vibe/**"
   ],
   "host_state_written": [
-    "settings.json preview scaffold",
+    "settings.vibe.preview.json preview scaffold",
     "hooks/** preview scaffold"
   ],
   "host_managed_boundaries": [

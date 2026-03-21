@@ -190,9 +190,8 @@ def install_codex_payload(repo_root: Path, target_root: Path):
 
 def install_claude_preview(repo_root: Path, target_root: Path):
     copy_tree(repo_root / "hooks", target_root / "hooks")
-    settings_path = target_root / "settings.json"
-    if not settings_path.exists():
-        copy_file(repo_root / "config" / "settings.template.claude.json", settings_path)
+    preview_settings_path = target_root / "settings.vibe.preview.json"
+    copy_file(repo_root / "config" / "settings.template.claude.json", preview_settings_path)
 
 
 def main():

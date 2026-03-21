@@ -29,6 +29,7 @@ Rules:
    - then run `bash ./check.sh --host claude-code --profile full --deep`
    - on Windows, use the equivalent `pwsh` commands.
    - explicitly tell me this is preview scaffold support, not full closure.
+   - explicitly tell me the installer only writes `settings.vibe.preview.json` as an example and does not overwrite the real `settings.json`.
 5. If I choose `opencode`:
    - on Linux / macOS, run `bash ./scripts/bootstrap/one-shot-setup.sh --host opencode`
    - then run `bash ./check.sh --host opencode --profile full --deep`

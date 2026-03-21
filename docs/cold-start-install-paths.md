@@ -58,12 +58,13 @@ bash ./scripts/bootstrap/one-shot-setup.sh --host claude-code
 你会得到：
 
 - runtime-core payload
-- `settings.template.claude.json` 生成的 preview `settings.json`
+- `settings.template.claude.json` 生成的 preview `settings.vibe.preview.json`
 - hooks scaffold
 - preview health check
 
 你不会得到：
 
+- 自动覆盖真实 `settings.json`
 - 自动插件 provision
 - 自动 MCP host 注册
 - 自动 provider secret 写入

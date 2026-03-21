@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT=""
 TARGET_ROOT=""
 FORCE="false"
+PREVIEW_SETTINGS_FILE="settings.vibe.preview.json"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -20,8 +21,8 @@ if [[ -z "${REPO_ROOT}" || -z "${TARGET_ROOT}" ]]; then
 fi
 
 mkdir -p "${TARGET_ROOT}/hooks"
-if [[ "${FORCE}" == "true" || ! -f "${TARGET_ROOT}/settings.json" ]]; then
-  cp "${REPO_ROOT}/config/settings.template.claude.json" "${TARGET_ROOT}/settings.json"
+if [[ "${FORCE}" == "true" || ! -f "${TARGET_ROOT}/${PREVIEW_SETTINGS_FILE}" ]]; then
+  cp "${REPO_ROOT}/config/settings.template.claude.json" "${TARGET_ROOT}/${PREVIEW_SETTINGS_FILE}"
 fi
 if [[ -d "${REPO_ROOT}/hooks" ]]; then
   cp -R "${REPO_ROOT}/hooks/." "${TARGET_ROOT}/hooks/"
@@ -36,7 +37,7 @@ print(json.dumps({
     "result": "PASS",
     "host_id": "claude-code",
     "target_root": str(target),
-    "settings_path": str((target / "settings.json").resolve()),
+    "preview_settings_path": str((target / "settings.vibe.preview.json").resolve()),
     "hooks_root": str((target / "hooks").resolve()),
 }, ensure_ascii=False, indent=2))
 PY

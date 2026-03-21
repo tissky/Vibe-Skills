@@ -53,7 +53,7 @@ If those are still missing, `manual_actions_pending` is the correct result.
 - Windows is still the strongest authoritative reference path.
 - Linux can approach the authoritative path only when `pwsh` is available and the PowerShell gate surface can run.
 - Linux without `pwsh` is still supported, but it is a degraded path, not full parity.
-- Claude Code remains `preview`.
+- Claude Code remains `preview`, writes `settings.vibe.preview.json` as a separate example scaffold, and does not overwrite the real `settings.json`.
 - Generic hosts remain advisory / contract-consumer territory unless separately proven.
 
 ## Recommended Commands

@@ -29,6 +29,7 @@
    - 然后执行 `bash ./check.sh --host claude-code --profile full --deep`
    - Windows 使用对应的 `pwsh` 命令。
    - 明确告诉我：这只是 preview scaffold，不是 full closure。
+   - 明确告诉我：安装器只会写 `settings.vibe.preview.json` 作为示例，不会覆盖真实 `settings.json`。
 5. 如果我选择 `opencode`：
    - Linux / macOS 使用 `bash ./scripts/bootstrap/one-shot-setup.sh --host opencode`
    - 然后执行 `bash ./check.sh --host opencode --profile full --deep`

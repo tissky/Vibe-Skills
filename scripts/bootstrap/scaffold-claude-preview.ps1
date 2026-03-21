@@ -17,9 +17,9 @@ function Copy-DirContent {
 }
 
 $settingsTemplate = Join-Path $RepoRoot 'config\settings.template.claude.json'
-$settingsTarget = Join-Path $TargetRoot 'settings.json'
-if ($Force -or -not (Test-Path -LiteralPath $settingsTarget)) {
-    Copy-Item -LiteralPath $settingsTemplate -Destination $settingsTarget -Force
+$previewSettingsTarget = Join-Path $TargetRoot 'settings.vibe.preview.json'
+if ($Force -or -not (Test-Path -LiteralPath $previewSettingsTarget)) {
+    Copy-Item -LiteralPath $settingsTemplate -Destination $previewSettingsTarget -Force
 }
 Copy-DirContent -Source (Join-Path $RepoRoot 'hooks') -Destination (Join-Path $TargetRoot 'hooks')
 
@@ -27,6 +27,6 @@ Copy-DirContent -Source (Join-Path $RepoRoot 'hooks') -Destination (Join-Path $T
     result = 'PASS'
     host_id = 'claude-code'
     target_root = [System.IO.Path]::GetFullPath($TargetRoot)
-    settings_path = [System.IO.Path]::GetFullPath($settingsTarget)
+    preview_settings_path = [System.IO.Path]::GetFullPath($previewSettingsTarget)
     hooks_root = [System.IO.Path]::GetFullPath((Join-Path $TargetRoot 'hooks'))
 } | ConvertTo-Json -Depth 10

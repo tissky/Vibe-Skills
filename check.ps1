@@ -416,8 +416,11 @@ function Invoke-AdapterSpecificChecks {
     [string]$NestedBundledPresencePolicy
   )
 
-  if ([string]$Adapter.check_mode -in @('governed', 'preview-scaffold')) {
+  if ([string]$Adapter.check_mode -eq 'governed') {
     Check-Path -Label "settings.json" -Path (Join-Path $TargetRoot 'settings.json')
+  }
+  if ([string]$Adapter.check_mode -eq 'preview-scaffold') {
+    Check-Path -Label "settings.vibe.preview.json" -Path (Join-Path $TargetRoot 'settings.vibe.preview.json')
   }
   if ([string]$Adapter.check_mode -eq 'governed') {
     Check-Path -Label "plugins manifest" -Path (Join-Path $TargetRoot 'config\plugins-manifest.codex.json')

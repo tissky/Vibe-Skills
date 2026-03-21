@@ -542,8 +542,11 @@ fi
 runtime_skill_root="${TARGET_ROOT}/${runtime_target_rel}"
 runtime_nested_skill_root="${runtime_skill_root}/bundled/skills/vibe"
 
-if [[ "${ADAPTER_CHECK_MODE}" == "governed" || "${ADAPTER_CHECK_MODE}" == "preview-scaffold" ]]; then
+if [[ "${ADAPTER_CHECK_MODE}" == "governed" ]]; then
   check_path "settings.json" "${TARGET_ROOT}/settings.json"
+fi
+if [[ "${ADAPTER_CHECK_MODE}" == "preview-scaffold" ]]; then
+  check_path "settings.vibe.preview.json" "${TARGET_ROOT}/settings.vibe.preview.json"
 fi
 if [[ "${ADAPTER_CHECK_MODE}" == "governed" ]]; then
   check_path "plugins manifest" "${TARGET_ROOT}/config/plugins-manifest.codex.json"

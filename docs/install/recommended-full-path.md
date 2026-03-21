@@ -67,7 +67,8 @@ bash ./check.sh --host generic --profile full
 
 ### Claude Code
 
-- repo 现在会 scaffold preview `settings.json` 和 hooks
+- repo 现在会 scaffold preview `settings.vibe.preview.json` 和 hooks
+- repo 不会覆盖真实的 `settings.json`
 - 但这不是 Claude Code full closure
 - 用户仍需自己提供 URL、API key、model，并在宿主侧完成插件/MCP 接入
 

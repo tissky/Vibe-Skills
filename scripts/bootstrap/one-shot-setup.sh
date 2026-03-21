@@ -416,9 +416,19 @@ if [[ "${ADAPTER_BOOTSTRAP_MODE}" == "governed" ]]; then
   bash "${CHECK_SH}" --profile "${PROFILE}" --host "${HOST_ID}" --target-root "${TARGET_ROOT}" --deep
 elif [[ "${ADAPTER_BOOTSTRAP_MODE}" == "preview-scaffold" ]]; then
   echo "[2/5] Writing Claude preview scaffold..."
-  bash "${CLAUDE_SCAFFOLD_SH}" --repo-root "${REPO_ROOT}" --target-root "${TARGET_ROOT}" --force >/dev/null
-  echo "[3/5] Claude preview keeps provider settings host-managed. You must supply url, apikey, and model yourself before claiming online readiness."
-  echo "[4/5] MCP materialization is skipped for Claude preview."
+  scaffold_payload="$(bash "${CLAUDE_SCAFFOLD_SH}" --repo-root "${REPO_ROOT}" --target-root "${TARGET_ROOT}" --force)"
+  python_bin="$(pick_python || true)"
+  if [[ -n "${python_bin}" ]]; then
+    preview_settings_path="$(printf '%s' "${scaffold_payload}" | "${python_bin}" -c 'import json,sys; print(json.load(sys.stdin)["preview_settings_path"])' 2>/dev/null || true)"
+  else
+    preview_settings_path=""
+  fi
+  if [[ -n "${preview_settings_path}" ]]; then
+    echo "[3/5] Claude preview wrote example settings to ${preview_settings_path} and did not modify the real settings.json."
+  else
+    echo "[3/5] Claude preview wrote a separate example settings file and did not modify the real settings.json."
+  fi
+  echo "[4/5] Claude preview keeps provider settings host-managed. You must supply url, apikey, and model yourself before claiming online readiness."
   echo "[5/5] Running preview health check..."
   bash "${CHECK_SH}" --profile "${PROFILE}" --host "${HOST_ID}" --target-root "${TARGET_ROOT}" --deep
 else

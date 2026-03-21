@@ -240,7 +240,7 @@ function Assert-VgoOfficialRuntimeHost {
     $resolvedHostId = Resolve-VgoHostId -HostId $HostId
     if ($resolvedHostId -ne 'codex') {
         throw ([string]::Format(
-            "The governed install/check closure lane currently supports only host='codex'. For host='{0}', the repository is preview-only: use config/settings.template.claude.json, adapters/claude-code/*, and dist/host-claude-code/manifest.json as manual guidance instead of the official installer.",
+            "The governed install/check closure lane currently supports only host='codex'. For host='{0}', use the matching preview or runtime-core lane instead of claiming governed closure.",
             $resolvedHostId
         ))
     }

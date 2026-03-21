@@ -11,6 +11,6 @@
   },
   "notes": [
     "This mapping is template-derived and currently preview-only.",
-    "No official repository install flow writes this target automatically."
+    "The preview installer writes settings.vibe.preview.json as a separate example file and never overwrites this target automatically."
   ]
 }

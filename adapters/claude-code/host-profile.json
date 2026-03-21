@@ -11,8 +11,9 @@
   ],
   "settings_surface": {
     "path": "~/.claude/settings.json",
-    "managed_by_repo": true,
-    "notes": "The repository now ships a truthful preview scaffold and preview health check, but still does not claim full Claude Code closure."
+    "managed_by_repo": false,
+    "preview_scaffold_path": "~/.claude/settings.vibe.preview.json",
+    "notes": "The repository ships a truthful preview scaffold and preview health check, but it does not modify the real Claude settings.json or claim full Claude Code closure."
   },
   "host_managed_surfaces": [
     "plugin enablement",

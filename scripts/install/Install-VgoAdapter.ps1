@@ -200,10 +200,8 @@ function Install-GovernedCodexPayload {
 
 function Install-ClaudePreviewPayload {
     Copy-DirContent -Source (Join-Path $RepoRoot 'hooks') -Destination (Join-Path $TargetRoot 'hooks')
-    $settingsPath = Join-Path $TargetRoot 'settings.json'
-    if (-not (Test-Path -LiteralPath $settingsPath)) {
-        Copy-Item -LiteralPath (Join-Path $RepoRoot 'config\settings.template.claude.json') -Destination $settingsPath -Force
-    }
+    $previewSettingsPath = Join-Path $TargetRoot 'settings.vibe.preview.json'
+    Copy-Item -LiteralPath (Join-Path $RepoRoot 'config\settings.template.claude.json') -Destination $previewSettingsPath -Force
 }
 
 $adapter = Resolve-VgoAdapterDescriptor -RepoRoot $RepoRoot -HostId $HostId

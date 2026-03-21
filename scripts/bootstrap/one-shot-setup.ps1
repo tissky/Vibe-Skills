@@ -184,9 +184,14 @@ switch ([string]$Adapter.bootstrap_mode) {
     }
     'preview-scaffold' {
         Write-Host '[2/5] Writing Claude preview scaffold...' -ForegroundColor Yellow
-        & $claudeScaffoldPath -RepoRoot $repoRoot -TargetRoot $TargetRoot -Force | Out-Null
-        Write-Host '[3/5] Claude preview keeps provider settings host-managed. You must supply url, apikey, and model yourself before claiming online readiness.' -ForegroundColor DarkGray
-        Write-Host '[4/5] User environment sync is skipped for Claude preview.' -ForegroundColor DarkGray
+        $scaffoldPayload = & $claudeScaffoldPath -RepoRoot $repoRoot -TargetRoot $TargetRoot -Force | ConvertFrom-Json
+        $previewSettingsPath = if ($null -ne $scaffoldPayload -and $scaffoldPayload.PSObject.Properties.Name -contains 'preview_settings_path') { [string]$scaffoldPayload.preview_settings_path } else { '' }
+        if (-not [string]::IsNullOrWhiteSpace($previewSettingsPath)) {
+            Write-Host ("[3/5] Claude preview wrote example settings to {0} and did not modify the real settings.json." -f $previewSettingsPath) -ForegroundColor DarkGray
+        } else {
+            Write-Host '[3/5] Claude preview wrote a separate example settings file and did not modify the real settings.json.' -ForegroundColor DarkGray
+        }
+        Write-Host '[4/5] Claude preview keeps provider settings host-managed. You must supply url, apikey, and model yourself before claiming online readiness.' -ForegroundColor DarkGray
         Write-Host '[5/5] Running preview health check...' -ForegroundColor Yellow
         & $checkPath -Profile $Profile -HostId $HostId -TargetRoot $TargetRoot -Deep
     }
