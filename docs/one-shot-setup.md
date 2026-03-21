@@ -84,7 +84,7 @@ Linux / macOS without `pwsh` still gets the full shipped content and the active 
 
 以下部分不会被 repo 静默“装完”，而是会在 doctor 报告里明确标成待处理：
 
-- Codex host plugins
+- Codex 本地设置补充项
 - 用户 API keys / provider secrets
 - host 级 MCP 注册与平台侧权限
 
@@ -134,33 +134,32 @@ bash ./check.sh --profile full --deep
 1. 先补 provider secrets
 2. 先确认 `scrapling` 可调用，把它视作 default full-profile scraping surface
 3. 把 `Cognee` 放在长程增强面，不让它接管 `state_store`
-4. 再补 plugin-backed MCP surfaces
+4. 再补官方支持的 MCP surfaces
 5. `Composio / Activepieces` 仅在你确实需要外部操作能力时再做 setup，并保持 confirm-gated
 
-1. 如果 `OPENAI_API_KEY` 仍是 `placeholder` 或 `missing`，先配置 key。
-2. 如果 `platform_plugin_required` 仍存在，按 doctor 报告中列出的插件逐项 provision。
+1. 如果 `OPENAI_API_KEY` 仍是 `placeholder` 或 `missing`，先在本地配置 key，不要在聊天里粘贴。
+2. 如果是 Claude Code，打开 `~/.claude/settings.json`，只补充缺失的 `env` 字段；如需参考，查看 `~/.claude/settings.vibe.preview.json`。
 3. 如果 `manual_action_required` 的 MCP server 是 `stdio` 模式，先安装对应命令行依赖，再在 host 中注册。
 
 当前 `full` profile 最重要的人工补齐项是：
 
-- host plugin surfaces still tracked by doctor / manifest: `superpowers`、`everything-claude-code`、`claude-code-settings`、`hookify`、`ralph-loop`
 - plugin-backed MCP surfaces: `github`、`context7`、`serena`
 - 你实际要在线使用的 provider secrets，尤其是 `OPENAI_API_KEY`
 
-但默认策略不是“第一次就把 5 个 host plugin 全部装上”。
+但默认策略不是“让用户自己折腾未经官方证明的 Codex hook/plugin 面”。
 
 推荐：
 
 - 第一次安装：先跑 one-shot + deep doctor，允许 `manual_actions_pending`
-- Windows / Codex 参考 lane：优先补 `superpowers` 和 `hookify`
-- `everything-claude-code`、`claude-code-settings`、`ralph-loop`：只在 doctor 仍指向明确缺口时再补
+- Codex：优先补本地配置、官方 MCP 和确有价值的 CLI 依赖
+- Claude Code：优先按本地文件增量补 `settings.json`，不要覆盖原文件
 
 如果你还想进一步增强，推荐顺序是：
 
 1. provider secrets
-2. `superpowers`、`hookify`
-3. plugin-backed MCP surfaces
-4. 其余宿主插件
+2. plugin-backed MCP surfaces
+3. Claude Code 本地 `settings.json` 增量配置
+4. 可选 CLI / 工具链增强
 5. 可选 CLI / 工具链增强
 
-完整决策与安装说明见：[`docs/install/host-plugin-policy.md`](./install/host-plugin-policy.md)
+更细的宿主边界说明见：[`docs/install/recommended-full-path.md`](./install/recommended-full-path.md)

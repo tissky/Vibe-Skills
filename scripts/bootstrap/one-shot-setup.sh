@@ -428,12 +428,12 @@ elif [[ "${ADAPTER_BOOTSTRAP_MODE}" == "preview-scaffold" ]]; then
   else
     echo "[3/5] Claude preview wrote a separate example settings file and did not modify the real settings.json."
   fi
-  echo "[4/5] Claude preview keeps provider settings host-managed. You must supply url, apikey, and model yourself before claiming online readiness."
+  echo "[4/5] Claude preview keeps provider settings host-managed. Open ${TARGET_ROOT}/settings.json and add only the missing env fields there. Use ${TARGET_ROOT}/settings.vibe.preview.json as reference, keep your existing settings, and do not paste API keys into chat."
   echo "[5/5] Running preview health check..."
   bash "${CHECK_SH}" --profile "${PROFILE}" --host "${HOST_ID}" --target-root "${TARGET_ROOT}" --deep
 else
   echo "[2/5] Runtime-core lane does not materialize host settings."
-  echo "[3/5] Runtime-core lane does not seed provider settings. Configure url, apikey, and model in the target agent yourself."
+  echo "[3/5] Runtime-core lane does not seed provider settings. Configure url, apikey, and model in the target agent's local settings or local environment variables. Do not paste secrets into chat."
   echo "[4/5] MCP materialization skipped for runtime-core lane."
   echo "[5/5] Running runtime-core health check..."
   bash "${CHECK_SH}" --profile "${PROFILE}" --host "${HOST_ID}" --target-root "${TARGET_ROOT}" --deep

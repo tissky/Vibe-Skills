@@ -24,12 +24,18 @@ Rules:
    - on Linux / macOS, run `bash ./scripts/bootstrap/one-shot-setup.sh --host codex`
    - then run `bash ./check.sh --host codex --profile full --deep`
    - on Windows, use the equivalent `pwsh` commands.
+   - do not tell me to install `hookify`, `everything-claude-code`, `claude-code-settings`, or `ralph-loop` for Codex.
+   - keep Codex guidance limited to officially supportable local settings, MCP, and optional CLI dependencies.
+   - if online model access is needed, tell me to configure `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and related values in `~/.codex/settings.json` under `env` or in local environment variables, not in chat.
 4. If I choose `claude-code`:
    - on Linux / macOS, run `bash ./scripts/bootstrap/one-shot-setup.sh --host claude-code`
    - then run `bash ./check.sh --host claude-code --profile full --deep`
    - on Windows, use the equivalent `pwsh` commands.
    - explicitly tell me this is preview scaffold support, not full closure.
    - explicitly tell me the installer only writes `settings.vibe.preview.json` as an example and does not overwrite the real `settings.json`.
+   - do not ask me to paste API keys into chat.
+   - tell me to open `~/.claude/settings.json` and add only the required `env` fields while preserving my existing settings.
+   - use `~/.claude/settings.vibe.preview.json` only as a reference, never as a full-file replacement.
 5. If I choose `opencode`:
    - on Linux / macOS, run `bash ./scripts/bootstrap/one-shot-setup.sh --host opencode`
    - then run `bash ./check.sh --host opencode --profile full --deep`
@@ -39,10 +45,9 @@ Rules:
    - prefer the `generic` lane, or switch to the manual copy install path
    - do not pretend host-native integration is complete.
 7. For `claude-code`, `opencode`, and `generic`, you must explicitly remind me before continuing that I need to provide:
-   - `url`
-   - `apikey`
-   - `model`
-   - if those three values are not explicitly provided, you must not describe the environment as online-ready.
+   - `url`, `apikey`, and `model` must be filled into local host settings or local environment variables by me
+   - do not ask me to paste those secrets into chat
+   - if those three values are not configured locally, you must not describe the environment as online-ready.
 8. After installation, give me a concise English summary of:
    - the target agent
    - the commands actually executed
@@ -68,9 +73,9 @@ Rules:
 
 These may still remain host-side or user-side tasks:
 
-- host plugin provisioning
+- local host configuration
 - MCP registration and authorization
-- filling in `url`, `apikey`, and `model`
+- locally filling in `url`, `apikey`, and `model`
 - host-native closure for non-Codex lanes
 
 ## Second Main Install Path

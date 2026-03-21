@@ -68,6 +68,8 @@ If you are not installing into `codex`, and especially if you are wiring another
 - `apikey`
 - `model`
 
+Those values should be filled into local host settings or local environment variables by the user, not pasted into chat.
+
 If those three values are not explicitly configured, the environment must not be described as online-ready.
 
 ## Short Prompt For Other Agents
@@ -80,7 +82,8 @@ Before claiming the environment is ready, check whether the user has explicitly 
 - url
 - apikey
 - model
-If any of them is missing, clearly remind the user to provide all three first.
+If any of them is missing, clearly remind the user to configure all three in local host settings or local environment variables first.
+Do not ask the user to paste secrets into chat.
 Do not describe the environment as online-ready if they are missing.
 ```
 

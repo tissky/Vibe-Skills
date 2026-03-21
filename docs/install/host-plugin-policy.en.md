@@ -4,6 +4,13 @@ This document answers a practical question:
 
 which host plugins should be installed by default for `vco-skills-codex`, which should stay deferred, and which should only be added after a real gap is observed.
 
+2026-03-22 clarification:
+
+- Codex install guidance must now stay within officially supportable surfaces.
+- Claude-style hook/plugin surfaces must not be described as part of the standard Codex install path.
+- Historical `manual-codex` references in this document should be treated as compatibility background, not as default install advice.
+- If you are following the current public install docs, ignore any older recommendation below that tells you to add `hookify`, `everything-claude-code`, `claude-code-settings`, or `ralph-loop` for Codex.
+
 The short answer:
 
 - the repo must not pretend it can auto-install every `manual-codex` plugin

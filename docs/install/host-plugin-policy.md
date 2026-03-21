@@ -4,6 +4,13 @@
 
 `vco-skills-codex` 到底哪些宿主插件应该默认安装，哪些不应该默认安装，哪些必须等到出现真实缺口再安装。
 
+2026-03-22 澄清：
+
+- 对 Codex，当前安装口径必须以官方可证实能力为准。
+- Claude Code 风格的 hook/plugin 面，不应再被描述成 Codex 标准安装要求。
+- 本文中的历史 `manual-codex` 记录只能视为兼容性背景，不能再直接复用为默认安装提示词。
+- 如果你只是按照当前公开安装文档安装，请忽略下文里任何要求为 Codex 补 `hookify`、`everything-claude-code`、`claude-code-settings`、`ralph-loop` 的历史建议。
+
 先说结论：
 
 - 仓库不会假装自己能一键安装所有 `manual-codex` 插件。

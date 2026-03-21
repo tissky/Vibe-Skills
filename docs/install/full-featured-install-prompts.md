@@ -48,11 +48,19 @@
    - 是否已经达到当前平台可宣称的“当前最强支持路径”
 5. 不要把宿主插件、外部 MCP、provider secrets 伪装成已经自动装好。
 6. 如果结果是 `manual_actions_pending`，请继续列出剩余人工动作，不要把它说成失败。
-7. 如果需要补宿主插件，遵守当前默认策略：
-   - 优先建议 `superpowers`、`hookify`
-   - 不要默认要求第一次就安装 `everything-claude-code`、`claude-code-settings`、`ralph-loop`
-8. 在整个过程中，不要修改仓库运行时逻辑；只做安装、检查、结论整理。
-> 提醒：AI 智能治理层相关配置不要直接复用仓库示例值。启用该层时，必须由用户自行提供并确认 `url`、`apikey`、`model`；如果由 AI 协助安装或生成配置，提示词里也应先明确提醒用户填写这三项，再继续写入配置。
+7. 如果需要补 MCP 或本地配置，只围绕宿主当前可官方证明支持的能力给建议；不要推荐未经证明的 Codex hook/plugin 面。
+8. 对 Claude Code：
+   - 不要要求我把 key 粘贴到聊天里
+   - 告诉我打开 `~/.claude/settings.json`
+   - 只在 `env` 下补充缺少字段，例如 `VCO_AI_PROVIDER_URL`、`VCO_AI_PROVIDER_API_KEY`、`VCO_AI_PROVIDER_MODEL`
+   - 如有需要，再按实际宿主连接方式补 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`
+   - 允许参考 `~/.claude/settings.vibe.preview.json`，但不能整文件覆盖
+9. 对 Codex：
+   - 不要推荐安装 `hookify`、`everything-claude-code`、`claude-code-settings`、`ralph-loop`
+   - 只围绕 `~/.codex` 下的本地设置、官方 MCP 注册和可选 CLI 依赖给建议
+   - 如果需要在线模型能力，告诉我去 `~/.codex/settings.json` 的 `env` 或本地环境变量里配置 `OPENAI_API_KEY`、`OPENAI_BASE_URL` 等值
+10. 在整个过程中，不要修改仓库运行时逻辑；只做安装、检查、结论整理。
+> 提醒：AI 智能治理层相关配置必须由用户在本地文件或本地环境变量中填写。不要要求用户在聊天里直接提供 `url`、`apikey`、`model`。
 ```
 
 ## Windows 满血安装提示词
@@ -81,10 +89,8 @@
    - 哪些 host-managed surfaces 还需要手工 provision
 4. 不要把宿主插件、provider secrets、plugin-backed MCP 伪装成自动完成。
 5. 如果是 `manual_actions_pending`，请把剩余动作列成清单。
-6. 宿主插件默认策略遵守：
-   - 优先建议 `superpowers`、`hookify`
-   - 不默认要求第一次就安装 `everything-claude-code`、`claude-code-settings`、`ralph-loop`
-> 提醒：AI 智能治理层相关配置不要直接复用仓库示例值。启用该层时，必须由用户自行提供并确认 `url`、`apikey`、`model`；如果由 AI 协助安装或生成配置，提示词里也应先明确提醒用户填写这三项，再继续写入配置。
+6. 对 Codex 只围绕本地 settings、官方 MCP 和可选 CLI 依赖给建议；不要推荐 `hookify` 等未经官方能力证明的 hook/plugin 安装。
+7. 如果需要启用 AI 智能治理层相关配置，不要让我把 `url`、`apikey`、`model` 发到聊天里，而是告诉我应该在本地哪里配置。
 ```
 
 ## Linux 满血安装提示词
@@ -113,12 +119,10 @@
    - readiness_state
    - 是否仍有 host-managed surfaces 未补齐
    - 是否建议我继续补 `pwsh`
-   - 是否建议我继续补宿主插件
-6. 默认宿主插件策略遵守：
-   - 优先建议 `superpowers`、`hookify`
-   - 不默认要求第一次就安装 `everything-claude-code`、`claude-code-settings`、`ralph-loop`
+   - 是否建议我继续补官方支持的 MCP 或本地配置
+6. 不要推荐 `hookify` 等未经官方能力证明的 Codex hook/plugin 安装。
 7. 如果结果为 `manual_actions_pending`，列出剩余人工动作，不要把它说成安装失败。
-> 提醒：AI 智能治理层相关配置不要直接复用仓库示例值。启用该层时，必须由用户自行提供并确认 `url`、`apikey`、`model`；如果由 AI 协助安装或生成配置，提示词里也应先明确提醒用户填写这三项，再继续写入配置。
+> 提醒：AI 智能治理层相关配置必须由用户在本地文件或本地环境变量中填写。不要要求用户在聊天里直接提供 `url`、`apikey`、`model`。
 
 ```
 
@@ -132,6 +136,5 @@
 ## 相关文档
 
 - [`recommended-full-path.md`](./recommended-full-path.md)
-- [`host-plugin-policy.md`](./host-plugin-policy.md)
 - [`../one-shot-setup.md`](../one-shot-setup.md)
 - [`../cold-start-install-paths.md`](../cold-start-install-paths.md)

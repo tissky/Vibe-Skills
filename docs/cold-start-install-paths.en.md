@@ -61,6 +61,11 @@ bash ./scripts/bootstrap/one-shot-setup.sh --skip-external-install
 - the basic doctor flow executed
 - clarity on whether the remaining gap is repo-owned or host-owned
 
+Important boundary:
+
+- do not treat the Codex lane as support for Claude-style hook/plugin installation
+- for Codex, the supportable host-side surfaces are local `~/.codex` settings, official MCP registration, and optional CLI dependencies
+
 ### What you should not expect
 
 - external CLIs are not guaranteed to be installed
@@ -167,9 +172,9 @@ Do not treat remaining manual actions as failure if the repo-owned surface is al
 Suggested order:
 
 1. add provider secrets
-2. add `superpowers` and `hookify`
-3. add `github`, `context7`, and `serena`
-4. only then consider `everything-claude-code`, `claude-code-settings`, and `ralph-loop` if doctor still points to a real gap
+2. add `github`, `context7`, and `serena` through official MCP registration where supported
+3. for Claude Code, open `~/.claude/settings.json` and add only the missing `env` fields
+4. only then add optional CLI enhancements if they solve a real gap
 
 See:
 

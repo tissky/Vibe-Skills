@@ -191,13 +191,13 @@ switch ([string]$Adapter.bootstrap_mode) {
         } else {
             Write-Host '[3/5] Claude preview wrote a separate example settings file and did not modify the real settings.json.' -ForegroundColor DarkGray
         }
-        Write-Host '[4/5] Claude preview keeps provider settings host-managed. You must supply url, apikey, and model yourself before claiming online readiness.' -ForegroundColor DarkGray
+        Write-Host ("[4/5] Claude preview keeps provider settings host-managed. Open {0} and add only the missing env fields there. Use {1} as reference, keep your existing settings, and do not paste API keys into chat." -f (Join-Path $TargetRoot 'settings.json'), (Join-Path $TargetRoot 'settings.vibe.preview.json')) -ForegroundColor DarkGray
         Write-Host '[5/5] Running preview health check...' -ForegroundColor Yellow
         & $checkPath -Profile $Profile -HostId $HostId -TargetRoot $TargetRoot -Deep
     }
     'runtime-core' {
         Write-Host '[2/5] Runtime-core lane does not materialize host settings.' -ForegroundColor DarkGray
-        Write-Host '[3/5] Runtime-core lane does not seed provider settings. Configure url, apikey, and model in the target agent yourself.' -ForegroundColor DarkGray
+        Write-Host '[3/5] Runtime-core lane does not seed provider settings. Configure url, apikey, and model in the target agent''s local settings or local environment variables. Do not paste secrets into chat.' -ForegroundColor DarkGray
         Write-Host '[4/5] User environment sync skipped for runtime-core lane.' -ForegroundColor DarkGray
         Write-Host '[5/5] Running runtime-core health check...' -ForegroundColor Yellow
         & $checkPath -Profile $Profile -HostId $HostId -TargetRoot $TargetRoot -Deep

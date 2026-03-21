@@ -68,6 +68,8 @@ cp ./config/skills-lock.json <TARGET_ROOT>/config/skills-lock.json
 - `apikey`
 - `model`
 
+但这些值应该由你自己填到目标代理的本地配置或本地环境变量里，不要在聊天里直接提供。
+
 如果这三项没有明确配置好，就不能把环境描述成“已完成 online readiness”。
 
 ## 给其他代理的最短提示词
@@ -80,7 +82,8 @@ Before claiming the environment is ready, check whether the user has explicitly 
 - url
 - apikey
 - model
-If any of them is missing, clearly remind the user to provide all three first.
+If any of them is missing, clearly remind the user to configure all three in local host settings or local environment variables first.
+Do not ask the user to paste secrets into chat.
 Do not describe the environment as online-ready if they are missing.
 ```
 

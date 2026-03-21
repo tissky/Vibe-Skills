@@ -42,7 +42,8 @@ bash ./check.sh --host generic --profile full
 - `claude-code` is scaffold + preview check, not full closure.
 - `claude-code` writes `settings.vibe.preview.json` as an example scaffold and does not overwrite the real `settings.json`.
 - `generic` and `opencode` install only runtime-core into neutral target roots.
-- Provider URL / API key / model remain user-supplied host-managed inputs for non-governed lanes.
+- Provider URL / API key / model remain local user-managed inputs for non-governed lanes.
+- Installation guidance must tell users where to configure those values locally, not ask them to paste secrets into chat.
 
 ## Verification
 

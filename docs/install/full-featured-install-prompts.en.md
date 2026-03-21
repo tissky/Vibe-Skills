@@ -54,11 +54,19 @@ Repository address: https://github.com/foryourhealth111-pixel/Vibe-Skills
    - not auto-enabled
    - still confirm-gated when enabled
 9. If the result is `manual_actions_pending`, list the remaining manual actions instead of calling it a failure.
-10. If host plugins still need to be provisioned, follow the current default policy:
-   - recommend `superpowers` and `hookify` first
-   - do not require `everything-claude-code`, `claude-code-settings`, and `ralph-loop` on first install by default
-11. Do not modify runtime logic during this flow; only install, check, and summarize.
-> Reminder: Do not directly reuse repository example values ​​for AI-powered intelligent governance layer configurations. When enabling this layer, users must provide and confirm the `url`, `apikey`, and `model` themselves. If AI assists in installation or generating the configuration, the prompt should clearly remind users to fill in these three items before continuing to write the configuration.
+10. If follow-up is needed, only recommend officially supportable surfaces for the host; do not recommend unproven Codex hook/plugin layers.
+11. For Claude Code:
+   - do not ask me to paste secrets into chat
+   - tell me to open `~/.claude/settings.json`
+   - only add missing `env` fields such as `VCO_AI_PROVIDER_URL`, `VCO_AI_PROVIDER_API_KEY`, and `VCO_AI_PROVIDER_MODEL`
+   - add `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` only when they are actually needed for the host connection
+   - use `~/.claude/settings.vibe.preview.json` only as a reference, never as a full-file replacement
+12. For Codex:
+   - do not recommend `hookify`, `everything-claude-code`, `claude-code-settings`, or `ralph-loop`
+   - keep guidance limited to local `~/.codex` settings, official MCP registration, and optional CLI dependencies
+   - if online model access is needed, tell me to configure values such as `OPENAI_API_KEY` and `OPENAI_BASE_URL` in `~/.codex/settings.json` under `env` or in local environment variables
+13. Do not modify runtime logic during this flow; only install, check, and summarize.
+> Reminder: AI governance layer values must be filled in by the user in local files or local environment variables. Do not ask the user to paste `url`, `apikey`, or `model` into chat.
 ```
 
 ## Windows Prompt
@@ -87,10 +95,8 @@ Requirements:
    - which host-managed surfaces still need manual provisioning
 4. Do not pretend host plugins, provider secrets, or plugin-backed MCP surfaces were completed automatically.
 5. If the result is `manual_actions_pending`, list the remaining actions clearly.
-6. Follow the current host-plugin default policy:
-   - recommend `superpowers` and `hookify` first
-   - do not require `everything-claude-code`, `claude-code-settings`, and `ralph-loop` on first install by default
-> Reminder: Do not directly reuse repository example values ​​for AI-powered intelligent governance layer configurations. When enabling this layer, users must provide and confirm the `url`, `apikey`, and `model` themselves. If AI assists in installation or generating the configuration, the prompt should clearly remind users to fill in these three items before continuing to write the configuration.
+6. Keep Codex guidance limited to local settings, official MCP, and optional CLI dependencies; do not recommend unproven hook/plugin installs such as `hookify`.
+7. If AI governance layer values are needed, tell me where to configure them locally instead of asking me to paste `url`, `apikey`, or `model` into chat.
 ```
 
 ## Linux Prompt
@@ -119,12 +125,10 @@ Requirements:
    - readiness_state
    - whether host-managed surfaces are still missing
    - whether I should add `pwsh`
-   - whether I should provision host plugins next
-6. Follow the current host-plugin default policy:
-   - recommend `superpowers` and `hookify` first
-   - do not require `everything-claude-code`, `claude-code-settings`, and `ralph-loop` on first install by default
+   - whether I should add official MCP or local configuration next
+6. Do not recommend unproven Codex hook/plugin installs such as `hookify`.
 7. If the result is `manual_actions_pending`, list the remaining manual actions instead of calling the install failed.
-> Reminder: Do not directly reuse repository example values ​​for AI-powered intelligent governance layer configurations. When enabling this layer, users must provide and confirm the `url`, `apikey`, and `model` themselves. If AI assists in installation or generating the configuration, the prompt should clearly remind users to fill in these three items before continuing to write the configuration.
+> Reminder: AI governance layer values must be filled in by the user in local files or local environment variables. Do not ask the user to paste `url`, `apikey`, or `model` into chat.
 ```
 
 
@@ -138,6 +142,5 @@ If you want to place this into a README, issue template, or community post, add 
 ## Related Docs
 
 - [`recommended-full-path.en.md`](./recommended-full-path.en.md)
-- [`host-plugin-policy.en.md`](./host-plugin-policy.en.md)
 - [`../one-shot-setup.md`](../one-shot-setup.md)
 - [`../cold-start-install-paths.en.md`](../cold-start-install-paths.en.md)

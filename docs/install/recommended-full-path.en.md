@@ -106,16 +106,28 @@ Do not add everything at once. A safer order is:
    In practice, confirm that `scrapling` is callable if you want the out-of-box scraping surface from the full profile.
 3. keep the memory lane clean
    Treat `Cognee` as the governed long-term graph-memory owner only. Do not let it replace `state_store`.
-4. add recommended host plugins
-   Prioritize `superpowers` and `hookify`.
-5. add plugin-backed MCP surfaces
+4. add official MCP surfaces
    For example `github`, `context7`, and `serena`.
-6. wire external action integrations only when you truly need them
+5. wire external action integrations only when you truly need them
    `Composio` and `Activepieces` stay predeclared, confirm-gated, and setup-required by design.
-7. only add the remaining host plugins when doctor still points to a concrete gap
-   For example `everything-claude-code`, `claude-code-settings`, and `ralph-loop`.
-8. add optional CLI enhancements
+6. for Claude Code, open `~/.claude/settings.json` and add only the missing `env` fields instead of replacing the file.
+7. add optional CLI enhancements
    For example `claude-flow`, `xan`, and `ivy`.
+
+For Codex specifically:
+
+- keep guidance limited to local `~/.codex` settings, official MCP registration, and optional CLI dependencies
+- do not recommend unproven hook/plugin installs such as `hookify`, `everything-claude-code`, `claude-code-settings`, or `ralph-loop`
+- if online model access is needed, point users to `~/.codex/settings.json` under `env` or local environment variables for values such as `OPENAI_API_KEY` and `OPENAI_BASE_URL`
+- do not ask users to paste those secrets into chat
+
+For Claude Code specifically:
+
+- do not ask users to paste secrets into chat
+- point them to `~/.claude/settings.json`
+- tell them to add values such as `VCO_AI_PROVIDER_URL`, `VCO_AI_PROVIDER_API_KEY`, and `VCO_AI_PROVIDER_MODEL` under `env`
+- add `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` only when needed for the host connection
+- use `~/.claude/settings.vibe.preview.json` only as a reference
 
 ## When You Should Escalate To The Enterprise-Governed Path
 

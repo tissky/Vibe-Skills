@@ -63,14 +63,28 @@ bash ./check.sh --host generic --profile full
 ### Codex
 
 - repo 会尽量完成 runtime、settings、MCP materialization 和 deep doctor
-- 但插件 provision、provider secrets 仍有 host-managed 部分
+- 但在线能力所需的 provider secrets 仍有 host-managed 部分
+- 对 Codex，不要把未经官方证明的 hook/plugin 面当成标准安装要求
+- Codex 当前应只围绕 `~/.codex` 本地设置、官方 MCP 注册和可选 CLI 依赖来增强
+- 如果需要在线模型能力，优先在 `~/.codex/settings.json` 的 `env` 下或本地环境变量里配置：
+  - `OPENAI_API_KEY`
+  - `OPENAI_BASE_URL`
+  - 以及按需使用的其他本地 provider 变量
+- 不要要求用户把这些密钥直接贴到聊天里
 
 ### Claude Code
 
 - repo 现在会 scaffold preview `settings.vibe.preview.json` 和 hooks
 - repo 不会覆盖真实的 `settings.json`
 - 但这不是 Claude Code full closure
-- 用户仍需自己提供 URL、API key、model，并在宿主侧完成插件/MCP 接入
+- 启用 AI 治理层时，用户应自己打开 `~/.claude/settings.json`，只在 `env` 下补充所需字段
+- 常见需要本地填写的字段：
+  - `VCO_AI_PROVIDER_URL`
+  - `VCO_AI_PROVIDER_API_KEY`
+  - `VCO_AI_PROVIDER_MODEL`
+  - 如宿主连接需要，再补 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`
+- 允许参考 `~/.claude/settings.vibe.preview.json`，但不能整文件覆盖
+- 不要要求用户把 API key 贴到聊天里
 
 ### Generic / OpenCode
 
@@ -82,8 +96,9 @@ bash ./check.sh --host generic --profile full
 
 对 `claude-code`、`generic`、`opencode` 这些非 governed Codex lane，AI 智能治理层必须提醒用户三件事：
 
-- 你需要自己提供 `url`
-- 你需要自己提供 `apikey`
-- 你需要自己提供 `model`
+- 你需要自己在本地宿主配置或本地环境变量里填写 `url`
+- 你需要自己在本地宿主配置或本地环境变量里填写 `apikey`
+- 你需要自己在本地宿主配置或本地环境变量里填写 `model`
+- 不要要求用户在聊天里直接提供这些值
 
-如果这些值没有显式提供，不能把环境描述成“已完成 online readiness”。
+如果这些值没有在本地配置好，不能把环境描述成“已完成 online readiness”。
