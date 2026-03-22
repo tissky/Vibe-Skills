@@ -306,7 +306,15 @@ graph LR
 感谢LinuxDo各位佬的支持！欢迎大家加入 https://linux.do/ 各种技术交流，AI前沿资讯，AI经验分享，尽在Linuxdo！
 
 ---
-[![Star History Chart](https://api.star-history.com/svg?repos=foryourhealth111-pixel/Vibe-Skills&type=Date)](https://star-history.com/#foryourhealth111-pixel/Vibe-Skills&Date)
+## Star History
+
+<a href="https://www.star-history.com/?repos=foryourhealth111-pixel%2FVibe-Skills&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=foryourhealth111-pixel/Vibe-Skills&type=date&theme=dark&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=foryourhealth111-pixel/Vibe-Skills&type=date&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=foryourhealth111-pixel/Vibe-Skills&type=date&legend=bottom-right" />
+ </picture>
+</a>
 ---
 
 <div align="center">
