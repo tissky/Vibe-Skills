@@ -113,6 +113,59 @@ function Resolve-VgoRepoRoot {
     return [System.IO.Path]::GetFullPath($candidates[$candidates.Count - 1])
 }
 
+function Get-VgoParentPath {
+    param(
+        [AllowEmptyString()] [string]$Path,
+        [switch]$AllowFilesystemRoot
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ''
+    }
+
+    try {
+        $fullPath = [System.IO.Path]::GetFullPath($Path)
+    } catch {
+        return ''
+    }
+
+    $parent = Split-Path -Parent $fullPath
+    if ([string]::IsNullOrWhiteSpace($parent) -or $parent -eq $fullPath) {
+        return ''
+    }
+
+    try {
+        $parentFull = [System.IO.Path]::GetFullPath($parent)
+    } catch {
+        return ''
+    }
+
+    $root = [System.IO.Path]::GetPathRoot($parentFull)
+    if (-not $AllowFilesystemRoot -and -not [string]::IsNullOrWhiteSpace($root) -and $parentFull -eq $root) {
+        return ''
+    }
+
+    return $parentFull
+}
+
+function Test-VgoCanonicalRepoExecution {
+    param(
+        [AllowEmptyString()] [string]$StartPath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($StartPath)) {
+        return $false
+    }
+
+    try {
+        $repoRoot = Resolve-VgoRepoRoot -StartPath $StartPath
+    } catch {
+        return $false
+    }
+
+    return (Test-Path -LiteralPath (Join-Path $repoRoot '.git'))
+}
+
 function Resolve-VgoHomeDirectory {
     param(
         [AllowEmptyString()] [string]$HomePath = ''

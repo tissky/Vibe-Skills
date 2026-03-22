@@ -47,6 +47,38 @@ resolve_default_target_root() {
   esac
 }
 
+safe_parent_dir() {
+  local path="${1:-}"
+  [[ -n "${path}" ]] || return 0
+  local parent=""
+  parent="$(cd "${path}/.." 2>/dev/null && pwd || true)"
+  if [[ -z "${parent}" || "${parent}" == "${path}" || "${parent}" == "/" ]]; then
+    return 0
+  fi
+  printf '%s' "${parent}"
+}
+
+canonical_repo_available() {
+  local current="${1:-}"
+  [[ -n "${current}" ]] || return 1
+  current="$(cd "${current}" 2>/dev/null && pwd || true)"
+  [[ -n "${current}" ]] || return 1
+
+  while [[ -n "${current}" ]]; do
+    if [[ -e "${current}/.git" && -f "${current}/config/version-governance.json" ]]; then
+      return 0
+    fi
+    local parent
+    parent="$(dirname "${current}")"
+    if [[ "${parent}" == "${current}" ]]; then
+      break
+    fi
+    current="${parent}"
+  done
+
+  return 1
+}
+
 assert_target_root_matches_host_intent() {
   local target_root="$1"
   local host_id="$2"
@@ -72,10 +104,14 @@ fi
 assert_target_root_matches_host_intent "${TARGET_ROOT}" "${HOST_ID}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CANONICAL_SKILLS_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-WORKSPACE_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-WORKSPACE_SKILLS_ROOT="${WORKSPACE_ROOT}/skills"
-WORKSPACE_SUPERPOWERS_ROOT="${WORKSPACE_ROOT}/superpowers/skills"
+CANONICAL_SKILLS_ROOT="$(safe_parent_dir "${SCRIPT_DIR}")"
+WORKSPACE_ROOT="$(safe_parent_dir "${CANONICAL_SKILLS_ROOT}")"
+WORKSPACE_SKILLS_ROOT=""
+WORKSPACE_SUPERPOWERS_ROOT=""
+if [[ -n "${WORKSPACE_ROOT}" ]]; then
+  WORKSPACE_SKILLS_ROOT="${WORKSPACE_ROOT}/skills"
+  WORKSPACE_SUPERPOWERS_ROOT="${WORKSPACE_ROOT}/superpowers/skills"
+fi
 SP_SRC_ROOT="${SCRIPT_DIR}/bundled/superpowers-skills"
 ADAPTER_RESOLVER="${SCRIPT_DIR}/scripts/common/resolve_vgo_adapter.py"
 ADAPTER_INSTALLER="${SCRIPT_DIR}/scripts/install/install_vgo_adapter.py"
@@ -213,7 +249,7 @@ run_runtime_freshness_gate() {
     return 0
   fi
 
-  if [[ ! -d "${SCRIPT_DIR}/.git" ]]; then
+  if ! canonical_repo_available "${SCRIPT_DIR}"; then
     echo "[WARN] Runtime freshness gate requires the canonical repo root; skipping because no outer .git root was found."
     return 0
   fi
