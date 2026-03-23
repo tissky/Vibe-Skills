@@ -170,6 +170,28 @@ VibeSkills' routing mechanism ensures:
 - ✅ **Controllability**: Users can override default routing through explicit invocation (e.g., `/vibe`)
 - ✅ **Stability**: 129 governance rules prevent conflicts and divergence
 
+### M/L/XL Execution Grades
+
+After selecting the main skill, the router automatically determines the execution grade based on task complexity:
+
+- **M (Medium)**: Narrow execution, usually single-agent or tightly scoped work
+- **L (Large)**: Medium-complexity work that needs design, planning, review, and bounded subagent coordination
+- **XL (Extra Large)**: Larger work that benefits from parallelism, longer execution waves, and multi-agent orchestration
+
+These three grades are **internal execution grades**. The system chooses them automatically after requirement clarification and before plan execution, based on task complexity, parallelism, and governance needs. Users only need to invoke `/vibe` or `$vibe`, and the system will automatically determine which grade to use.
+
+**Grade Selection Logic**:
+- By default, routing automatically decides based on task content
+- `L` is usually more restrained and token-efficient
+- `XL` trades more tokens for parallelism and execution time
+
+**Explicit Preference**: You can also express a grade preference in your request, for example:
+```text
+I want you to execute this task according to the plan and start an XL-grade workflow /vibe
+```
+
+This should be understood as a strong routing hint rather than a way to bypass governance and hard-force a grade.
+
 ---
 
 ## ✦ Panoramic Capability Map: Your all-in-one workspace
@@ -331,39 +353,6 @@ We know that building in isolation cannot keep up with the speed of the AI era. 
 - In **Codex**, type: `$vibe`
 - The usage is the same as calling skills, such as in Codex: "I want you to design a XXXX $vibe". In Claude Code, it would be: "I want you to design a XXX /vibe".
 - **Recommended practice**: if you want every follow-up turn to clearly remain inside the VibeSkills governed workflow, keep explicitly appending `$vibe` or `/vibe` in each turn. If a turn does not explicitly include the invocation syntax, it should not be advertised as "still explicitly locked into the vibe runtime" for that turn.
-
-### 🧭 How the `M / L / XL` execution grades are designed
-
-`vibe` now exposes one unified governed runtime entry for users. It is not a system where users manually choose between `M`, `L`, and `XL` as public modes.
-
-- `M`: narrow execution, usually single-agent or tightly scoped work
-- `L`: medium-complexity work that needs design, planning, review, and bounded subagent coordination
-- `XL`: larger work that benefits from parallelism, longer execution waves, and multi-agent orchestration
-
-Those grades still exist, but they are **internal execution grades**. The runtime chooses them automatically after `deep_interview` and before `plan_execute`, based on task complexity, parallelism, and governance needs.
-
-By default, routing **automatically decides** whether a task should run as `M`, `L`, or `XL`.
-
-- if you do not specify anything, the system makes the internal grade decision from the task itself
-- as a rough operator mental model: `L` is usually more restrained and more token-efficient, while `XL` is closer to spending more tokens in exchange for parallelism and time
-
-That is why the README now shows one public `vibe` entry while still mentioning `M/L/XL`:
-
-- for users: explicitly invoke `$vibe` or `/vibe` to enter the same governed runtime
-- for the system: decide internally whether the task should run as `M`, `L`, or `XL`
-
-You can also **express a grade preference explicitly** in the request, for example:
-
-```text
-I want you to execute this task according to the plan and start an XL-grade workflow $vibe
-```
-
-```text
-I want you to execute this task according to the plan and start an L-grade workflow $vibe
-```
-
-That should be understood as a strong routing hint rather than a way to bypass governance and hard-force a grade.
-In other words, users can explicitly signal a preferred grade, but the final decision still belongs to the `vibe` runtime after considering task content and governance boundaries.
 
 
 
