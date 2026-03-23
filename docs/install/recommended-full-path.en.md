@@ -131,19 +131,20 @@ If you installed to a custom `TargetRoot`, replace `~/.codex` with that install 
 
 - this is the strongest repo-governed path today
 - guidance should stay limited to local `~/.codex` settings, official MCP registration, and optional CLI dependencies
-- hooks are currently frozen because of compatibility issues and are not part of the standard install path
+- the hook install surface is still paused while the author works through compatibility issues; that is a current boundary, not an install failure
 - if Codex base online model access is needed, point users to `~/.codex/settings.json` under `env` or local environment variables for `OPENAI_API_KEY` and `OPENAI_BASE_URL`
-- if the user also wants the governance AI online layer under Codex, they must additionally configure:
+- if the user also wants the governance AI online layer under Codex, they can optionally add these enhancement settings:
   - `VCO_AI_PROVIDER_URL`
   - `VCO_AI_PROVIDER_API_KEY`
   - `VCO_AI_PROVIDER_MODEL`
 - `OPENAI_*` is not the same as `VCO_AI_PROVIDER_*`; the former is Codex base online provider access, while the latter is the governance AI online layer
 - do not ask users to paste secrets into chat
+- any missing MCP, `VCO_AI_PROVIDER_*`, or similar local-provider setup should be framed as optional enhancement work rather than install warnings
 
 ### Claude Code
 
 - this is preview guidance, not full closure
-- hooks are currently frozen because of compatibility issues
+- the hook install surface is still paused while the author works through compatibility issues; that is a current boundary, not an install failure
 - the installer no longer writes `settings.vibe.preview.json`
 - users should open `~/.claude/settings.json` and add only the required fields under `env`
 - common fields are:
@@ -152,6 +153,7 @@ If you installed to a custom `TargetRoot`, replace `~/.codex` with that install 
   - `VCO_AI_PROVIDER_MODEL`
 - add `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` only when needed for the host connection
 - do not ask users to paste secrets into chat
+- any missing MCP, provider, or governance-AI-online setup should be framed as optional enhancement work rather than install warnings
 
 ## AI Governance Reminder
 

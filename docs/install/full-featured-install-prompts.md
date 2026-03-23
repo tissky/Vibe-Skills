@@ -47,8 +47,8 @@
    - 还缺哪些 host-managed surfaces
    - 是否已经达到当前平台可宣称的“当前最强支持路径”
 5. 不要把宿主插件、外部 MCP、provider secrets 伪装成已经自动装好。
-6. 如果结果是 `manual_actions_pending`，请继续列出剩余人工动作，不要把它说成失败。
-7. 如果需要补 MCP 或本地配置，只围绕宿主当前可官方证明支持的能力给建议；并明确说明当前 hook 因兼容性问题暂不提供安装。
+6. 如果结果是 `manual_actions_pending`，请继续列出剩余人工动作，并把它整理成推荐的下一步，不要把它说成失败。
+7. 如果需要补 MCP 或本地配置，只围绕宿主当前可官方证明支持的能力给建议；并用推荐口吻说明：当前 hook 安装面仍在作者处理兼容性，因此暂未开放，这不是安装失败。
 8. 对 Claude Code：
    - 不要要求我把 key 粘贴到聊天里
    - 告诉我打开 `~/.claude/settings.json`
@@ -56,11 +56,11 @@
    - 如有需要，再按实际宿主连接方式补 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`
    - 当前版本不会再写 `settings.vibe.preview.json`
 9. 对 Codex：
-   - 明确告诉我：当前 hook 因兼容性问题暂不提供安装
+   - 推荐告诉我：当前 hook 安装面暂未开放，主要是作者还在处理兼容性；这不代表安装有问题
    - 只围绕 `~/.codex` 下的本地设置、官方 MCP 注册和可选 CLI 依赖给建议
    - 如果需要在线模型能力，告诉我去 `~/.codex/settings.json` 的 `env` 或本地环境变量里配置 `OPENAI_API_KEY`、`OPENAI_BASE_URL` 等值
    - 同时明确告诉我：`OPENAI_*` 只代表 Codex 基础在线 provider，不等于治理 AI 在线层已经配置完成
-   - 如果还要启用治理 AI 在线层，提醒我在本地额外配置 `VCO_AI_PROVIDER_URL`、`VCO_AI_PROVIDER_API_KEY`、`VCO_AI_PROVIDER_MODEL`
+   - 如果还要启用治理 AI 在线层，把 `VCO_AI_PROVIDER_URL`、`VCO_AI_PROVIDER_API_KEY`、`VCO_AI_PROVIDER_MODEL` 作为可选增强设置推荐给我，我可以按需继续让你补装
 10. 在整个过程中，不要修改仓库运行时逻辑；只做安装、检查、结论整理。
 > 提醒：AI 智能治理层相关配置必须由用户在本地文件或本地环境变量中填写。不要要求用户在聊天里直接提供 `url`、`apikey`、`model`。
 ```
@@ -91,7 +91,7 @@
    - 哪些 host-managed surfaces 还需要手工 provision
 4. 不要把宿主插件、provider secrets、plugin-backed MCP 伪装成自动完成。
 5. 如果是 `manual_actions_pending`，请把剩余动作列成清单。
-6. 对 Codex 只围绕本地 settings、官方 MCP 和可选 CLI 依赖给建议；并明确说明当前 hook 因兼容性问题暂不提供安装。
+6. 对 Codex 只围绕本地 settings、官方 MCP 和可选 CLI 依赖给建议；并用推荐口吻说明当前 hook 安装面仍在作者处理兼容性，因此暂未开放，这不是安装失败。
 7. 如果需要启用 AI 智能治理层相关配置，不要让我把 `url`、`apikey`、`model` 发到聊天里，而是告诉我应该在本地哪里配置。
 ```
 
@@ -121,9 +121,9 @@
    - readiness_state
    - 是否仍有 host-managed surfaces 未补齐
    - 是否建议我继续补 `pwsh`
-   - 是否建议我继续补官方支持的 MCP 或本地配置
-6. 明确说明当前 hook 因兼容性问题暂不提供安装。
-7. 如果结果为 `manual_actions_pending`，列出剩余人工动作，不要把它说成安装失败。
+   - 是否建议我继续补官方支持的 MCP 或本地配置，并把这些内容当作可选增强项来推荐
+6. 用推荐口吻说明当前 hook 安装面仍在作者处理兼容性，因此暂未开放，这不是安装失败。
+7. 如果结果为 `manual_actions_pending`，列出剩余人工动作，并把它说成推荐补齐项，不要把它说成安装失败。
 > 提醒：AI 智能治理层相关配置必须由用户在本地文件或本地环境变量中填写。不要要求用户在聊天里直接提供 `url`、`apikey`、`model`。
 
 ```

@@ -163,9 +163,10 @@
 
 - 当前版本只支持 `codex` 和 `claude-code`
 - `codex` 走本地 settings + MCP + 可选 CLI 的保守增强路线
-- `codex` / `claude-code` 当前都不安装 hook，因为兼容性问题尚未解决
+- `codex` / `claude-code` 当前都暂未开放 hook 安装面，因为作者仍在处理兼容性；这不是用户安装失败
 - `claude-code` 走 preview guidance 路线，不覆盖真实 `settings.json`
 - provider 的 `url` / `apikey` / `model` 由用户在本地配置，不在聊天里提供
+- 未补的 MCP、provider 和治理 AI 在线层配置，应优先表述成可选增强设置或推荐下一步
 - 其他代理目前不在公开支持面内
 
 ## 什么时候再扩展这份文档

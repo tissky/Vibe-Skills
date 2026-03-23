@@ -134,6 +134,11 @@ warn_note() {
   WARN=$((WARN+1))
 }
 
+info_note() {
+  local message="$1"
+  echo "[INFO] ${message}"
+}
+
 normalize_path() {
   local value="${1:-}"
   if [[ -z "$value" ]]; then
@@ -555,7 +560,7 @@ if [[ "${ADAPTER_CHECK_MODE}" == "governed" ]]; then
   check_path "settings.json" "${TARGET_ROOT}/settings.json"
 fi
 if [[ "${ADAPTER_CHECK_MODE}" == "preview-guidance" ]]; then
-  warn_note "claude preview hook/settings scaffold is intentionally disabled because of current compatibility issues"
+  info_note "claude preview hook/settings scaffold remains intentionally unavailable while the author works through compatibility issues; this is a current product boundary, not an install failure"
 fi
 if [[ "${ADAPTER_CHECK_MODE}" == "governed" ]]; then
   check_path "plugins manifest" "${TARGET_ROOT}/config/plugins-manifest.codex.json"

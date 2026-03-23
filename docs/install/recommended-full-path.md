@@ -131,19 +131,20 @@ jq -r '.release.version, .release.updated' ~/.codex/skills/vibe/config/version-g
 
 - 当前是最完整的 repo-governed 路径
 - 建议范围只包括本地 `~/.codex` 设置、官方 MCP 注册和可选 CLI 依赖
-- hook 当前因兼容性问题被冻结，不属于标准安装内容
+- hook 安装面当前仍在作者处理兼容性，所以暂未开放；这不是安装失败，只是当前标准安装边界
 - 如果需要 Codex 基础在线模型能力，去 `~/.codex/settings.json` 的 `env` 或本地环境变量里配置 `OPENAI_API_KEY`、`OPENAI_BASE_URL`
-- 如果需要启用 Codex 下的治理 AI 在线层，还要额外在本地配置：
+- 如果需要启用 Codex 下的治理 AI 在线层，可按需再补这些可选增强设置：
   - `VCO_AI_PROVIDER_URL`
   - `VCO_AI_PROVIDER_API_KEY`
   - `VCO_AI_PROVIDER_MODEL`
 - `OPENAI_*` 不等于 `VCO_AI_PROVIDER_*`；前者是 Codex 基础在线 provider，后者是治理 AI 在线层
 - 不要要求用户把密钥贴到聊天里
+- 未补的 MCP、`VCO_AI_PROVIDER_*` 或类似配置，应优先表述成推荐增强项，而不是安装告警
 
 ### Claude Code
 
 - 这是 preview guidance，不是 full closure
-- hook 当前因兼容性问题被冻结
+- hook 安装面当前仍在作者处理兼容性，所以暂未开放；这不是安装失败
 - 安装器不再写 `settings.vibe.preview.json`
 - 用户应自己打开 `~/.claude/settings.json`，只在 `env` 下补所需字段
 - 常见字段：
@@ -152,6 +153,7 @@ jq -r '.release.version, .release.updated' ~/.codex/skills/vibe/config/version-g
   - `VCO_AI_PROVIDER_MODEL`
 - 如宿主连接需要，再补 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`
 - 不要要求用户把密钥贴到聊天里
+- 未补的 MCP、provider 或治理 AI 在线层配置，应优先表述成推荐增强项，而不是安装告警
 
 ## AI 治理层提示
 

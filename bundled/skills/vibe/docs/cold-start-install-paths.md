@@ -41,7 +41,19 @@ bash ./check.sh --host codex --profile full --deep
 
 你不会得到：
 
-- hook 安装
+- hook 安装（当前作者仍在处理兼容性，所以这个安装面暂未开放；这不是你的安装失败）
+
+## Codex 的正确后续动作
+
+- 打开 `~/.codex/settings.json`
+- 如果只是基础在线 provider，先看 `env` 下的 `OPENAI_API_KEY`、`OPENAI_BASE_URL`
+- 如果还要启用治理 AI 在线层，可按需再补这些可选增强设置：
+  - `VCO_AI_PROVIDER_URL`
+  - `VCO_AI_PROVIDER_API_KEY`
+  - `VCO_AI_PROVIDER_MODEL`
+- `OPENAI_*` 不等于 `VCO_AI_PROVIDER_*`
+- 不要把密钥贴到聊天里
+- 未补的官方 MCP 注册或治理 AI 在线层配置，默认都应视为按需启用的增强项
 
 ## 路径二：Claude Code
 
@@ -67,7 +79,7 @@ bash ./check.sh --host claude-code --profile full --deep
 你不会得到：
 
 - 自动覆盖真实 `settings.json`
-- hook 安装
+- hook 安装（当前作者仍在处理兼容性，所以这个安装面暂未开放；这不是你的安装失败）
 - 自动插件 provision
 - 自动 MCP 宿主注册
 - 自动 provider secret 写入
@@ -80,10 +92,13 @@ bash ./check.sh --host claude-code --profile full --deep
 - 如宿主连接需要，再补 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`
 - 当前版本不会再生成 `settings.vibe.preview.json`
 - 不要把密钥贴到聊天里
+- 未补的 MCP、provider 或治理 AI 在线层配置，默认都应视为按需启用的增强项
 
 ## 冷启动阶段最重要的边界
 
 - `HostId` / `--host` 决定宿主语义，不是路径名决定
 - 当前没有其他宿主的公开安装入口
-- hook 当前因兼容性问题被冻结，不在支持宿主的安装面里
-- 如果本地还没配好 `url` / `apikey` / `model`，不能描述成“已完成 online readiness”
+- hook 安装面当前仍在作者处理兼容性，所以暂未开放；这表示边界尚未开放，不表示安装出错
+- 如果本地还没配好治理 AI 的 `url` / `apikey` / `model`，不能描述成“已完成治理 AI online readiness”
+- 对 `codex`，`OPENAI_*` 已配置最多只能说明基础在线 provider 已就绪，不能顺带声称治理 AI 在线层也已就绪
+- 未补的官方 MCP 注册、`VCO_AI_PROVIDER_*` 或其他本地 provider 配置，应优先表述成可选增强设置，而不是安装告警

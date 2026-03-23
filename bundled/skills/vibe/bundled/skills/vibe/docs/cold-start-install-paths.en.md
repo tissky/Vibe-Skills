@@ -41,7 +41,19 @@ What you get:
 
 What you do not get:
 
-- hook installation
+- hook installation yet; that install surface is still paused while the author works through compatibility issues, so this should not be framed as your install failing
+
+## Correct Follow-Up For Codex
+
+- open `~/.codex/settings.json`
+- if you only want the base online provider, start with `OPENAI_API_KEY` and `OPENAI_BASE_URL` under `env`
+- if you also want the governance AI online layer, you can optionally add these enhancement settings:
+  - `VCO_AI_PROVIDER_URL`
+  - `VCO_AI_PROVIDER_API_KEY`
+  - `VCO_AI_PROVIDER_MODEL`
+- `OPENAI_*` is not the same as `VCO_AI_PROVIDER_*`
+- do not paste secrets into chat
+- any missing official MCP registration or governance-AI online configuration should be described as optional enhancement work, not as an install failure
 
 ## Path 2: Claude Code
 
@@ -67,7 +79,7 @@ What you get:
 What you do not get:
 
 - automatic overwrite of the real `settings.json`
-- hook installation
+- hook installation yet; that install surface is still paused while the author works through compatibility issues, so this should not be framed as your install failing
 - automatic plugin provisioning
 - automatic host MCP registration
 - automatic provider secret wiring
@@ -80,10 +92,13 @@ What you do not get:
 - add `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` only when needed for the host connection
 - the current version no longer generates `settings.vibe.preview.json`
 - do not paste secrets into chat
+- any missing MCP, provider, or governance-AI online configuration should be described as optional enhancement work by default
 
 ## Most Important Cold-Start Boundary
 
 - `HostId` / `--host` decides host semantics, not the folder name alone
 - there is no public install entry for any other host in the current version
-- hooks are currently frozen because of compatibility issues and are outside the supported install surface
-- if `url` / `apikey` / `model` are not configured locally yet, the environment must not be described as online-ready
+- the hook install surface is still paused while the author works through compatibility issues; that is a current boundary, not an install error
+- if the governance AI `url` / `apikey` / `model` are not configured locally yet, the environment must not be described as governance-AI-online-ready
+- for `codex`, `OPENAI_*` being configured only proves the base online provider is ready, not the governance AI online layer
+- any missing official MCP registration, `VCO_AI_PROVIDER_*`, or similar local provider settings should be framed as optional enhancements rather than warning-style install defects

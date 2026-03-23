@@ -420,7 +420,7 @@ function Invoke-AdapterSpecificChecks {
     Check-Path -Label "settings.json" -Path (Join-Path $TargetRoot 'settings.json')
   }
   if ([string]$Adapter.check_mode -eq 'preview-guidance') {
-    Warn-Note -Message 'claude preview hook/settings scaffold is intentionally disabled because of current compatibility issues'
+    Write-Host '[INFO] claude preview hook/settings scaffold remains intentionally unavailable while the author works through compatibility issues; this is a current product boundary, not an install failure' -ForegroundColor Cyan
   }
   if ([string]$Adapter.check_mode -eq 'governed') {
     Check-Path -Label "plugins manifest" -Path (Join-Path $TargetRoot 'config\plugins-manifest.codex.json')

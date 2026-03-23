@@ -163,9 +163,10 @@ If you need to reference this policy in issues, README text, discussions, or ins
 
 - the current version supports only `codex` and `claude-code`
 - `codex` follows a conservative path centered on local settings, MCP, and optional CLI enhancements
-- the current version does not install hooks for `codex` or `claude-code` because compatibility issues remain unresolved
+- the current version does not open the hook install surface for `codex` or `claude-code` because the author is still working through compatibility issues; this is not a user install failure
 - `claude-code` follows a preview guidance path and does not overwrite the real `settings.json`
 - provider `url` / `apikey` / `model` values are configured locally by the user, not pasted into chat
+- missing MCP, provider, or governance-AI-online setup should be framed first as optional enhancement work or recommended next steps
 - other agents are outside the current public support surface
 
 ## When This Document Should Expand Again
