@@ -8,15 +8,17 @@ This document exists to explain the current real support boundary.
 
 ## Current Supported Surface
 
-At the moment, only two hosts are supported:
+The current public surface supports three hosts:
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
 Within that scope:
 
 - `codex`: recommended path
 - `claude-code`: preview guidance path
+- `windsurf`: preview runtime-core path
 
 `TargetRoot` is only the install path.
 `HostId` / `--host` is what decides host semantics.
@@ -45,6 +47,18 @@ pwsh -File .\check.ps1 -HostId claude-code -Profile full -Deep
 ```bash
 bash ./scripts/bootstrap/one-shot-setup.sh --host claude-code
 bash ./check.sh --host claude-code --profile full --deep
+```
+
+### Windsurf
+
+```powershell
+pwsh -File .\scripts\bootstrap\one-shot-setup.ps1 -HostId windsurf
+pwsh -File .\check.ps1 -HostId windsurf -Profile full -Deep
+```
+
+```bash
+bash ./scripts/bootstrap/one-shot-setup.sh --host windsurf
+bash ./check.sh --host windsurf --profile full --deep
 ```
 
 ## Boundaries That Must Stay Explicit
@@ -76,6 +90,15 @@ bash ./check.sh --host claude-code --profile full --deep
 - add `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` only when needed for the host connection
 - do not ask users to paste secrets into chat
 - any missing MCP, provider, or governance-AI-online setup should be framed as optional enhancement work rather than install warnings
+
+### Windsurf
+
+- this is `preview runtime-core`, not full closure
+- the default host root is `~/.codeium/windsurf`
+- the repo currently owns only shared runtime payload plus optional materialization of `mcp_config.json` and `global_workflows/`
+- do not describe it as having login, account, provider, plugin, or workspace-projection closure
+- if host-native capabilities are needed, finish them inside Windsurf itself
+- do not ask users to paste secrets into chat
 
 ## AI Governance Reminder
 

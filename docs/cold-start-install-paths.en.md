@@ -4,15 +4,17 @@ This document answers the only cold-start questions that matter right now: which
 
 ## One-Line Conclusion
 
-At the moment, only two hosts are supported:
+The current public surface supports three hosts:
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
 Within that scope:
 
 - `codex`: recommended path
 - `claude-code`: preview guidance path
+- `windsurf`: preview runtime-core path
 
 If you want another agent, the current version should be treated as unsupported rather than silently routed into a hidden lane.
 
@@ -94,11 +96,52 @@ What you do not get:
 - do not paste secrets into chat
 - any missing MCP, provider, or governance-AI online configuration should be described as optional enhancement work by default
 
+## Path 3: Windsurf
+
+Windows:
+
+```powershell
+pwsh -File .\scripts\bootstrap\one-shot-setup.ps1 -HostId windsurf
+pwsh -File .\check.ps1 -HostId windsurf -Profile full -Deep
+```
+
+Linux / macOS:
+
+```bash
+bash ./scripts/bootstrap/one-shot-setup.sh --host windsurf
+bash ./check.sh --host windsurf --profile full --deep
+```
+
+What you get:
+
+- shared runtime payload
+- a preview runtime-core install under `~/.codeium/windsurf`
+- `mcp_config.json` materialized if it is absent
+- `global_workflows/` materialized when the install payload includes `commands/`
+
+What you do not get:
+
+- full closure
+- automatic overwrite of host-native settings
+- automatic provider credential wiring
+- automatic plugin provisioning
+- automatic login or account takeover
+- automatic workspace projection
+
+## Correct Follow-Up For Windsurf
+
+- open `~/.codeium/windsurf`
+- confirm that `mcp_config.json` and `global_workflows/` exist when expected
+- finish any host-native account, provider, or plugin setup inside Windsurf itself
+- do not paste secrets into chat
+- describe this path only as `preview runtime-core`, not as full closure or host-native online readiness
+
 ## Most Important Cold-Start Boundary
 
 - `HostId` / `--host` decides host semantics, not the folder name alone
-- there is no public install entry for any other host in the current version
+- there is no public install entry beyond `codex`, `claude-code`, and `windsurf` in the current version
 - the hook install surface is still paused while the author works through compatibility issues; that is a current boundary, not an install error
 - if the governance AI `url` / `apikey` / `model` are not configured locally yet, the environment must not be described as governance-AI-online-ready
 - for `codex`, `OPENAI_*` being configured only proves the base online provider is ready, not the governance AI online layer
 - any missing official MCP registration, `VCO_AI_PROVIDER_*`, or similar local provider settings should be framed as optional enhancements rather than warning-style install defects
+- for `windsurf`, the repo currently owns only shared runtime payload plus preview runtime-core materialization, not login, account, provider, or plugin closure

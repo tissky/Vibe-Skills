@@ -9,10 +9,11 @@
 
 ## 当前支持边界
 
-当前公开支持面只包括：
+当前公开支持面包括：
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
 除此之外的其他代理，当前版本都不应被描述成“已支持安装”。
 
@@ -148,23 +149,69 @@
 
 如果本地还没配好这些值，也不能把环境描述成“已完成 online readiness”。
 
+## Windsurf 的默认策略
+
+对 `windsurf`，当前口径要比 `codex` 更克制，比 `claude-code` 更聚焦在 shared runtime payload。
+
+### 当前真实状态
+
+`windsurf` 现在是：
+
+- preview runtime-core
+- 不是 full closure
+- 默认宿主根目录是 `~/.codeium/windsurf`
+- repo 只负责共享 runtime payload，以及按需物化 `mcp_config.json` 和 `global_workflows/`
+
+### 仓库会做什么
+
+当前仓库只会做这些事：
+
+- 安装 shared runtime payload
+- 在目标目录缺少 `mcp_config.json` 时补一份
+- 当安装 payload 包含 `commands/` 时同步物化 `global_workflows/`
+- 运行对应的 preview runtime-core 检查
+
+### 仓库不会做什么
+
+当前仓库不会自动完成：
+
+- 覆盖 Windsurf 宿主真实设置
+- 自动写入 provider 凭据
+- 自动完成插件 provision
+- 自动登录 / 账号接管
+- 自动 workspace projection
+
+### 用户应当怎么做
+
+正确方式是：
+
+- 打开 `~/.codeium/windsurf`
+- 检查 `mcp_config.json` 与 `global_workflows/` 是否存在
+- 如需账号、provider 或插件能力，在 Windsurf 宿主侧继续本地完成
+- 不要把密钥贴到聊天里
+
+如果这些宿主原生能力还没补完，也不能把环境描述成“已完成 Windsurf full closure”。
+
 ## 宿主插件的当前政策结论
 
 如果只看当前版本，公开文档应该坚持下面这组结论：
 
 1. `codex` 没有额外的默认宿主插件前置要求。
-2. `claude-code` 也不是靠“补一堆宿主插件”来完成接入，而是靠 preview guidance + 用户本地配置补全。
-3. 历史上出现过的某些插件名，不等于当前社区文档还应该继续推荐它们。
-4. 只要某个能力没有被仓库稳定、公开、可验证地接入，就不该写成默认安装要求。
+2. `claude-code` 不是靠“补一堆宿主插件”来完成接入，而是靠 preview guidance + 用户本地配置补全。
+3. `windsurf` 也不是靠仓库接管宿主账号或插件来完成接入，而是 preview runtime-core + 宿主侧本地补全。
+4. 历史上出现过的某些插件名，不等于当前社区文档还应该继续推荐它们。
+5. 只要某个能力没有被仓库稳定、公开、可验证地接入，就不该写成默认安装要求。
 
 ## 推荐的社区表述
 
 如果你要在 issue、README、讨论区或安装提示词里引用这份策略，推荐用下面这种说法：
 
-- 当前版本只支持 `codex` 和 `claude-code`
+- 当前版本支持 `codex`、`claude-code`、`windsurf`
 - `codex` 走本地 settings + MCP + 可选 CLI 的保守增强路线
-- `codex` / `claude-code` 当前都暂未开放 hook 安装面，因为作者仍在处理兼容性；这不是用户安装失败
 - `claude-code` 走 preview guidance 路线，不覆盖真实 `settings.json`
+- `windsurf` 走 preview runtime-core 路线，默认根目录是 `~/.codeium/windsurf`
+- `windsurf` 当前只物化 shared runtime payload、`mcp_config.json`、`global_workflows/`，不接管登录、账号、provider、插件
+- `codex` / `claude-code` / `windsurf` 当前都暂未开放 hook 安装面，因为作者仍在处理兼容性；这不是用户安装失败
 - provider 的 `url` / `apikey` / `model` 由用户在本地配置，不在聊天里提供
 - 未补的 MCP、provider 和治理 AI 在线层配置，应优先表述成可选增强设置或推荐下一步
 - 其他代理目前不在公开支持面内

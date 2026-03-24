@@ -282,7 +282,7 @@ We know that building in isolation cannot keep up with the speed of the AI era. 
 * 📜 [VibeSkills manifesto](./docs/manifesto.md)
 
 **Installation and configuration guide**
-* Current public support surface: **Claude Code and Codex only**
+* Current public support surface: **`codex`, `claude-code`, and `windsurf` (`preview runtime-core`)**
 * ⚡️ [Prompt-based install (recommended default)](./docs/install/one-click-install-release-copy.en.md)
   The prompt now explicitly distinguishes Codex base online provider settings (`OPENAI_*`) from the governance AI online layer (`VCO_AI_PROVIDER_*`), and requires the assistant to explain what those fields do, why they matter, and where they must be configured locally.
 * 📁 [Manual copy install (offline / no-admin)](./docs/install/manual-copy-install.en.md)

@@ -4,12 +4,13 @@ If you do not want to run the install scripts and only want to place the files m
 
 **copy the VibeSkills runtime directories into your target host root.**
 
-This path currently supports only two hosts:
+This path currently supports three public hosts:
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
-If your target is not one of those two, the current version should not be described as supported installation.
+If your target is not one of those three, the current version should not be described as supported installation.
 
 ## What To Copy
 
@@ -39,6 +40,12 @@ The target directory should end up containing paths like:
 - `<TARGET_ROOT>/config/upstream-lock.json`
 - `<TARGET_ROOT>/config/skills-lock.json` if present
 
+If the target host is `windsurf`, also note:
+
+- the default target root should be `~/.codeium/windsurf`
+- to match the scripted result, mirror `commands/` into `<TARGET_ROOT>/global_workflows/`
+- to match the scripted result, copy `mcp/servers.template.json` to `<TARGET_ROOT>/mcp_config.json` when it is absent
+
 ## What You Still Need To Configure Yourself
 
 Manual copy only places the repo files. It does not finish host-local configuration.
@@ -67,6 +74,15 @@ You still need to configure locally:
   - `ANTHROPIC_BASE_URL`
   - `ANTHROPIC_AUTH_TOKEN`
 
+### If you install into Windsurf
+
+You still need to confirm locally:
+
+- the target root is `~/.codeium/windsurf`
+- `mcp_config.json` exists, or is copied from `mcp/servers.template.json`
+- `global_workflows/` is materialized from `commands/` when needed
+- account, provider, plugin, and workspace-native host capabilities are still completed inside Windsurf itself
+
 ## What This Path Does Not Do Automatically
 
 Manual copy does not automatically complete:
@@ -75,10 +91,11 @@ Manual copy does not automatically complete:
 - MCP registration
 - provider credential wiring
 - edits to Claude Code's real `settings.json`
+- Windsurf login / account / provider / plugin closure
 
 The important current boundary is:
 
-- `codex` and `claude-code` currently do **not** install hooks
+- `codex`, `claude-code`, and `windsurf` currently do **not** install hooks
 - hook installation is temporarily frozen because of compatibility issues
 
 ## Final Boundary

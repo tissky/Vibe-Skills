@@ -297,7 +297,7 @@ graph LR
 * 🔄 如果你后续要覆盖更新版本：放在 `skills/custom/` 与 `config/custom-workflows.json` 的自定义治理通常可保留；但直接改官方 runtime / 官方 skill / 官方 mcp/rules 的内容，更新时可能被覆盖。
 
 **安装与配置指南**
-* 当前公开支持面：**仅支持 Claude Code 和 Codex**
+* 当前公开支持面：**`codex`、`claude-code`、`windsurf`（preview runtime-core）**
 * 当前对外公开版本：**全量版本 + 可自定义添加治理**、**仅核心框架 + 可自定义添加治理**
 * ⚡️ [提示词安装（默认推荐）](./docs/install/one-click-install-release-copy.md)
   这里已经整理成更容易扫读的安装入口：先看版本差异，再复制对应提示词，再继续看自定义接入。现在也包含“版本更新提示词”。

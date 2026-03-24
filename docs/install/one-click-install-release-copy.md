@@ -14,10 +14,11 @@
 
 `workflow` 仍保留为兼容 / 过渡 lane，但不再作为普通用户首页主推荐版本。
 
-暂时只支持两个目标宿主：
+当前公开支持三个目标宿主：
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
 ## 先看结论
 
@@ -37,7 +38,7 @@
 
 ## 你只需要做什么
 
-1. 选择宿主：`codex` 或 `claude-code`
+1. 选择宿主：`codex`、`claude-code` 或 `windsurf`
 2. 选择公开版本：`全量版本 + 可自定义添加治理` 或 `仅核心框架 + 可自定义添加治理`
 3. 复制下面对应提示词给 AI，让 AI 执行安装
 
@@ -106,7 +107,7 @@
 仓库地址：https://github.com/foryourhealth111-pixel/Vibe-Skills
 
 在执行任何安装命令前，你必须先问我：
-“你要把 VibeSkills 安装到哪个宿主里？当前只支持：codex 或 claude-code。”
+“你要把 VibeSkills 安装到哪个宿主里？当前只支持：codex、claude-code 或 windsurf。”
 
 在我回答宿主后，你还必须再问我：
 “你要安装哪个公开版本？当前只支持：全量版本+可自定义添加治理，或 仅核心框架+可自定义添加治理。”
@@ -114,7 +115,7 @@
 规则：
 1. 在我明确回答目标宿主之前，不要开始安装。
 2. 在我明确回答公开版本之前，不要开始安装。
-3. 如果我回答的宿主不是 `codex` 或 `claude-code`，请直接告诉我：当前版本暂不支持该宿主安装，并停止继续伪装安装。
+3. 如果我回答的宿主不是 `codex`、`claude-code` 或 `windsurf`，请直接告诉我：当前版本暂不支持该宿主安装，并停止继续伪装安装。
 4. 如果我回答的公开版本不是“全量版本+可自定义添加治理”或“仅核心框架+可自定义添加治理”，请直接告诉我：当前公开安装说明暂不支持该版本名，并停止继续伪装安装。
 5. 先判断当前系统是 Windows 还是 Linux / macOS，并使用对应命令格式。
 6. 这次如果我选择的是“全量版本+可自定义添加治理”，你必须把它映射到安装 profile：`full`。
@@ -154,16 +155,25 @@
      - `VCO_AI_PROVIDER_MODEL`：治理 AI 在线分析、治理增强或相关 overlay 要调用的模型名。
    - 还要明确告诉我为什么要配置它们：如果你希望启用 AI 治理层的在线能力，而不是只跑本地 runtime / prompt / check 流程，就需要这三项；没配时只能说“本地安装完成，但治理 AI 在线能力未就绪”，不能伪装成 full closure 或 online readiness。
    - 还要明确告诉我去哪里配置：优先去 `~/.claude/settings.json` 的 `env` 下本地填写，或使用本地环境变量；不要让我把 URL、API key、model 贴到聊天里。
-9. 对 `codex` 和 `claude-code`，都不要要求我把密钥、URL 或 model 直接粘贴到聊天里；只告诉我去本地 settings 或本地环境变量里配置。
-10. 如果这些本地 provider 字段没有配置好，不能把环境描述成“已完成 online readiness”。
-11. 安装完成后，请用简洁中文告诉我：
+9. 如果我选择 `windsurf`：
+   - Linux / macOS 使用 `bash ./scripts/bootstrap/one-shot-setup.sh --host windsurf --profile full`
+   - 然后执行 `bash ./check.sh --host windsurf --profile full --deep`
+   - Windows 使用对应的 `pwsh` 命令。
+   - 明确告诉我：这只是 preview runtime-core，不是 full closure。
+   - 明确告诉我：默认宿主根目录是 `~/.codeium/windsurf`。
+   - 明确告诉我：当前仓库只负责 shared runtime payload，以及在缺少时物化 `mcp_config.json` 和 `global_workflows/`。
+   - 明确告诉我：登录、账号、provider、插件、workspace 等宿主原生能力仍然要在 Windsurf 侧本地完成。
+   - 不要要求我把 API key 直接发到聊天里。
+10. 对 `codex`、`claude-code` 和 `windsurf`，都不要要求我把密钥、URL 或 model 直接粘贴到聊天里；只告诉我去本地 settings 或本地环境变量里配置。
+11. 如果这些本地 provider 字段没有配置好，不能把环境描述成“已完成 online readiness”。
+12. 安装完成后，请用简洁中文告诉我：
    - 目标宿主
    - 公开版本
    - 实际映射的 profile
    - 实际执行的命令
    - 已完成的部分
    - 仍需我手动处理的部分
-12. 不要把宿主插件、MCP 注册、provider 凭据伪装成已经自动完成；未补的项目优先表述成可选增强项或推荐下一步。
+13. 不要把宿主插件、MCP 注册、provider 凭据伪装成已经自动完成；未补的项目优先表述成可选增强项或推荐下一步。
 ```
 
 ### 提示词 B：仅核心框架 + 可自定义添加治理
@@ -186,7 +196,7 @@
 仓库地址：https://github.com/foryourhealth111-pixel/Vibe-Skills
 
 在执行任何安装命令前，你必须先问我：
-“你要把 VibeSkills 安装到哪个宿主里？当前只支持：codex 或 claude-code。”
+“你要把 VibeSkills 安装到哪个宿主里？当前只支持：codex、claude-code 或 windsurf。”
 
 在我回答宿主后，你还必须再问我：
 “你要安装哪个公开版本？当前只支持：全量版本+可自定义添加治理，或 仅核心框架+可自定义添加治理。”
@@ -194,7 +204,7 @@
 规则：
 1. 在我明确回答目标宿主之前，不要开始安装。
 2. 在我明确回答公开版本之前，不要开始安装。
-3. 如果我回答的宿主不是 `codex` 或 `claude-code`，请直接告诉我：当前版本暂不支持该宿主安装，并停止继续伪装安装。
+3. 如果我回答的宿主不是 `codex`、`claude-code` 或 `windsurf`，请直接告诉我：当前版本暂不支持该宿主安装，并停止继续伪装安装。
 4. 如果我回答的公开版本不是“全量版本+可自定义添加治理”或“仅核心框架+可自定义添加治理”，请直接告诉我：当前公开安装说明暂不支持该版本名，并停止继续伪装安装。
 5. 先判断当前系统是 Windows 还是 Linux / macOS，并使用对应命令格式。
 6. 这次如果我选择的是“仅核心框架+可自定义添加治理”，你必须把它映射到安装 profile：`framework-only`。
@@ -234,17 +244,26 @@
      - `VCO_AI_PROVIDER_MODEL`：治理 AI 在线分析、治理增强或相关 overlay 要调用的模型名。
    - 还要明确告诉我为什么要配置它们：如果你希望启用 AI 治理层的在线能力，而不是只跑本地 runtime / prompt / check 流程，就需要这三项；没配时只能说“本地安装完成，但治理 AI 在线能力未就绪”，不能伪装成 full closure 或 online readiness。
    - 还要明确告诉我去哪里配置：优先去 `~/.claude/settings.json` 的 `env` 下本地填写，或使用本地环境变量；不要让我把 URL、API key、model 贴到聊天里。
-9. 对 `codex` 和 `claude-code`，都不要要求我把密钥、URL 或 model 直接粘贴到聊天里；只告诉我去本地 settings 或本地环境变量里配置。
-10. 如果这些本地 provider 字段没有配置好，不能把环境描述成“已完成 online readiness”。
-11. 安装完成后，请用简洁中文告诉我：
+9. 如果我选择 `windsurf`：
+   - Linux / macOS 使用 `bash ./scripts/bootstrap/one-shot-setup.sh --host windsurf --profile framework-only`
+   - 然后执行 `bash ./check.sh --host windsurf --profile framework-only --deep`
+   - Windows 使用对应的 `pwsh` 命令。
+   - 明确告诉我：这只是 preview runtime-core，不是 full closure。
+   - 明确告诉我：默认宿主根目录是 `~/.codeium/windsurf`。
+   - 明确告诉我：当前仓库只负责 shared runtime payload，以及在缺少时物化 `mcp_config.json` 和 `global_workflows/`。
+   - 明确告诉我：登录、账号、provider、插件、workspace 等宿主原生能力仍然要在 Windsurf 侧本地完成。
+   - 不要要求我把 API key 直接发到聊天里。
+10. 对 `codex`、`claude-code` 和 `windsurf`，都不要要求我把密钥、URL 或 model 直接粘贴到聊天里；只告诉我去本地 settings 或本地环境变量里配置。
+11. 如果这些本地 provider 字段没有配置好，不能把环境描述成“已完成 online readiness”。
+12. 安装完成后，请用简洁中文告诉我：
    - 目标宿主
    - 公开版本
    - 实际映射的 profile
    - 实际执行的命令
    - 已完成的部分
    - 仍需我手动处理的部分
-12. 还要额外明确告诉我：当前拿到的是治理框架底座，不等于默认 workflow core 已经齐备；如果我后续要接入自己的 workflow，请引导我继续走 custom workflow governed onboarding，而不是伪装成已经开箱即用。
-13. 不要把宿主插件、MCP 注册、provider 凭据伪装成已经自动完成。
+13. 还要额外明确告诉我：当前拿到的是治理框架底座，不等于默认 workflow core 已经齐备；如果我后续要接入自己的 workflow，请引导我继续走 custom workflow governed onboarding，而不是伪装成已经开箱即用。
+14. 不要把宿主插件、MCP 注册、provider 凭据伪装成已经自动完成。
 ```
 
 ## 安装完成后你会看到什么
@@ -274,6 +293,7 @@
 - hook 的后续兼容性等待（当前是作者侧兼容性边界，不是你的安装失败）
 - `url` / `apikey` / `model` 的本地填写
 - Claude Code 的真实 `settings.json` 人工补充
+- Windsurf 的登录 / 账号 / provider / 插件 / workspace 原生配置
 - custom workflow 的 manifest 声明与治理规则补齐
 
 ## 安装后如何继续自定义添加 skills / 治理
@@ -346,7 +366,7 @@
 仓库地址：https://github.com/foryourhealth111-pixel/Vibe-Skills
 
 在执行任何更新命令前，你必须先问我：
-“你当前是装在哪个宿主里？当前只支持：codex 或 claude-code。”
+“你当前是装在哪个宿主里？当前只支持：codex、claude-code 或 windsurf。”
 
 在我回答宿主后，你还必须再问我：
 “你当前要更新到哪个公开版本？当前只支持：全量版本+可自定义添加治理，或 仅核心框架+可自定义添加治理。”
@@ -400,7 +420,7 @@
 仓库地址：https://github.com/foryourhealth111-pixel/Vibe-Skills
 
 在执行任何更新命令前，你必须先问我：
-“你当前是装在哪个宿主里？当前只支持：codex 或 claude-code。”
+“你当前是装在哪个宿主里？当前只支持：codex、claude-code 或 windsurf。”
 
 在我回答宿主后，你还必须再问我：
 “你当前要更新到哪个公开版本？当前只支持：全量版本+可自定义添加治理，或 仅核心框架+可自定义添加治理。”

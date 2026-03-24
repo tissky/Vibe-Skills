@@ -2,10 +2,11 @@
 
 This is the default installation path.
 
-At the moment, only two target hosts are supported:
+The current public surface supports three target hosts:
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
 ## Prompt To Copy Into AI
 
@@ -14,11 +15,11 @@ You are now my VibeSkills installation assistant.
 Repository: https://github.com/foryourhealth111-pixel/Vibe-Skills
 
 Before running any install command, you must ask me:
-"Which host do you want to install VibeSkills into? Currently supported: codex or claude-code."
+"Which host do you want to install VibeSkills into? Currently supported: codex, claude-code, or windsurf."
 
 Rules:
 1. Do not start installation until I explicitly answer which target host I want.
-2. If I answer with anything other than `codex` or `claude-code`, tell me clearly that this version does not support that host yet, and stop instead of pretending installation is complete.
+2. If I answer with anything other than `codex`, `claude-code`, or `windsurf`, tell me clearly that this version does not support that host yet, and stop instead of pretending installation is complete.
 3. Detect whether the current system is Windows or Linux / macOS, and use the matching command format.
 4. If I choose `codex`:
    - on Linux / macOS, run `bash ./scripts/bootstrap/one-shot-setup.sh --host codex`
@@ -56,19 +57,28 @@ Rules:
      - `VCO_AI_PROVIDER_MODEL`: the model name used when governance AI needs online analysis, governance enhancement, or related overlay capability.
    - also explain why they matter: if the user wants AI-governance online capability rather than only local runtime / prompt / check flows, these three fields are required; if they are missing, the install can only be described as locally installed with governance AI online capability still not ready, not as full closure or online-ready.
    - also explain where to configure them: preferably in `~/.claude/settings.json` under `env`, or through local environment variables; never ask me to paste the URL, API key, or model into chat.
-6. For both `codex` and `claude-code`, never ask me to paste secrets, URLs, or model values into chat. Only point me to local settings or local environment variables.
-7. If the required local provider fields are not configured yet, you must not describe the environment as online-ready.
-8. After installation, give me a concise English summary of:
+6. If I choose `windsurf`:
+   - on Linux / macOS, run `bash ./scripts/bootstrap/one-shot-setup.sh --host windsurf`
+   - then run `bash ./check.sh --host windsurf --profile full --deep`
+   - on Windows, use the equivalent `pwsh` commands.
+   - explicitly tell me this is `preview runtime-core`, not full closure.
+   - explicitly tell me the default host root is `~/.codeium/windsurf`.
+   - explain that the repo currently only installs shared runtime payload, materializes `mcp_config.json` when absent, and materializes `global_workflows/` when the install payload includes `commands/`.
+   - explicitly tell me that login, account, provider, plugin, and workspace-native setup still belong to Windsurf itself.
+   - do not ask me to paste API keys into chat.
+7. For `codex`, `claude-code`, and `windsurf`, never ask me to paste secrets, URLs, or model values into chat. Only point me to local settings or local environment variables.
+8. If the required local provider fields are not configured yet, you must not describe the environment as online-ready.
+9. After installation, give me a concise English summary of:
    - the target host
    - the commands actually executed
    - what is complete
    - what I still need to do manually
-9. Do not pretend that host plugins, MCP registration, or provider credentials were completed automatically if they were not; describe anything still missing as optional enhancement work or recommended next steps first.
+10. Do not pretend that host plugins, MCP registration, or provider credentials were completed automatically if they were not; describe anything still missing as optional enhancement work or recommended next steps first.
 ```
 
 ## Who This Path Is For
 
-- users who want AI to choose between `codex` and `claude-code`
+- users who want AI to choose between `codex`, `claude-code`, and `windsurf`
 - users who do not want to study the scripts first
 - users who want one truthful install pass plus a clear manual follow-up list
 
@@ -80,6 +90,7 @@ Rules:
 - reframing any missing MCP, provider, or governance-AI-online setup as optional enhancement work rather than install warnings
 - for `codex`, explaining that `OPENAI_*` covers base online provider access, while `VCO_AI_PROVIDER_*` is only additionally needed for the governance AI online layer
 - for `claude-code`, explaining what `VCO_AI_PROVIDER_URL`, `VCO_AI_PROVIDER_API_KEY`, and `VCO_AI_PROVIDER_MODEL` do, why they are needed, and where they must be configured locally
+- for `windsurf`, explaining that the repo installs only preview runtime-core payload at `~/.codeium/windsurf` plus `mcp_config.json` / `global_workflows/` materialization when needed
 
 ## What It Does Not Pretend To Do
 
@@ -90,6 +101,7 @@ These may still remain host-side or user-side tasks:
 - waiting for hook compatibility work to resume on the author side, not as a user install failure
 - local `url` / `apikey` / `model` configuration
 - manual updates to Claude Code's real `settings.json`
+- Windsurf login, account, provider, plugin, and workspace-native setup
 
 ## Second Main Install Path
 

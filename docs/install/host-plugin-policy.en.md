@@ -9,10 +9,11 @@ This document answers only the questions that matter in the current version:
 
 ## Current Support Boundary
 
-The public support surface currently includes only:
+The public support surface currently includes:
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
 Anything outside those two hosts must not be described as "supported installation" in the current version.
 
@@ -148,23 +149,69 @@ Again, none of those values should be requested in chat.
 
 If they are not configured locally yet, the environment must not be described as online-ready.
 
+## Default Policy For Windsurf
+
+For `windsurf`, the wording needs to stay narrower than `codex` and focused on shared runtime payload.
+
+### Current real status
+
+`windsurf` is currently:
+
+- `preview runtime-core`
+- not full closure
+- rooted by default at `~/.codeium/windsurf`
+- a host path where the repo only owns shared runtime payload plus optional materialization of `mcp_config.json` and `global_workflows/`
+
+### What the repository does
+
+Right now the repository only does the following:
+
+- installs shared runtime payload
+- materializes `mcp_config.json` when it is absent
+- materializes `global_workflows/` when the install payload includes `commands/`
+- runs the matching preview runtime-core checks
+
+### What the repository does not do
+
+Right now the repository does not automatically:
+
+- overwrite Windsurf host-native settings
+- write provider credentials on behalf of the user
+- provision host plugins
+- take over login or account state
+- project workspaces automatically
+
+### What the user should do
+
+The correct host-side flow is:
+
+- open `~/.codeium/windsurf`
+- confirm that `mcp_config.json` and `global_workflows/` exist when expected
+- finish any account, provider, or plugin setup inside Windsurf itself
+- never paste secrets into chat
+
+If those host-native capabilities are still missing, the environment must not be described as Windsurf full closure.
+
 ## Current Policy Conclusion For Host Plugins
 
 For the current version, the public policy should hold these lines clearly:
 
 1. `codex` has no extra default host-plugin prerequisite.
 2. `claude-code` is not integrated by "adding a pile of host plugins". It is a preview guidance path plus local host configuration.
-3. Historical plugin names are not a reason to keep recommending them in current community docs.
-4. If a capability is not stably, publicly, and verifiably integrated by the repo, it should not be written as a standard install requirement.
+3. `windsurf` is not integrated by having the repo take over login, account, provider, or plugin state. It is a preview runtime-core path plus local host completion.
+4. Historical plugin names are not a reason to keep recommending them in current community docs.
+5. If a capability is not stably, publicly, and verifiably integrated by the repo, it should not be written as a standard install requirement.
 
 ## Recommended Community Wording
 
 If you need to reference this policy in issues, README text, discussions, or install prompts, use language like this:
 
-- the current version supports only `codex` and `claude-code`
+- the current version supports `codex`, `claude-code`, and `windsurf`
 - `codex` follows a conservative path centered on local settings, MCP, and optional CLI enhancements
-- the current version does not open the hook install surface for `codex` or `claude-code` because the author is still working through compatibility issues; this is not a user install failure
 - `claude-code` follows a preview guidance path and does not overwrite the real `settings.json`
+- `windsurf` follows a preview runtime-core path rooted at `~/.codeium/windsurf`
+- `windsurf` currently materializes only shared runtime payload, `mcp_config.json`, and `global_workflows/`; it does not take over login, account, provider, or plugin closure
+- the current version does not open the hook install surface for `codex`, `claude-code`, or `windsurf` because the author is still working through compatibility issues; this is not a user install failure
 - provider `url` / `apikey` / `model` values are configured locally by the user, not pasted into chat
 - missing MCP, provider, or governance-AI-online setup should be framed first as optional enhancement work or recommended next steps
 - other agents are outside the current public support surface

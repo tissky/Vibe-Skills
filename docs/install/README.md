@@ -33,15 +33,17 @@
 
 ## 宿主边界（必须先确认）
 
-当前公开支持宿主只有：
+当前公开支持宿主有：
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
 其中：
 
 - `codex`：governed 官方路径
 - `claude-code`：preview guidance（不是 full closure）
+- `windsurf`：preview runtime-core（共享 runtime payload 路径，不是 full closure）
 
 不支持的宿主不能伪装安装成功或 online readiness 完成。
 

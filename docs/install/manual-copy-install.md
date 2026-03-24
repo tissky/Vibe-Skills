@@ -4,12 +4,13 @@
 
 **把 VibeSkills 的运行时目录复制到目标宿主目录里。**
 
-当前这条路径只面向两个宿主：
+当前这条路径面向三个公开宿主：
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
-如果你的目标不是这两个宿主，当前版本不应描述成“已支持安装”。
+如果你的目标不是这三个宿主，当前版本不应描述成“已支持安装”。
 
 ## 你要复制什么
 
@@ -39,6 +40,12 @@
 - `<TARGET_ROOT>/config/upstream-lock.json`
 - `<TARGET_ROOT>/config/skills-lock.json`（如果存在）
 
+如果目标宿主是 `windsurf`，还要额外注意：
+
+- 默认目标根目录应为 `~/.codeium/windsurf`
+- 如需与脚本安装结果保持一致，应把 `commands/` 同步到 `<TARGET_ROOT>/global_workflows/`
+- 如需与脚本安装结果保持一致，应在缺少时把 `mcp/servers.template.json` 复制为 `<TARGET_ROOT>/mcp_config.json`
+
 ## 安装后你还要自己做什么
 
 手动复制只解决“把仓库文件放进去”，不解决宿主本地配置。
@@ -67,6 +74,15 @@
   - `ANTHROPIC_BASE_URL`
   - `ANTHROPIC_AUTH_TOKEN`
 
+### 如果你装到 Windsurf
+
+你还需要自己确认：
+
+- 目标根目录是 `~/.codeium/windsurf`
+- `mcp_config.json` 是否已经存在；若不存在，可由 `mcp/servers.template.json` 复制得到
+- `global_workflows/` 是否已经按需从 `commands/` 物化
+- 账号、provider、插件、workspace 等宿主原生能力仍需在 Windsurf 侧本地完成
+
 ## 当前不会自动帮你做什么
 
 手动复制安装不会自动完成这些事：
@@ -75,10 +91,11 @@
 - MCP 注册
 - provider 凭据写入
 - Claude Code 真实 `settings.json` 修改
+- Windsurf 宿主登录 / 账号 / provider / 插件闭环
 
 其中要特别注意：
 
-- `codex` / `claude-code` 当前都**不提供 hook 安装**
+- `codex` / `claude-code` / `windsurf` 当前都**不提供 hook 安装**
 - hook 目前因为兼容性问题，暂时被冻结
 
 ## 最后一个边界

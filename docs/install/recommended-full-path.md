@@ -8,15 +8,17 @@
 
 ## 当前支持面
 
-暂时只支持两个宿主：
+当前公开支持三个宿主：
 
 - `codex`
 - `claude-code`
+- `windsurf`
 
 其中：
 
 - `codex`：正式推荐路径
 - `claude-code`：preview guidance 路径
+- `windsurf`：preview runtime-core 路径
 
 `TargetRoot` 只是安装路径。
 `HostId` / `--host` 才决定宿主语义。
@@ -45,6 +47,18 @@ pwsh -File .\check.ps1 -HostId claude-code -Profile full -Deep
 ```bash
 bash ./scripts/bootstrap/one-shot-setup.sh --host claude-code
 bash ./check.sh --host claude-code --profile full --deep
+```
+
+### Windsurf
+
+```powershell
+pwsh -File .\scripts\bootstrap\one-shot-setup.ps1 -HostId windsurf
+pwsh -File .\check.ps1 -HostId windsurf -Profile full -Deep
+```
+
+```bash
+bash ./scripts/bootstrap/one-shot-setup.sh --host windsurf
+bash ./check.sh --host windsurf --profile full --deep
 ```
 
 ## 必须说清楚的边界
@@ -76,6 +90,15 @@ bash ./check.sh --host claude-code --profile full --deep
 - 如宿主连接需要，再补 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`
 - 不要要求用户把密钥贴到聊天里
 - 未补的 MCP、provider 或治理 AI 在线层配置，应优先表述成推荐增强项，而不是安装告警
+
+### Windsurf
+
+- 这是 preview runtime-core，不是 full closure
+- 默认宿主根目录是 `~/.codeium/windsurf`
+- repo 当前只负责 shared runtime payload，以及按需物化 `mcp_config.json` 与 `global_workflows/`
+- 不要把它描述成已完成登录、账号、provider、插件或 workspace projection 闭环
+- 如果你还需要宿主原生能力，在 Windsurf 宿主侧继续本地完成
+- 不要要求用户把密钥贴到聊天里
 
 ## AI 治理层提示
 
