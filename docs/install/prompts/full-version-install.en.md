@@ -19,9 +19,9 @@ Rules:
 2. If I choose the full version, map it to the real profile `full`.
 3. Detect the OS first; use `bash` on Linux/macOS and `pwsh` on Windows.
 4. For `codex`, run `--host codex --profile full` and describe it as the strongest governed path, while making clear that hooks remain frozen.
-5. For `claude-code`, run `--host claude-code --profile full` and describe it as preview guidance, not full closure.
-6. For `cursor`, run `--host cursor --profile full` and describe it as preview guidance, not full closure, with no takeover of the real `~/.cursor/settings.json`.
-7. For `windsurf`, run `--host windsurf --profile full` and describe it as preview runtime-core, not full closure; mention the default root `~/.codeium/windsurf` and that the repo only owns shared runtime payload plus optional `mcp_config.json` / `global_workflows/` materialization.
+5. For `claude-code`, run `--host claude-code --profile full` and describe it as a supported install-and-use path that does not overwrite the real `~/.claude/settings.json`.
+6. For `cursor`, run `--host cursor --profile full` and describe it as a supported install-and-use path with no takeover of the real `~/.cursor/settings.json`.
+7. For `windsurf`, run `--host windsurf --profile full` and describe it as a supported install-and-use path with runtime-adapter integration; mention the default root `~/.codeium/windsurf` and that the repo only owns shared runtime payload plus optional `mcp_config.json` / `global_workflows/` materialization.
 8. Never ask me to paste secrets, URLs, or model names into chat.
 9. Distinguish “installed locally” from “online-ready”.
 10. End with a concise report covering host, public version, real profile, commands executed, completed parts, and manual follow-up.

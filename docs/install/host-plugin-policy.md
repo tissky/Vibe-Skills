@@ -29,30 +29,30 @@
 
 ## Claude Code
 
-- preview guidance
+- 提供支持的安装与使用路径
 - 不靠“补一堆宿主插件”来完成接入
 - 不覆盖真实 `~/.claude/settings.json`
 - hook 当前冻结；这不是安装失败
 
 ## Cursor
 
-- preview guidance
+- 提供支持的安装与使用路径
 - 不覆盖真实 `~/.cursor/settings.json`
-- 不接管 Cursor host-native plugin / provider / MCP 闭环
+- Cursor 宿主原生插件、设置与扩展面仍按 Cursor 自身方式管理
 - hook 当前冻结；这不是安装失败
 
 ## Windsurf
 
-- preview runtime-core
+- 提供支持的安装与使用路径，且已接入 runtime adapter
 - 默认根目录是 `~/.codeium/windsurf`
 - repo 当前只负责 shared runtime payload，以及按需物化 `mcp_config.json` 和 `global_workflows/`
-- 不接管登录、账号、provider、插件或 workspace-native 闭环
+- Windsurf 宿主本地设置仍按 Windsurf 自身方式管理
 
 ## 推荐的社区表述
 
 - 当前版本支持 `codex`、`claude-code`、`cursor`、`windsurf`
 - `codex` 走 governed 路径
-- `claude-code` / `cursor` 走 preview guidance
-- `windsurf` 走 preview runtime-core
+- `claude-code` / `cursor` 提供支持的安装与使用路径
+- `windsurf` 提供支持的安装与使用路径，且已接入 runtime adapter
 - hooks 在当前公开支持面里统一冻结；这不是用户安装失败
 - provider 的 `url` / `apikey` / `model` 由用户在本地配置，不要要求用户贴到聊天里

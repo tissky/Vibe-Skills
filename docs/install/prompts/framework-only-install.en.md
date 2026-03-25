@@ -19,8 +19,8 @@ Rules:
 2. If I choose the framework version, map it to the real profile `minimal`.
 3. Detect the OS first; use `bash` on Linux/macOS and `pwsh` on Windows.
 4. Execute install and check with `--host <host> --profile minimal`.
-5. Describe `claude-code` and `cursor` as preview guidance.
-6. Describe `windsurf` as preview runtime-core with default root `~/.codeium/windsurf`.
+5. Describe `claude-code` and `cursor` as supported install-and-use paths.
+6. Describe `windsurf` as a supported install-and-use path with runtime-adapter integration and default root `~/.codeium/windsurf`.
 7. For `codex`, say clearly that hooks remain frozen and this is not an install failure.
 8. Never ask me to paste secrets, URLs, or model names into chat.
 9. Remind me that this gives me the governance foundation first, not the full default workflow-core experience.

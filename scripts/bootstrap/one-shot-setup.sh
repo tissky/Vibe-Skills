@@ -53,9 +53,9 @@ prompt_for_host_id() {
   local choice normalized
   echo "Select the install target before bootstrap:"
   echo "  1) codex        - strongest governed lane"
-  echo "  2) claude-code  - preview guidance lane"
-  echo "  3) cursor       - preview guidance lane"
-  echo "  4) windsurf     - runtime-core preview lane"
+  echo "  2) claude-code  - supported install/use path"
+  echo "  3) cursor       - supported install/use path"
+  echo "  4) windsurf     - supported path + runtime adapter"
   while true; do
     read -r -p "Install into which agent? [1-4]: " choice
     normalized="$(printf '%s' "${choice}" | tr '[:upper:]' '[:lower:]' | xargs)"
@@ -124,7 +124,7 @@ assert_target_root_matches_host_intent() {
   fi
   if [[ "${host_id}" == "codex" && "${is_cursor_root}" == "true" ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a Cursor home, but host='codex'." >&2
-    echo "[FAIL] Pass --host cursor for preview guidance or use a Codex target root." >&2
+    echo "[FAIL] Pass --host cursor or use a Codex target root." >&2
     exit 1
   fi
   if [[ "${host_id}" == "claude-code" && ( "${is_codex_root}" == "true" || "${is_windsurf_root}" == "true" ) ]]; then
@@ -138,7 +138,7 @@ assert_target_root_matches_host_intent() {
   fi
   if [[ "${host_id}" == "claude-code" && "${is_cursor_root}" == "true" ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a Cursor home, but host='claude-code'." >&2
-    echo "[FAIL] Pass --host cursor for Cursor preview guidance or choose a Claude Code target root." >&2
+    echo "[FAIL] Pass --host cursor or choose a Claude Code target root." >&2
     exit 1
   fi
   if [[ "${host_id}" == "cursor" && "${is_codex_root}" == "true" ]]; then
@@ -148,12 +148,12 @@ assert_target_root_matches_host_intent() {
   fi
   if [[ "${host_id}" == "cursor" && "${is_claude_root}" == "true" ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a Claude Code home, but host='cursor'." >&2
-    echo "[FAIL] Pass --host claude-code for Claude preview guidance or choose a Cursor target root." >&2
+    echo "[FAIL] Pass --host claude-code or choose a Cursor target root." >&2
     exit 1
   fi
   if [[ "${host_id}" == "cursor" && "${is_windsurf_root}" == "true" ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a Windsurf home, but host='cursor'." >&2
-    echo "[FAIL] Pass --host windsurf for preview runtime-core or choose a Cursor target root." >&2
+    echo "[FAIL] Pass --host windsurf or choose a Cursor target root." >&2
     exit 1
   fi
   if [[ "${host_id}" == "windsurf" && ( "${is_codex_root}" == "true" || "${is_claude_root}" == "true" ) ]]; then
@@ -162,7 +162,7 @@ assert_target_root_matches_host_intent() {
   fi
   if [[ "${host_id}" == "windsurf" && "${is_cursor_root}" == "true" ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a Cursor home, but host='windsurf'." >&2
-    echo "[FAIL] Pass --host cursor for preview guidance or choose a Windsurf target root." >&2
+    echo "[FAIL] Pass --host cursor or choose a Windsurf target root." >&2
     exit 1
   fi
 }
@@ -458,17 +458,17 @@ elif [[ "${ADAPTER_BOOTSTRAP_MODE}" == "preview-guidance" ]]; then
     echo "[2/5] Hook installation is frozen for Claude Code because of compatibility issues."
     bash "${CLAUDE_SCAFFOLD_SH}" --repo-root "${REPO_ROOT}" --target-root "${TARGET_ROOT}" --force >/dev/null
   else
-    echo "[2/5] Host-specific preview scaffold is currently unavailable for '${HOST_ID}'."
+    echo "[2/5] Host-specific scaffold is currently unavailable for '${HOST_ID}'."
   fi
-  echo "[3/5] No hook files or preview settings were installed into the target root."
+  echo "[3/5] No hook files or extra preview settings were installed into the target root."
   echo "[4/5] Provider settings remain host-managed for '${HOST_ID}'. Configure the real host settings surface separately (for example, Cursor commonly uses ~/.cursor/settings.json). Do not paste API keys into chat."
-  echo "[5/5] Running preview guidance health check..."
+  echo "[5/5] Running supported-path health check..."
   bash "${CHECK_SH}" --profile "${PROFILE}" --host "${HOST_ID}" --target-root "${TARGET_ROOT}" --deep
 else
-  echo "[2/5] Runtime-core lane does not materialize host settings."
-  echo "[3/5] Runtime-core lane does not seed provider settings. Configure url, apikey, and model in the target agent's local settings or local environment variables. Do not paste secrets into chat."
-  echo "[4/5] MCP materialization skipped for runtime-core lane."
-  echo "[5/5] Running runtime-core health check..."
+  echo "[2/5] Runtime-adapter path does not materialize host settings."
+  echo "[3/5] Runtime-adapter path does not seed provider settings. Configure url, apikey, and model in the target agent's local settings or local environment variables. Do not paste secrets into chat."
+  echo "[4/5] MCP materialization skipped for the runtime-adapter path."
+  echo "[5/5] Running runtime-adapter health check..."
   bash "${CHECK_SH}" --profile "${PROFILE}" --host "${HOST_ID}" --target-root "${TARGET_ROOT}" --deep
 fi
 

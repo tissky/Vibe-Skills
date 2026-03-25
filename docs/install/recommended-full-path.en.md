@@ -12,9 +12,9 @@ This document explains the current real support boundary and the concrete comman
 | Host | Mode | Default root | Current wording |
 | --- | --- | --- | --- |
 | `codex` | governed | `~/.codex` | strongest supported path today |
-| `claude-code` | preview guidance | `~/.claude` | preview guidance, not full closure |
-| `cursor` | preview guidance | `~/.cursor` | preview guidance, not full closure |
-| `windsurf` | preview runtime-core | `~/.codeium/windsurf` | runtime-core preview, not full closure |
+| `claude-code` | supported install-and-use path | `~/.claude` | keeps real host settings boundaries explicit |
+| `cursor` | supported install-and-use path | `~/.cursor` | keeps real host settings boundaries explicit |
+| `windsurf` | supported install-and-use path + runtime adapter | `~/.codeium/windsurf` | includes runtime-adapter integration while keeping real host settings boundaries explicit |
 
 `TargetRoot` is only a path.
 `HostId` / `--host` decides host semantics.
@@ -99,19 +99,19 @@ git checkout vX.Y.Z
 
 ### Claude Code
 
-- this is preview guidance
+- this host has a supported install-and-use path
 - it does not overwrite the real `~/.claude/settings.json`
 - hooks remain frozen; that is not an install failure
 
 ### Cursor
 
-- this is preview guidance
+- this host has a supported install-and-use path
 - it does not overwrite the real `~/.cursor/settings.json`
-- the repo does not currently take over Cursor host-native provider, MCP, or hook closure
+- Cursor-native settings and extension surfaces remain managed on the Cursor side
 
 ### Windsurf
 
-- this is preview runtime-core
+- this host has a supported install-and-use path with runtime-adapter integration
 - the default root is `~/.codeium/windsurf`
 - the repo currently owns only shared runtime payload plus optional materialization of `mcp_config.json` and `global_workflows/`
-- do not describe it as completed login, account, provider, plugin, or workspace-native closure
+- Windsurf-native local settings remain managed on the Windsurf side

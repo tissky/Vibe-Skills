@@ -19,9 +19,9 @@
 2. 这次如果我选的是“全量版本+可自定义添加治理”，你必须把它映射到真实 profile：`full`。
 3. 先判断系统类型；Linux / macOS 用 `bash`，Windows 用 `pwsh`。
 4. 如果我选 `codex`，使用 `--host codex --profile full`；明确说明这是当前最完整的 governed 路径，但 hook 仍冻结。
-5. 如果我选 `claude-code`，使用 `--host claude-code --profile full`；明确说明这是 preview guidance，不是 full closure。
-6. 如果我选 `cursor`，使用 `--host cursor --profile full`；明确说明这是 preview guidance，不是 full closure，也不接管真实 `~/.cursor/settings.json`。
-7. 如果我选 `windsurf`，使用 `--host windsurf --profile full`；明确说明这是 preview runtime-core，不是 full closure，默认根目录是 `~/.codeium/windsurf`，repo 只负责 shared runtime payload 和按需物化 `mcp_config.json` / `global_workflows/`。
+5. 如果我选 `claude-code`，使用 `--host claude-code --profile full`；明确说明当前提供支持的安装与使用路径，不覆盖真实 `~/.claude/settings.json`。
+6. 如果我选 `cursor`，使用 `--host cursor --profile full`；明确说明当前提供支持的安装与使用路径，也不接管真实 `~/.cursor/settings.json`。
+7. 如果我选 `windsurf`，使用 `--host windsurf --profile full`；明确说明当前提供支持的安装与使用路径，且已接入 runtime adapter，默认根目录是 `~/.codeium/windsurf`，repo 只负责 shared runtime payload 和按需物化 `mcp_config.json` / `global_workflows/`。
 8. 对四个宿主，都不要要求我把密钥、URL 或 model 粘贴到聊天里；只告诉我去本地 settings 或本地环境变量里配置。
 9. 区分“本地安装完成”和“在线能力就绪”。
 10. 安装完成后，用简洁中文汇报：目标宿主、公开版本、实际 profile、实际命令、已完成部分、仍需我手动处理的部分。

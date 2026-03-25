@@ -46,9 +46,9 @@
 其中：
 
 - `codex`：governed / 当前最完整路径
-- `claude-code`：preview guidance
-- `cursor`：preview guidance
-- `windsurf`：preview runtime-core
+- `claude-code`：支持的安装与使用路径
+- `cursor`：支持的安装与使用路径
+- `windsurf`：支持的安装与使用路径，且已接入 runtime adapter
 
 其他宿主当前不应被描述成“已支持安装”。
 

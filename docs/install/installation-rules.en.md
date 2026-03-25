@@ -53,34 +53,34 @@ If the user chooses `codex`:
 - if the governance AI online layer is needed, point the user to local `VCO_AI_PROVIDER_*` configuration
 - never imply that `OPENAI_*` alone means governance-AI online readiness
 
-## Rule 8: Describe Claude Code as preview guidance
+## Rule 8: Describe Claude Code as a supported install-and-use path
 
 If the user chooses `claude-code`:
 
 - run `--host claude-code`
-- state clearly that it is preview guidance, not full closure
+- state clearly that it has a supported install-and-use path
 - explain that hooks remain frozen; this is not an install failure
 - do not claim the installer writes `settings.vibe.preview.json`
 - guide the user to maintain `~/.claude/settings.json` locally
 
-## Rule 9: Describe Cursor as preview guidance too
+## Rule 9: Describe Cursor as a supported install-and-use path too
 
 If the user chooses `cursor`:
 
 - run `--host cursor`
-- state clearly that it is preview guidance, not full closure
-- do not claim the repo takes over Cursor settings, provider wiring, MCP closure, or hook closure
+- state clearly that it has a supported install-and-use path
+- do not claim the repo takes over Cursor settings or Cursor-native extension surfaces
 - guide the user to maintain `~/.cursor/settings.json` locally
 
-## Rule 10: Describe Windsurf as preview runtime-core
+## Rule 10: Describe Windsurf as a supported install-and-use path with runtime-adapter integration
 
 If the user chooses `windsurf`:
 
 - run `--host windsurf`
-- state clearly that it is preview runtime-core, not full closure
+- state clearly that it has a supported install-and-use path with runtime-adapter integration
 - the default host root is `~/.codeium/windsurf`
 - the repo currently owns only shared runtime payload plus optional materialization of `mcp_config.json` and `global_workflows/`
-- do not pretend login, account, provider, plugin, or workspace-native closure has been completed
+- make it clear that Windsurf-local settings still need to be managed on the Windsurf side
 
 ## Rule 11: Never ask users to paste secrets into chat
 

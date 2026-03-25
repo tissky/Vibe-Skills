@@ -53,34 +53,34 @@
 - 如需治理 AI 在线层，再按需补 `VCO_AI_PROVIDER_*`
 - 不能把 `OPENAI_*` 已配置偷换成“治理 AI online readiness 已完成”
 
-## 规则 8：Claude Code 要按 preview guidance 口径描述
+## 规则 8：Claude Code 要按“支持的安装与使用路径”口径描述
 
 如果用户选择 `claude-code`：
 
 - 运行 `--host claude-code`
-- 明确说明这是 preview guidance，不是 full closure
+- 明确说明当前提供支持的安装与使用路径
 - hook 当前冻结；这不是安装失败
 - 不再写 `settings.vibe.preview.json`
 - 引导用户自己补 `~/.claude/settings.json` 的 `env`
 
-## 规则 9：Cursor 也属于 preview guidance
+## 规则 9：Cursor 也按“支持的安装与使用路径”口径描述
 
 如果用户选择 `cursor`：
 
 - 运行 `--host cursor`
-- 明确说明这是 preview guidance，不是 full closure
-- 当前不接管 Cursor 的真实 settings、provider、MCP 或 hook 闭环
+- 明确说明当前提供支持的安装与使用路径
+- 当前不接管 Cursor 的真实 settings 与宿主原生扩展面
 - 引导用户自己检查和维护 `~/.cursor/settings.json`
 
-## 规则 10：Windsurf 要按 preview runtime-core 口径描述
+## 规则 10：Windsurf 要按“支持的安装与使用路径，且已接入 runtime adapter”口径描述
 
 如果用户选择 `windsurf`：
 
 - 运行 `--host windsurf`
-- 明确说明这是 preview runtime-core，不是 full closure
+- 明确说明当前提供支持的安装与使用路径，且已接入 runtime adapter
 - 默认宿主根目录是 `~/.codeium/windsurf`
 - repo 当前只负责 shared runtime payload，以及按需物化 `mcp_config.json` 与 `global_workflows/`
-- 不要伪装成已完成登录、账号、provider、插件或 workspace-native 闭环
+- Windsurf 宿主本地设置仍由用户在宿主侧完成
 
 ## 规则 11：不要要求用户把密钥贴到聊天里
 

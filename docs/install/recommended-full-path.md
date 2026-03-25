@@ -12,9 +12,9 @@
 | 宿主 | 模式 | 默认根目录 | 当前口径 |
 | --- | --- | --- | --- |
 | `codex` | governed | `~/.codex` | 当前最完整路径 |
-| `claude-code` | preview guidance | `~/.claude` | 预览指导，不是 full closure |
-| `cursor` | preview guidance | `~/.cursor` | 预览指导，不是 full closure |
-| `windsurf` | preview runtime-core | `~/.codeium/windsurf` | runtime-core 预览，不是 full closure |
+| `claude-code` | 支持的安装与使用路径 | `~/.claude` | 保持真实宿主设置边界 |
+| `cursor` | 支持的安装与使用路径 | `~/.cursor` | 保持真实宿主设置边界 |
+| `windsurf` | 支持的安装与使用路径 + runtime adapter | `~/.codeium/windsurf` | 已接入 runtime adapter，保持真实宿主设置边界 |
 
 `TargetRoot` 只是路径。
 `HostId` / `--host` 才决定宿主语义。
@@ -99,19 +99,19 @@ git checkout vX.Y.Z
 
 ### Claude Code
 
-- 这是 preview guidance
+- 当前提供支持的安装与使用路径
 - 不覆盖真实 `~/.claude/settings.json`
 - hook 当前冻结；这不是安装失败
 
 ### Cursor
 
-- 这是 preview guidance
+- 当前提供支持的安装与使用路径
 - 不覆盖真实 `~/.cursor/settings.json`
-- 当前不接管 Cursor 的 host-native provider / MCP / hook 闭环
+- Cursor 的宿主原生设置与扩展面仍按 Cursor 自身方式管理
 
 ### Windsurf
 
-- 这是 preview runtime-core
+- 当前提供支持的安装与使用路径，且已接入 runtime adapter
 - 默认根目录是 `~/.codeium/windsurf`
 - repo 当前只负责 shared runtime payload，以及按需物化 `mcp_config.json` 与 `global_workflows/`
-- 不要把它描述成已完成登录、账号、provider、插件或 workspace-native 闭环
+- Windsurf 宿主自身的本地设置仍按 Windsurf 自身方式管理

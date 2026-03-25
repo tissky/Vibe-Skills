@@ -24,9 +24,9 @@ The real profile mapping is:
 | Host | Mode | Default root | What the repo currently owns | What it must not be described as |
 | --- | --- | --- | --- | --- |
 | `codex` | governed | `~/.codex` | governed runtime, settings/MCP guidance, deep check | hooks already installed, governance-AI online readiness complete |
-| `claude-code` | preview guidance | `~/.claude` | preview guidance and health checks | full closure, real settings takeover |
-| `cursor` | preview guidance | `~/.cursor` | preview guidance and health checks | full closure, Cursor host-native closure |
-| `windsurf` | preview runtime-core | `~/.codeium/windsurf` | shared runtime payload, optional `mcp_config.json` / `global_workflows/` materialization, health checks | login/account/provider/plugin/workspace-native closure |
+| `claude-code` | supported install-and-use path | `~/.claude` | install path, usage guidance, and health checks | real settings takeover |
+| `cursor` | supported install-and-use path | `~/.cursor` | install path, usage guidance, and health checks | repo-owned Cursor-native settings and extension closure |
+| `windsurf` | supported install-and-use path + runtime adapter | `~/.codeium/windsurf` | shared runtime payload, optional `mcp_config.json` / `global_workflows/` materialization, and health checks | full repo takeover of Windsurf-native settings |
 
 ## What AI should do in this flow
 
@@ -43,9 +43,9 @@ The install assistant should:
 ## Common truth-first wording
 
 - `codex`: the strongest path today, but hooks are still frozen; `OPENAI_*` is not the same thing as `VCO_AI_PROVIDER_*`
-- `claude-code`: preview guidance and does not overwrite the real `~/.claude/settings.json`
-- `cursor`: preview guidance and does not take over the real `~/.cursor/settings.json`
-- `windsurf`: preview runtime-core and only installs runtime payload plus required materialized files
+- `claude-code`: provides a supported install-and-use path and does not overwrite the real `~/.claude/settings.json`
+- `cursor`: provides a supported install-and-use path and does not take over the real `~/.cursor/settings.json`
+- `windsurf`: provides a supported install-and-use path with runtime-adapter integration and only installs runtime payload plus required materialized files
 
 ## What to read next
 

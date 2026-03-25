@@ -385,7 +385,8 @@ We know that building in isolation cannot keep up with the speed of the AI era. 
 * 🔄 If you need to update the version later: custom governance placed in `skills/custom/` and `config/custom-workflows.json` can usually be retained; but directly modifying official runtime/official skills/official mcp/rules content may be overwritten during updates.
 
 **Installation and configuration guide**
-* Current public support surface: **`codex`, `claude-code`, `cursor` (`preview guidance`), and `windsurf` (`preview runtime-core`)**
+* Current public support surface: **`codex`, `claude-code`, `cursor`, and `windsurf`**
+  Within that scope, `codex` is the strongest governed path today, `claude-code` and `cursor` have a supported install-and-use path, and `windsurf` has a supported install-and-use path with runtime-adapter integration.
 * Current public versions: **Full version + customizable governance**, **Framework version + customizable governance**
 * ⚡️ [Prompt-based install (recommended default)](./docs/install/one-click-install-release-copy.en.md)
   Start there to confirm host and version first, then jump to the matching prompt file.

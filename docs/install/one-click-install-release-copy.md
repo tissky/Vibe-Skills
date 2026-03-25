@@ -24,9 +24,9 @@
 | 宿主 | 模式 | 默认根目录 | 仓库当前负责什么 | 不应伪装成什么 |
 | --- | --- | --- | --- | --- |
 | `codex` | governed | `~/.codex` | governed runtime、settings/MCP 建议、deep check | hook 已自动完成、治理 AI online readiness 已完成 |
-| `claude-code` | preview guidance | `~/.claude` | preview guidance、health check | full closure、真实 settings 已被接管 |
-| `cursor` | preview guidance | `~/.cursor` | preview guidance、health check | full closure、Cursor host-native 闭环 |
-| `windsurf` | preview runtime-core | `~/.codeium/windsurf` | shared runtime payload、按需物化 `mcp_config.json` / `global_workflows/`、health check | 登录/账号/provider/插件/workspace-native 闭环 |
+| `claude-code` | 支持的安装与使用路径 | `~/.claude` | 安装路径、使用说明、health check | 真实 settings 已被接管 |
+| `cursor` | 支持的安装与使用路径 | `~/.cursor` | 安装路径、使用说明、health check | Cursor 宿主原生设置与扩展面已被仓库接管 |
+| `windsurf` | 支持的安装与使用路径 + runtime adapter | `~/.codeium/windsurf` | shared runtime payload、按需物化 `mcp_config.json` / `global_workflows/`、health check | Windsurf 宿主原生设置已被仓库完全接管 |
 
 ## 你应该期待 AI 怎么做
 
@@ -43,9 +43,9 @@ AI 安装助手应当：
 ## 常见 truth-first 口径
 
 - `codex`：最完整，但 hook 仍冻结；`OPENAI_*` 与 `VCO_AI_PROVIDER_*` 不是一回事
-- `claude-code`：preview guidance，不覆盖真实 `~/.claude/settings.json`
-- `cursor`：preview guidance，不接管真实 `~/.cursor/settings.json`
-- `windsurf`：preview runtime-core，只落地 runtime payload 与必要物化文件
+- `claude-code`：提供支持的安装与使用路径，不覆盖真实 `~/.claude/settings.json`
+- `cursor`：提供支持的安装与使用路径，不接管真实 `~/.cursor/settings.json`
+- `windsurf`：提供支持的安装与使用路径，且已接入 runtime adapter；只落地 runtime payload 与必要物化文件
 
 ## 安装完之后再做什么
 

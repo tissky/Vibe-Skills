@@ -29,30 +29,30 @@ Other agents should not currently be described as having an official install clo
 
 ## Claude Code
 
-- preview guidance
+- supported install-and-use path
 - not integrated by “adding a pile of host plugins”
 - does not overwrite the real `~/.claude/settings.json`
 - hooks remain frozen; that is not an install failure
 
 ## Cursor
 
-- preview guidance
+- supported install-and-use path
 - does not overwrite the real `~/.cursor/settings.json`
-- does not take over Cursor host-native plugin, provider, or MCP closure
+- Cursor-native plugins, settings, and extension surfaces remain managed on the Cursor side
 - hooks remain frozen; that is not an install failure
 
 ## Windsurf
 
-- preview runtime-core
+- supported install-and-use path with runtime-adapter integration
 - default root is `~/.codeium/windsurf`
 - the repo currently owns only shared runtime payload plus optional materialization of `mcp_config.json` and `global_workflows/`
-- it does not take over login, account, provider, plugin, or workspace-native closure
+- Windsurf-native local settings remain managed on the Windsurf side
 
 ## Recommended Community Wording
 
 - the current version supports `codex`, `claude-code`, `cursor`, and `windsurf`
 - `codex` follows the governed path
-- `claude-code` and `cursor` follow preview guidance
-- `windsurf` follows preview runtime-core
+- `claude-code` and `cursor` have a supported install-and-use path
+- `windsurf` has a supported install-and-use path with runtime-adapter integration
 - hooks remain frozen across the current public surface; that is not a user install failure
 - provider `url` / `apikey` / `model` values stay local and should not be pasted into chat

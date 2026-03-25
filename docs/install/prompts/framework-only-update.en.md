@@ -19,7 +19,7 @@ Rules:
 2. If the target remains the framework version, map it to the real profile `minimal`.
 3. Remind me that `skills/custom/` and `config/custom-workflows.json` are usually retained, while edits under official managed paths may be overwritten.
 4. Update the repo first, then rerun install/check with `--host <host> --profile minimal`.
-5. Keep `claude-code` and `cursor` described as preview guidance, and `windsurf` as preview runtime-core.
+5. Keep `claude-code` and `cursor` described as supported install-and-use paths, and `windsurf` as a supported install-and-use path with runtime-adapter integration.
 6. Never ask me to paste secrets, URLs, or model names into chat.
 7. Remind me that the result is still the governance-foundation mode, not the complete default workflow-core experience.
 ```

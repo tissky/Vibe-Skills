@@ -46,9 +46,9 @@ bash ./check.sh --host windsurf --profile full --deep
 ## Truth Boundaries
 
 - `codex` is the strongest governed path today
-- `claude-code` is preview guidance, not full closure
-- `cursor` is preview guidance, not full closure
-- `windsurf` is preview runtime-core, not full closure
+- `claude-code` has a supported install-and-use path and does not overwrite the real host settings
+- `cursor` has a supported install-and-use path and does not overwrite the real host settings
+- `windsurf` has a supported install-and-use path with runtime-adapter integration
 - hooks remain frozen on the current public surface
 - `windsurf` defaults to `~/.codeium/windsurf` and only gets shared runtime payload plus optional `mcp_config.json` / `global_workflows/` materialization
 - provider `url` / `apikey` / `model` values remain local user configuration

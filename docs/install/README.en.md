@@ -46,9 +46,9 @@ Keep the public wording user-friendly, then map to the real profile at execution
 Within that scope:
 
 - `codex`: governed and currently the strongest path
-- `claude-code`: preview guidance
-- `cursor`: preview guidance
-- `windsurf`: preview runtime-core
+- `claude-code`: supported install-and-use path
+- `cursor`: supported install-and-use path
+- `windsurf`: supported install-and-use path with runtime-adapter integration
 
 Other hosts should not currently be described as supported installation targets.
 

@@ -19,8 +19,8 @@
 2. 这次如果我选的是“仅核心框架+可自定义添加治理”，你必须把它映射到真实 profile：`minimal`。
 3. 先判断系统类型；Linux / macOS 用 `bash`，Windows 用 `pwsh`。
 4. 按我选择的宿主执行 `--host <host> --profile minimal` 的安装与检查命令。
-5. 对 `claude-code` 和 `cursor`，明确说明是 preview guidance。
-6. 对 `windsurf`，明确说明是 preview runtime-core，默认根目录是 `~/.codeium/windsurf`。
+5. 对 `claude-code` 和 `cursor`，明确说明当前提供支持的安装与使用路径。
+6. 对 `windsurf`，明确说明当前提供支持的安装与使用路径，且已接入 runtime adapter，默认根目录是 `~/.codeium/windsurf`。
 7. 对 `codex`，明确说明 hook 仍冻结；这不是安装失败。
 8. 对四个宿主，都不要要求我把密钥、URL 或 model 粘贴到聊天里。
 9. 安装完成后，必须额外提醒我：当前拿到的是治理框架底座，不等于默认 workflow core 已齐备。
