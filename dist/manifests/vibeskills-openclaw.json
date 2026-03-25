@@ -1,40 +1,40 @@
 {
   "manifest_kind": "vibeskills-distribution-manifest",
   "manifest_version": 1,
-  "package_id": "vibeskills-windsurf",
-  "package_name": "VibeSkills for Windsurf (Preview Runtime-Core)",
+  "package_id": "vibeskills-openclaw",
+  "package_name": "VibeSkills for OpenClaw (Preview Runtime-Core)",
   "status": "preview",
   "runtime_role": "official-runtime-adapter",
-  "summary": "Windsurf may consume the shared runtime-core payload through a documented host root, but this repository does not claim host-native governed closure for it.",
+  "summary": "OpenClaw may consume the shared runtime-core payload through a documented host root, but this repository does not claim host-native governed closure for it.",
   "truth_sources": [
     "docs/universalization/host-capability-matrix.md",
     "docs/universalization/platform-parity-contract.md",
     "docs/universalization/distribution-lanes.md",
-    "adapters/windsurf/host-profile.json",
-    "adapters/windsurf/platform-windows.json",
-    "adapters/windsurf/platform-linux.json",
-    "adapters/windsurf/platform-macos.json",
+    "adapters/openclaw/host-profile.json",
+    "adapters/openclaw/platform-windows.json",
+    "adapters/openclaw/platform-linux.json",
+    "adapters/openclaw/platform-macos.json",
     "README.md"
   ],
-  "host_adapter_ref": "adapters/windsurf/host-profile.json",
+  "host_adapter_ref": "adapters/openclaw/host-profile.json",
   "platform_contracts": [
-    "adapters/windsurf/platform-windows.json",
-    "adapters/windsurf/platform-linux.json",
-    "adapters/windsurf/platform-macos.json"
+    "adapters/openclaw/platform-windows.json",
+    "adapters/openclaw/platform-linux.json",
+    "adapters/openclaw/platform-macos.json"
   ],
-  "entry_manifest": "dist/host-windsurf/manifest.json",
+  "entry_manifest": "dist/host-openclaw/manifest.json",
   "install_entrypoints": {
     "repo_provided": [
-      "install.ps1 --host windsurf",
-      "install.sh --host windsurf",
-      "check.ps1 --host windsurf",
-      "check.sh --host windsurf"
+      "install.ps1 --host openclaw",
+      "install.sh --host openclaw",
+      "check.ps1 --host openclaw",
+      "check.sh --host openclaw"
     ],
     "host_managed": [
       "login and account state",
       "provider credentials",
       "plugin provisioning",
-      "workspace projection and undocumented settings surfaces"
+      "workspace projection and editor-specific settings surfaces"
     ],
     "notes": [
       "This is a preview runtime-core lane, not a governed host-native closure claim.",
@@ -48,6 +48,6 @@
   },
   "anti_overclaim": [
     "Preview means the repo only claims runtime-core payload install and truthful health checks for the documented host root.",
-    "Windsurf support does not imply host-native settings, login, or plugin closure."
+    "OpenClaw support does not imply host-native settings, login, or plugin closure."
   ]
 }

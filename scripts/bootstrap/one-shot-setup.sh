@@ -42,8 +42,9 @@ resolve_host_id() {
     claude|claude-code) printf '%s' 'claude-code' ;;
     cursor) printf '%s' 'cursor' ;;
     windsurf) printf '%s' 'windsurf' ;;
+    openclaw) printf '%s' 'openclaw' ;;
     *)
-      echo "[FAIL] Unsupported VCO host id: ${host_id}. Supported values: codex, claude-code, cursor, windsurf" >&2
+      echo "[FAIL] Unsupported VCO host id: ${host_id}. Supported values: codex, claude-code, cursor, windsurf, openclaw" >&2
       exit 1
       ;;
   esac
@@ -56,16 +57,18 @@ prompt_for_host_id() {
   echo "  2) claude-code  - supported install/use path"
   echo "  3) cursor       - supported install/use path"
   echo "  4) windsurf     - supported path + runtime adapter"
+  echo "  5) openclaw     - preview runtime-core adapter"
   while true; do
-    read -r -p "Install into which agent? [1-4]: " choice
+    read -r -p "Install into which agent? [1-5]: " choice
     normalized="$(printf '%s' "${choice}" | tr '[:upper:]' '[:lower:]' | xargs)"
     case "${normalized}" in
       1|codex) HOST_ID='codex'; return 0 ;;
       2|claude|claude-code) HOST_ID='claude-code'; return 0 ;;
       3|cursor) HOST_ID='cursor'; return 0 ;;
       4|windsurf) HOST_ID='windsurf'; return 0 ;;
+      5|openclaw) HOST_ID='openclaw'; return 0 ;;
       *)
-        echo "[WARN] Unsupported choice: ${choice}. Enter 1, 2, 3, 4, or a supported host name." >&2
+        echo "[WARN] Unsupported choice: ${choice}. Enter 1, 2, 3, 4, 5, or a supported host name." >&2
         ;;
     esac
   done
@@ -84,7 +87,7 @@ ensure_requested_host_id() {
     return 0
   fi
   echo "[FAIL] No host was provided for one-shot bootstrap." >&2
-  echo "[FAIL] Pass --host codex|claude-code|cursor|windsurf when running non-interactively." >&2
+  echo "[FAIL] Pass --host codex|claude-code|cursor|windsurf|openclaw when running non-interactively." >&2
   return 1
 }
 
@@ -95,6 +98,7 @@ resolve_default_target_root() {
     claude-code) printf '%s' "${CLAUDE_HOME:-${HOME}/.claude}" ;;
     cursor) printf '%s' "${CURSOR_HOME:-${HOME}/.cursor}" ;;
     windsurf) printf '%s' "${WINDSURF_HOME:-${HOME}/.codeium/windsurf}" ;;
+    openclaw) printf '%s' "${OPENCLAW_HOME:-${HOME}/.openclaw}" ;;
     *)
       echo "[FAIL] Unsupported VCO host id for target-root resolution: ${host_id}" >&2
       exit 1
@@ -105,7 +109,7 @@ resolve_default_target_root() {
 assert_target_root_matches_host_intent() {
   local target_root="$1"
   local host_id="$2"
-  local leaf normalized_target is_codex_root is_claude_root is_cursor_root is_windsurf_root
+  local leaf normalized_target is_codex_root is_claude_root is_cursor_root is_windsurf_root is_openclaw_root
   leaf="$(basename "${target_root}")"
   leaf="$(printf '%s' "${leaf}" | tr '[:upper:]' '[:lower:]')"
   normalized_target="$(printf '%s' "${target_root}" | tr '\\' '/' | tr '[:upper:]' '[:lower:]')"
@@ -114,11 +118,13 @@ assert_target_root_matches_host_intent() {
   is_claude_root="false"
   is_cursor_root="false"
   is_windsurf_root="false"
+  is_openclaw_root="false"
   [[ "${leaf}" == ".codex" ]] && is_codex_root="true"
   [[ "${leaf}" == ".claude" ]] && is_claude_root="true"
   [[ "${leaf}" == ".cursor" ]] && is_cursor_root="true"
   [[ "${normalized_target}" == */.codeium/windsurf ]] && is_windsurf_root="true"
-  if [[ "${host_id}" == "codex" && ( "${is_claude_root}" == "true" || "${is_windsurf_root}" == "true" ) ]]; then
+  [[ "${leaf}" == ".openclaw" ]] && is_openclaw_root="true"
+  if [[ "${host_id}" == "codex" && ( "${is_claude_root}" == "true" || "${is_windsurf_root}" == "true" || "${is_openclaw_root}" == "true" ) ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a non-Codex host root, but host='codex'." >&2
     exit 1
   fi
@@ -127,7 +133,7 @@ assert_target_root_matches_host_intent() {
     echo "[FAIL] Pass --host cursor or use a Codex target root." >&2
     exit 1
   fi
-  if [[ "${host_id}" == "claude-code" && ( "${is_codex_root}" == "true" || "${is_windsurf_root}" == "true" ) ]]; then
+  if [[ "${host_id}" == "claude-code" && ( "${is_codex_root}" == "true" || "${is_windsurf_root}" == "true" || "${is_openclaw_root}" == "true" ) ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a non-Claude host root, but host='claude-code'." >&2
     exit 1
   fi
@@ -156,13 +162,27 @@ assert_target_root_matches_host_intent() {
     echo "[FAIL] Pass --host windsurf or choose a Cursor target root." >&2
     exit 1
   fi
-  if [[ "${host_id}" == "windsurf" && ( "${is_codex_root}" == "true" || "${is_claude_root}" == "true" ) ]]; then
+  if [[ "${host_id}" == "cursor" && "${is_openclaw_root}" == "true" ]]; then
+    echo "[FAIL] Target root '${target_root}' looks like an OpenClaw home, but host='cursor'." >&2
+    echo "[FAIL] Pass --host openclaw or choose a Cursor target root." >&2
+    exit 1
+  fi
+  if [[ "${host_id}" == "windsurf" && ( "${is_codex_root}" == "true" || "${is_claude_root}" == "true" || "${is_openclaw_root}" == "true" ) ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a non-Windsurf host root, but host='windsurf'." >&2
     exit 1
   fi
   if [[ "${host_id}" == "windsurf" && "${is_cursor_root}" == "true" ]]; then
     echo "[FAIL] Target root '${target_root}' looks like a Cursor home, but host='windsurf'." >&2
     echo "[FAIL] Pass --host cursor or choose a Windsurf target root." >&2
+    exit 1
+  fi
+  if [[ "${host_id}" == "openclaw" && ( "${is_codex_root}" == "true" || "${is_claude_root}" == "true" || "${is_windsurf_root}" == "true" ) ]]; then
+    echo "[FAIL] Target root '${target_root}' looks like a non-OpenClaw host root, but host='openclaw'." >&2
+    exit 1
+  fi
+  if [[ "${host_id}" == "openclaw" && "${is_cursor_root}" == "true" ]]; then
+    echo "[FAIL] Target root '${target_root}' looks like a Cursor home, but host='openclaw'." >&2
+    echo "[FAIL] Pass --host cursor or choose an OpenClaw target root." >&2
     exit 1
   fi
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-13",
+  "updated_at": "2026-03-25",
   "policy": "replay-host-capability-matrix",
   "sources": {
     "execution_program": "docs/plans/2026-03-13-universal-vibeskills-execution-program.md",
@@ -40,6 +40,17 @@
         "adapters/claude-code/platform-windows.json",
         "adapters/claude-code/platform-linux.json",
         "adapters/claude-code/platform-macos.json"
+      ]
+    },
+    {
+      "adapter_id": "openclaw",
+      "host_profile": "adapters/openclaw/host-profile.json",
+      "expected_status": "preview",
+      "expected_runtime_role": "official-runtime-adapter",
+      "platform_contracts": [
+        "adapters/openclaw/platform-windows.json",
+        "adapters/openclaw/platform-linux.json",
+        "adapters/openclaw/platform-macos.json"
       ]
     },
     {
@@ -135,6 +146,56 @@
       "closure_truth": {
         "authoritative_lane": false
       }
+    },
+    {
+      "lane_id": "openclaw/linux",
+      "adapter_id": "openclaw",
+      "platform": "linux",
+      "expected_platform_status": "preview",
+      "platform_contract": "adapters/openclaw/platform-linux.json",
+      "promotion_bundle": {
+        "manifest": "references/proof-bundles/openclaw-runtime-core-preview-candidate/manifest.json",
+        "required_gate": "scripts/verify/vibe-platform-promotion-bundle.ps1",
+        "bundle_gate": "scripts/verify/vibe-platform-promotion-bundle.ps1",
+        "current_evidence_state": "candidate-scaffold-only-not-for-promotion"
+      },
+      "closure_truth": {
+        "authoritative_lane": false,
+        "degrade_cases": {
+          "runtime_core_only_install": "degraded-but-supported",
+          "workspace_projection_not_requested": "degraded-but-supported",
+          "host_login_state_missing": "host-managed"
+        },
+        "notes": [
+          "OpenClaw is replay-tracked as runtime-core-preview only."
+        ]
+      }
+    },
+    {
+      "lane_id": "openclaw/windows",
+      "adapter_id": "openclaw",
+      "platform": "windows",
+      "expected_platform_status": "not-yet-proven",
+      "platform_contract": "adapters/openclaw/platform-windows.json",
+      "closure_truth": {
+        "authoritative_lane": false,
+        "notes": [
+          "Windows lane is registered but not proven for OpenClaw."
+        ]
+      }
+    },
+    {
+      "lane_id": "openclaw/macos",
+      "adapter_id": "openclaw",
+      "platform": "macos",
+      "expected_platform_status": "not-yet-proven",
+      "platform_contract": "adapters/openclaw/platform-macos.json",
+      "closure_truth": {
+        "authoritative_lane": false,
+        "notes": [
+          "macOS lane is registered but not proven for OpenClaw."
+        ]
+      }
     }
   ],
   "hard_no_overclaim_rules": {
@@ -145,6 +206,9 @@
     "linux_full_authoritative_requires_bundle": "references/proof-bundles/linux-full-authoritative-candidate/manifest.json",
     "linux_full_authoritative_requires_fresh_machine_runs": 2,
     "linux_without_pwsh_is_degraded_not_full": true,
-    "macos_is_not_yet_proven_until_frozen": true
+    "macos_is_not_yet_proven_until_frozen": true,
+    "openclaw_status_must_remain_preview": true,
+    "openclaw_promotion_bundle_required_before_status_raise": "references/proof-bundles/openclaw-runtime-core-preview-candidate/manifest.json",
+    "openclaw_windows_and_macos_not_yet_proven": true
   }
 }

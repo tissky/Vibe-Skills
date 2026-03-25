@@ -26,3 +26,10 @@ Artifacts are written to `outputs/verify/` when `-WriteArtifacts` is provided.
 
 - `tests/replay/fixtures/host-capability-matrix.json` (host/platform truth + no-overclaim lanes)
 - `tests/replay/fixtures/provider-state-matrix.json` (provider-state truth + offline degrade contract)
+
+## OpenClaw Runtime-Core-Preview Fixtures
+
+- `tests/replay/route/openclaw-runtime-core-preview.json` (route truth for OpenClaw preview lane; no full-closure claim)
+- `tests/replay/degrade/openclaw-runtime-core-preview.json` (explicit degrade and host-managed abstain semantics)
+- `tests/replay/install/openclaw-runtime-core-preview-isolation.json` (install isolation boundary for runtime-core-preview)
+- `tests/replay/promotion/openclaw-runtime-core-preview.json` (promotion ceiling guardrail: stay `preview` until evidence is complete)

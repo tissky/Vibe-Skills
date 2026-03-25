@@ -210,7 +210,7 @@ function Install-ClaudeGuidancePayload {
     return
 }
 
-function Install-WindsurfPayload {
+function Install-RuntimeCoreModePayload {
     $commandsRoot = Join-Path $RepoRoot 'commands'
     if (Test-Path -LiteralPath $commandsRoot) {
         Copy-DirContent -Source $commandsRoot -Destination (Join-Path $TargetRoot 'global_workflows')
@@ -229,9 +229,7 @@ switch ([string]$adapter.install_mode) {
     'governed' { Install-GovernedCodexPayload }
     'preview-guidance' { Install-ClaudeGuidancePayload }
     'runtime-core' {
-        if ([string]$adapter.id -eq 'windsurf') {
-            Install-WindsurfPayload
-        }
+        Install-RuntimeCoreModePayload
     }
     default { throw "Unsupported adapter install mode: $($adapter.install_mode)" }
 }

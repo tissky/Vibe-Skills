@@ -35,7 +35,8 @@ function Prompt-VgoHostId {
         Write-Host '  2) claude-code  - supported install/use path'
         Write-Host '  3) cursor       - supported install/use path'
         Write-Host '  4) windsurf     - supported path + runtime adapter'
-        $choice = [string](Read-Host 'Install into which agent? [1-4]')
+        Write-Host '  5) openclaw     - preview runtime-core adapter'
+        $choice = [string](Read-Host 'Install into which agent? [1-5]')
         $normalized = $choice.Trim().ToLowerInvariant()
         switch ($normalized) {
             '1' { return 'codex' }
@@ -47,7 +48,9 @@ function Prompt-VgoHostId {
             'cursor' { return 'cursor' }
             '4' { return 'windsurf' }
             'windsurf' { return 'windsurf' }
-            default { Write-Warning "Unsupported choice: $choice. Enter 1, 2, 3, 4, or a supported host name." }
+            '5' { return 'openclaw' }
+            'openclaw' { return 'openclaw' }
+            default { Write-Warning "Unsupported choice: $choice. Enter 1, 2, 3, 4, 5, or a supported host name." }
         }
     }
 }
@@ -60,7 +63,7 @@ if (-not (Test-NonEmptyString -Value $HostId)) {
     } elseif (Test-IsInteractiveBootstrap) {
         $HostId = Prompt-VgoHostId
     } else {
-        throw 'No host was provided for one-shot bootstrap. Pass -HostId codex|claude-code|cursor|windsurf when running non-interactively.'
+        throw 'No host was provided for one-shot bootstrap. Pass -HostId codex|claude-code|cursor|windsurf|openclaw when running non-interactively.'
     }
 }
 $HostId = Resolve-VgoHostId -HostId $HostId

@@ -558,7 +558,7 @@ _You know what this is now. All it takes from here is one prompt:_
 
 > 💡 **Recommended practice**: If you want every subsequent turn to be explicitly governed by the VibeSkills runtime, keep appending `$vibe` or `/vibe` in each turn. If you don't include the invocation syntax in a turn, that turn should not be treated as "explicitly locked in vibe runtime".
 
-**Currently supported platforms**: `codex` (most complete governed path) · `claude-code` · `cursor` · `windsurf` (preview runtime-core lane) · `openclaw` (preview runtime-core path)
+**Currently supported platforms**: `codex` (most complete governed path) · `claude-code` · `cursor` · `windsurf` (supported install-and-use path with runtime-adapter integration) · `openclaw` (preview runtime-core path)
 
 <br/>
 

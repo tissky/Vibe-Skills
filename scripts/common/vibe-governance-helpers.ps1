@@ -228,8 +228,9 @@ function Resolve-VgoHostId {
         'claude-code' { return 'claude-code' }
         'cursor' { return 'cursor' }
         'windsurf' { return 'windsurf' }
+        'openclaw' { return 'openclaw' }
         default {
-            throw "Unsupported VCO host id: $resolved. Supported values: codex, claude-code, cursor, windsurf"
+            throw "Unsupported VCO host id: $resolved. Supported values: codex, claude-code, cursor, windsurf, openclaw"
         }
     }
 }
@@ -265,6 +266,12 @@ function Resolve-VgoDefaultTargetRoot {
                 return [System.IO.Path]::GetFullPath($env:WINDSURF_HOME)
             }
             return [System.IO.Path]::GetFullPath((Join-Path $homeDir '.codeium\windsurf'))
+        }
+        'openclaw' {
+            if (-not [string]::IsNullOrWhiteSpace($env:OPENCLAW_HOME)) {
+                return [System.IO.Path]::GetFullPath($env:OPENCLAW_HOME)
+            }
+            return [System.IO.Path]::GetFullPath((Join-Path $homeDir '.openclaw'))
         }
         default {
             throw "Unsupported VCO host id: $resolvedHostId"
@@ -313,10 +320,11 @@ function Assert-VgoTargetRootMatchesHostIntent {
     $isCodexRoot = ($normalizedLeaf -eq '.codex')
     $isCursorRoot = ($normalizedLeaf -eq '.cursor')
     $isWindsurfRoot = $normalizedTargetPath.EndsWith('/.codeium/windsurf')
+    $isOpenClawRoot = ($normalizedLeaf -eq '.openclaw')
 
     switch ($resolvedHostId) {
         'codex' {
-            if ($isClaudeRoot -or $isWindsurfRoot) {
+            if ($isClaudeRoot -or $isWindsurfRoot -or $isOpenClawRoot) {
                 throw ([string]::Format(
                     "TargetRoot '{0}' looks like a non-Codex host root, but HostId resolved to 'codex'. Pass the matching host id or use a Codex target root.",
                     $TargetRoot
@@ -330,7 +338,7 @@ function Assert-VgoTargetRootMatchesHostIntent {
             }
         }
         'claude-code' {
-            if ($isCodexRoot -or $isWindsurfRoot) {
+            if ($isCodexRoot -or $isWindsurfRoot -or $isOpenClawRoot) {
                 throw ([string]::Format(
                     "TargetRoot '{0}' looks like a non-Claude host root, but HostId resolved to 'claude-code'. Pass the matching host id or use a Claude Code target root.",
                     $TargetRoot
@@ -344,7 +352,7 @@ function Assert-VgoTargetRootMatchesHostIntent {
             }
         }
         'windsurf' {
-            if ($isCodexRoot -or $isClaudeRoot) {
+            if ($isCodexRoot -or $isClaudeRoot -or $isOpenClawRoot) {
                 throw ([string]::Format(
                     "TargetRoot '{0}' looks like a non-Windsurf host root, but HostId resolved to 'windsurf'. Pass the matching host id or use a Windsurf target root.",
                     $TargetRoot
@@ -373,6 +381,26 @@ function Assert-VgoTargetRootMatchesHostIntent {
             if ($isWindsurfRoot) {
                 throw ([string]::Format(
                     "TargetRoot '{0}' looks like a Windsurf home, but HostId resolved to 'cursor'. Use -HostId windsurf or choose a Cursor target root.",
+                    $TargetRoot
+                ))
+            }
+            if ($isOpenClawRoot) {
+                throw ([string]::Format(
+                    "TargetRoot '{0}' looks like an OpenClaw home, but HostId resolved to 'cursor'. Use -HostId openclaw or choose a Cursor target root.",
+                    $TargetRoot
+                ))
+            }
+        }
+        'openclaw' {
+            if ($isCodexRoot -or $isClaudeRoot -or $isWindsurfRoot) {
+                throw ([string]::Format(
+                    "TargetRoot '{0}' looks like a non-OpenClaw host root, but HostId resolved to 'openclaw'. Pass the matching host id or use an OpenClaw target root.",
+                    $TargetRoot
+                ))
+            }
+            if ($isCursorRoot) {
+                throw ([string]::Format(
+                    "TargetRoot '{0}' looks like a Cursor home, but HostId resolved to 'openclaw'. Use -HostId cursor or choose an OpenClaw target root.",
                     $TargetRoot
                 ))
             }
