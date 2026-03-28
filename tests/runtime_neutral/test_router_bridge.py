@@ -73,6 +73,22 @@ class RouterBridgeTests(unittest.TestCase):
             self.assertTrue(result["confirm_ui"]["enabled"])
             self.assertGreaterEqual(len(result["confirm_ui"]["options"]), 1)
 
+    def test_requested_vibe_can_preserve_runtime_authority_while_router_selects_specialist(self) -> None:
+        result = run_bridge(
+            "I have a failing test and a stack trace. Help me debug systematically before proposing fixes.",
+            "XL",
+            "debug",
+            requested_skill="vibe",
+        )
+
+        self.assertEqual("confirm_required", result["route_mode"])
+        self.assertEqual("code-quality", result["selected"]["pack_id"])
+        self.assertEqual("systematic-debugging", result["selected"]["skill"])
+        self.assertEqual("vibe", result["alias"]["requested_canonical"])
+        self.assertEqual("vibe", result["ranked"][1]["selected_candidate"])
+        self.assertIn("confirm_ui", result)
+        self.assertTrue(result["confirm_ui"]["enabled"])
+
 
 if __name__ == "__main__":
     unittest.main()

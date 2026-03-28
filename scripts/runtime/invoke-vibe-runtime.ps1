@@ -3,6 +3,13 @@ param(
     [ValidateSet('interactive_governed', 'benchmark_autonomous')] [string]$Mode = 'interactive_governed',
     [string]$RunId = '',
     [string]$ArtifactRoot = '',
+    [AllowEmptyString()] [string]$GovernanceScope = '',
+    [AllowEmptyString()] [string]$RootRunId = '',
+    [AllowEmptyString()] [string]$ParentRunId = '',
+    [AllowEmptyString()] [string]$ParentUnitId = '',
+    [AllowEmptyString()] [string]$InheritedRequirementDocPath = '',
+    [AllowEmptyString()] [string]$InheritedExecutionPlanPath = '',
+    [string[]]$ApprovedSpecialistSkillIds = @(),
     [switch]$ExecuteGovernanceCleanup,
     [switch]$ApplyManagedNodeCleanup
 )
@@ -68,13 +75,88 @@ if ([string]::IsNullOrWhiteSpace($RunId)) {
     $RunId = New-VibeRunId
 }
 $artifactBaseRoot = Get-VibeArtifactRoot -RepoRoot $runtime.repo_root -ArtifactRoot $ArtifactRoot
+$hierarchyState = Get-VibeHierarchyState `
+    -GovernanceScope $GovernanceScope `
+    -RunId $RunId `
+    -RootRunId $RootRunId `
+    -ParentRunId $ParentRunId `
+    -ParentUnitId $ParentUnitId `
+    -InheritedRequirementDocPath $InheritedRequirementDocPath `
+    -InheritedExecutionPlanPath $InheritedExecutionPlanPath `
+    -HierarchyContract $runtime.runtime_input_packet_policy.hierarchy_contract
+
+$hierarchyArgs = @{
+    GovernanceScope = [string]$hierarchyState.governance_scope
+}
+if (-not [string]::IsNullOrWhiteSpace([string]$hierarchyState.root_run_id)) {
+    $hierarchyArgs.RootRunId = [string]$hierarchyState.root_run_id
+}
+if (-not [string]::IsNullOrWhiteSpace([string]$hierarchyState.parent_run_id)) {
+    $hierarchyArgs.ParentRunId = [string]$hierarchyState.parent_run_id
+}
+if (-not [string]::IsNullOrWhiteSpace([string]$hierarchyState.parent_unit_id)) {
+    $hierarchyArgs.ParentUnitId = [string]$hierarchyState.parent_unit_id
+}
+if (-not [string]::IsNullOrWhiteSpace([string]$hierarchyState.inherited_requirement_doc_path)) {
+    $hierarchyArgs.InheritedRequirementDocPath = [string]$hierarchyState.inherited_requirement_doc_path
+}
+if (-not [string]::IsNullOrWhiteSpace([string]$hierarchyState.inherited_execution_plan_path)) {
+    $hierarchyArgs.InheritedExecutionPlanPath = [string]$hierarchyState.inherited_execution_plan_path
+}
 
 $skeleton = & (Join-Path $PSScriptRoot 'Invoke-SkeletonCheck.ps1') -Task $Task -Mode $Mode -RunId $RunId -ArtifactRoot $ArtifactRoot
-$runtimeInput = & (Join-Path $PSScriptRoot 'Freeze-RuntimeInputPacket.ps1') -Task $Task -Mode $Mode -RunId $RunId -ArtifactRoot $ArtifactRoot
+$freezeArgs = @{
+    Task = $Task
+    Mode = $Mode
+    RunId = $RunId
+    ArtifactRoot = $ArtifactRoot
+    ApprovedSpecialistSkillIds = $ApprovedSpecialistSkillIds
+}
+foreach ($key in @($hierarchyArgs.Keys)) {
+    $freezeArgs[$key] = $hierarchyArgs[$key]
+}
+$runtimeInput = & (Join-Path $PSScriptRoot 'Freeze-RuntimeInputPacket.ps1') @freezeArgs
 $interview = & (Join-Path $PSScriptRoot 'Invoke-DeepInterview.ps1') -Task $Task -Mode $Mode -RunId $RunId -ArtifactRoot $ArtifactRoot
-$requirement = & (Join-Path $PSScriptRoot 'Write-RequirementDoc.ps1') -Task $Task -Mode $Mode -RunId $RunId -IntentContractPath $interview.receipt_path -RuntimeInputPacketPath $runtimeInput.packet_path -ArtifactRoot $ArtifactRoot
-$plan = & (Join-Path $PSScriptRoot 'Write-XlPlan.ps1') -Task $Task -Mode $Mode -RunId $RunId -RequirementDocPath $requirement.requirement_doc_path -RuntimeInputPacketPath $runtimeInput.packet_path -ArtifactRoot $ArtifactRoot
-$execute = & (Join-Path $PSScriptRoot 'Invoke-PlanExecute.ps1') -Task $Task -Mode $Mode -RunId $RunId -RequirementDocPath $requirement.requirement_doc_path -ExecutionPlanPath $plan.execution_plan_path -RuntimeInputPacketPath $runtimeInput.packet_path -ArtifactRoot $ArtifactRoot
+$requirementArgs = @{
+    Task = $Task
+    Mode = $Mode
+    RunId = $RunId
+    IntentContractPath = $interview.receipt_path
+    RuntimeInputPacketPath = $runtimeInput.packet_path
+    ArtifactRoot = $ArtifactRoot
+}
+foreach ($key in @($hierarchyArgs.Keys)) {
+    $requirementArgs[$key] = $hierarchyArgs[$key]
+}
+$requirement = & (Join-Path $PSScriptRoot 'Write-RequirementDoc.ps1') @requirementArgs
+$planArgs = @{
+    Task = $Task
+    Mode = $Mode
+    RunId = $RunId
+    RequirementDocPath = $requirement.requirement_doc_path
+    RuntimeInputPacketPath = $runtimeInput.packet_path
+    ArtifactRoot = $ArtifactRoot
+}
+foreach ($key in @($hierarchyArgs.Keys)) {
+    $planArgs[$key] = $hierarchyArgs[$key]
+}
+$planArgs.InheritedRequirementDocPath = $requirement.requirement_doc_path
+$plan = & (Join-Path $PSScriptRoot 'Write-XlPlan.ps1') @planArgs
+$executeArgs = @{
+    Task = $Task
+    Mode = $Mode
+    RunId = $RunId
+    RequirementDocPath = $requirement.requirement_doc_path
+    ExecutionPlanPath = $plan.execution_plan_path
+    RuntimeInputPacketPath = $runtimeInput.packet_path
+    ArtifactRoot = $ArtifactRoot
+}
+foreach ($key in @('GovernanceScope', 'RootRunId', 'ParentRunId', 'ParentUnitId')) {
+    if ($hierarchyArgs.ContainsKey($key)) {
+        $executeArgs[$key] = $hierarchyArgs[$key]
+    }
+}
+$execute = & (Join-Path $PSScriptRoot 'Invoke-PlanExecute.ps1') @executeArgs
 $cleanup = & (Join-Path $PSScriptRoot 'Invoke-PhaseCleanup.ps1') -Task $Task -Mode $Mode -RunId $RunId -ArtifactRoot $ArtifactRoot -ExecuteGovernanceCleanup:$ExecuteGovernanceCleanup -ApplyManagedNodeCleanup:$ApplyManagedNodeCleanup
 
 $artifactReadiness = Wait-VibeArtifactSet -Paths @(
@@ -111,12 +193,20 @@ $relativeArtifacts = [ordered]@{
 
 $summary = [pscustomobject]@{
     run_id = $RunId
+    governance_scope = [string]$hierarchyState.governance_scope
     mode = $Mode
     task = $Task
     generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
     artifact_root = $artifactBaseRoot
     session_root = $skeleton.session_root
     session_root_relative = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$skeleton.session_root)
+    hierarchy = [pscustomobject]@{
+        root_run_id = [string]$hierarchyState.root_run_id
+        parent_run_id = if ($null -eq $hierarchyState.parent_run_id) { $null } else { [string]$hierarchyState.parent_run_id }
+        parent_unit_id = if ($null -eq $hierarchyState.parent_unit_id) { $null } else { [string]$hierarchyState.parent_unit_id }
+        inherited_requirement_doc_path = if ($null -eq $hierarchyState.inherited_requirement_doc_path) { $null } else { [string]$hierarchyState.inherited_requirement_doc_path }
+        inherited_execution_plan_path = if ($null -eq $hierarchyState.inherited_execution_plan_path) { $null } else { [string]$hierarchyState.inherited_execution_plan_path }
+    }
     stage_order = @(
         'skeleton_check',
         'deep_interview',

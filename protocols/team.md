@@ -32,6 +32,22 @@ ruflo remains optional for workflow/memory enhancements.
 
 All spawned subagent prompts must end with `$vibe` so the governed runtime remains the active contract inside delegated work.
 
+## Root/Child Authority Model
+
+XL delegation uses two governance scopes:
+
+- `root_governed`: one lane per user task; owns canonical requirement/plan truth and final completion claims
+- `child_governed`: delegated lane; inherits frozen context and emits local execution evidence
+
+Child-governed lanes keep `vibe` discipline but are not new top-level governors.
+
+Child-governed lanes must not:
+
+- create a second canonical requirement surface
+- create a second canonical execution-plan surface
+- emit final completion claims for the full root task
+- self-approve new global specialist dispatch
+
 ### Role Division
 
 | Concern | Provider | Tool |
@@ -59,6 +75,31 @@ Lead-agent rules:
 - subagents may surface report-only warnings, but must not invent a new hard gate,
 - if an existing approved policy or failed gate truly blocks progress, cite that exact surface,
 - aggregation must not flatten bounded-specialization outputs into generalized completion claims.
+- when a specialist skill is dispatched, keep its native workflow intact instead of rewriting it into generic lead-agent prose.
+- only root-governed aggregation may publish final completion claims for the full task.
+
+## Native Specialist Dispatch
+
+Within XL execution, a specialist skill is a bounded helper, not a replacement runtime.
+
+Rules:
+
+- `vibe` keeps final control of stage order, plan authority, and completion claims
+- specialist dispatch should be declared in the frozen plan before execution
+- each specialist receives a bounded subtask contract plus the frozen requirement context
+- specialist outputs must stay in the native format or workflow expected by that specialist skill
+- lead aggregation may summarize specialist output, but must not erase specialist-specific verification notes
+- a specialist recommendation is advisory until the governed plan chooses to dispatch it
+
+Hierarchy-specific dispatch semantics:
+
+- `approved_dispatch`: specialist usage approved by root and frozen in plan; child lanes may execute directly
+- `local_suggestion`: child-lane specialist suggestion; advisory until explicit root escalation approval
+
+Escalation rule:
+
+- child lanes needing non-approved specialists must emit explicit escalation evidence to root
+- no silent specialist activation is allowed in child lanes
 
 ## Orchestration Options
 
@@ -182,6 +223,7 @@ Contract rules:
 - Prefer `verification` that is command-shaped (copy/paste runnable).
 - If required info is missing, return `status=blocked` with `handoff_questions` (do not guess).
 - The same contract maps cleanly to the GSD wave contract (`entry_criteria`/`exit_criteria`/`verify_commands`).
+- If the subtask is owned by a specialist skill, keep the contract narrow enough that native specialist workflow still applies without improvising a new method.
 
 ## Shared Memory Contract (3-Tier)
 

@@ -51,6 +51,9 @@ def _create_fake_command(directory: Path, name: str) -> Path:
     return command_path
 
 
+SPECIALIST_TASK = "I have a failing test and a stack trace. Help me debug systematically before proposing fixes."
+
+
 def resolve_python_command_spec_via_powershell(command_spec: str, path_entries: list[Path]) -> dict[str, object]:
     shell = resolve_powershell()
     if shell is None:
@@ -138,7 +141,7 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
                 (
                     "& { "
                     f"$result = & '{script_path}' "
-                    "-Task 'bridge governed runtime into a verified temporary artifact root' "
+                    f"-Task '{SPECIALIST_TASK}' "
                     "-Mode benchmark_autonomous "
                     f"-RunId '{run_id}' "
                     f"-ArtifactRoot '{artifact_root}'; "
@@ -220,8 +223,11 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
                 self.assertIn("## Acceptance Criteria", requirement_doc)
                 self.assertIn("## Assumptions", requirement_doc)
                 self.assertIn("## Runtime Input Truth", requirement_doc)
+                self.assertIn("## Specialist Recommendations", requirement_doc)
             self.assertEqual("requirements", requirement_doc_path.parent.name)
             self.assertEqual("plans", execution_plan_path.parent.name)
+            execution_plan = execution_plan_path.read_text(encoding="utf-8")
+            self.assertIn("## Specialist Skill Dispatch Plan", execution_plan)
 
             runtime_input_packet = json.loads(runtime_input_packet_path.read_text(encoding="utf-8"))
             execute_receipt = json.loads(execute_receipt_path.read_text(encoding="utf-8"))
@@ -233,20 +239,39 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
             self.assertFalse(runtime_input_packet["canonical_router"]["unattended"])
             self.assertEqual("structure", runtime_input_packet["provenance"]["proof_class"])
             self.assertEqual("vibe", runtime_input_packet["authority_flags"]["explicit_runtime_skill"])
+            self.assertEqual("vibe", runtime_input_packet["route_snapshot"]["selected_skill"])
+            self.assertFalse(runtime_input_packet["divergence_shadow"]["skill_mismatch"])
+            self.assertGreaterEqual(len(runtime_input_packet["specialist_recommendations"]), 1)
+            self.assertIn(
+                "systematic-debugging",
+                [item["skill_id"] for item in runtime_input_packet["specialist_recommendations"]],
+            )
             self.assertNotEqual("execution-contract-prepared", execute_receipt["status"])
             self.assertGreaterEqual(execute_receipt["executed_unit_count"], 2)
             self.assertTrue(Path(execute_receipt["plan_shadow_path"]).exists())
             self.assertEqual("runtime", execute_receipt["proof_class"])
+            self.assertGreaterEqual(execute_receipt["specialist_recommendation_count"], 1)
+            self.assertGreaterEqual(execute_receipt["specialist_dispatch_unit_count"], 1)
+            self.assertIn("systematic-debugging", execute_receipt["specialist_skills"])
             self.assertEqual(execute_receipt["executed_unit_count"], execution_manifest["executed_unit_count"])
             self.assertEqual("completed", execution_manifest["status"])
             self.assertGreaterEqual(execution_manifest["successful_unit_count"], 2)
             self.assertEqual(0, execution_manifest["failed_unit_count"])
             self.assertEqual("runtime", execution_manifest["proof_class"])
             self.assertTrue(Path(execution_manifest["plan_shadow"]["path"]).exists())
+            self.assertEqual("vibe", execution_manifest["route_runtime_alignment"]["router_selected_skill"])
+            self.assertEqual("vibe", execution_manifest["route_runtime_alignment"]["runtime_selected_skill"])
+            self.assertFalse(execution_manifest["route_runtime_alignment"]["skill_mismatch"])
+            self.assertGreaterEqual(execution_manifest["specialist_accounting"]["recommendation_count"], 1)
+            self.assertGreaterEqual(execution_manifest["specialist_accounting"]["dispatch_unit_count"], 1)
+            self.assertIn("systematic-debugging", execution_manifest["specialist_accounting"]["specialist_skills"])
+            self.assertGreaterEqual(execution_manifest["plan_shadow"]["specialist_dispatch_unit_count"], 1)
             self.assertTrue(benchmark_proof["proof_passed"])
             self.assertGreaterEqual(benchmark_proof["executed_unit_count"], 2)
             self.assertEqual("runtime", benchmark_proof["proof_class"])
             self.assertTrue(Path(benchmark_proof["plan_shadow_path"]).exists())
+            self.assertGreaterEqual(benchmark_proof["specialist_recommendation_count"], 1)
+            self.assertGreaterEqual(benchmark_proof["specialist_dispatch_unit_count"], 1)
 
             cleanup_receipt = json.loads(resolve_artifact_path("cleanup_receipt").read_text(encoding="utf-8"))
             self.assertEqual("receipt_only", cleanup_receipt["cleanup_mode"])

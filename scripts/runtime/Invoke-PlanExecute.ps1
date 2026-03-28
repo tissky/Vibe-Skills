@@ -5,7 +5,11 @@ param(
     [string]$RequirementDocPath = '',
     [string]$ExecutionPlanPath = '',
     [string]$RuntimeInputPacketPath = '',
-    [string]$ArtifactRoot = ''
+    [string]$ArtifactRoot = '',
+    [AllowEmptyString()] [string]$GovernanceScope = '',
+    [AllowEmptyString()] [string]$RootRunId = '',
+    [AllowEmptyString()] [string]$ParentRunId = '',
+    [AllowEmptyString()] [string]$ParentUnitId = ''
 )
 
 Set-StrictMode -Version Latest
@@ -256,7 +260,7 @@ function Get-VibePlanDerivedExecutionShadow {
 
     $sections = Get-VibePlanSections -PlanPath $PlanPath
     $units = @()
-    $sectionOrder = @('Wave Plan', 'Verification Commands', 'Phase Cleanup Contract')
+    $sectionOrder = @('Wave Plan', 'Specialist Skill Dispatch Plan', 'Verification Commands', 'Phase Cleanup Contract')
     $unitIndex = 0
 
     foreach ($sectionName in $sectionOrder) {
@@ -275,7 +279,10 @@ function Get-VibePlanDerivedExecutionShadow {
             $reason = 'narrative_bullet_without_executable_command'
             $inlineCommands = [regex]::Matches($trimmed, '`([^`]+)`') | ForEach-Object { $_.Groups[1].Value }
 
-            if (@($inlineCommands).Count -gt 0) {
+            if ($sectionName -eq 'Specialist Skill Dispatch Plan') {
+                $classification = 'specialist_dispatch_unit'
+                $reason = 'bounded_native_specialist_dispatch_declared'
+            } elseif (@($inlineCommands).Count -gt 0) {
                 $classification = 'executable_unit'
                 $reason = 'inline_command_detected'
             } elseif ($sectionName -eq 'Verification Commands') {
@@ -303,6 +310,7 @@ function Get-VibePlanDerivedExecutionShadow {
         execution_plan_path = $PlanPath
         candidate_unit_count = @($units).Count
         executable_unit_count = @($units | Where-Object { $_.classification -eq 'executable_unit' }).Count
+        specialist_dispatch_unit_count = @($units | Where-Object { $_.classification -eq 'specialist_dispatch_unit' }).Count
         advisory_only_unit_count = @($units | Where-Object { $_.classification -eq 'advisory_only_unit' }).Count
         ambiguous_unit_count = @($units | Where-Object { $_.classification -eq 'ambiguous_unit' }).Count
         unsafe_unit_count = @($units | Where-Object { $_.classification -eq 'unsafe_unit' }).Count
@@ -336,6 +344,15 @@ $runtimeInputPacket = if (Test-Path -LiteralPath $runtimeInputPath) {
 } else {
     $null
 }
+$hierarchyState = Get-VibeHierarchyState `
+    -GovernanceScope $(if ($runtimeInputPacket) { [string]$runtimeInputPacket.governance_scope } else { $GovernanceScope }) `
+    -RunId $RunId `
+    -RootRunId $(if ($runtimeInputPacket -and $runtimeInputPacket.hierarchy) { [string]$runtimeInputPacket.hierarchy.root_run_id } else { $RootRunId }) `
+    -ParentRunId $(if ($runtimeInputPacket -and $runtimeInputPacket.hierarchy) { [string]$runtimeInputPacket.hierarchy.parent_run_id } else { $ParentRunId }) `
+    -ParentUnitId $(if ($runtimeInputPacket -and $runtimeInputPacket.hierarchy) { [string]$runtimeInputPacket.hierarchy.parent_unit_id } else { $ParentUnitId }) `
+    -InheritedRequirementDocPath $(if ($runtimeInputPacket -and $runtimeInputPacket.hierarchy) { [string]$runtimeInputPacket.hierarchy.inherited_requirement_doc_path } else { $RequirementDocPath }) `
+    -InheritedExecutionPlanPath $(if ($runtimeInputPacket -and $runtimeInputPacket.hierarchy) { [string]$runtimeInputPacket.hierarchy.inherited_execution_plan_path } else { $ExecutionPlanPath }) `
+    -HierarchyContract $runtime.runtime_input_packet_policy.hierarchy_contract
 
 $policy = $runtime.benchmark_execution_policy
 $proofRegistry = $runtime.proof_class_registry
@@ -363,8 +380,31 @@ $tokens = @{
     '${REQUIREMENT_DOC}' = [System.IO.Path]::GetFullPath($requirementPath)
     '${EXECUTION_PLAN}' = [System.IO.Path]::GetFullPath($planPath)
     '${RUN_ID}' = [string]$RunId
+    '${ROOT_RUN_ID}' = [string]$hierarchyState.root_run_id
 }
 $planShadow = Get-VibePlanDerivedExecutionShadow -PlanPath $planPath -RunId $RunId -SessionRoot $sessionRoot
+$specialistRecommendations = if ($runtimeInputPacket) { @($runtimeInputPacket.specialist_recommendations) } else { @() }
+$approvedDispatch = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch) { @($runtimeInputPacket.specialist_dispatch.approved_dispatch) } else { @() }
+$localSuggestions = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch) { @($runtimeInputPacket.specialist_dispatch.local_specialist_suggestions) } else { @() }
+$specialistSkills = @($approvedDispatch | ForEach-Object { [string]$_.skill_id } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+$escalationRequired = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch) { [bool]$runtimeInputPacket.specialist_dispatch.escalation_required } else { $false }
+$escalationPath = $null
+if ([string]$hierarchyState.governance_scope -eq 'child' -and $escalationRequired) {
+    $escalation = [pscustomobject]@{
+        run_id = $RunId
+        governance_scope = [string]$hierarchyState.governance_scope
+        root_run_id = [string]$hierarchyState.root_run_id
+        parent_run_id = if ($null -eq $hierarchyState.parent_run_id) { $null } else { [string]$hierarchyState.parent_run_id }
+        parent_unit_id = if ($null -eq $hierarchyState.parent_unit_id) { $null } else { [string]$hierarchyState.parent_unit_id }
+        approval_owner = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch) { [string]$runtimeInputPacket.specialist_dispatch.approval_owner } else { 'root_vibe' }
+        status = 'root_approval_required'
+        requested_specialist_skill_ids = @($localSuggestions | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
+        local_specialist_suggestions = @($localSuggestions)
+        generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    }
+    $escalationPath = Join-Path $sessionRoot 'specialist-escalation-request.json'
+    Write-VibeJsonArtifact -Path $escalationPath -Value $escalation
+}
 
 $waveReceipts = @()
 $resultPaths = @()
@@ -413,9 +453,11 @@ foreach ($wave in @($profile.waves)) {
     }
 }
 
+$baseStatus = if ($failedUnitCount -eq 0 -and $executedUnitCount -ge [int]$profile.expected_minimum_units) { 'completed' } elseif ($executedUnitCount -eq 0) { 'failed' } else { 'completed_with_failures' }
 $executionManifest = [pscustomobject]@{
     stage = 'plan_execute'
     run_id = $RunId
+    governance_scope = [string]$hierarchyState.governance_scope
     mode = $Mode
     internal_grade = $grade
     scheduler_kind = [string]$policy.scheduler.kind
@@ -432,6 +474,20 @@ $executionManifest = [pscustomobject]@{
     timed_out_unit_count = $timedOutUnitCount
     proof_class = [string]$proofRegistry.artifact_class_defaults.execution_manifest
     promotion_suitable = [string]$proofRegistry.promotion_suitability.runtime
+    hierarchy = [pscustomobject]@{
+        governance_scope = [string]$hierarchyState.governance_scope
+        root_run_id = [string]$hierarchyState.root_run_id
+        parent_run_id = if ($null -eq $hierarchyState.parent_run_id) { $null } else { [string]$hierarchyState.parent_run_id }
+        parent_unit_id = if ($null -eq $hierarchyState.parent_unit_id) { $null } else { [string]$hierarchyState.parent_unit_id }
+        inherited_requirement_doc_path = if ($null -eq $hierarchyState.inherited_requirement_doc_path) { $null } else { [string]$hierarchyState.inherited_requirement_doc_path }
+        inherited_execution_plan_path = if ($null -eq $hierarchyState.inherited_execution_plan_path) { $null } else { [string]$hierarchyState.inherited_execution_plan_path }
+    }
+    authority = [pscustomobject]@{
+        canonical_requirement_write_allowed = [bool]$hierarchyState.allow_requirement_freeze
+        canonical_plan_write_allowed = [bool]$hierarchyState.allow_plan_freeze
+        global_dispatch_allowed = [bool]$hierarchyState.allow_global_dispatch
+        completion_claim_allowed = [bool]$hierarchyState.allow_completion_claim
+    }
     route_runtime_alignment = [pscustomobject]@{
         router_selected_skill = if ($runtimeInputPacket) { [string]$runtimeInputPacket.route_snapshot.selected_skill } else { $null }
         runtime_selected_skill = if ($runtimeInputPacket) { [string]$runtimeInputPacket.authority_flags.explicit_runtime_skill } else { 'vibe' }
@@ -442,10 +498,25 @@ $executionManifest = [pscustomobject]@{
         path = $planShadow.path
         candidate_unit_count = [int]$planShadow.payload.candidate_unit_count
         executable_unit_count = [int]$planShadow.payload.executable_unit_count
+        specialist_dispatch_unit_count = [int]$planShadow.payload.specialist_dispatch_unit_count
         advisory_only_unit_count = [int]$planShadow.payload.advisory_only_unit_count
         ambiguous_unit_count = [int]$planShadow.payload.ambiguous_unit_count
     }
-    status = if ($failedUnitCount -eq 0 -and $executedUnitCount -ge [int]$profile.expected_minimum_units) { 'completed' } elseif ($executedUnitCount -eq 0) { 'failed' } else { 'completed_with_failures' }
+    specialist_accounting = [pscustomobject]@{
+        recommendation_count = @($specialistRecommendations).Count
+        specialist_skill_count = @($specialistSkills).Count
+        specialist_skills = @($specialistSkills)
+        native_usage_required = [bool](@($specialistRecommendations | Where-Object { $_.native_usage_required }).Count -gt 0)
+        dispatch_unit_count = [int]$planShadow.payload.specialist_dispatch_unit_count
+        recommendations = @($specialistRecommendations)
+        approved_dispatch_count = @($approvedDispatch).Count
+        approved_dispatch = @($approvedDispatch)
+        local_suggestion_count = @($localSuggestions).Count
+        local_specialist_suggestions = @($localSuggestions)
+        escalation_required = [bool]$escalationRequired
+        escalation_request_path = $escalationPath
+    }
+    status = if ([string]$hierarchyState.governance_scope -eq 'child' -and $baseStatus -eq 'completed') { 'completed_local_scope' } else { $baseStatus }
     waves = @($waveReceipts)
 }
 
@@ -468,6 +539,10 @@ $proofManifest = [pscustomobject]@{
     minimum_units_required = [int]$profile.expected_minimum_units
     proof_class = [string]$proofRegistry.artifact_class_defaults.benchmark_proof_manifest
     promotion_suitable = [string]$proofRegistry.promotion_suitability.runtime
+    specialist_recommendation_count = @($specialistRecommendations).Count
+    specialist_dispatch_unit_count = [int]$planShadow.payload.specialist_dispatch_unit_count
+    governance_scope = [string]$hierarchyState.governance_scope
+    escalation_required = [bool]$escalationRequired
     proof_passed = [bool](($failedUnitCount -eq 0) -and ($executedUnitCount -ge [int]$profile.expected_minimum_units))
 }
 $proofManifestPath = Join-Path $proofRoot 'manifest.json'
@@ -483,6 +558,8 @@ $proofLines = @(
     ('- executed_unit_count: `{0}`' -f $executedUnitCount),
     ('- successful_unit_count: `{0}`' -f $successfulUnitCount),
     ('- failed_unit_count: `{0}`' -f $failedUnitCount),
+    ('- specialist_recommendation_count: `{0}`' -f @($specialistRecommendations).Count),
+    ('- specialist_dispatch_unit_count: `{0}`' -f [int]$planShadow.payload.specialist_dispatch_unit_count),
     ('- execution_manifest: `{0}`' -f $executionManifestPath),
     ('- plan_shadow: `{0}`' -f $planShadow.path),
     ''
@@ -504,6 +581,7 @@ Write-VibeMarkdownArtifact -Path $proofSummaryPath -Lines $proofLines
 $receipt = [pscustomobject]@{
     stage = 'plan_execute'
     run_id = $RunId
+    governance_scope = [string]$hierarchyState.governance_scope
     mode = $Mode
     internal_grade = $grade
     status = [string]$executionManifest.status
@@ -516,10 +594,19 @@ $receipt = [pscustomobject]@{
     executed_unit_count = $executedUnitCount
     successful_unit_count = $successfulUnitCount
     failed_unit_count = $failedUnitCount
+    specialist_recommendation_count = @($specialistRecommendations).Count
+    specialist_dispatch_unit_count = [int]$planShadow.payload.specialist_dispatch_unit_count
+    specialist_skills = @($specialistSkills)
+    local_specialist_suggestion_count = @($localSuggestions).Count
+    escalation_required = [bool]$escalationRequired
+    escalation_request_path = $escalationPath
+    completion_claim_allowed = [bool]$hierarchyState.allow_completion_claim
     proof_class = [string]$proofRegistry.artifact_class_defaults.execution_manifest
     verification_contract = @(
         'No completion claim without verification evidence.',
         'All subagent prompts must end with $vibe.',
+        'Specialist help must preserve native workflow and remain bounded under vibe governance.',
+        'Child-governed lanes may not issue final completion claims or mutate canonical requirement/plan truth.',
         'Phase cleanup must run after execution.'
     )
     generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')

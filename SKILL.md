@@ -70,6 +70,42 @@ Legacy compatibility alias only.
 If older callers still pass `benchmark_autonomous`, the runtime silently normalizes it to `interactive_governed`.
 It is not a separate execution plane and it must not create a second unattended control path.
 
+## Governor And Specialist Contract
+
+`vibe` owns runtime authority even when the canonical router surfaces a specialist skill.
+
+That means:
+
+- router-selected specialist skills may appear as bounded recommendations or route truth
+- runtime-selected skill remains `vibe` for governed entry
+- specialist help is allowed only as bounded native-mode assistance
+- specialist help must preserve the specialist skill's own workflow, inputs, outputs, and validation style
+- specialist help must not create a second requirement doc, second plan surface, or second runtime authority
+
+## Root/Child Governance Lanes
+
+For XL delegation, `vibe` runs with hierarchy semantics:
+
+- `root_governed`: the only lane that may freeze canonical requirement and plan surfaces and issue final completion claims
+- `child_governed`: subordinate execution lane that inherits frozen context and emits local receipts only
+
+Child-governed lanes must:
+
+- keep `$vibe` at prompt tail to preserve governed discipline
+- inherit frozen requirement and plan context from the root lane
+- stay within assigned ownership boundaries and write scopes
+
+Child-governed lanes must not:
+
+- create a second canonical requirement surface under `docs/requirements/`
+- create a second canonical plan surface under `docs/plans/`
+- publish final completion claims for the full root task
+
+Specialist dispatch under hierarchy:
+
+- `approved_dispatch`: root-approved specialist usage in the frozen plan
+- `local_suggestion`: child-detected specialist suggestion that stays advisory until root escalation approval
+
 ## Internal Execution Grades
 
 `M`, `L`, and `XL` remain active, but only as internal orchestration grades.
@@ -139,6 +175,8 @@ Execute the approved plan.
 
 If the work is parallelizable, prefer Codex-native XL orchestration.
 If subagents are spawned, their prompts must end with `$vibe`.
+If specialist skills are used, record them as bounded native dispatch under `vibe` governance rather than as a runtime handoff.
+If subagents run in child-governed lanes, they must inherit root-frozen context and must not reopen canonical requirement or plan truth surfaces.
 
 ### 6. `phase_cleanup`
 
@@ -232,6 +270,7 @@ The governed runtime should leave behind:
 - `docs/plans/YYYY-MM-DD-<topic>-execution-plan.md`
 - `outputs/runtime/vibe-sessions/<run-id>/phase-*.json`
 - `outputs/runtime/vibe-sessions/<run-id>/cleanup-receipt.json`
+- specialist recommendation and dispatch accounting when bounded specialist help is planned
 
 ## Known Boundaries
 

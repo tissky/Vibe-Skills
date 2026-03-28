@@ -19,6 +19,7 @@ Primary policy:
 
 ## Current Entry
 
+- [`2026-03-28-root-child-vibe-hierarchy-governance.md`](./2026-03-28-root-child-vibe-hierarchy-governance.md): 冻结“root/child `vibe` 分层治理”需求；聚焦把子代理 `$vibe` 收敛为从属执行态，避免递归顶层治理、重复专家分发与模糊 completion authority。
 - [`2026-03-27-ai-governance-consolidation.md`](./2026-03-27-ai-governance-consolidation.md): 冻结“内置 AI 治理层活跃路径整体收敛整理”的需求；聚焦让 runtime、doctor、install docs 与 helper surface 在 active shipped path 上完全对齐。
 - [`2026-03-27-ai-governance-historical-wording-cleanup.md`](./2026-03-27-ai-governance-historical-wording-cleanup.md): 冻结“内置 AI 治理层历史表述清理”的需求；聚焦在 `vibe` 范围内去掉退役模型键名的历史残留。
 - [`2026-03-27-ai-governance-openai-compatible-only.md`](./2026-03-27-ai-governance-openai-compatible-only.md): 冻结“内置 AI 治理层只保留 OpenAI-compatible 接入”的需求；聚焦移除 Ark 并行内置入口，统一公开安装、bootstrap、probe 与默认策略口径。

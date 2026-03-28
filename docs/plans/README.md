@@ -24,6 +24,7 @@ Those surfaces live under [`../status/README.md`](../status/README.md).
 
 ### Current Entry
 
+- [`2026-03-28-root-child-vibe-hierarchy-governance-plan.md`](./2026-03-28-root-child-vibe-hierarchy-governance-plan.md): root/child `vibe` 分层治理执行计划；聚焦把 child `$vibe` 收敛为 subordinate lane，并用批准式 specialist dispatch + escalation proof 防止递归总治理。
 - [`2026-03-27-ai-governance-consolidation-plan.md`](./2026-03-27-ai-governance-consolidation-plan.md): 内置 AI 治理层收敛整理执行计划；聚焦把 active runtime、doctor、helper scripts、one-shot 入口与 bundled 镜像统一到单一路径契约。
 - [`2026-03-27-ai-governance-historical-wording-cleanup-plan.md`](./2026-03-27-ai-governance-historical-wording-cleanup-plan.md): 内置 AI 治理层历史表述清理执行计划；聚焦清理 `vibe` 范围内已退役模型键名的历史残留表述。
 - [`2026-03-27-ai-governance-openai-compatible-only-plan.md`](./2026-03-27-ai-governance-openai-compatible-only-plan.md): 内置 AI 治理层 OpenAI-compatible-only 执行计划；聚焦收口权威 provider registry、vector diff 默认面、bootstrap/setup 和安装文档中的 Ark 分支。
