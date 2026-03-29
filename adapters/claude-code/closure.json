@@ -1,24 +1,32 @@
 {
   "adapter_id": "claude-code",
-  "closure_level": "preview-guidance",
+  "closure_level": "preview-managed",
   "install_mode": "preview-guidance",
   "check_mode": "preview-guidance",
   "bootstrap_mode": "preview-guidance",
   "repo_managed_payload": [
     "runtime core payload",
-    "canonical vibe mirror under skills/vibe/**"
+    "canonical vibe mirror under skills/vibe/**",
+    ".vibeskills/host-closure.json",
+    ".vibeskills/bin/**",
+    "settings.json managed vibeskills stanza"
   ],
-  "host_state_written": [],
+  "host_state_written": [
+    ".vibeskills/host-closure.json",
+    ".vibeskills/bin/**",
+    "settings.json managed vibeskills stanza"
+  ],
   "host_managed_boundaries": [
     "plugin provisioning",
     "hook installation",
     "MCP registration",
     "provider credentials",
-    "final Claude host configuration"
+    "broader Claude host behavior outside the managed vibeskills surface"
   ],
   "verification_contract": [
     "runtime freshness gate",
     "runtime BOM/frontmatter gate",
-    "runtime coherence gate"
+    "runtime coherence gate",
+    "host closure presence check"
   ]
 }

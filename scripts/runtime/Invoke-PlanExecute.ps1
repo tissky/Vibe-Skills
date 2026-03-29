@@ -1104,6 +1104,8 @@ $executionManifest = [pscustomobject]@{
     route_runtime_alignment = [pscustomobject]@{
         router_selected_skill = if ($runtimeInputPacket) { [string]$runtimeInputPacket.route_snapshot.selected_skill } else { $null }
         runtime_selected_skill = if ($runtimeInputPacket) { [string]$runtimeInputPacket.authority_flags.explicit_runtime_skill } else { 'vibe' }
+        requested_host_adapter_id = if ($runtimeInputPacket -and $runtimeInputPacket.host_adapter) { [string]$runtimeInputPacket.host_adapter.requested_host_id } else { [string]$runtime.host_adapter.id }
+        effective_host_adapter_id = if ($runtimeInputPacket -and $runtimeInputPacket.host_adapter) { [string]$runtimeInputPacket.host_adapter.effective_host_id } else { [string]$runtime.host_adapter.id }
         skill_mismatch = if ($runtimeInputPacket) { [bool]$runtimeInputPacket.divergence_shadow.skill_mismatch } else { $false }
         confirm_required = if ($runtimeInputPacket) { [bool]$runtimeInputPacket.route_snapshot.confirm_required } else { $false }
     }
@@ -1145,6 +1147,8 @@ $executionManifest = [pscustomobject]@{
         ambiguous_unit_count = [int]$planShadow.payload.ambiguous_unit_count
     }
     specialist_accounting = [pscustomobject]@{
+        requested_host_adapter_id = if ($runtimeInputPacket -and $runtimeInputPacket.host_adapter) { [string]$runtimeInputPacket.host_adapter.requested_host_id } else { [string]$runtime.host_adapter.id }
+        effective_host_adapter_id = if ($runtimeInputPacket -and $runtimeInputPacket.host_adapter) { [string]$runtimeInputPacket.host_adapter.effective_host_id } else { [string]$runtime.host_adapter.id }
         recommendation_count = @($specialistRecommendations).Count
         specialist_skill_count = @($specialistSkills).Count
         specialist_skills = @($specialistSkills)

@@ -11,13 +11,17 @@
     "config/skills-lock.json",
     "canonical vibe mirror under skills/vibe/**",
     "host-root global_workflows/** when commands exist",
-    "host-root mcp_config.json from mcp/servers.template.json when absent"
+    "host-root mcp_config.json from mcp/servers.template.json when absent",
+    "host-root .vibeskills/host-closure.json",
+    "host-root .vibeskills/bin/**"
   ],
   "host_state_written": [
     "skills/**",
     "skills/vibe/**",
     "global_workflows/** when commands exist",
-    "mcp_config.json when absent"
+    "mcp_config.json when absent",
+    ".vibeskills/host-closure.json",
+    ".vibeskills/bin/**"
   ],
   "host_managed_boundaries": [
     "login and account state",
@@ -31,6 +35,7 @@
     "runtime freshness gate",
     "runtime BOM/frontmatter gate",
     "runtime coherence gate",
-    "runtime-core presence check"
+    "runtime-core presence check",
+    "host closure presence check"
   ]
 }

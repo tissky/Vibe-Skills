@@ -106,6 +106,7 @@
         "scripts/runtime/Freeze-RuntimeInputPacket.ps1",
         "scripts/runtime/invoke-vibe-runtime.ps1",
         "scripts/runtime/Invoke-PlanExecute.ps1",
+        "scripts/runtime/native_specialist_runner.py",
         "scripts/runtime/memory_backend_driver.py",
         "scripts/verify/vibe-installed-runtime-freshness-gate.ps1",
         "scripts/verify/vibe-release-install-runtime-coherence-gate.ps1",

@@ -434,6 +434,14 @@ $packet = [pscustomobject]@{
     stage = 'runtime_input_freeze'
     run_id = $RunId
     governance_scope = [string]$hierarchyState.governance_scope
+    host_adapter = [pscustomobject]@{
+        requested_host_id = if ($runtime.host_adapter -and $runtime.host_adapter.requested_id) { [string]$runtime.host_adapter.requested_id } else { [string]$runtime.host_adapter.id }
+        effective_host_id = if ($runtime.host_adapter) { [string]$runtime.host_adapter.id } else { 'codex' }
+        status = if ($runtime.host_adapter -and $runtime.host_adapter.status) { [string]$runtime.host_adapter.status } else { $null }
+        install_mode = if ($runtime.host_adapter -and $runtime.host_adapter.install_mode) { [string]$runtime.host_adapter.install_mode } else { $null }
+        check_mode = if ($runtime.host_adapter -and $runtime.host_adapter.check_mode) { [string]$runtime.host_adapter.check_mode } else { $null }
+        bootstrap_mode = if ($runtime.host_adapter -and $runtime.host_adapter.bootstrap_mode) { [string]$runtime.host_adapter.bootstrap_mode } else { $null }
+    }
     task = $Task
     generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
     runtime_mode = $Mode

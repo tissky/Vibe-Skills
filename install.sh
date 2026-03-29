@@ -5,6 +5,7 @@ PROFILE="full"
 HOST_ID="codex"
 INSTALL_EXTERNAL="false"
 STRICT_OFFLINE="false"
+REQUIRE_CLOSED_READY="false"
 ALLOW_EXTERNAL_SKILL_FALLBACK="false"
 SKIP_RUNTIME_FRESHNESS_GATE="false"
 TARGET_ROOT=""
@@ -28,6 +29,7 @@ while [[ $# -gt 0 ]]; do
     --target-root) TARGET_ROOT="$2"; shift 2 ;;
     --install-external) INSTALL_EXTERNAL="true"; shift ;;
     --strict-offline) STRICT_OFFLINE="true"; shift ;;
+    --require-closed-ready) REQUIRE_CLOSED_READY="true"; shift ;;
     --allow-external-skill-fallback) ALLOW_EXTERNAL_SKILL_FALLBACK="true"; shift ;;
     --skip-runtime-freshness-gate) SKIP_RUNTIME_FRESHNESS_GATE="true"; shift ;;
     *) echo "Unknown arg: $1"; exit 1 ;;
@@ -676,6 +678,7 @@ echo "Mode   : ${ADAPTER_INSTALL_MODE}"
 echo "Profile: ${PROFILE}"
 echo "Target : ${TARGET_ROOT}"
 echo "StrictOffline: ${STRICT_OFFLINE}"
+echo "RequireClosedReady: ${REQUIRE_CLOSED_READY}"
 echo "AllowExternalSkillFallback: ${ALLOW_EXTERNAL_SKILL_FALLBACK}"
 echo "SkipRuntimeFreshnessGate: ${SKIP_RUNTIME_FRESHNESS_GATE}"
 
@@ -692,6 +695,7 @@ ADAPTER_INSTALL_JSON="$("${PYTHON_BIN_FOR_ADAPTER}" "${ADAPTER_INSTALLER}" \
   --target-root "${TARGET_ROOT}" \
   --host "${HOST_ID}" \
   --profile "${PROFILE}" \
+  $([[ "${REQUIRE_CLOSED_READY}" == "true" ]] && printf '%s' '--require-closed-ready') \
   $([[ "${ALLOW_EXTERNAL_SKILL_FALLBACK}" == "true" ]] && printf '%s' '--allow-external-skill-fallback'))"
 if [[ -n "${ADAPTER_INSTALL_JSON}" ]]; then
   mapfile -t EXTERNAL_FALLBACK_USED < <(printf '%s\n' "${ADAPTER_INSTALL_JSON}" | "${PYTHON_BIN_FOR_ADAPTER}" -c 'import json,sys; data=json.load(sys.stdin); [print(x) for x in data.get("external_fallback_used", [])]')

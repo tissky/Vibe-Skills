@@ -71,10 +71,13 @@ class OpenClawRuntimeCoreTests(unittest.TestCase):
 
             self.assertEqual("openclaw", payload["host_id"])
             self.assertEqual("runtime-core", payload["install_mode"])
+            self.assertIn("host_closure_path", payload)
             self.assertTrue((target_root / "skills" / "vibe" / "SKILL.md").exists())
             self.assertTrue((target_root / "skills" / "brainstorming" / "SKILL.md").exists())
             self.assertTrue((target_root / "commands").exists())
+            self.assertTrue((target_root / "commands" / "vibe.md").exists())
             self.assertTrue((target_root / "mcp_config.json").exists())
+            self.assertTrue((target_root / ".vibeskills" / "host-closure.json").exists())
             self.assertFalse((target_root / "settings.json").exists())
             self.assertFalse((target_root / "config" / "plugins-manifest.codex.json").exists())
 
@@ -100,7 +103,10 @@ class OpenClawRuntimeCoreTests(unittest.TestCase):
             self.assertIn("Mode   : runtime-core", install_result.stdout)
             self.assertTrue((target_root / "skills" / "vibe" / "SKILL.md").exists())
             self.assertTrue((target_root / "commands").exists())
+            self.assertTrue((target_root / "commands" / "vibe.md").exists())
+            self.assertTrue((target_root / "global_workflows" / "vibe.md").exists())
             self.assertTrue((target_root / "mcp_config.json").exists())
+            self.assertTrue((target_root / ".vibeskills" / "host-closure.json").exists())
             self.assertFalse((target_root / "settings.json").exists())
 
             check_result = subprocess.run(
@@ -120,6 +126,7 @@ class OpenClawRuntimeCoreTests(unittest.TestCase):
             )
             self.assertIn("Host: openclaw", check_result.stdout)
             self.assertIn("Mode: runtime-core", check_result.stdout)
+            self.assertIn("[OK] host closure manifest", check_result.stdout)
             self.assertIn("[OK] npm check skipped for non-governed adapter mode", check_result.stdout)
             self.assertNotIn("[FAIL] settings.json", check_result.stdout)
             self.assertNotIn("[FAIL] config/plugins-manifest.codex.json", check_result.stdout)

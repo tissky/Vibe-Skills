@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import os
 import shutil
+import stat
 import subprocess
 import tempfile
 import unittest
@@ -9,6 +11,13 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+STRICT_READY_HOSTS = [
+    ("claude-code", "VGO_CLAUDE_CODE_SPECIALIST_BRIDGE_COMMAND"),
+    ("cursor", "VGO_CURSOR_SPECIALIST_BRIDGE_COMMAND"),
+    ("windsurf", "VGO_WINDSURF_SPECIALIST_BRIDGE_COMMAND"),
+    ("openclaw", "VGO_OPENCLAW_SPECIALIST_BRIDGE_COMMAND"),
+    ("opencode", "VGO_OPENCODE_SPECIALIST_BRIDGE_COMMAND"),
+]
 
 
 def resolve_powershell() -> str | None:
@@ -48,6 +57,92 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
             str(self.target_root),
         ]
         subprocess.run(cmd, capture_output=True, text=True, check=True)
+
+    def create_fake_bridge(self, name: str, host_id: str) -> Path:
+        suffix = ".cmd" if os.name == "nt" else ""
+        bridge_path = self.root / f"{name}{suffix}"
+        if os.name == "nt":
+            bridge_path.write_text(
+                "@echo off\r\n"
+                "setlocal EnableDelayedExpansion\r\n"
+                "set OUT=\r\n"
+                ":loop\r\n"
+                "if \"%~1\"==\"\" goto done\r\n"
+                "if /I \"%~1\"==\"--output\" (\r\n"
+                "  set OUT=%~2\r\n"
+                "  shift\r\n"
+                "  shift\r\n"
+                "  goto loop\r\n"
+                ")\r\n"
+                "shift\r\n"
+                "goto loop\r\n"
+                ":done\r\n"
+                "if \"%OUT%\"==\"\" exit /b 2\r\n"
+                f"> \"%OUT%\" echo {{\"status\":\"completed\",\"summary\":\"{host_id} bridge executed\"}}\r\n"
+                f"echo {host_id} bridge ok\r\n"
+                "exit /b 0\r\n",
+                encoding="utf-8",
+            )
+        else:
+            bridge_path.write_text(
+                "#!/usr/bin/env sh\n"
+                "OUT=''\n"
+                "while [ \"$#\" -gt 0 ]; do\n"
+                "  case \"$1\" in\n"
+                "    --output)\n"
+                "      OUT=\"$2\"\n"
+                "      shift 2\n"
+                "      ;;\n"
+                "    *)\n"
+                "      shift\n"
+                "      ;;\n"
+                "  esac\n"
+                "done\n"
+                "if [ -z \"$OUT\" ]; then\n"
+                "  exit 2\n"
+                "fi\n"
+                f"printf '%s' '{{\"status\":\"completed\",\"summary\":\"{host_id} bridge executed\"}}' > \"$OUT\"\n"
+                f"printf '{host_id} bridge ok\\n'\n",
+                encoding="utf-8",
+            )
+            bridge_path.chmod(bridge_path.stat().st_mode | stat.S_IXUSR)
+        return bridge_path
+
+    def invoke_installed_specialist_wrapper(self, launcher_path: Path, host_id: str) -> None:
+        output_path = self.root / f"{host_id}-wrapper-result.json"
+        completed = subprocess.run(
+            [str(launcher_path), "--output", str(output_path)],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn(f"{host_id} bridge ok", completed.stdout)
+        self.assertTrue(output_path.exists())
+        payload = json.loads(output_path.read_text(encoding="utf-8"))
+        self.assertEqual("completed", payload["status"])
+
+    def strict_install_env(self, *, powershell: str | None = None, include_fake_bridge: tuple[str, str] | None = None) -> dict[str, str]:
+        env = os.environ.copy()
+        sanitized_bin = self.root / "strict-bin"
+        sanitized_bin.mkdir(parents=True, exist_ok=True)
+        blocked = {"claude", "claude-code", "cursor", "cursor-agent", "windsurf", "codeium", "openclaw", "opencode"}
+        for candidate in Path("/bin").iterdir():
+            if candidate.name in blocked:
+                continue
+            target = sanitized_bin / candidate.name
+            if target.exists():
+                continue
+            try:
+                target.symlink_to(candidate)
+            except FileExistsError:
+                continue
+        env["PATH"] = str(sanitized_bin)
+        for _host_id, env_name in STRICT_READY_HOSTS:
+            env.pop(env_name, None)
+        if include_fake_bridge is not None:
+            env_name, bridge_path = include_fake_bridge
+            env[env_name] = bridge_path
+        return env
 
     def assert_nested_runtime_skill_entrypoints_sanitized(self, target_root: Path) -> None:
         nested_skills_root = target_root / "skills" / "vibe" / "bundled" / "skills"
@@ -229,6 +324,70 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         install_script = (self.target_root / "skills" / "vibe" / "install.sh").read_text(encoding="utf-8")
         self.assertNotIn("rm -rf", install_script)
 
+    def test_shell_install_require_closed_ready_fails_without_bridge_command(self) -> None:
+        for host_id, _env_name in STRICT_READY_HOSTS:
+            with self.subTest(host_id=host_id):
+                target_root = self.root / f"{host_id}-strict-fail"
+                target_root.mkdir(parents=True, exist_ok=True)
+                result = subprocess.run(
+                    [
+                        "bash",
+                        str(REPO_ROOT / "install.sh"),
+                        "--host",
+                        host_id,
+                        "--profile",
+                        "full",
+                        "--target-root",
+                        str(target_root),
+                        "--require-closed-ready",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    env=self.strict_install_env(),
+                )
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("not closed_ready", result.stderr or result.stdout)
+                closure_path = target_root / ".vibeskills" / "host-closure.json"
+                self.assertTrue(closure_path.exists())
+                closure = json.loads(closure_path.read_text(encoding="utf-8"))
+                self.assertEqual("configured_offline_unready", closure["host_closure_state"])
+
+    def test_shell_install_require_closed_ready_succeeds_with_real_bridge_command(self) -> None:
+        for host_id, env_name in STRICT_READY_HOSTS:
+            with self.subTest(host_id=host_id):
+                target_root = self.root / f"{host_id}-strict-pass"
+                target_root.mkdir(parents=True, exist_ok=True)
+                bridge = self.create_fake_bridge(f"{host_id}-strict-bridge", host_id)
+                env = os.environ.copy()
+                env = self.strict_install_env(include_fake_bridge=(env_name, str(bridge)))
+                result = subprocess.run(
+                    [
+                        "bash",
+                        str(REPO_ROOT / "install.sh"),
+                        "--host",
+                        host_id,
+                        "--profile",
+                        "full",
+                        "--target-root",
+                        str(target_root),
+                        "--require-closed-ready",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                    env=env,
+                )
+                self.assertIn("Install done.", result.stdout)
+                closure_path = target_root / ".vibeskills" / "host-closure.json"
+                self.assertTrue(closure_path.exists())
+                closure = json.loads(closure_path.read_text(encoding="utf-8"))
+                self.assertEqual("closed_ready", closure["host_closure_state"])
+                self.assertTrue(bool(closure["specialist_wrapper"]["ready"]))
+                self.assertEqual(f"env:{env_name}", closure["specialist_wrapper"]["bridge_source"])
+                launcher_path = Path(closure["specialist_wrapper"]["launcher_path"])
+                self.assertTrue(launcher_path.exists())
+                self.invoke_installed_specialist_wrapper(launcher_path, host_id)
+
     def test_installed_powershell_scripts_work_without_repo_level_adapter_registry(self) -> None:
         powershell = resolve_powershell()
         if powershell is None:
@@ -365,6 +524,74 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         check_result = subprocess.run(check_cmd, capture_output=True, text=True, env=env)
         self.assertNotEqual(0, check_result.returncode)
         self.assertIn("duplicate Codex-discovered vibe skill surface", check_result.stdout)
+
+    def test_powershell_install_require_closed_ready_enforces_real_host_closure(self) -> None:
+        powershell = resolve_powershell()
+        if powershell is None:
+            self.skipTest("PowerShell executable not available in PATH")
+
+        host_id = "openclaw"
+        env_name = "VGO_OPENCLAW_SPECIALIST_BRIDGE_COMMAND"
+
+        failure_target = self.root / "pwsh-openclaw-strict-fail"
+        failure_target.mkdir(parents=True, exist_ok=True)
+        fail_result = subprocess.run(
+            [
+                powershell,
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(REPO_ROOT / "install.ps1"),
+                "-HostId",
+                host_id,
+                "-Profile",
+                "full",
+                "-TargetRoot",
+                str(failure_target),
+                "-RequireClosedReady",
+            ],
+            capture_output=True,
+            text=True,
+            env=self.strict_install_env(powershell=powershell),
+        )
+        self.assertNotEqual(0, fail_result.returncode)
+        self.assertIn("not closed_ready", fail_result.stderr or fail_result.stdout)
+
+        success_target = self.root / "pwsh-openclaw-strict-pass"
+        success_target.mkdir(parents=True, exist_ok=True)
+        bridge = self.create_fake_bridge("pwsh-openclaw-bridge", host_id)
+        env = self.strict_install_env(powershell=powershell, include_fake_bridge=(env_name, str(bridge)))
+        success_result = subprocess.run(
+            [
+                powershell,
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(REPO_ROOT / "install.ps1"),
+                "-HostId",
+                host_id,
+                "-Profile",
+                "full",
+                "-TargetRoot",
+                str(success_target),
+                "-RequireClosedReady",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+            env=env,
+        )
+        self.assertIn("Installation complete.", success_result.stdout)
+        closure_path = success_target / ".vibeskills" / "host-closure.json"
+        self.assertTrue(closure_path.exists())
+        closure = json.loads(closure_path.read_text(encoding="utf-8"))
+        self.assertEqual("closed_ready", closure["host_closure_state"])
+        self.assertEqual(f"env:{env_name}", closure["specialist_wrapper"]["bridge_source"])
+        launcher_path = Path(closure["specialist_wrapper"]["launcher_path"])
+        self.assertTrue(launcher_path.exists())
+        self.invoke_installed_specialist_wrapper(launcher_path, host_id)
 
 
 if __name__ == "__main__":

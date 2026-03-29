@@ -263,6 +263,66 @@ function Resolve-VibeProcessInvocationSpec {
     }
 }
 
+function Resolve-VibeBridgeExecutable {
+    param(
+        [Parameter(Mandatory)] [object]$Adapter,
+        [object]$Runtime = $null
+    )
+
+    $resolvedCommandPath = $null
+    $envName = if ($Adapter.PSObject.Properties.Name -contains 'bridge_executable_env') { [string]$Adapter.bridge_executable_env } else { '' }
+    if (-not [string]::IsNullOrWhiteSpace($envName)) {
+        $envValue = [Environment]::GetEnvironmentVariable($envName)
+        if (-not [string]::IsNullOrWhiteSpace($envValue)) {
+            $candidate = Get-Command $envValue -ErrorAction SilentlyContinue
+            if ($candidate) {
+                $resolvedCommandPath = [string]$candidate.Source
+            } elseif (Test-Path -LiteralPath $envValue) {
+                $resolvedCommandPath = [System.IO.Path]::GetFullPath($envValue)
+            }
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($resolvedCommandPath) -and $null -ne $Runtime -and $Runtime.PSObject.Properties.Name -contains 'host_closure' -and $null -ne $Runtime.host_closure) {
+        $hostClosure = $Runtime.host_closure
+        if ($hostClosure.PSObject.Properties.Name -contains 'data' -and $null -ne $hostClosure.data) {
+            $specialistWrapper = if ($hostClosure.data.PSObject.Properties.Name -contains 'specialist_wrapper') { $hostClosure.data.specialist_wrapper } else { $null }
+            if ($null -ne $specialistWrapper) {
+                $ready = if ($specialistWrapper.PSObject.Properties.Name -contains 'ready') { [bool]$specialistWrapper.ready } else { $false }
+                $launcherPath = if ($specialistWrapper.PSObject.Properties.Name -contains 'launcher_path') { [string]$specialistWrapper.launcher_path } else { '' }
+                if ($ready -and -not [string]::IsNullOrWhiteSpace($launcherPath) -and (Test-Path -LiteralPath $launcherPath -PathType Leaf)) {
+                    $resolvedCommandPath = [System.IO.Path]::GetFullPath($launcherPath)
+                }
+            }
+        }
+    }
+
+    $defaultCommand = if ($Adapter.PSObject.Properties.Name -contains 'bridge_command') { [string]$Adapter.bridge_command } else { '' }
+    if ([string]::IsNullOrWhiteSpace($resolvedCommandPath) -and -not [string]::IsNullOrWhiteSpace($defaultCommand)) {
+        $candidate = Get-Command $defaultCommand -ErrorAction SilentlyContinue
+        if ($candidate) {
+            $resolvedCommandPath = [string]$candidate.Source
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($resolvedCommandPath)) {
+        $reason = if (-not [string]::IsNullOrWhiteSpace($envName)) {
+            ("native_specialist_bridge_command_unavailable:{0}" -f [string]$Adapter.id)
+        } else {
+            ("native_specialist_adapter_command_unavailable:{0}" -f [string]$Adapter.id)
+        }
+        return [pscustomobject]@{
+            command_path = $null
+            reason = $reason
+        }
+    }
+
+    return [pscustomobject]@{
+        command_path = [string]$resolvedCommandPath
+        reason = 'native_specialist_bridge_ready'
+    }
+}
+
 function Resolve-VibeNativeSpecialistAdapter {
     param(
         [Parameter(Mandatory)] [string]$ScriptPath
@@ -323,7 +383,9 @@ function Resolve-VibeNativeSpecialistAdapter {
         }
     }
 
-    $adapterId = if ($policy.PSObject.Properties.Name -contains 'default_adapter_id' -and -not [string]::IsNullOrWhiteSpace([string]$policy.default_adapter_id)) {
+    $adapterId = if ($runtime.host_adapter -and -not [string]::IsNullOrWhiteSpace([string]$runtime.host_adapter.id)) {
+        [string]$runtime.host_adapter.id
+    } elseif ($policy.PSObject.Properties.Name -contains 'default_adapter_id' -and -not [string]::IsNullOrWhiteSpace([string]$policy.default_adapter_id)) {
         [string]$policy.default_adapter_id
     } else {
         'codex'
@@ -351,29 +413,62 @@ function Resolve-VibeNativeSpecialistAdapter {
     $commandPath = $null
     $invocationArgumentsPrefix = @()
     $resolvedReason = $null
-    if ($adapter.PSObject.Properties.Name -contains 'executable_env' -and -not [string]::IsNullOrWhiteSpace([string]$adapter.executable_env)) {
-        $envCommand = [Environment]::GetEnvironmentVariable([string]$adapter.executable_env)
-        if (-not [string]::IsNullOrWhiteSpace($envCommand)) {
-            $candidate = Get-Command $envCommand -ErrorAction SilentlyContinue
-            if ($candidate) {
-                $commandPath = [string]$candidate.Source
-            } elseif (Test-Path -LiteralPath $envCommand) {
-                $commandPath = [System.IO.Path]::GetFullPath($envCommand)
+    $invocationKind = if ($adapter.PSObject.Properties.Name -contains 'invocation_kind') { [string]$adapter.invocation_kind } else { 'direct' }
+
+    if ($invocationKind -eq 'python_runner') {
+        $bridgeResolution = Resolve-VibeBridgeExecutable -Adapter $adapter -Runtime $runtime
+        if ([string]::IsNullOrWhiteSpace([string]$bridgeResolution.command_path)) {
+            $resolvedReason = [string]$bridgeResolution.reason
+        } else {
+            $pythonInvocation = Resolve-VgoPythonCommandSpec -Command '${VGO_PYTHON}'
+            $runnerScriptPath = if ($adapter.PSObject.Properties.Name -contains 'runner_script_path' -and -not [string]::IsNullOrWhiteSpace([string]$adapter.runner_script_path)) {
+                [System.IO.Path]::GetFullPath((Join-Path $runtime.repo_root ([string]$adapter.runner_script_path)))
+            } else {
+                $null
+            }
+            if ([string]::IsNullOrWhiteSpace($runnerScriptPath) -or -not (Test-Path -LiteralPath $runnerScriptPath)) {
+                $resolvedReason = ("native_specialist_runner_missing:{0}" -f [string]$adapter.id)
+            } else {
+                $commandPath = [string]$pythonInvocation.host_path
+                $invocationArgumentsPrefix = @($pythonInvocation.prefix_arguments)
+                $invocationArgumentsPrefix += @(
+                    $runnerScriptPath,
+                    '--host-adapter', ([string]$adapter.id),
+                    '--bridge-executable', ([string]$bridgeResolution.command_path)
+                )
+                if ($adapter.PSObject.Properties.Name -contains 'bridge_contract' -and -not [string]::IsNullOrWhiteSpace([string]$adapter.bridge_contract)) {
+                    $invocationArgumentsPrefix += @('--bridge-contract', ([string]$adapter.bridge_contract))
+                }
+                foreach ($item in @($adapter.runner_arguments_prefix)) {
+                    $invocationArgumentsPrefix += [string]$item
+                }
             }
         }
-    }
-    if ([string]::IsNullOrWhiteSpace($commandPath)) {
-        $candidate = Get-Command ([string]$adapter.command) -ErrorAction SilentlyContinue
-        if ($candidate) {
-            $commandPath = [string]$candidate.Source
-        }
-    }
-    if ([string]::IsNullOrWhiteSpace($commandPath)) {
-        $resolvedReason = ("native_specialist_adapter_command_unavailable:{0}" -f [string]$adapter.command)
     } else {
-        $invocationSpec = Resolve-VibeProcessInvocationSpec -CommandPath $commandPath -ArgumentList @()
-        $commandPath = [string]$invocationSpec.command_path
-        $invocationArgumentsPrefix = @($invocationSpec.arguments)
+        if ($adapter.PSObject.Properties.Name -contains 'executable_env' -and -not [string]::IsNullOrWhiteSpace([string]$adapter.executable_env)) {
+            $envCommand = [Environment]::GetEnvironmentVariable([string]$adapter.executable_env)
+            if (-not [string]::IsNullOrWhiteSpace($envCommand)) {
+                $candidate = Get-Command $envCommand -ErrorAction SilentlyContinue
+                if ($candidate) {
+                    $commandPath = [string]$candidate.Source
+                } elseif (Test-Path -LiteralPath $envCommand) {
+                    $commandPath = [System.IO.Path]::GetFullPath($envCommand)
+                }
+            }
+        }
+        if ([string]::IsNullOrWhiteSpace($commandPath)) {
+            $candidate = Get-Command ([string]$adapter.command) -ErrorAction SilentlyContinue
+            if ($candidate) {
+                $commandPath = [string]$candidate.Source
+            }
+        }
+        if ([string]::IsNullOrWhiteSpace($commandPath)) {
+            $resolvedReason = ("native_specialist_adapter_command_unavailable:{0}" -f [string]$adapter.command)
+        } else {
+            $invocationSpec = Resolve-VibeProcessInvocationSpec -CommandPath $commandPath -ArgumentList @()
+            $commandPath = [string]$invocationSpec.command_path
+            $invocationArgumentsPrefix = @($invocationSpec.arguments)
+        }
     }
 
     return [pscustomobject]@{
@@ -383,6 +478,8 @@ function Resolve-VibeNativeSpecialistAdapter {
         runtime = $runtime
         policy = $policy
         adapter = $adapter
+        requested_host_adapter_id = if ($runtime.host_adapter -and $runtime.host_adapter.requested_id) { [string]$runtime.host_adapter.requested_id } else { [string]$adapterId }
+        effective_host_adapter_id = [string]$adapter.id
         command_path = $commandPath
         invocation_arguments_prefix = @($invocationArgumentsPrefix)
     }
@@ -644,6 +741,7 @@ function New-VibeDegradedSpecialistDispatchResult {
         [Parameter(Mandatory)] [string]$SessionRoot,
         [Parameter(Mandatory)] [object]$Policy,
         [Parameter(Mandatory)] [string]$Reason,
+        [AllowNull()] [object]$AdapterResolution = $null,
         [AllowEmptyString()] [string]$WriteScope = '',
         [AllowEmptyString()] [string]$ReviewMode = 'native_contract'
     )
@@ -695,6 +793,8 @@ function New-VibeDegradedSpecialistDispatchResult {
         write_scope = $WriteScope
         review_mode = $ReviewMode
         execution_driver = [string]$Policy.degrade_contract.execution_driver
+        requested_host_adapter_id = if ($AdapterResolution -and $AdapterResolution.PSObject.Properties.Name -contains 'requested_host_adapter_id') { [string]$AdapterResolution.requested_host_adapter_id } else { $null }
+        host_adapter_id = if ($AdapterResolution -and $AdapterResolution.PSObject.Properties.Name -contains 'effective_host_adapter_id') { [string]$AdapterResolution.effective_host_adapter_id } else { $null }
         live_native_execution = $false
         degraded = $true
         degradation_reason = $Reason
@@ -739,6 +839,7 @@ function Invoke-VibeSpecialistDispatchUnit {
             -SessionRoot $SessionRoot `
             -Policy $policy `
             -Reason ([string]$adapterResolution.reason) `
+            -AdapterResolution $adapterResolution `
             -WriteScope $WriteScope `
             -ReviewMode $ReviewMode
     }
@@ -893,6 +994,7 @@ function Invoke-VibeSpecialistDispatchUnit {
         write_scope = $WriteScope
         review_mode = $ReviewMode
         execution_driver = [string]$adapter.execution_driver
+        requested_host_adapter_id = [string]$adapterResolution.requested_host_adapter_id
         host_adapter_id = [string]$adapter.id
         live_native_execution = $true
         degraded = $false

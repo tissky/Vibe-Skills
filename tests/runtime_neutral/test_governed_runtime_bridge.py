@@ -100,6 +100,7 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
         self.assertIn("scripts/runtime/Freeze-RuntimeInputPacket.ps1", required_markers)
         self.assertIn("scripts/runtime/invoke-vibe-runtime.ps1", required_markers)
         self.assertIn("scripts/runtime/memory_backend_driver.py", required_markers)
+        self.assertIn("scripts/runtime/native_specialist_runner.py", required_markers)
         self.assertIn("scripts/verify/vibe-governed-runtime-contract-gate.ps1", required_markers)
         self.assertIn("config/runtime-contract.json", required_markers)
         self.assertIn("config/runtime-modes.json", required_markers)

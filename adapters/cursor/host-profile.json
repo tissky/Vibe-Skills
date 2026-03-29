@@ -10,21 +10,21 @@
   ],
   "settings_surface": {
     "path": "~/.cursor/settings.json",
-    "managed_by_repo": false,
-    "notes": "The repository currently provides preview guidance only. Real Cursor host settings remain host-managed."
+    "managed_by_repo": true,
+    "notes": "The repository now materializes commands, a host-closure manifest, and a minimal Cursor settings surface under the documented host root. Broader host-native workflow behavior remains preview-scoped."
   },
   "host_managed_surfaces": [
     "plugin enablement",
-    "hook installation",
     "MCP registration",
-    "provider credentials"
+    "provider credentials",
+    "broader host-native workflow behavior outside the managed Vibe closure surface"
   ],
   "capabilities": {
     "fs.read": "expected",
     "fs.write": "expected",
     "shell.exec": "expected",
     "mcp.client": "supported-with-constraints",
-    "settings.materialize": "preview-guidance",
+    "settings.materialize": "preview-managed",
     "plugin.provision": "manual-host-managed",
     "agent.spawn": "supported-with-constraints",
     "route.provider_call": "supported-with-constraints",
@@ -33,7 +33,7 @@
   },
   "degrade_contract": {
     "missing_plugins": "degraded-but-supported",
-    "missing_provider_credentials": "degraded-but-supported",
+    "missing_provider_credentials": "configured_offline_unready",
     "unverified_platform_lane": "not-yet-proven"
   },
   "supported_platform_contracts": [

@@ -788,6 +788,8 @@ fi
 if [[ "${ADAPTER_CHECK_MODE}" == "preview-guidance" ]]; then
   if [[ "${HOST_ID}" == "opencode" ]]; then
     warn_note "opencode preview keeps the real opencode.json host-managed; only skills, commands, agents, and an example config scaffold are verified"
+  elif [[ "${HOST_ID}" == "cursor" ]]; then
+    info_note "cursor preview now materializes managed commands, host-closure state, and a minimal settings surface; deeper host-native workflow remains preview-scoped"
   else
     info_note "${HOST_ID} preview hook/settings scaffold remains intentionally unavailable while the author works through compatibility issues; this is a current product boundary, not an install failure"
   fi
@@ -798,6 +800,22 @@ if [[ "${ADAPTER_CHECK_MODE}" == "runtime-core" ]]; then
   fi
   if [[ -f "${SCRIPT_DIR}/mcp/servers.template.json" ]]; then
     check_path "mcp_config.json" "${TARGET_ROOT}/mcp_config.json"
+  fi
+fi
+check_path "host closure manifest" "${TARGET_ROOT}/.vibeskills/host-closure.json"
+if [[ -f "${TARGET_ROOT}/.vibeskills/host-closure.json" ]]; then
+  closure_state="$(json_query_scalar_from_file "${TARGET_ROOT}/.vibeskills/host-closure.json" 'host_closure_state' 2>/dev/null || true)"
+  if [[ -n "${closure_state}" ]]; then
+    if [[ "${closure_state}" == "closed_ready" ]]; then
+      echo "[OK] host closure state -> ${closure_state}"
+      PASS=$((PASS+1))
+    else
+      warn_note "host closure state -> ${closure_state}"
+    fi
+  fi
+  wrapper_launcher="$(json_query_scalar_from_file "${TARGET_ROOT}/.vibeskills/host-closure.json" 'specialist_wrapper.launcher_path' 2>/dev/null || true)"
+  if [[ -n "${wrapper_launcher}" ]]; then
+    check_path "specialist wrapper launcher" "${wrapper_launcher}"
   fi
 fi
 if [[ "${ADAPTER_CHECK_MODE}" == "governed" ]]; then

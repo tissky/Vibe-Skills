@@ -112,10 +112,14 @@ class ClaudePreviewScaffoldTests(unittest.TestCase):
         payload = json.loads(result.stdout)
 
         settings_path = self.target_root / 'settings.json'
-        preview_path = self.target_root / PREVIEW_FILE
-        self.assertEqual(self.existing_settings, json.loads(settings_path.read_text(encoding='utf-8')))
-        self.assertFalse(preview_path.exists())
+        closure_path = self.target_root / '.vibeskills' / 'host-closure.json'
+        settings = json.loads(settings_path.read_text(encoding='utf-8'))
+        self.assertEqual(self.existing_settings['env'], settings['env'])
+        self.assertEqual(self.existing_settings['model'], settings['model'])
+        self.assertEqual('claude-code', settings['vibeskills']['host_id'])
+        self.assertTrue(closure_path.exists())
         self.assertEqual('preview-guidance', payload['install_mode'])
+        self.assertEqual(str(closure_path), payload['host_closure_path'])
 
     def test_preview_check_accepts_preview_settings_file_without_touching_real_settings(self) -> None:
         install_cmd = [
@@ -142,9 +146,11 @@ class ClaudePreviewScaffoldTests(unittest.TestCase):
         ]
         result = subprocess.run(check_cmd, capture_output=True, text=True, check=True)
 
-        self.assertIn('preview hook/settings scaffold remains intentionally unavailable', result.stdout)
-        self.assertNotIn('[FAIL] settings.json', result.stdout)
-        self.assertEqual(self.existing_settings, json.loads((self.target_root / 'settings.json').read_text(encoding='utf-8')))
+        self.assertIn('[OK] host closure manifest', result.stdout)
+        settings = json.loads((self.target_root / 'settings.json').read_text(encoding='utf-8'))
+        self.assertEqual(self.existing_settings['env'], settings['env'])
+        self.assertEqual(self.existing_settings['model'], settings['model'])
+        self.assertEqual('claude-code', settings['vibeskills']['host_id'])
 
 
 if __name__ == '__main__':

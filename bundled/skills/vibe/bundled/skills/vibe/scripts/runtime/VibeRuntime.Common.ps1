@@ -3,6 +3,108 @@ $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot '..\common\vibe-governance-helpers.ps1')
 
+function Get-VibeHostAdapterEntry {
+    param(
+        [Parameter(Mandatory)] [string]$RepoRoot,
+        [AllowEmptyString()] [string]$HostId = ''
+    )
+
+    $requestedHostId = if ([string]::IsNullOrWhiteSpace($HostId)) { $env:VCO_HOST_ID } else { $HostId }
+    $resolvedHostId = Resolve-VgoHostId -HostId $requestedHostId
+    $registryPath = Join-Path $RepoRoot 'adapters\index.json'
+    if (-not (Test-Path -LiteralPath $registryPath)) {
+        return [pscustomobject]@{
+            requested_id = if ([string]::IsNullOrWhiteSpace($requestedHostId)) { $null } else { [string]$requestedHostId }
+            id = $resolvedHostId
+            status = $null
+            install_mode = $null
+            check_mode = $null
+            bootstrap_mode = $null
+            default_target_root = $null
+        }
+    }
+
+    $registry = Get-Content -LiteralPath $registryPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $adapter = @($registry.adapters | Where-Object { [string]$_.id -eq $resolvedHostId } | Select-Object -First 1)[0]
+    if ($null -eq $adapter) {
+        return [pscustomobject]@{
+            requested_id = if ([string]::IsNullOrWhiteSpace($requestedHostId)) { $null } else { [string]$requestedHostId }
+            id = $resolvedHostId
+            status = $null
+            install_mode = $null
+            check_mode = $null
+            bootstrap_mode = $null
+            default_target_root = $null
+        }
+    }
+
+    return [pscustomobject]@{
+        requested_id = if ([string]::IsNullOrWhiteSpace($requestedHostId)) { $null } else { [string]$requestedHostId }
+        id = [string]$adapter.id
+        status = if ($adapter.PSObject.Properties.Name -contains 'status') { [string]$adapter.status } else { $null }
+        install_mode = if ($adapter.PSObject.Properties.Name -contains 'install_mode') { [string]$adapter.install_mode } else { $null }
+        check_mode = if ($adapter.PSObject.Properties.Name -contains 'check_mode') { [string]$adapter.check_mode } else { $null }
+        bootstrap_mode = if ($adapter.PSObject.Properties.Name -contains 'bootstrap_mode') { [string]$adapter.bootstrap_mode } else { $null }
+        default_target_root = if ($adapter.PSObject.Properties.Name -contains 'default_target_root') { $adapter.default_target_root } else { $null }
+    }
+}
+
+function Resolve-VibeHostTargetRoot {
+    param(
+        [Parameter(Mandatory)] [object]$HostAdapter
+    )
+
+    if ($null -eq $HostAdapter -or $null -eq $HostAdapter.default_target_root) {
+        return $null
+    }
+
+    $targetSpec = $HostAdapter.default_target_root
+    $envName = if ($targetSpec.PSObject.Properties.Name -contains 'env') { [string]$targetSpec.env } else { '' }
+    $rel = if ($targetSpec.PSObject.Properties.Name -contains 'rel') { [string]$targetSpec.rel } else { '' }
+    if (-not [string]::IsNullOrWhiteSpace($envName)) {
+        $envValue = [Environment]::GetEnvironmentVariable($envName)
+        if (-not [string]::IsNullOrWhiteSpace($envValue)) {
+            return [System.IO.Path]::GetFullPath($envValue)
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($rel)) {
+        return $null
+    }
+    if ([System.IO.Path]::IsPathRooted($rel)) {
+        return [System.IO.Path]::GetFullPath($rel)
+    }
+    $homeDir = Resolve-VgoHomeDirectory
+    return [System.IO.Path]::GetFullPath((Join-Path $homeDir $rel))
+}
+
+function Get-VibeHostClosureRecord {
+    param(
+        [Parameter(Mandatory)] [object]$HostAdapter
+    )
+
+    $targetRoot = Resolve-VibeHostTargetRoot -HostAdapter $HostAdapter
+    if ([string]::IsNullOrWhiteSpace($targetRoot)) {
+        return $null
+    }
+
+    $closurePath = Join-Path $targetRoot '.vibeskills\host-closure.json'
+    if (-not (Test-Path -LiteralPath $closurePath -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $closure = Get-Content -LiteralPath $closurePath -Raw -Encoding UTF8 | ConvertFrom-Json
+    } catch {
+        return $null
+    }
+
+    return [pscustomobject]@{
+        target_root = $targetRoot
+        path = $closurePath
+        data = $closure
+    }
+}
+
 function Get-VibeRuntimeContext {
     param(
         [Parameter(Mandatory)] [string]$ScriptPath
@@ -10,10 +112,13 @@ function Get-VibeRuntimeContext {
 
     $governanceContext = Get-VgoGovernanceContext -ScriptPath $ScriptPath -EnforceExecutionContext
     $repoRoot = $governanceContext.repoRoot
+    $hostAdapter = Get-VibeHostAdapterEntry -RepoRoot $repoRoot
 
     return [pscustomobject]@{
         repo_root = $repoRoot
         governance_context = $governanceContext
+        host_adapter = $hostAdapter
+        host_closure = Get-VibeHostClosureRecord -HostAdapter $hostAdapter
         runtime_contract = Get-Content -LiteralPath (Join-Path $repoRoot 'config\runtime-contract.json') -Raw -Encoding UTF8 | ConvertFrom-Json
         runtime_modes = Get-Content -LiteralPath (Join-Path $repoRoot 'config\runtime-modes.json') -Raw -Encoding UTF8 | ConvertFrom-Json
         runtime_input_packet_policy = Get-Content -LiteralPath (Join-Path $repoRoot 'config\runtime-input-packet-policy.json') -Raw -Encoding UTF8 | ConvertFrom-Json
