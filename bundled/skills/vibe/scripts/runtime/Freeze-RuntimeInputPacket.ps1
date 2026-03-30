@@ -522,108 +522,35 @@ $specialistDispatch = Split-VibeSpecialistDispatch `
     -Recommendations @($specialistRecommendations) `
     -ApprovedSpecialistSkillIds @($ApprovedSpecialistSkillIds) `
     -SuggestionContract $policy.child_specialist_suggestion_contract
-$packet = [pscustomobject]@{
-    stage = 'runtime_input_freeze'
-    run_id = $RunId
-    governance_scope = [string]$hierarchyState.governance_scope
-    task = $Task
-    generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-    runtime_mode = $Mode
-    internal_grade = $grade
-    hierarchy = [pscustomobject]@{
-        governance_scope = [string]$hierarchyState.governance_scope
-        root_run_id = [string]$hierarchyState.root_run_id
-        parent_run_id = if ($null -eq $hierarchyState.parent_run_id) { $null } else { [string]$hierarchyState.parent_run_id }
-        parent_unit_id = if ($null -eq $hierarchyState.parent_unit_id) { $null } else { [string]$hierarchyState.parent_unit_id }
-        inherited_requirement_doc_path = if ($null -eq $hierarchyState.inherited_requirement_doc_path) { $null } else { [string]$hierarchyState.inherited_requirement_doc_path }
-        inherited_execution_plan_path = if ($null -eq $hierarchyState.inherited_execution_plan_path) { $null } else { [string]$hierarchyState.inherited_execution_plan_path }
-    }
-    canonical_router = [pscustomobject]@{
-        prompt = $Task
-        task_type = $taskType
-        requested_skill = $requestedSkill
-        host_id = $routerHostId
-        target_root = $routerTargetRoot
-        unattended = [bool]$unattended
-        route_script_path = $routerScriptPath
-    }
-    host_adapter = [pscustomobject]@{
-        requested_host_id = if ($runtime.host_adapter -and -not [string]::IsNullOrWhiteSpace([string]$runtime.host_adapter.requested_id)) { [string]$runtime.host_adapter.requested_id } else { $routerHostId }
-        effective_host_id = if ($runtime.host_adapter -and -not [string]::IsNullOrWhiteSpace([string]$runtime.host_adapter.id)) { [string]$runtime.host_adapter.id } else { $routerHostId }
-        status = if ($runtime.host_adapter -and $runtime.host_adapter.PSObject.Properties.Name -contains 'status') { [string]$runtime.host_adapter.status } else { $null }
-        install_mode = if ($runtime.host_adapter -and $runtime.host_adapter.PSObject.Properties.Name -contains 'install_mode') { [string]$runtime.host_adapter.install_mode } else { $null }
-        check_mode = if ($runtime.host_adapter -and $runtime.host_adapter.PSObject.Properties.Name -contains 'check_mode') { [string]$runtime.host_adapter.check_mode } else { $null }
-        bootstrap_mode = if ($runtime.host_adapter -and $runtime.host_adapter.PSObject.Properties.Name -contains 'bootstrap_mode') { [string]$runtime.host_adapter.bootstrap_mode } else { $null }
-        target_root = $routerTargetRoot
-        closure_path = if ($runtime.host_closure) { [string]$runtime.host_closure.path } else { $null }
-    }
-    route_snapshot = [pscustomobject]@{
-        selected_pack = if ($routeResult.selected) { [string]$routeResult.selected.pack_id } else { $null }
-        selected_skill = $routerSelectedSkill
-        route_mode = [string]$routeResult.route_mode
-        route_reason = [string]$routeResult.route_reason
-        confirm_required = [bool]$confirmRequired
-        confidence = if ($routeResult.confidence -ne $null) { [double]$routeResult.confidence } else { $null }
-        truth_level = [string]$routeResult.truth_level
-        degradation_state = [string]$routeResult.degradation_state
-        non_authoritative = [bool]$routeResult.non_authoritative
-        fallback_active = [bool]$routeResult.fallback_active
-        hazard_alert_required = [bool]$routeResult.hazard_alert_required
-        unattended_override_applied = [bool]$routeResult.unattended_override_applied
-        custom_admission_status = if ($routeResult.PSObject.Properties.Name -contains 'custom_admission' -and $routeResult.custom_admission) { [string]$routeResult.custom_admission.status } else { $null }
-    }
-    custom_admission = if ($routeResult.PSObject.Properties.Name -contains 'custom_admission' -and $routeResult.custom_admission) {
-        [pscustomobject]@{
-            status = [string]$routeResult.custom_admission.status
-            target_root = if ($routeResult.custom_admission.PSObject.Properties.Name -contains 'target_root') { [string]$routeResult.custom_admission.target_root } else { $null }
-            admitted_candidate_count = if ($routeResult.custom_admission.PSObject.Properties.Name -contains 'admitted_candidates') { @($routeResult.custom_admission.admitted_candidates).Count } else { 0 }
-            admitted_skill_ids = if ($routeResult.custom_admission.PSObject.Properties.Name -contains 'admitted_candidates') {
-                @($routeResult.custom_admission.admitted_candidates | ForEach-Object { [string]$_.skill_id } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
-            } else {
-                @()
-            }
-        }
-    } else {
-        $null
-    }
-    specialist_recommendations = @($specialistRecommendations)
-    specialist_dispatch = [pscustomobject]@{
-        approved_dispatch = @($specialistDispatch.approved_dispatch)
-        local_specialist_suggestions = @($specialistDispatch.local_specialist_suggestions)
-        approved_skill_ids = @($specialistDispatch.approved_dispatch | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
-        local_suggestion_skill_ids = @($specialistDispatch.local_specialist_suggestions | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
-        escalation_required = [bool]$specialistDispatch.escalation_required
-        escalation_status = [string]$specialistDispatch.escalation_status
-        approval_owner = if ($policy.child_specialist_suggestion_contract.PSObject.Properties.Name -contains 'approval_owner') { [string]$policy.child_specialist_suggestion_contract.approval_owner } else { 'root_vibe' }
-        status = if ($policy.child_specialist_suggestion_contract.PSObject.Properties.Name -contains 'status') { [string]$policy.child_specialist_suggestion_contract.status } else { 'advisory_until_root_approval' }
-    }
-    overlay_decisions = @($overlayDecisions)
-    authority_flags = [pscustomobject]@{
-        runtime_entry = 'vibe'
-        explicit_runtime_skill = $runtimeSelectedSkill
-        router_truth_level = [string]$routeResult.truth_level
-        shadow_only = [bool]$policy.shadow_only
-        non_authoritative = [bool]$routeResult.non_authoritative
-        allow_requirement_freeze = [bool]$hierarchyState.allow_requirement_freeze
-        allow_plan_freeze = [bool]$hierarchyState.allow_plan_freeze
-        allow_global_dispatch = [bool]$hierarchyState.allow_global_dispatch
-        allow_completion_claim = [bool]$hierarchyState.allow_completion_claim
-    }
-    divergence_shadow = [pscustomobject]@{
-        router_selected_skill = $routerSelectedSkill
-        runtime_selected_skill = $runtimeSelectedSkill
-        skill_mismatch = [bool](-not [string]::Equals($routerSelectedSkill, $runtimeSelectedSkill, [System.StringComparison]::OrdinalIgnoreCase))
-        confirm_required = [bool]$confirmRequired
-        explicit_runtime_override_applied = [bool](-not [string]::IsNullOrWhiteSpace($runtimeSelectedSkill))
-        explicit_runtime_override_reason = 'governed_runtime_entry'
-        governance_scope_mismatch = $false
-    }
-    provenance = [pscustomobject]@{
-        source_of_truth = 'canonical_router_shadow_freeze'
-        freeze_before_requirement_doc = [bool]$policy.freeze_before_requirement_doc
-        proof_class = 'structure'
-    }
-}
+$hierarchyProjection = New-VibeHierarchyProjection -HierarchyState $hierarchyState -IncludeGovernanceScope
+$authorityFlagsProjection = New-VibeRuntimePacketAuthorityFlagsProjection `
+    -HierarchyState $hierarchyState `
+    -RuntimeEntry 'vibe' `
+    -ExplicitRuntimeSkill $runtimeSelectedSkill `
+    -RouterTruthLevel ([string]$routeResult.truth_level) `
+    -ShadowOnly ([bool]$policy.shadow_only) `
+    -NonAuthoritative ([bool]$routeResult.non_authoritative)
+$packet = New-VibeRuntimeInputPacketProjection `
+    -RunId $RunId `
+    -Task $Task `
+    -Mode $Mode `
+    -InternalGrade $grade `
+    -HierarchyState $hierarchyState `
+    -HierarchyProjection $hierarchyProjection `
+    -AuthorityFlagsProjection $authorityFlagsProjection `
+    -RouteResult $routeResult `
+    -Runtime $runtime `
+    -TaskType $taskType `
+    -RequestedSkill $requestedSkill `
+    -RouterHostId $routerHostId `
+    -RouterTargetRoot $routerTargetRoot `
+    -Unattended ([bool]$unattended) `
+    -RouterScriptPath $routerScriptPath `
+    -RuntimeSelectedSkill $runtimeSelectedSkill `
+    -SpecialistRecommendations @($specialistRecommendations) `
+    -SpecialistDispatch $specialistDispatch `
+    -OverlayDecisions @($overlayDecisions) `
+    -Policy $policy
 
 $packetPath = Get-VibeRuntimeInputPacketPath -RepoRoot $runtime.repo_root -RunId $RunId -ArtifactRoot $ArtifactRoot
 Write-VibeJsonArtifact -Path $packetPath -Value $packet

@@ -248,7 +248,7 @@ if exist "%LocalAppData%\Programs\Python\Python311\python.exe" (
         Set-Content -LiteralPath $launcherPath -Value $cmdScript -Encoding ASCII
     } else {
         $launcherPath = Join-Path $toolsRoot ("{0}-specialist-wrapper.sh" -f $HostId)
-        $shScript = @"
+        $shScript = @'
 #!/usr/bin/env sh
 set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -260,8 +260,9 @@ else
   echo 'python runtime unavailable for host specialist wrapper' >&2
   exit 127
 fi
-exec "$PYTHON_BIN" "$SCRIPT_DIR/$(Split-Path -Leaf $wrapperPy)" "$@"
-"@
+exec "$PYTHON_BIN" "$SCRIPT_DIR/__WRAPPER_FILE__" "$@"
+'@
+        $shScript = $shScript.Replace('__WRAPPER_FILE__', (Split-Path -Leaf $wrapperPy))
         Set-Content -LiteralPath $launcherPath -Value $shScript -Encoding UTF8
         try {
             chmod +x $launcherPath
@@ -440,11 +441,104 @@ function Sync-VibeCanonicalToTarget {
     }
 }
 
+function Get-GeneratedNestedCompatibilitySuffix {
+    param([psobject]$Governance)
+
+    $topology = if ($Governance.PSObject.Properties.Name -contains 'mirror_topology') { $Governance.mirror_topology } else { $null }
+    $targets = if ($null -ne $topology -and $topology.PSObject.Properties.Name -contains 'targets' -and $null -ne $topology.targets) { @($topology.targets) } else { @() }
+    $bundledPath = $null
+    $nestedPath = $null
+    $materializationMode = $null
+    foreach ($target in $targets) {
+        $targetId = if ($target.PSObject.Properties.Name -contains 'id') { [string]$target.id } else { '' }
+        switch ($targetId) {
+            'bundled' {
+                $bundledPath = if ($target.PSObject.Properties.Name -contains 'path') { [string]$target.path } else { $null }
+            }
+            'nested_bundled' {
+                $nestedPath = if ($target.PSObject.Properties.Name -contains 'path') { [string]$target.path } else { $null }
+                $materializationMode = if ($target.PSObject.Properties.Name -contains 'materialization_mode') { [string]$target.materialization_mode } else { $null }
+            }
+        }
+    }
+
+    $legacy = if ($Governance.PSObject.Properties.Name -contains 'source_of_truth') { $Governance.source_of_truth } else { $null }
+    if ([string]::IsNullOrWhiteSpace($bundledPath)) {
+        $bundledPath = if ($null -ne $legacy -and $legacy.PSObject.Properties.Name -contains 'bundled_root') { [string]$legacy.bundled_root } else { 'bundled/skills/vibe' }
+    }
+    if ([string]::IsNullOrWhiteSpace($nestedPath)) {
+        $nestedPath = if ($null -ne $legacy -and $legacy.PSObject.Properties.Name -contains 'nested_bundled_root') { [string]$legacy.nested_bundled_root } else { $null }
+    }
+    if ([string]::IsNullOrWhiteSpace($nestedPath)) {
+        $nestedPath = '{0}/{1}' -f $bundledPath, $bundledPath
+    }
+    if ([string]::IsNullOrWhiteSpace($materializationMode)) {
+        $materializationMode = 'release_install_only'
+    }
+    if ($materializationMode -ne 'release_install_only') {
+        return $null
+    }
+
+    $bundledNorm = $bundledPath.Replace('\', '/').Trim('/')
+    $nestedNorm = $nestedPath.Replace('\', '/').Trim('/')
+    if (-not $nestedNorm.StartsWith($bundledNorm + '/', [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $null
+    }
+
+    $suffix = $nestedNorm.Substring($bundledNorm.Length + 1).Trim('/')
+    if ([string]::IsNullOrWhiteSpace($suffix)) {
+        return $null
+    }
+
+    return $suffix.Replace('/', '\')
+}
+
+function Sync-InstalledGeneratedNestedCompatibilityRoot {
+    param(
+        [Parameter(Mandatory)] [psobject]$Governance,
+        [Parameter(Mandatory)] [string]$TargetRoot,
+        [string]$TargetRel = 'skills\vibe'
+    )
+
+    $nestedSuffix = Get-GeneratedNestedCompatibilitySuffix -Governance $Governance
+    if ([string]::IsNullOrWhiteSpace($nestedSuffix)) {
+        return
+    }
+
+    $targetVibeRoot = Join-Path $TargetRoot $TargetRel
+    $nestedRoot = Join-Path $targetVibeRoot $nestedSuffix
+    if ([System.IO.Path]::GetFullPath($targetVibeRoot) -eq [System.IO.Path]::GetFullPath($nestedRoot)) {
+        return
+    }
+
+    if (Test-Path -LiteralPath $nestedRoot) {
+        Remove-Item -LiteralPath $nestedRoot -Recurse -Force
+    }
+
+    $mirrorFiles = @($Governance.packaging.mirror.files)
+    $mirrorDirs = @($Governance.packaging.mirror.directories)
+    foreach ($rel in $mirrorFiles) {
+        $src = Join-Path $targetVibeRoot $rel
+        $dst = Join-Path $nestedRoot $rel
+        if (-not (Test-Path -LiteralPath $src)) { continue }
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dst) | Out-Null
+        Copy-Item -LiteralPath $src -Destination $dst -Force
+    }
+    foreach ($dir in $mirrorDirs) {
+        $srcDir = Join-Path $targetVibeRoot $dir
+        $dstDir = Join-Path $nestedRoot $dir
+        if (-not (Test-Path -LiteralPath $srcDir)) { continue }
+        Copy-DirContent -Source $srcDir -Destination $dstDir
+    }
+}
+
 function Install-RuntimeCorePayload {
     param([psobject]$Adapter)
 
     $packagingPath = Join-Path $RepoRoot 'config\runtime-core-packaging.json'
     $packaging = Get-Content -LiteralPath $packagingPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $governancePath = Join-Path $RepoRoot 'config\version-governance.json'
+    $governance = Get-Content -LiteralPath $governancePath -Raw -Encoding UTF8 | ConvertFrom-Json
 
     foreach ($dir in @($packaging.directories)) {
         New-Item -ItemType Directory -Force -Path (Join-Path $TargetRoot ([string]$dir)) | Out-Null
@@ -484,6 +578,7 @@ function Install-RuntimeCorePayload {
     }
 
     Sync-VibeCanonicalToTarget -RepoRoot $RepoRoot -TargetRoot $TargetRoot -TargetRel $targetVibeRel
+    Sync-InstalledGeneratedNestedCompatibilityRoot -Governance $governance -TargetRoot $TargetRoot -TargetRel $targetVibeRel
 
     $canonicalSkillsRoot = Get-VgoParentPath -Path $RepoRoot
     $workspaceRoot = Get-VgoParentPath -Path $canonicalSkillsRoot

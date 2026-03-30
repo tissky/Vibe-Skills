@@ -330,6 +330,10 @@ function Resolve-VibeNativeSpecialistAdapter {
 
     $runtime = Get-VibeRuntimeContext -ScriptPath $ScriptPath
     $policy = $runtime.native_specialist_execution_policy
+    $runtimeHostAdapterIdentity = Get-VibeHostAdapterIdentityProjection `
+        -HostAdapter $runtime.host_adapter `
+        -RequestedPropertyName 'requested_id' `
+        -EffectivePropertyName 'id'
     if ($null -eq $policy -or -not [bool]$policy.enabled) {
         return [pscustomobject]@{
             enabled = $false
@@ -338,6 +342,8 @@ function Resolve-VibeNativeSpecialistAdapter {
             runtime = $runtime
             policy = $policy
             adapter = $null
+            requested_host_adapter_id = [string]$runtimeHostAdapterIdentity.requested_host_id
+            effective_host_adapter_id = [string]$runtimeHostAdapterIdentity.effective_host_id
             command_path = $null
             invocation_arguments_prefix = @()
         }
@@ -354,6 +360,8 @@ function Resolve-VibeNativeSpecialistAdapter {
                 runtime = $runtime
                 policy = $policy
                 adapter = $null
+                requested_host_adapter_id = [string]$runtimeHostAdapterIdentity.requested_host_id
+                effective_host_adapter_id = [string]$runtimeHostAdapterIdentity.effective_host_id
                 command_path = $null
                 invocation_arguments_prefix = @()
             }
@@ -378,13 +386,15 @@ function Resolve-VibeNativeSpecialistAdapter {
             runtime = $runtime
             policy = $policy
             adapter = $null
+            requested_host_adapter_id = [string]$runtimeHostAdapterIdentity.requested_host_id
+            effective_host_adapter_id = [string]$runtimeHostAdapterIdentity.effective_host_id
             command_path = $null
             invocation_arguments_prefix = @()
         }
     }
 
-    $adapterId = if ($runtime.host_adapter -and -not [string]::IsNullOrWhiteSpace([string]$runtime.host_adapter.id)) {
-        [string]$runtime.host_adapter.id
+    $adapterId = if (-not [string]::IsNullOrWhiteSpace([string]$runtimeHostAdapterIdentity.effective_host_id)) {
+        [string]$runtimeHostAdapterIdentity.effective_host_id
     } elseif ($policy.PSObject.Properties.Name -contains 'default_adapter_id' -and -not [string]::IsNullOrWhiteSpace([string]$policy.default_adapter_id)) {
         [string]$policy.default_adapter_id
     } else {
@@ -405,6 +415,8 @@ function Resolve-VibeNativeSpecialistAdapter {
             runtime = $runtime
             policy = $policy
             adapter = $null
+            requested_host_adapter_id = [string]$runtimeHostAdapterIdentity.requested_host_id
+            effective_host_adapter_id = [string]$runtimeHostAdapterIdentity.effective_host_id
             command_path = $null
             invocation_arguments_prefix = @()
         }
@@ -478,7 +490,7 @@ function Resolve-VibeNativeSpecialistAdapter {
         runtime = $runtime
         policy = $policy
         adapter = $adapter
-        requested_host_adapter_id = if ($runtime.host_adapter -and $runtime.host_adapter.requested_id) { [string]$runtime.host_adapter.requested_id } else { [string]$adapterId }
+        requested_host_adapter_id = if (-not [string]::IsNullOrWhiteSpace([string]$runtimeHostAdapterIdentity.requested_host_id)) { [string]$runtimeHostAdapterIdentity.requested_host_id } else { [string]$adapterId }
         effective_host_adapter_id = [string]$adapter.id
         command_path = $commandPath
         invocation_arguments_prefix = @($invocationArgumentsPrefix)

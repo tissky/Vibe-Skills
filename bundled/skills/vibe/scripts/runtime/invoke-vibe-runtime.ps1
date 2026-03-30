@@ -47,30 +47,6 @@ function Wait-VibeArtifactSet {
     }
 }
 
-function Get-VibeRelativePathCompat {
-    param(
-        [Parameter(Mandatory)] [string]$BasePath,
-        [Parameter(Mandatory)] [string]$TargetPath
-    )
-
-    $baseFull = [System.IO.Path]::GetFullPath($BasePath)
-    $targetFull = [System.IO.Path]::GetFullPath($TargetPath)
-
-    if ($baseFull -eq $targetFull) {
-        return '.'
-    }
-
-    if ($baseFull.Substring(0, 1).ToUpperInvariant() -ne $targetFull.Substring(0, 1).ToUpperInvariant()) {
-        return $targetFull
-    }
-
-    $baseWithSeparator = $baseFull.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
-    $baseUri = New-Object System.Uri($baseWithSeparator)
-    $targetUri = New-Object System.Uri($targetFull)
-    $relative = [System.Uri]::UnescapeDataString($baseUri.MakeRelativeUri($targetUri).ToString())
-    return $relative.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
-}
-
 $runtime = Get-VibeRuntimeContext -ScriptPath $PSCommandPath
 $Mode = Resolve-VibeRuntimeMode -Mode $Mode -DefaultMode ([string]$runtime.runtime_modes.default_mode)
 if ([string]::IsNullOrWhiteSpace($RunId)) {
@@ -246,24 +222,24 @@ if (-not $artifactReadiness.ready) {
     throw ("Governed runtime returned before critical artifacts were durable. Missing: {0}" -f (@($artifactReadiness.missing) -join ', '))
 }
 
-$relativeArtifacts = [ordered]@{
-    skeleton_receipt = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$skeleton.receipt_path)
-    runtime_input_packet = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$runtimeInput.packet_path)
-    intent_contract = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$interview.receipt_path)
-    requirement_doc = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$requirement.requirement_doc_path)
-    requirement_receipt = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$requirement.receipt_path)
-    execution_plan = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$plan.execution_plan_path)
-    execution_plan_receipt = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$plan.receipt_path)
-    execute_receipt = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$execute.receipt_path)
-    execution_manifest = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$execute.execution_manifest_path)
-    execution_topology = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$execute.execution_topology_path)
-    benchmark_proof_manifest = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$execute.benchmark_proof_manifest_path)
-    cleanup_receipt = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$cleanup.receipt_path)
-    delivery_acceptance_report = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$deliveryAcceptanceReportPath)
-    delivery_acceptance_markdown = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$deliveryAcceptanceMarkdownPath)
-    memory_activation_report = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$memoryActivation.report_path)
-    memory_activation_markdown = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$memoryActivation.markdown_path)
-}
+$summaryArtifacts = New-VibeRuntimeSummaryArtifactProjection `
+    -SkeletonReceiptPath ([string]$skeleton.receipt_path) `
+    -RuntimeInputPacketPath ([string]$runtimeInput.packet_path) `
+    -IntentContractPath ([string]$interview.receipt_path) `
+    -RequirementDocPath ([string]$requirement.requirement_doc_path) `
+    -RequirementReceiptPath ([string]$requirement.receipt_path) `
+    -ExecutionPlanPath ([string]$plan.execution_plan_path) `
+    -ExecutionPlanReceiptPath ([string]$plan.receipt_path) `
+    -ExecuteReceiptPath ([string]$execute.receipt_path) `
+    -ExecutionManifestPath ([string]$execute.execution_manifest_path) `
+    -ExecutionTopologyPath ([string]$execute.execution_topology_path) `
+    -BenchmarkProofManifestPath ([string]$execute.benchmark_proof_manifest_path) `
+    -CleanupReceiptPath ([string]$cleanup.receipt_path) `
+    -DeliveryAcceptanceReportPath ([string]$deliveryAcceptanceReportPath) `
+    -DeliveryAcceptanceMarkdownPath ([string]$deliveryAcceptanceMarkdownPath) `
+    -MemoryActivationReportPath ([string]$memoryActivation.report_path) `
+    -MemoryActivationMarkdownPath ([string]$memoryActivation.markdown_path)
+$relativeArtifacts = New-VibeRuntimeSummaryRelativeArtifactProjection -BasePath $artifactBaseRoot -Artifacts $summaryArtifacts
 
 $deliveryAcceptanceReport = if (Test-Path -LiteralPath $deliveryAcceptanceReportPath) {
     Get-Content -LiteralPath $deliveryAcceptanceReportPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -271,68 +247,17 @@ $deliveryAcceptanceReport = if (Test-Path -LiteralPath $deliveryAcceptanceReport
     $null
 }
 
-$summary = [pscustomobject]@{
-    run_id = $RunId
-    governance_scope = [string]$hierarchyState.governance_scope
-    mode = $Mode
-    task = $Task
-    generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-    artifact_root = $artifactBaseRoot
-    session_root = $skeleton.session_root
-    session_root_relative = Get-VibeRelativePathCompat -BasePath $artifactBaseRoot -TargetPath ([string]$skeleton.session_root)
-    hierarchy = [pscustomobject]@{
-        root_run_id = [string]$hierarchyState.root_run_id
-        parent_run_id = if ($null -eq $hierarchyState.parent_run_id) { $null } else { [string]$hierarchyState.parent_run_id }
-        parent_unit_id = if ($null -eq $hierarchyState.parent_unit_id) { $null } else { [string]$hierarchyState.parent_unit_id }
-        inherited_requirement_doc_path = if ($null -eq $hierarchyState.inherited_requirement_doc_path) { $null } else { [string]$hierarchyState.inherited_requirement_doc_path }
-        inherited_execution_plan_path = if ($null -eq $hierarchyState.inherited_execution_plan_path) { $null } else { [string]$hierarchyState.inherited_execution_plan_path }
-    }
-    stage_order = @(
-        'skeleton_check',
-        'deep_interview',
-        'requirement_doc',
-        'xl_plan',
-        'plan_execute',
-        'phase_cleanup'
-    )
-    artifacts = [pscustomobject]@{
-        skeleton_receipt = $skeleton.receipt_path
-        runtime_input_packet = $runtimeInput.packet_path
-        intent_contract = $interview.receipt_path
-        requirement_doc = $requirement.requirement_doc_path
-        requirement_receipt = $requirement.receipt_path
-        execution_plan = $plan.execution_plan_path
-        execution_plan_receipt = $plan.receipt_path
-        execute_receipt = $execute.receipt_path
-        execution_manifest = $execute.execution_manifest_path
-        execution_topology = $execute.execution_topology_path
-        benchmark_proof_manifest = $execute.benchmark_proof_manifest_path
-        cleanup_receipt = $cleanup.receipt_path
-        delivery_acceptance_report = $deliveryAcceptanceReportPath
-        delivery_acceptance_markdown = $deliveryAcceptanceMarkdownPath
-        memory_activation_report = $memoryActivation.report_path
-        memory_activation_markdown = $memoryActivation.markdown_path
-    }
-    memory_activation = [pscustomobject]@{
-        policy_mode = [string]$memoryActivation.report.policy.mode
-        routing_contract = [string]$memoryActivation.report.policy.routing_contract
-        fallback_event_count = [int]$memoryActivation.report.summary.fallback_event_count
-        artifact_count = [int]$memoryActivation.report.summary.artifact_count
-        budget_guard_respected = [bool]$memoryActivation.report.summary.budget_guard_respected
-    }
-    delivery_acceptance = if ($deliveryAcceptanceReport) {
-        [pscustomobject]@{
-            gate_result = [string]$deliveryAcceptanceReport.summary.gate_result
-            completion_language_allowed = [bool]$deliveryAcceptanceReport.summary.completion_language_allowed
-            readiness_state = [string]$deliveryAcceptanceReport.summary.readiness_state
-            manual_review_layer_count = [int]$deliveryAcceptanceReport.summary.manual_review_layer_count
-            failing_layer_count = [int]$deliveryAcceptanceReport.summary.failing_layer_count
-        }
-    } else {
-        $null
-    }
-    artifacts_relative = [pscustomobject]$relativeArtifacts
-}
+$summary = New-VibeRuntimeSummaryProjection `
+    -RunId $RunId `
+    -Mode $Mode `
+    -Task $Task `
+    -ArtifactRoot $artifactBaseRoot `
+    -SessionRoot ([string]$skeleton.session_root) `
+    -HierarchyState $hierarchyState `
+    -Artifacts $summaryArtifacts `
+    -RelativeArtifacts $relativeArtifacts `
+    -MemoryActivationReport $memoryActivation.report `
+    -DeliveryAcceptanceReport $deliveryAcceptanceReport
 
 $summaryPath = Join-Path $skeleton.session_root 'runtime-summary.json'
 Write-VibeJsonArtifact -Path $summaryPath -Value $summary

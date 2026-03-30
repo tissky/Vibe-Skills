@@ -1,5 +1,14 @@
 # VCO Changelog
 
+## v2.3.54 (2026-03-30)
+
+- Closed the release-surface truth gap by making `scripts/governance/release-cut.ps1` the authoritative path for version governance, changelog / ledger writes, release README updates, dist manifest `source_release` alignment, and bundled / nested bundled sync during release apply.
+- Added a stable runtime-contract proof baseline through shared packet projection, contract references, schema/golden tests, and host/runtime projection coverage so later refactors can move with less hidden drift risk.
+- Completed the currently targeted tracked outputs-boundary migration and install-time generated nested compatibility path while preserving installed-runtime behavior and parity gates.
+- Added release-note quality enforcement and re-cut the governed release surface so `v2.3.54` accurately describes the code and verification state that now exists in the repository.
+- Detailed release notes: `docs/releases/v2.3.54.md`.
+
+
 ## v2.3.53 (2026-03-30)
 
 - Closed governed specialist dispatch with explicit custom-admission handling, and restored delegated-lane payload plus host-adapter metadata continuity across router admission, runtime packets, and specialist execution closure gates.

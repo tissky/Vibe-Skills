@@ -52,6 +52,7 @@ The authoritative requirement set for closure remains [`../../docs/status/non-re
 | Family | Typical Scripts | When to Run |
 | --- | --- | --- |
 | Runtime Integrity / Packaging | `vibe-bom-frontmatter-gate.ps1`, `vibe-version-packaging-gate.ps1`, `vibe-installed-runtime-freshness-gate.ps1`, `vibe-release-install-runtime-coherence-gate.ps1` | packaging, install, frontmatter, runtime freshness |
+| Release Surface Quality | `vibe-dist-manifest-gate.ps1`, `vibe-release-notes-quality-gate.ps1` | release-facing README/manifest/note truth surfaces |
 | Fallback Governance / Truth Honesty | `vibe-no-silent-fallback-contract-gate.ps1`, `vibe-no-self-introduced-fallback-gate.ps1`, `vibe-release-truth-consistency-gate.ps1` | degraded-path governance, hazard honesty, release truth alignment |
 | Managed Runtime / Process Hygiene | `vibe-node-zombie-gate.ps1` | managed Node ownership, stale-process classification, report-only cleanup safety |
 | Cleanliness / Outputs / Mirror Hygiene | `vibe-repo-cleanliness-gate.ps1`, `vibe-output-artifact-boundary-gate.ps1`, `vibe-mirror-edit-hygiene-gate.ps1`, `vibe-nested-bundled-parity-gate.ps1` | canonical cleanup batches, sync-before or sync-after, fixture migrations |

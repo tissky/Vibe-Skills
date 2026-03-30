@@ -69,6 +69,7 @@ Nested compatibility note:
 - `runtime.installed_runtime.require_nested_bundled_root = false`
 - freshness does not fail only because a nested compatibility mirror is absent
 - if a nested layout is present in the installed payload, it must still remain parity-safe
+- install-time compatibility generation is allowed to materialize `skills/vibe/bundled/skills/vibe` from the installed canonical payload even when the repo-level nested mirror is absent
 
 ## Shell Degraded Behavior
 

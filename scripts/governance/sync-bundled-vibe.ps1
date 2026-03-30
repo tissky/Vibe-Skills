@@ -1,7 +1,8 @@
 param(
     [switch]$PruneBundledExtras,
     [switch]$Preview,
-    [string]$PreviewOutputPath = ''
+    [string]$PreviewOutputPath = '',
+    [switch]$IncludeGeneratedCompatibilityTargets
 )
 
 $ErrorActionPreference = 'Stop'
@@ -18,7 +19,28 @@ function Copy-DirContent {
     }
 
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-    Copy-Item -Path (Join-Path $Source '*') -Destination $Destination -Recurse -Force
+
+    $directories = @(
+        Get-ChildItem -LiteralPath $Source -Recurse -Directory | Sort-Object FullName
+    )
+    foreach ($directory in $directories) {
+        $relativePath = Get-VgoRelativePathPortable -BasePath $Source -TargetPath $directory.FullName
+        $targetDirectory = Join-Path $Destination $relativePath
+        New-Item -ItemType Directory -Force -Path $targetDirectory | Out-Null
+    }
+
+    $files = @(
+        Get-ChildItem -LiteralPath $Source -Recurse -File | Sort-Object FullName
+    )
+    foreach ($file in $files) {
+        $relativePath = Get-VgoRelativePathPortable -BasePath $Source -TargetPath $file.FullName
+        $targetPath = Join-Path $Destination $relativePath
+        $targetDirectory = Split-Path -Parent $targetPath
+        if (-not [string]::IsNullOrWhiteSpace($targetDirectory)) {
+            New-Item -ItemType Directory -Force -Path $targetDirectory | Out-Null
+        }
+        Copy-Item -LiteralPath $file.FullName -Destination $targetPath -Force
+    }
 }
 
 function Add-PreviewAction {
@@ -65,7 +87,15 @@ $mirrorDirs = @($packaging.mirror.directories)
 $allowBundledOnly = @($packaging.allow_bundled_only)
 $syncTargets = @(
     $context.mirrorTargets | Where-Object {
-        -not $_.isCanonical -and $_.sync_enabled
+        -not $_.isCanonical -and (
+            $_.sync_enabled -or
+            $_.exists -or
+            (
+                $IncludeGeneratedCompatibilityTargets -and
+                $_.PSObject.Properties.Name -contains 'materialization_mode' -and
+                [string]$_.materialization_mode -eq 'release_install_only'
+            )
+        )
     }
 )
 $previewContractPath = Join-Path $canonicalRoot 'config/operator-preview-contract.json'
@@ -82,7 +112,11 @@ function Sync-ToMirrorTarget {
     )
 
     $targetRoot = [string]$Target.fullPath
-    $shouldCreate = [bool]$Target.required -or ([string]$Target.presence_policy -eq 'required')
+    $shouldCreate = [bool]$Target.required -or ([string]$Target.presence_policy -eq 'required') -or (
+        $IncludeGeneratedCompatibilityTargets -and
+        $Target.PSObject.Properties.Name -contains 'materialization_mode' -and
+        [string]$Target.materialization_mode -eq 'release_install_only'
+    )
     $targetExists = [bool]$Target.exists
     $targetPathExists = Test-Path -LiteralPath $targetRoot
     if (-not $targetExists) {
@@ -201,8 +235,10 @@ if ($Preview) {
                     id = $_.id
                     full_path = $_.fullPath
                     presence_policy = $_.presence_policy
+                    materialization_mode = if ($_.PSObject.Properties.Name -contains 'materialization_mode') { $_.materialization_mode } else { 'tracked_mirror' }
                 }
             })
+            include_generated_compatibility_targets = [bool]$IncludeGeneratedCompatibilityTargets
         }
         preview = [ordered]@{
             generated_at = (Get-Date).ToString('s')

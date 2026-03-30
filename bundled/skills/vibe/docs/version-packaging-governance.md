@@ -16,7 +16,7 @@ The canonical repo root is the only source of truth. `mirror_topology.targets` n
 | --- | --- | --- | --- | --- | --- |
 | `canonical` | `.` | canonical | yes | `required` | never synced from any mirror |
 | `bundled` | `bundled/skills/vibe` | release mirror | yes | `required` | synced directly from canonical |
-| `nested_bundled` | `bundled/skills/vibe/bundled/skills/vibe` | compatibility mirror | no | `if_present_must_match` | synced directly from canonical when present |
+| `nested_bundled` | `bundled/skills/vibe/bundled/skills/vibe` | compatibility mirror | no | `if_present_must_match` | optional generated compatibility target; parity enforced when materialized |
 
 Core rules:
 
@@ -24,8 +24,10 @@ Core rules:
 2. All sync operations copy from canonical to mirrors.
 3. `nested_bundled` is optional to exist, but if it exists it must match canonical and bundled.
 4. Repo topology no longer treats `nested_bundled` as an installed-runtime hard requirement; it is a compatibility mirror, not an always-required runtime root.
-5. `allow_bundled_only` remains the only approved exception set for packaged mirror-only files.
-6. Installed runtime stays outside repo parity, but it must obey the runtime freshness contract.
+5. Repo-level sync only targets mirrors with `sync_enabled = true`; `nested_bundled` may therefore remain absent in the repo and be materialized later by release/install compatibility flows.
+6. `allow_bundled_only` remains the only approved exception set for packaged mirror-only files.
+7. Installed runtime stays outside repo parity, but it must obey the runtime freshness contract.
+8. Install-time compatibility materialization must derive `nested_bundled` from the installed canonical payload, not from a repo-resident nested mirror copy.
 
 ## Execution-Context Lock
 
@@ -62,6 +64,7 @@ Sync guarantees:
 - the script enumerates `mirror_topology.targets`
 - only targets with `sync_enabled = true` are considered
 - optional targets with `presence_policy = if_present_must_match` are skipped when absent
+- `nested_bundled` is no longer a default repo-sync target once `sync_enabled = false`
 - `-PruneBundledExtras` applies to every synced mirror target
 - mirror-to-mirror cascading is forbidden
 
@@ -94,6 +97,7 @@ That means:
 
 - release metadata and release-cut gates validate canonical + bundled + nested repo state
 - install copies the governed payload into `${TARGET_ROOT}/skills/vibe` and writes a freshness receipt on success
+- install-time compatibility flows may generate `${TARGET_ROOT}/skills/vibe/bundled/skills/vibe` even when the repo-level nested mirror is absent
 - runtime freshness authoritatively validates the installed copy against canonical source
 - routine `check.ps1` / `check.sh` may execute the runtime freshness gate only when the canonical repo context is available
 
@@ -111,7 +115,7 @@ That means:
 
 The installed runtime freshness gate remains the receipt authority. The coherence gate validates that release/install/runtime documentation, scripts, and receipt expectations stay aligned.
 
-`require_nested_bundled_root = false` means installed-runtime freshness does not fail only because a nested compatibility mirror is absent. If a nested layout is still materialized for compatibility, it remains governed by the same parity and hygiene rules.
+`require_nested_bundled_root = false` means installed-runtime freshness does not fail only because a nested compatibility mirror is absent. If a nested layout is materialized for compatibility, install-time generation must keep it derived from the installed canonical payload and governed by the same parity and hygiene rules.
 
 ## Shell Degraded Behavior
 

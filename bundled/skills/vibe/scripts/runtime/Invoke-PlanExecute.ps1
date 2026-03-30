@@ -1092,6 +1092,10 @@ $effectiveSpecialistExecutionStatus = if (@($liveSpecialistUnits).Count -gt 0 -a
     'none'
 }
 $specialistDispatchUnitCount = @($approvedDispatch).Count
+$runtimePacketHostAdapterIdentity = Get-VibeRuntimePacketHostAdapterAlignment -RuntimeInputPacket $runtimeInputPacket
+$routeRuntimeAlignment = New-VibeRouteRuntimeAlignmentProjection -RuntimeInputPacket $runtimeInputPacket -DefaultRuntimeSkill 'vibe'
+$hierarchyProjection = New-VibeHierarchyProjection -HierarchyState $hierarchyState -IncludeGovernanceScope
+$authorityProjection = New-VibeExecutionAuthorityProjection -HierarchyState $hierarchyState
 $executionManifest = [pscustomobject]@{
     stage = 'plan_execute'
     run_id = $RunId
@@ -1114,28 +1118,9 @@ $executionManifest = [pscustomobject]@{
     timed_out_unit_count = $timedOutUnitCount
     proof_class = [string]$proofRegistry.artifact_class_defaults.execution_manifest
     promotion_suitable = [string]$proofRegistry.promotion_suitability.runtime
-    hierarchy = [pscustomobject]@{
-        governance_scope = [string]$hierarchyState.governance_scope
-        root_run_id = [string]$hierarchyState.root_run_id
-        parent_run_id = if ($null -eq $hierarchyState.parent_run_id) { $null } else { [string]$hierarchyState.parent_run_id }
-        parent_unit_id = if ($null -eq $hierarchyState.parent_unit_id) { $null } else { [string]$hierarchyState.parent_unit_id }
-        inherited_requirement_doc_path = if ($null -eq $hierarchyState.inherited_requirement_doc_path) { $null } else { [string]$hierarchyState.inherited_requirement_doc_path }
-        inherited_execution_plan_path = if ($null -eq $hierarchyState.inherited_execution_plan_path) { $null } else { [string]$hierarchyState.inherited_execution_plan_path }
-    }
-    authority = [pscustomobject]@{
-        canonical_requirement_write_allowed = [bool]$hierarchyState.allow_requirement_freeze
-        canonical_plan_write_allowed = [bool]$hierarchyState.allow_plan_freeze
-        global_dispatch_allowed = [bool]$hierarchyState.allow_global_dispatch
-        completion_claim_allowed = [bool]$hierarchyState.allow_completion_claim
-    }
-    route_runtime_alignment = [pscustomobject]@{
-        router_selected_skill = if ($runtimeInputPacket) { [string]$runtimeInputPacket.route_snapshot.selected_skill } else { $null }
-        runtime_selected_skill = if ($runtimeInputPacket) { [string]$runtimeInputPacket.authority_flags.explicit_runtime_skill } else { 'vibe' }
-        skill_mismatch = if ($runtimeInputPacket) { [bool]$runtimeInputPacket.divergence_shadow.skill_mismatch } else { $false }
-        confirm_required = if ($runtimeInputPacket) { [bool]$runtimeInputPacket.route_snapshot.confirm_required } else { $false }
-        requested_host_adapter_id = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'host_adapter' -and $runtimeInputPacket.host_adapter) { [string]$runtimeInputPacket.host_adapter.requested_host_id } else { $null }
-        effective_host_adapter_id = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'host_adapter' -and $runtimeInputPacket.host_adapter) { [string]$runtimeInputPacket.host_adapter.effective_host_id } else { $null }
-    }
+    hierarchy = $hierarchyProjection
+    authority = $authorityProjection
+    route_runtime_alignment = $routeRuntimeAlignment
     execution_topology = [pscustomobject]@{
         path = $executionTopologyPath
         delegation_mode = [string]$executionTopology.delegation_mode
@@ -1188,8 +1173,8 @@ $executionManifest = [pscustomobject]@{
         approved_dispatch = @($approvedDispatch)
         auto_approved_dispatch_count = @($autoApprovedDispatch).Count
         auto_approved_dispatch = @($autoApprovedDispatch)
-        requested_host_adapter_id = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'host_adapter' -and $runtimeInputPacket.host_adapter) { [string]$runtimeInputPacket.host_adapter.requested_host_id } else { $null }
-        effective_host_adapter_id = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'host_adapter' -and $runtimeInputPacket.host_adapter) { [string]$runtimeInputPacket.host_adapter.effective_host_id } else { $null }
+        requested_host_adapter_id = $runtimePacketHostAdapterIdentity.requested_host_id
+        effective_host_adapter_id = $runtimePacketHostAdapterIdentity.effective_host_id
         phase_binding_counts = [pscustomobject]@{
             pre_execution = @($approvedDispatch | Where-Object { [string]$_.dispatch_phase -eq 'pre_execution' }).Count
             in_execution = @($approvedDispatch | Where-Object { [string]$_.dispatch_phase -eq 'in_execution' }).Count
@@ -1336,7 +1321,7 @@ $receipt = [pscustomobject]@{
     escalation_required = [bool]$escalationRequired
     escalation_request_path = $escalationPath
     specialist_dispatch_resolution_path = if ($specialistDispatchResolution.auto_absorb_gate.receipt_path) { [string]$specialistDispatchResolution.auto_absorb_gate.receipt_path } else { $null }
-    completion_claim_allowed = [bool]$hierarchyState.allow_completion_claim
+    completion_claim_allowed = [bool]$authorityProjection.completion_claim_allowed
     proof_class = [string]$proofRegistry.artifact_class_defaults.execution_manifest
     verification_contract = @(
         'No completion claim without verification evidence.',

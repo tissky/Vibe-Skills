@@ -77,6 +77,150 @@ function Resolve-VibeHostTargetRoot {
     return [System.IO.Path]::GetFullPath((Join-Path $homeDir $rel))
 }
 
+function Get-VibeRelativePathCompat {
+    param(
+        [Parameter(Mandatory)] [string]$BasePath,
+        [Parameter(Mandatory)] [string]$TargetPath
+    )
+
+    $baseFull = [System.IO.Path]::GetFullPath($BasePath)
+    $targetFull = [System.IO.Path]::GetFullPath($TargetPath)
+
+    if ($baseFull -eq $targetFull) {
+        return '.'
+    }
+
+    if ($baseFull.Substring(0, 1).ToUpperInvariant() -ne $targetFull.Substring(0, 1).ToUpperInvariant()) {
+        return $targetFull
+    }
+
+    $baseWithSeparator = $baseFull.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+    $baseUri = New-Object System.Uri($baseWithSeparator)
+    $targetUri = New-Object System.Uri($targetFull)
+    $relative = [System.Uri]::UnescapeDataString($baseUri.MakeRelativeUri($targetUri).ToString())
+    return $relative.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+}
+
+function Test-VibeObjectHasProperty {
+    param(
+        [AllowNull()] [object]$InputObject,
+        [Parameter(Mandatory)] [string]$PropertyName
+    )
+
+    if ($null -eq $InputObject -or [string]::IsNullOrWhiteSpace($PropertyName)) {
+        return $false
+    }
+
+    $propertyNames = @($InputObject.PSObject.Properties | ForEach-Object { [string]$_.Name })
+    return ($propertyNames -contains $PropertyName)
+}
+
+function Get-VibeHostAdapterIdentityProjection {
+    param(
+        [AllowNull()] [object]$HostAdapter,
+        [AllowEmptyString()] [string]$RequestedPropertyName = 'requested_id',
+        [AllowEmptyString()] [string]$EffectivePropertyName = 'id',
+        [AllowEmptyString()] [string]$FallbackHostId = ''
+    )
+
+    $requestedHostId = if ([string]::IsNullOrWhiteSpace($FallbackHostId)) { $null } else { [string]$FallbackHostId }
+    $effectiveHostId = if ([string]::IsNullOrWhiteSpace($FallbackHostId)) { $null } else { [string]$FallbackHostId }
+
+    if ($null -ne $HostAdapter) {
+        $requestedFields = @($RequestedPropertyName, 'requested_id', 'requested_host_id', 'id', 'effective_host_id') | Select-Object -Unique
+        $effectiveFields = @($EffectivePropertyName, 'id', 'effective_host_id', 'requested_id', 'requested_host_id') | Select-Object -Unique
+
+        foreach ($field in @($requestedFields)) {
+            if (Test-VibeObjectHasProperty -InputObject $HostAdapter -PropertyName $field) {
+                $candidateRequestedHostId = [string]$HostAdapter.$field
+                if (-not [string]::IsNullOrWhiteSpace($candidateRequestedHostId)) {
+                    $requestedHostId = $candidateRequestedHostId
+                    break
+                }
+            }
+        }
+        foreach ($field in @($effectiveFields)) {
+            if (Test-VibeObjectHasProperty -InputObject $HostAdapter -PropertyName $field) {
+                $candidateEffectiveHostId = [string]$HostAdapter.$field
+                if (-not [string]::IsNullOrWhiteSpace($candidateEffectiveHostId)) {
+                    $effectiveHostId = $candidateEffectiveHostId
+                    break
+                }
+            }
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($requestedHostId) -and -not [string]::IsNullOrWhiteSpace($effectiveHostId)) {
+        $requestedHostId = [string]$effectiveHostId
+    }
+    if ([string]::IsNullOrWhiteSpace($effectiveHostId) -and -not [string]::IsNullOrWhiteSpace($requestedHostId)) {
+        $effectiveHostId = [string]$requestedHostId
+    }
+
+    return [pscustomobject]@{
+        requested_id = if ([string]::IsNullOrWhiteSpace($requestedHostId)) { $null } else { [string]$requestedHostId }
+        id = if ([string]::IsNullOrWhiteSpace($effectiveHostId)) { $null } else { [string]$effectiveHostId }
+        requested_host_id = if ([string]::IsNullOrWhiteSpace($requestedHostId)) { $null } else { [string]$requestedHostId }
+        effective_host_id = if ([string]::IsNullOrWhiteSpace($effectiveHostId)) { $null } else { [string]$effectiveHostId }
+    }
+}
+
+function New-VibeRuntimeHostAdapterProjection {
+    param(
+        [Parameter(Mandatory)] [object]$Runtime,
+        [AllowEmptyString()] [string]$FallbackHostId = '',
+        [AllowEmptyString()] [string]$TargetRoot = ''
+    )
+
+    $identity = Get-VibeHostAdapterIdentityProjection `
+        -HostAdapter $Runtime.host_adapter `
+        -RequestedPropertyName 'requested_id' `
+        -EffectivePropertyName 'id' `
+        -FallbackHostId $FallbackHostId
+
+    return [pscustomobject]@{
+        requested_id = $identity.requested_id
+        id = $identity.id
+        requested_host_id = $identity.requested_host_id
+        effective_host_id = $identity.effective_host_id
+        status = if ($Runtime.host_adapter -and (Test-VibeObjectHasProperty -InputObject $Runtime.host_adapter -PropertyName 'status')) { [string]$Runtime.host_adapter.status } else { $null }
+        install_mode = if ($Runtime.host_adapter -and (Test-VibeObjectHasProperty -InputObject $Runtime.host_adapter -PropertyName 'install_mode')) { [string]$Runtime.host_adapter.install_mode } else { $null }
+        check_mode = if ($Runtime.host_adapter -and (Test-VibeObjectHasProperty -InputObject $Runtime.host_adapter -PropertyName 'check_mode')) { [string]$Runtime.host_adapter.check_mode } else { $null }
+        bootstrap_mode = if ($Runtime.host_adapter -and (Test-VibeObjectHasProperty -InputObject $Runtime.host_adapter -PropertyName 'bootstrap_mode')) { [string]$Runtime.host_adapter.bootstrap_mode } else { $null }
+        target_root = if ([string]::IsNullOrWhiteSpace($TargetRoot)) { $null } else { [string]$TargetRoot }
+        closure_path = if ($Runtime.host_closure) { [string]$Runtime.host_closure.path } else { $null }
+    }
+}
+
+function Get-VibeRuntimePacketHostAdapterAlignment {
+    param(
+        [AllowNull()] [object]$RuntimeInputPacket
+    )
+
+    return Get-VibeHostAdapterIdentityProjection `
+        -HostAdapter $(if ($null -ne $RuntimeInputPacket -and $RuntimeInputPacket.PSObject.Properties.Name -contains 'host_adapter') { $RuntimeInputPacket.host_adapter } else { $null }) `
+        -RequestedPropertyName 'requested_host_id' `
+        -EffectivePropertyName 'effective_host_id'
+}
+
+function New-VibeRouteRuntimeAlignmentProjection {
+    param(
+        [AllowNull()] [object]$RuntimeInputPacket,
+        [AllowEmptyString()] [string]$DefaultRuntimeSkill = 'vibe'
+    )
+
+    $hostAdapterIdentity = Get-VibeRuntimePacketHostAdapterAlignment -RuntimeInputPacket $RuntimeInputPacket
+
+    return [pscustomobject]@{
+        router_selected_skill = if ($null -ne $RuntimeInputPacket) { [string]$RuntimeInputPacket.route_snapshot.selected_skill } else { $null }
+        runtime_selected_skill = if ($null -ne $RuntimeInputPacket) { [string]$RuntimeInputPacket.authority_flags.explicit_runtime_skill } else { $DefaultRuntimeSkill }
+        skill_mismatch = if ($null -ne $RuntimeInputPacket) { [bool]$RuntimeInputPacket.divergence_shadow.skill_mismatch } else { $false }
+        confirm_required = if ($null -ne $RuntimeInputPacket) { [bool]$RuntimeInputPacket.route_snapshot.confirm_required } else { $false }
+        requested_host_adapter_id = $hostAdapterIdentity.requested_host_id
+        effective_host_adapter_id = $hostAdapterIdentity.effective_host_id
+    }
+}
+
 function Get-VibeHostClosureRecord {
     param(
         [Parameter(Mandatory)] [object]$HostAdapter
@@ -226,6 +370,320 @@ function Get-VibeHierarchyState {
         allow_plan_freeze = [bool]$authoritySource.allow_plan_freeze
         allow_global_dispatch = [bool]$authoritySource.allow_global_dispatch
         allow_completion_claim = [bool]$authoritySource.allow_completion_claim
+    }
+}
+
+function New-VibeHierarchyProjection {
+    param(
+        [Parameter(Mandatory)] [object]$HierarchyState,
+        [switch]$IncludeGovernanceScope
+    )
+
+    $projection = [ordered]@{}
+    if ($IncludeGovernanceScope) {
+        $projection.governance_scope = [string]$HierarchyState.governance_scope
+    }
+    $projection.root_run_id = [string]$HierarchyState.root_run_id
+    $projection.parent_run_id = if ($null -eq $HierarchyState.parent_run_id) { $null } else { [string]$HierarchyState.parent_run_id }
+    $projection.parent_unit_id = if ($null -eq $HierarchyState.parent_unit_id) { $null } else { [string]$HierarchyState.parent_unit_id }
+    $projection.inherited_requirement_doc_path = if ($null -eq $HierarchyState.inherited_requirement_doc_path) { $null } else { [string]$HierarchyState.inherited_requirement_doc_path }
+    $projection.inherited_execution_plan_path = if ($null -eq $HierarchyState.inherited_execution_plan_path) { $null } else { [string]$HierarchyState.inherited_execution_plan_path }
+    return [pscustomobject]$projection
+}
+
+function New-VibeAuthorityCapabilityProjection {
+    param(
+        [Parameter(Mandatory)] [object]$HierarchyState
+    )
+
+    return [pscustomobject]@{
+        allow_requirement_freeze = if (Test-VibeObjectHasProperty -InputObject $HierarchyState -PropertyName 'allow_requirement_freeze') { [bool]$HierarchyState.allow_requirement_freeze } else { $false }
+        allow_plan_freeze = if (Test-VibeObjectHasProperty -InputObject $HierarchyState -PropertyName 'allow_plan_freeze') { [bool]$HierarchyState.allow_plan_freeze } else { $false }
+        allow_global_dispatch = if (Test-VibeObjectHasProperty -InputObject $HierarchyState -PropertyName 'allow_global_dispatch') { [bool]$HierarchyState.allow_global_dispatch } else { $false }
+        allow_completion_claim = if (Test-VibeObjectHasProperty -InputObject $HierarchyState -PropertyName 'allow_completion_claim') { [bool]$HierarchyState.allow_completion_claim } else { $false }
+    }
+}
+
+function New-VibeRuntimePacketAuthorityFlagsProjection {
+    param(
+        [Parameter(Mandatory)] [object]$HierarchyState,
+        [AllowEmptyString()] [string]$RuntimeEntry = 'vibe',
+        [AllowEmptyString()] [string]$ExplicitRuntimeSkill = 'vibe',
+        [AllowEmptyString()] [string]$RouterTruthLevel = '',
+        [bool]$ShadowOnly = $false,
+        [bool]$NonAuthoritative = $false
+    )
+
+    $capabilities = New-VibeAuthorityCapabilityProjection -HierarchyState $HierarchyState
+
+    return [pscustomobject]@{
+        runtime_entry = if ([string]::IsNullOrWhiteSpace($RuntimeEntry)) { $null } else { [string]$RuntimeEntry }
+        explicit_runtime_skill = if ([string]::IsNullOrWhiteSpace($ExplicitRuntimeSkill)) { $null } else { [string]$ExplicitRuntimeSkill }
+        router_truth_level = if ([string]::IsNullOrWhiteSpace($RouterTruthLevel)) { $null } else { [string]$RouterTruthLevel }
+        shadow_only = [bool]$ShadowOnly
+        non_authoritative = [bool]$NonAuthoritative
+        allow_requirement_freeze = [bool]$capabilities.allow_requirement_freeze
+        allow_plan_freeze = [bool]$capabilities.allow_plan_freeze
+        allow_global_dispatch = [bool]$capabilities.allow_global_dispatch
+        allow_completion_claim = [bool]$capabilities.allow_completion_claim
+    }
+}
+
+function New-VibeRuntimeInputPacketProjection {
+    param(
+        [Parameter(Mandatory)] [string]$RunId,
+        [Parameter(Mandatory)] [string]$Task,
+        [Parameter(Mandatory)] [string]$Mode,
+        [Parameter(Mandatory)] [string]$InternalGrade,
+        [Parameter(Mandatory)] [object]$HierarchyState,
+        [Parameter(Mandatory)] [object]$HierarchyProjection,
+        [Parameter(Mandatory)] [object]$AuthorityFlagsProjection,
+        [Parameter(Mandatory)] [object]$RouteResult,
+        [Parameter(Mandatory)] [object]$Runtime,
+        [AllowEmptyString()] [string]$TaskType = '',
+        [AllowNull()] [string]$RequestedSkill = $null,
+        [AllowEmptyString()] [string]$RouterHostId = '',
+        [AllowEmptyString()] [string]$RouterTargetRoot = '',
+        [bool]$Unattended = $false,
+        [AllowEmptyString()] [string]$RouterScriptPath = '',
+        [AllowEmptyString()] [string]$RuntimeSelectedSkill = 'vibe',
+        [AllowNull()] [object[]]$SpecialistRecommendations = @(),
+        [Parameter(Mandatory)] [object]$SpecialistDispatch,
+        [AllowNull()] [object[]]$OverlayDecisions = @(),
+        [Parameter(Mandatory)] [object]$Policy
+    )
+
+    $confirmRequired = ([string]$RouteResult.route_mode -eq 'confirm_required')
+    $routerSelectedSkill = if ($RouteResult.selected) { [string]$RouteResult.selected.skill } else { $null }
+
+    $customAdmission = if (
+        $RouteResult.PSObject.Properties.Name -contains 'custom_admission' -and
+        $null -ne $RouteResult.custom_admission
+    ) {
+        [pscustomobject]@{
+            status = [string]$RouteResult.custom_admission.status
+            target_root = if ($RouteResult.custom_admission.PSObject.Properties.Name -contains 'target_root') { [string]$RouteResult.custom_admission.target_root } else { $null }
+            admitted_candidate_count = if ($RouteResult.custom_admission.PSObject.Properties.Name -contains 'admitted_candidates') { @($RouteResult.custom_admission.admitted_candidates).Count } else { 0 }
+            admitted_skill_ids = if ($RouteResult.custom_admission.PSObject.Properties.Name -contains 'admitted_candidates') {
+                @($RouteResult.custom_admission.admitted_candidates | ForEach-Object { [string]$_.skill_id } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+            } else {
+                @()
+            }
+        }
+    } else {
+        $null
+    }
+
+    return [pscustomobject]@{
+        stage = 'runtime_input_freeze'
+        run_id = $RunId
+        governance_scope = [string]$HierarchyState.governance_scope
+        task = $Task
+        generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+        runtime_mode = $Mode
+        internal_grade = $InternalGrade
+        hierarchy = $HierarchyProjection
+        canonical_router = [pscustomobject]@{
+            prompt = $Task
+            task_type = if ([string]::IsNullOrWhiteSpace($TaskType)) { $null } else { [string]$TaskType }
+            requested_skill = if ([string]::IsNullOrWhiteSpace([string]$RequestedSkill)) { $null } else { [string]$RequestedSkill }
+            host_id = if ([string]::IsNullOrWhiteSpace($RouterHostId)) { $null } else { [string]$RouterHostId }
+            target_root = if ([string]::IsNullOrWhiteSpace($RouterTargetRoot)) { $null } else { [string]$RouterTargetRoot }
+            unattended = [bool]$Unattended
+            route_script_path = if ([string]::IsNullOrWhiteSpace($RouterScriptPath)) { $null } else { [string]$RouterScriptPath }
+        }
+        host_adapter = (New-VibeRuntimeHostAdapterProjection -Runtime $Runtime -FallbackHostId $RouterHostId -TargetRoot $RouterTargetRoot)
+        route_snapshot = [pscustomobject]@{
+            selected_pack = if ($RouteResult.selected) { [string]$RouteResult.selected.pack_id } else { $null }
+            selected_skill = $routerSelectedSkill
+            route_mode = [string]$RouteResult.route_mode
+            route_reason = [string]$RouteResult.route_reason
+            confirm_required = [bool]$confirmRequired
+            confidence = if ($RouteResult.confidence -ne $null) { [double]$RouteResult.confidence } else { $null }
+            truth_level = [string]$RouteResult.truth_level
+            degradation_state = [string]$RouteResult.degradation_state
+            non_authoritative = [bool]$RouteResult.non_authoritative
+            fallback_active = [bool]$RouteResult.fallback_active
+            hazard_alert_required = [bool]$RouteResult.hazard_alert_required
+            unattended_override_applied = [bool]$RouteResult.unattended_override_applied
+            custom_admission_status = if ($RouteResult.PSObject.Properties.Name -contains 'custom_admission' -and $RouteResult.custom_admission) { [string]$RouteResult.custom_admission.status } else { $null }
+        }
+        custom_admission = $customAdmission
+        specialist_recommendations = @($SpecialistRecommendations)
+        specialist_dispatch = [pscustomobject]@{
+            approved_dispatch = @($SpecialistDispatch.approved_dispatch)
+            local_specialist_suggestions = @($SpecialistDispatch.local_specialist_suggestions)
+            approved_skill_ids = @($SpecialistDispatch.approved_dispatch | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
+            local_suggestion_skill_ids = @($SpecialistDispatch.local_specialist_suggestions | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
+            escalation_required = [bool]$SpecialistDispatch.escalation_required
+            escalation_status = [string]$SpecialistDispatch.escalation_status
+            approval_owner = if ($Policy.child_specialist_suggestion_contract.PSObject.Properties.Name -contains 'approval_owner') { [string]$Policy.child_specialist_suggestion_contract.approval_owner } else { 'root_vibe' }
+            status = if ($Policy.child_specialist_suggestion_contract.PSObject.Properties.Name -contains 'status') { [string]$Policy.child_specialist_suggestion_contract.status } else { 'advisory_until_root_approval' }
+        }
+        overlay_decisions = @($OverlayDecisions)
+        authority_flags = $AuthorityFlagsProjection
+        divergence_shadow = [pscustomobject]@{
+            router_selected_skill = $routerSelectedSkill
+            runtime_selected_skill = if ([string]::IsNullOrWhiteSpace($RuntimeSelectedSkill)) { $null } else { [string]$RuntimeSelectedSkill }
+            skill_mismatch = [bool](-not [string]::Equals($routerSelectedSkill, $RuntimeSelectedSkill, [System.StringComparison]::OrdinalIgnoreCase))
+            confirm_required = [bool]$confirmRequired
+            explicit_runtime_override_applied = [bool](-not [string]::IsNullOrWhiteSpace($RuntimeSelectedSkill))
+            explicit_runtime_override_reason = 'governed_runtime_entry'
+            governance_scope_mismatch = $false
+        }
+        provenance = [pscustomobject]@{
+            source_of_truth = 'canonical_router_shadow_freeze'
+            freeze_before_requirement_doc = [bool]$Policy.freeze_before_requirement_doc
+            proof_class = 'structure'
+        }
+    }
+}
+
+function New-VibeExecutionAuthorityProjection {
+    param(
+        [Parameter(Mandatory)] [object]$HierarchyState
+    )
+
+    $capabilities = New-VibeAuthorityCapabilityProjection -HierarchyState $HierarchyState
+
+    return [pscustomobject]@{
+        canonical_requirement_write_allowed = [bool]$capabilities.allow_requirement_freeze
+        canonical_plan_write_allowed = [bool]$capabilities.allow_plan_freeze
+        global_dispatch_allowed = [bool]$capabilities.allow_global_dispatch
+        completion_claim_allowed = [bool]$capabilities.allow_completion_claim
+    }
+}
+
+function Get-VibeGovernedRuntimeStageOrder {
+    return @(
+        'skeleton_check',
+        'deep_interview',
+        'requirement_doc',
+        'xl_plan',
+        'plan_execute',
+        'phase_cleanup'
+    )
+}
+
+function New-VibeRuntimeSummaryArtifactProjection {
+    param(
+        [Parameter(Mandatory)] [string]$SkeletonReceiptPath,
+        [Parameter(Mandatory)] [string]$RuntimeInputPacketPath,
+        [Parameter(Mandatory)] [string]$IntentContractPath,
+        [Parameter(Mandatory)] [string]$RequirementDocPath,
+        [Parameter(Mandatory)] [string]$RequirementReceiptPath,
+        [Parameter(Mandatory)] [string]$ExecutionPlanPath,
+        [Parameter(Mandatory)] [string]$ExecutionPlanReceiptPath,
+        [Parameter(Mandatory)] [string]$ExecuteReceiptPath,
+        [Parameter(Mandatory)] [string]$ExecutionManifestPath,
+        [Parameter(Mandatory)] [string]$ExecutionTopologyPath,
+        [Parameter(Mandatory)] [string]$BenchmarkProofManifestPath,
+        [Parameter(Mandatory)] [string]$CleanupReceiptPath,
+        [Parameter(Mandatory)] [string]$DeliveryAcceptanceReportPath,
+        [Parameter(Mandatory)] [string]$DeliveryAcceptanceMarkdownPath,
+        [Parameter(Mandatory)] [string]$MemoryActivationReportPath,
+        [Parameter(Mandatory)] [string]$MemoryActivationMarkdownPath
+    )
+
+    return [pscustomobject]@{
+        skeleton_receipt = $SkeletonReceiptPath
+        runtime_input_packet = $RuntimeInputPacketPath
+        intent_contract = $IntentContractPath
+        requirement_doc = $RequirementDocPath
+        requirement_receipt = $RequirementReceiptPath
+        execution_plan = $ExecutionPlanPath
+        execution_plan_receipt = $ExecutionPlanReceiptPath
+        execute_receipt = $ExecuteReceiptPath
+        execution_manifest = $ExecutionManifestPath
+        execution_topology = $ExecutionTopologyPath
+        benchmark_proof_manifest = $BenchmarkProofManifestPath
+        cleanup_receipt = $CleanupReceiptPath
+        delivery_acceptance_report = $DeliveryAcceptanceReportPath
+        delivery_acceptance_markdown = $DeliveryAcceptanceMarkdownPath
+        memory_activation_report = $MemoryActivationReportPath
+        memory_activation_markdown = $MemoryActivationMarkdownPath
+    }
+}
+
+function New-VibeRuntimeSummaryRelativeArtifactProjection {
+    param(
+        [Parameter(Mandatory)] [string]$BasePath,
+        [Parameter(Mandatory)] [object]$Artifacts
+    )
+
+    $relativeArtifacts = [ordered]@{}
+    foreach ($property in @($Artifacts.PSObject.Properties)) {
+        $relativeArtifacts[[string]$property.Name] = Get-VibeRelativePathCompat -BasePath $BasePath -TargetPath ([string]$property.Value)
+    }
+
+    return [pscustomobject]$relativeArtifacts
+}
+
+function New-VibeRuntimeSummaryMemoryActivationProjection {
+    param(
+        [AllowNull()] [object]$MemoryActivationReport
+    )
+
+    if ($null -eq $MemoryActivationReport) {
+        return $null
+    }
+
+    return [pscustomobject]@{
+        policy_mode = [string]$MemoryActivationReport.policy.mode
+        routing_contract = [string]$MemoryActivationReport.policy.routing_contract
+        fallback_event_count = [int]$MemoryActivationReport.summary.fallback_event_count
+        artifact_count = [int]$MemoryActivationReport.summary.artifact_count
+        budget_guard_respected = [bool]$MemoryActivationReport.summary.budget_guard_respected
+    }
+}
+
+function New-VibeRuntimeSummaryDeliveryAcceptanceProjection {
+    param(
+        [AllowNull()] [object]$DeliveryAcceptanceReport
+    )
+
+    if ($null -eq $DeliveryAcceptanceReport) {
+        return $null
+    }
+
+    return [pscustomobject]@{
+        gate_result = [string]$DeliveryAcceptanceReport.summary.gate_result
+        completion_language_allowed = [bool]$DeliveryAcceptanceReport.summary.completion_language_allowed
+        readiness_state = [string]$DeliveryAcceptanceReport.summary.readiness_state
+        manual_review_layer_count = [int]$DeliveryAcceptanceReport.summary.manual_review_layer_count
+        failing_layer_count = [int]$DeliveryAcceptanceReport.summary.failing_layer_count
+    }
+}
+
+function New-VibeRuntimeSummaryProjection {
+    param(
+        [Parameter(Mandatory)] [string]$RunId,
+        [Parameter(Mandatory)] [string]$Mode,
+        [Parameter(Mandatory)] [string]$Task,
+        [Parameter(Mandatory)] [string]$ArtifactRoot,
+        [Parameter(Mandatory)] [string]$SessionRoot,
+        [Parameter(Mandatory)] [object]$HierarchyState,
+        [Parameter(Mandatory)] [object]$Artifacts,
+        [Parameter(Mandatory)] [object]$RelativeArtifacts,
+        [AllowNull()] [object]$MemoryActivationReport,
+        [AllowNull()] [object]$DeliveryAcceptanceReport
+    )
+
+    return [pscustomobject]@{
+        run_id = $RunId
+        governance_scope = [string]$HierarchyState.governance_scope
+        mode = $Mode
+        task = $Task
+        generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+        artifact_root = $ArtifactRoot
+        session_root = $SessionRoot
+        session_root_relative = Get-VibeRelativePathCompat -BasePath $ArtifactRoot -TargetPath $SessionRoot
+        hierarchy = New-VibeHierarchyProjection -HierarchyState $HierarchyState
+        stage_order = @(Get-VibeGovernedRuntimeStageOrder)
+        artifacts = $Artifacts
+        memory_activation = New-VibeRuntimeSummaryMemoryActivationProjection -MemoryActivationReport $MemoryActivationReport
+        delivery_acceptance = New-VibeRuntimeSummaryDeliveryAcceptanceProjection -DeliveryAcceptanceReport $DeliveryAcceptanceReport
+        artifacts_relative = $RelativeArtifacts
     }
 }
 

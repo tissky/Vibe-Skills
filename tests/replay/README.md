@@ -33,3 +33,7 @@ Artifacts are written to `outputs/verify/` when `-WriteArtifacts` is provided.
 - `tests/replay/degrade/openclaw-runtime-core-preview.json` (explicit degrade and host-managed abstain semantics)
 - `tests/replay/install/openclaw-runtime-core-preview-isolation.json` (install isolation boundary for runtime-core-preview)
 - `tests/replay/promotion/openclaw-runtime-core-preview.json` (promotion ceiling guardrail: stay `preview` until evidence is complete)
+
+## Governed Runtime Contract Fixtures
+
+- `tests/replay/runtime/governed-runtime-contract-golden.json` (stable packet/manifest contract surface for governed runtime replay)

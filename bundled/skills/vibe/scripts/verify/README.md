@@ -82,6 +82,7 @@ pwsh -NoProfile -File .\..\governance\phase-end-cleanup.ps1 -WriteArtifacts -Inc
 ## Gate Families
 
 - **Runtime Integrity / Packaging**：`vibe-bom-frontmatter-gate.ps1`、`vibe-version-consistency-gate.ps1`、`vibe-version-packaging-gate.ps1`、`vibe-config-parity-gate.ps1`、`vibe-installed-runtime-freshness-gate.ps1`。
+- **Release Surface Quality**：`vibe-dist-manifest-gate.ps1`、`vibe-release-notes-quality-gate.ps1`；验证 dist manifests 与当前 release note 的真相面质量。
 - **Cleanliness / Outputs / Mirror Hygiene**：`vibe-repo-cleanliness-gate.ps1`、`vibe-output-artifact-boundary-gate.ps1`、`vibe-mirror-edit-hygiene-gate.ps1`、`vibe-nested-bundled-parity-gate.ps1`。
 - **Developer Entry / Contributor UX**：`vibe-developer-entry-gate.ps1`；验证 root README -> `CONTRIBUTING.md` -> zone / proof / plan surface 的开发者入口主链路。
 - **Routing Core / Retro / Probe**：routing smoke / stability / retro / probe family。
@@ -116,6 +117,8 @@ pwsh -NoProfile -File .\..\governance\phase-end-cleanup.ps1 -WriteArtifacts -Inc
 - `vibe-config-parity-gate.ps1`: config parity gate for main vs bundled VCO JSON configs using normalized structural comparison + hash + diff-path output.
 - `vibe-version-consistency-gate.ps1`: release metadata consistency gate across `config/version-governance.json`, maintenance markers, changelog header, and release ledger.
 - `vibe-version-packaging-gate.ps1`: validates version/source-of-truth and packaging mirror consistency between canonical root and `bundled/skills/vibe`.
+- `vibe-dist-manifest-gate.ps1`: validates lane/public distribution manifests against the governed release version and release-facing truth docs.
+- `vibe-release-notes-quality-gate.ps1`: validates the current governed release note for required sections, duplicate headings, and `TODO` placeholders.
 - `vibe-repo-cleanliness-gate.ps1`: classifies dirty working-tree entries, blocks visible local noise/runtime artifacts, and reports governed workset pressure separately from local hygiene.
 - `vibe-output-artifact-boundary-gate.ps1`: governs the legacy tracked `outputs/**` allowlist so runtime outputs and long-term fixtures stay explicitly separated.
 - `vibe-installed-runtime-freshness-gate.ps1`: validates installed runtime freshness between canonical root and `${TARGET_ROOT}/skills/vibe`, and can write a runtime freshness receipt after install.

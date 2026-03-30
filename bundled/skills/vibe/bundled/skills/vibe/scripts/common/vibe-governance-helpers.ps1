@@ -934,7 +934,7 @@ function Get-VgoMirrorTopologyTargets {
         $targets = @(
             [pscustomobject]@{ id = 'canonical'; path = $canonicalRel; role = 'canonical'; required = $true; presence_policy = 'required'; sync_enabled = $false; parity_policy = 'authoritative' },
             [pscustomobject]@{ id = 'bundled'; path = $bundledRel; role = 'mirror'; required = $true; presence_policy = 'required'; sync_enabled = $true; parity_policy = 'full' },
-            [pscustomobject]@{ id = 'nested_bundled'; path = $nestedRel; role = 'mirror'; required = $false; presence_policy = 'if_present_must_match'; sync_enabled = $true; parity_policy = 'full' }
+            [pscustomobject]@{ id = 'nested_bundled'; path = $nestedRel; role = 'mirror'; required = $false; presence_policy = 'if_present_must_match'; sync_enabled = $false; parity_policy = 'full'; materialization_mode = 'release_install_only' }
         )
     }
 
@@ -956,6 +956,7 @@ function Get-VgoMirrorTopologyTargets {
         $presencePolicy = if ($target.PSObject.Properties.Name -contains 'presence_policy' -and -not [string]::IsNullOrWhiteSpace([string]$target.presence_policy)) { [string]$target.presence_policy } else { if ($required) { 'required' } else { 'optional' } }
         $syncEnabled = if ($target.PSObject.Properties.Name -contains 'sync_enabled') { [bool]$target.sync_enabled } else { -not ($role -eq 'canonical') }
         $parityPolicy = if ($target.PSObject.Properties.Name -contains 'parity_policy' -and -not [string]::IsNullOrWhiteSpace([string]$target.parity_policy)) { [string]$target.parity_policy } else { if ($role -eq 'canonical') { 'authoritative' } else { 'full' } }
+        $materializationMode = if ($target.PSObject.Properties.Name -contains 'materialization_mode' -and -not [string]::IsNullOrWhiteSpace([string]$target.materialization_mode)) { [string]$target.materialization_mode } else { if ($targetId -eq 'nested_bundled' -and -not $syncEnabled) { 'release_install_only' } else { 'tracked_mirror' } }
 
         $materializationMarker = Join-Path $fullPath 'SKILL.md'
         $targetExists = (Test-Path -LiteralPath $fullPath)
@@ -972,6 +973,7 @@ function Get-VgoMirrorTopologyTargets {
             presence_policy = $presencePolicy
             sync_enabled = $syncEnabled
             parity_policy = $parityPolicy
+            materialization_mode = $materializationMode
             exists = $targetExists
             isCanonical = ($role -eq 'canonical')
         }

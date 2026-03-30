@@ -12,6 +12,7 @@ Navigation guide for VCO long-lived contracts, registries, matrices, ledgers, sc
 | [tool-rule-contract.md](./tool-rule-contract.md) | 工具、规则、允许/禁止项合同 |
 | [mirror-topology.md](./mirror-topology.md) | canonical、bundled、nested topology invariants |
 | [release-evidence-bundle-contract.md](./release-evidence-bundle-contract.md) | 什么构成 release 或 closure proof 的证据合同 |
+| [runtime-contract-field-contract.md](./runtime-contract-field-contract.md) | governed runtime packet / manifest / summary 字段合同 |
 | [reference-asset-taxonomy.md](./reference-asset-taxonomy.md) | `references/` 的正式分类、命名约定与维护规则 |
 
 ### Evidence Entrypoints
@@ -41,6 +42,7 @@ Navigation guide for VCO long-lived contracts, registries, matrices, ledgers, sc
 | [tool-rule-contract.md](./tool-rule-contract.md) | 工具 / 规则约束合同 |
 | [memory-block-contract.md](./memory-block-contract.md) | memory block / tier 结构合同 |
 | [memory-runtime-v3-contract.md](./memory-runtime-v3-contract.md) | memory runtime v3 合同 |
+| [runtime-contract-field-contract.md](./runtime-contract-field-contract.md) | governed runtime public artifact 字段合同 |
 | [browser-task-contract.md](./browser-task-contract.md) | browser task contract |
 | [openworld-task-contract.md](./openworld-task-contract.md) | open-world runtime task contract |
 | [gate-keyword-alias-contract.md](./gate-keyword-alias-contract.md) | gate/document keyword alias contract |

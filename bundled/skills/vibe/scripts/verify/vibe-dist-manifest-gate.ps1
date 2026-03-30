@@ -333,6 +333,11 @@ foreach ($item in $requiredPublicManifests) {
     Add-Assertion -Collection $assertions -Condition ([int]$manifest.manifest_version -eq 1) -Message ("[dist-public] manifest_version == 1: {0}" -f $manifestRel)
     Add-Assertion -Collection $assertions -Condition ([string]$manifest.package_id -eq [string]$item.package_id) -Message ("[dist-public] package_id matches expected ({0}): {1}" -f $item.package_id, $manifestRel)
     Add-Assertion -Collection $assertions -Condition ([string]$manifest.status -eq [string]$item.expected_status) -Message ("[dist-public] status matches expected ({0}): {1}" -f $item.expected_status, $manifestRel)
+    Add-Assertion -Collection $assertions -Condition ($manifest.PSObject.Properties.Name -contains 'source_release' -and $null -ne $manifest.source_release) -Message ("[dist-public] source_release is present: {0}" -f $manifestRel)
+    if ($manifest.PSObject.Properties.Name -contains 'source_release' -and $null -ne $manifest.source_release) {
+        Add-Assertion -Collection $assertions -Condition ([string]$manifest.source_release.version -eq $releaseVersion) -Message ("[dist-public] source_release.version matches governance: {0}" -f $manifestRel)
+        Add-Assertion -Collection $assertions -Condition ([string]$manifest.source_release.updated -eq $releaseUpdated) -Message ("[dist-public] source_release.updated matches governance: {0}" -f $manifestRel)
+    }
     Add-Assertion -Collection $assertions -Condition ($manifest.PSObject.Properties.Name -contains 'truth_sources') -Message ("[dist-public] truth_sources is present: {0}" -f $manifestRel)
     Add-Assertion -Collection $assertions -Condition (@($manifest.truth_sources).Count -ge 1) -Message ("[dist-public] truth_sources is non-empty: {0}" -f $manifestRel)
 

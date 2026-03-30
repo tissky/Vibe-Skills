@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
   "release": {
-    "version": "2.3.53",
+    "version": "2.3.54",
     "updated": "2026-03-30",
     "channel": "stable",
-    "notes": "Closes governed specialist dispatch and custom admission, hardens Windows PowerShell host resolution plus managed-host install guarantees, and tightens cleanup-truth safety wording."
+    "notes": "release operator closure / runtime contract schema baseline / outputs-boundary migration / install-time generated nested compatibility / release truth hardening"
   },
   "source_of_truth": {
     "canonical_root": ".",
@@ -39,8 +39,9 @@
         "role": "mirror",
         "required": false,
         "presence_policy": "if_present_must_match",
-        "sync_enabled": true,
-        "parity_policy": "full"
+        "sync_enabled": false,
+        "parity_policy": "full",
+        "materialization_mode": "release_install_only"
       }
     ]
   },

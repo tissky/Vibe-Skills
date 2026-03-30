@@ -14,6 +14,7 @@ Wave123 moves the repository toward a clean boundary:
 
 - `external-corpus/`: external-corpus candidate and routing baseline fixture material
 - `retro-compare/`: safety, sample-run, and smoke retro-compare baseline fixture snapshots
+- `runtime-contract/`: governed runtime packet / execution manifest curated golden fixtures
 - `verify/routing-stability/`: routing-stability baseline fixture snapshots
 
 ## Reading rule

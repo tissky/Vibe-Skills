@@ -514,6 +514,69 @@ def sync_vibe_canonical(repo_root: Path, target_root: Path, target_rel: str):
         if src.exists():
             copy_dir_replace(src, dst)
 
+def generated_nested_compatibility_suffix(governance: dict) -> Path | None:
+    topology = governance.get("mirror_topology") or {}
+    targets = topology.get("targets") or []
+    bundled_path = None
+    nested_path = None
+    nested_materialization_mode = None
+
+    for target in targets:
+        target_id = str(target.get("id") or "").strip().lower()
+        if target_id == "bundled":
+            bundled_path = str(target.get("path") or "").strip()
+        elif target_id == "nested_bundled":
+            nested_path = str(target.get("path") or "").strip()
+            nested_materialization_mode = str(target.get("materialization_mode") or "").strip()
+
+    source = governance.get("source_of_truth") or {}
+    if not bundled_path:
+        bundled_path = str(source.get("bundled_root") or "bundled/skills/vibe").strip()
+    if not nested_path:
+        nested_path = str(source.get("nested_bundled_root") or "").strip()
+    if not nested_path:
+        nested_path = f"{bundled_path}/{bundled_path}"
+    if not nested_materialization_mode:
+        nested_materialization_mode = "release_install_only"
+    if nested_materialization_mode != "release_install_only":
+        return None
+
+    bundled_norm = bundled_path.replace("\\", "/").strip("/")
+    nested_norm = nested_path.replace("\\", "/").strip("/")
+    prefix = f"{bundled_norm}/"
+    if not nested_norm.startswith(prefix):
+        return None
+
+    suffix = nested_norm[len(prefix) :].strip("/")
+    if not suffix:
+        return None
+
+    return Path(*suffix.split("/"))
+
+
+def materialize_generated_nested_compatibility(governance: dict, installed_root: Path):
+    suffix = generated_nested_compatibility_suffix(governance)
+    if suffix is None:
+        return
+
+    nested_root = installed_root / suffix
+    if same_path(installed_root, nested_root):
+        return
+
+    if nested_root.exists():
+        shutil.rmtree(nested_root)
+
+    packaging = governance.get("packaging") or {}
+    mirror = packaging.get("mirror") or {}
+    for rel in mirror.get("files") or []:
+        src = installed_root / rel
+        if src.exists():
+            copy_file(src, nested_root / rel)
+    for rel in mirror.get("directories") or []:
+        src = installed_root / rel
+        if src.exists():
+            copy_dir_replace(src, nested_root / rel)
+
 
 def ensure_skill_present(target_root: Path, name: str, required: bool, allow_fallback: bool, fallback_sources, external_used, missing):
     skill_md = target_root / "skills" / name / "SKILL.md"
@@ -534,6 +597,7 @@ def ensure_skill_present(target_root: Path, name: str, required: bool, allow_fal
 
 def install_runtime_core(repo_root: Path, target_root: Path, profile: str, allow_fallback: bool):
     packaging = load_json(repo_root / "config" / "runtime-core-packaging.json")
+    governance = load_json(repo_root / "config" / "version-governance.json")
     for rel in packaging["directories"]:
         (target_root / rel).mkdir(parents=True, exist_ok=True)
     for entry in packaging["copy_directories"]:
@@ -552,6 +616,7 @@ def install_runtime_core(repo_root: Path, target_root: Path, profile: str, allow
 
     target_rel = packaging.get("canonical_vibe_mirror", {}).get("target_relpath", "skills/vibe")
     sync_vibe_canonical(repo_root, target_root, target_rel)
+    materialize_generated_nested_compatibility(governance, target_root / target_rel)
 
     roots = skill_source_roots(repo_root)
 
