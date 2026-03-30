@@ -18,6 +18,12 @@
 
 ## Host / 平台先决判断
 
+在 Linux / macOS 的 shell 路径上，先决条件补充如下：
+
+- `bash` 入口按 **macOS 自带 Bash 3.2** 兼容维护
+- `python3` / `python` 需要满足 **Python 3.10+**
+- 如果你从 `zsh` 里启动，问题通常不是 `zsh`，而是实际解析到的 `bash` 或 `python3` 太老
+
 ### 最强参考 lane（Codex）
 
 根据 `docs/universalization/host-capability-matrix.md`：Codex 当前是 `supported-with-constraints` 的参考 lane（仍有 host-managed surfaces）。
@@ -57,6 +63,8 @@ bash ./check.sh
 ```
 
 > 提示：如果你希望 Linux 的 doctor/gate 更接近权威路径，请额外安装 `pwsh`，否则一些 PowerShell 治理 gate 可能只能跳过并输出明确 warning（这是预期的降级，而不是失败伪装）。
+
+> macOS 提示：如果命令在进入安装逻辑前就报 Python 兼容性错误，请先确保 `python3 --version` 至少是 `3.10`。这和可选外部 runtime 的独立 venv 不是一回事。
 
 ## 验收标准（truth-first）
 
