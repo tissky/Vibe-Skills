@@ -14,8 +14,7 @@
 
 - 不保证宿主侧插件已启用
 - 不保证 plugin-backed MCP 已注册/授权
-- 不保证 `OPENAI_API_KEY` 等 provider secrets 已准备好
-- 不把 Linux/macOS 的 bash 可运行偷换成 “与 Windows 完全等价”
+- 不保证 `VCO_INTENT_ADVICE_API_KEY` 等 VCO_* 凭据（含可选 `VCO_VECTOR_DIFF_*`）已准备好
 
 ## Host / 平台先决判断
 

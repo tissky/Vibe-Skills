@@ -51,11 +51,12 @@ If the user chooses `codex`:
 - run `--host codex`
 - describe it as the default recommended path today
 - explain that hook installation is currently frozen because of compatibility issues; that is not an install failure
-- if the common OpenAI-compatible governance-advice path is needed, point the user to local configuration for:
-  - `OPENAI_API_KEY`
-  - optional `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
-- the built-in AI governance layer now supports OpenAI-compatible integration only
+- if the common governance-advice path is needed, point the user to local configuration for:
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - optional `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
+  - `VCO_VECTOR_DIFF_API_KEY` (optional vector diff embeddings that degrade gracefully)
+- the built-in AI governance layer now reads the advice credentials strictly from `VCO_INTENT_ADVICE_*`
 - never imply that baseline host online access automatically means governance-AI online readiness
 
 ## Rule 8: Describe Claude Code as a supported install-and-use path
@@ -112,10 +113,10 @@ If the user chooses `opencode`:
 
 When explaining AI-governance advice connectivity, prefer:
 
-- OpenAI-compatible:
-  - `OPENAI_API_KEY`
-  - optional `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
+- `VCO_INTENT_ADVICE_API_KEY`
+- optional `VCO_INTENT_ADVICE_BASE_URL`
+- `VCO_INTENT_ADVICE_MODEL`
+- mention `VCO_VECTOR_DIFF_*` if vector embeddings are configured, and note that missing vector diff keys do not block the advice path because it degrades gracefully
 
 
 ## Rule 14: Never ask users to paste secrets into chat

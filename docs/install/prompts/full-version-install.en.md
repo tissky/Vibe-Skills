@@ -30,8 +30,9 @@ Rules:
    - state clearly that direct install/check writes skills, `.vibeskills/*` sidecars, and `opencode.json.example`, but does not take ownership of the real `opencode.json`, provider credentials, plugin installation, or MCP trust
 10. Never ask me to paste secrets, URLs, or model names into chat.
 11. If I later want AI-governance online capability, you must recommend the real key names first:
-   - OpenAI-compatible: `OPENAI_API_KEY`, optional `OPENAI_BASE_URL` / `OPENAI_API_BASE`, plus `VCO_RUCNLPIR_MODEL`
-   - the built-in AI governance layer supports OpenAI-compatible integration only
+   - `VCO_INTENT_ADVICE_API_KEY`, optional `VCO_INTENT_ADVICE_BASE_URL`, and `VCO_INTENT_ADVICE_MODEL` for the built-in advice path
+   - `VCO_VECTOR_DIFF_API_KEY` / `VCO_VECTOR_DIFF_BASE_URL` / `VCO_VECTOR_DIFF_MODEL` separately when vector diff embeddings are desired (not required, vector diff degrades gracefully)
+   - note that legacy `OPENAI_*` names are no longer used as automatic fallbacks for the built-in runtime
 12. Distinguish “installed locally” from “online-ready”.
 13. After installation, proactively give me one quick check command for “is AI governance configured?”:
    - Windows: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\verify\\vibe-router-ai-connectivity-gate.ps1 -TargetRoot "<resolved host root>" -WriteArtifacts`

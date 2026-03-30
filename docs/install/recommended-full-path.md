@@ -121,23 +121,25 @@ git checkout vX.Y.Z
 ### Codex
 
 - hook 当前冻结；这不是安装失败
-- AI 治理 advice 的常见 OpenAI-compatible 在线路径，优先使用：
-  - `OPENAI_API_KEY`
-  - 可选 `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
+- AI 治理 advice 的常见配置路径，优先使用：
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - 可选 `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
+- 向量 diff（可选）：添加 `VCO_VECTOR_DIFF_API_KEY`/`VCO_VECTOR_DIFF_MODEL`（base URL 同样可选），缺失时 diff 会退化为文本片段
 
 ### Claude Code
 
 - 当前提供支持的安装与使用路径
 - 不覆盖真实 `~/.claude/settings.json`
 - hook 当前冻结；这不是安装失败
-- 如需 AI 治理 advice 的常见 OpenAI-compatible 在线路径，优先使用 `OPENAI_API_KEY` + 可选 base URL + `VCO_RUCNLPIR_MODEL`
+- 如需 AI 治理 advice 的常见配套路径，优先使用 `VCO_INTENT_ADVICE_API_KEY` + 可选 `VCO_INTENT_ADVICE_BASE_URL` + `VCO_INTENT_ADVICE_MODEL`
 
 ### Cursor
 
 - 当前提供支持的安装与使用路径
 - 不覆盖真实 `~/.cursor/settings.json`
 - Cursor 的宿主原生设置与扩展面仍按 Cursor 自身方式管理
+- AI 治理 advice 使用 `VCO_INTENT_ADVICE_*` 及可选 `VCO_VECTOR_DIFF_*`，旧 `OPENAI_*` 不再自动回填
 
 ### Windsurf
 

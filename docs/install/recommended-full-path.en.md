@@ -121,17 +121,18 @@ git checkout vX.Y.Z
 ### Codex
 
 - hooks remain frozen; that is not an install failure
-- for the common OpenAI-compatible governance-advice path, prefer:
-  - `OPENAI_API_KEY`
-  - optional `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
+- for the built-in governance-advice path, prefer:
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - optional `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
+  - `VCO_VECTOR_DIFF_API_KEY` / `VCO_VECTOR_DIFF_BASE_URL` / `VCO_VECTOR_DIFF_MODEL` (optional embeddings that degrade gracefully)
 
 ### Claude Code
 
 - this host has a supported install-and-use path
 - it does not overwrite the real `~/.claude/settings.json`
 - hooks remain frozen; that is not an install failure
-- for the common OpenAI-compatible governance-advice path, prefer `OPENAI_API_KEY` + optional base URL + `VCO_RUCNLPIR_MODEL`
+- for the built-in governance-advice path, prefer `VCO_INTENT_ADVICE_API_KEY` + optional `VCO_INTENT_ADVICE_BASE_URL` + `VCO_INTENT_ADVICE_MODEL`; configure `VCO_VECTOR_DIFF_*` only when you also want vector-diff embeddings
 
 ### Cursor
 

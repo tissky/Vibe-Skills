@@ -62,7 +62,8 @@ class BootstrapDoctorTests(unittest.TestCase):
             json.dumps(
                 {
                     "allowed_secret_refs": [
-                        {"name": "OPENAI_API_KEY", "scope": "env", "storage": ["env"]},
+                        {"name": "VCO_INTENT_ADVICE_API_KEY", "scope": "env", "storage": ["env"]},
+                        {"name": "VCO_VECTOR_DIFF_API_KEY", "scope": "env", "storage": ["env"]},
                         {"name": "COMPOSIO_SESSION_MCP_URL", "scope": "env", "storage": ["env"]},
                     ]
                 },
@@ -124,7 +125,7 @@ class BootstrapDoctorTests(unittest.TestCase):
         (self.target_root / "mcp").mkdir(parents=True, exist_ok=True)
         (self.target_root / "mcp" / "servers.active.json").write_text('{"profile":"full"}\n', encoding="utf-8")
         (self.target_root / "settings.json").write_text(
-            json.dumps({"vco": {"mcp_profile": "full"}, "env": {"OPENAI_API_KEY": "<pending>"}}) + "\n",
+            json.dumps({"vco": {"mcp_profile": "full"}, "env": {"VCO_INTENT_ADVICE_API_KEY": "<pending>"}}) + "\n",
             encoding="utf-8",
         )
 

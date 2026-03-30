@@ -51,11 +51,11 @@
 - 运行 `--host codex`
 - 明确说明这是当前默认推荐路径
 - hook 当前因兼容性问题被冻结；这不是安装失败
-- 如需 AI 治理 advice 的常见 OpenAI-compatible 在线路径，去本地 `~/.codex/settings.json` 的 `env` 或本地环境变量配置：
-  - `OPENAI_API_KEY`
-  - 可选 `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
-- 内置 AI 治理层当前只支持 OpenAI-compatible 接入
+- 如需 AI 治理 advice 的常见配置路径，去本地 `~/.codex/settings.json` 的 `env` 或本地环境变量配置：
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - 可选 `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
+- 内置 AI 治理层当前只支持 OpenAI-compatible 协议，凭据读取统一改为 `VCO_INTENT_ADVICE_*`
 - 不能把宿主基础在线能力偷换成“治理 AI online readiness 已完成”
 
 ## 规则 8：Claude Code 要按“支持的安装与使用路径”口径描述
@@ -111,10 +111,14 @@
 
 如需解释 AI 治理 advice 的在线配置，优先使用：
 
-- OpenAI-compatible：
-  - `OPENAI_API_KEY`
-  - 可选 `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
+- 主路径（intent advice）：
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - 可选 `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
+- 可选增强路径（vector diff embeddings）：
+  - `VCO_VECTOR_DIFF_API_KEY`
+  - 可选 `VCO_VECTOR_DIFF_BASE_URL`
+  - `VCO_VECTOR_DIFF_MODEL`
 
 
 ## 规则 14：不要要求用户把密钥贴到聊天里

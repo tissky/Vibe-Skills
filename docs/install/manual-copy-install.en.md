@@ -50,18 +50,20 @@ Then use [`opencode-path.en.md`](./opencode-path.en.md) for the preview-adapter 
 ### Codex
 
 - maintain `~/.codex/settings.json`
-- for the common OpenAI-compatible governance-advice path, prefer:
-  - `OPENAI_API_KEY`
-  - optional `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
+- for the built-in governance-advice path, prefer:
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - optional `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
+  - `VCO_VECTOR_DIFF_API_KEY` / `VCO_VECTOR_DIFF_BASE_URL` / `VCO_VECTOR_DIFF_MODEL` when embedding-powered diff context is desired
 
 ### Claude Code
 
 - maintain `~/.claude/settings.json`
-- for the common OpenAI-compatible governance-advice path, prefer:
-  - `OPENAI_API_KEY`
-  - optional `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
+- for the built-in governance-advice path, prefer:
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - optional `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
+  - `VCO_VECTOR_DIFF_*` keys only when vector diff embeddings are configured; otherwise the advice path still works
 
 ### Cursor
 

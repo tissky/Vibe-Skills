@@ -47,18 +47,23 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
                     "provider": {
                         "type": "openai",
                         "model": "gpt-4.1-mini",
+                        "model_env": "VCO_INTENT_ADVICE_MODEL",
                         "base_url": "https://api.openai.com/v1",
+                        "base_url_env_candidates": ["VCO_INTENT_ADVICE_BASE_URL"],
+                        "api_key_env": "VCO_INTENT_ADVICE_API_KEY",
                         "timeout_ms": 12000,
                     },
                     "context": {
                         "vector_diff": {
                             "enabled": False,
                             "embedding_model": "",
+                            "embedding_model_env": "VCO_VECTOR_DIFF_MODEL",
                             "embedding_provider": {
                                 "type": "openai",
                                 "base_url": "https://api.openai.com/v1",
+                                "base_url_env_candidates": ["VCO_VECTOR_DIFF_BASE_URL"],
                                 "endpoint_path": "/embeddings",
-                                "api_key_env": "OPENAI_API_KEY",
+                                "api_key_env": "VCO_VECTOR_DIFF_API_KEY",
                                 "timeout_ms": 6000,
                             },
                         }
@@ -76,8 +81,8 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
                         {
                             "id": "openai-compatible",
                             "offline_contract": {
-                                "abstain_reason": "missing_openai_api_key",
-                                "required_env_any": ["OPENAI_API_KEY"],
+                                "abstain_reason": "missing_intent_advice_api_key",
+                                "required_env_any": ["VCO_INTENT_ADVICE_API_KEY"],
                             },
                         }
                     ]
@@ -106,7 +111,7 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
         )
 
     def test_prefix_required_is_classified_without_network_probe(self) -> None:
-        self._write_settings({"OPENAI_API_KEY": "sk-test"})
+        self._write_settings({"VCO_INTENT_ADVICE_API_KEY": "sk-test"})
         transport_calls: list[dict] = []
 
         def transport(req: dict) -> dict:
@@ -138,7 +143,7 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
         self.assertEqual("FAIL", artifact["summary"]["gate_result"])
 
     def test_scope_not_applicable_is_distinct_from_provider_failure(self) -> None:
-        self._write_settings({"OPENAI_API_KEY": "sk-test"})
+        self._write_settings({"VCO_INTENT_ADVICE_API_KEY": "sk-test"})
         transport_calls: list[dict] = []
 
         def transport(req: dict) -> dict:
@@ -157,7 +162,7 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
         self.assertEqual([], transport_calls)
 
     def test_provider_rejected_request_is_classified(self) -> None:
-        self._write_settings({"OPENAI_API_KEY": "sk-test"})
+        self._write_settings({"VCO_INTENT_ADVICE_API_KEY": "sk-test"})
 
         def transport(_req: dict) -> dict:
             return {
@@ -181,7 +186,7 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
         self.assertEqual("provider_rejected_request", artifact["summary"]["advice_status"])
 
     def test_parse_error_is_classified(self) -> None:
-        self._write_settings({"OPENAI_API_KEY": "sk-test"})
+        self._write_settings({"VCO_INTENT_ADVICE_API_KEY": "sk-test"})
 
         def transport(_req: dict) -> dict:
             return {
@@ -205,7 +210,7 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
         self.assertEqual("parse_error", artifact["summary"]["advice_status"])
 
     def test_ok_with_vector_not_configured_passes(self) -> None:
-        self._write_settings({"OPENAI_API_KEY": "sk-test"})
+        self._write_settings({"VCO_INTENT_ADVICE_API_KEY": "sk-test"})
 
         def transport(req: dict) -> dict:
             if req["endpoint_kind"] == "responses":
@@ -245,7 +250,7 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
         policy["context"]["vector_diff"]["enabled"] = True
         policy["context"]["vector_diff"]["embedding_model"] = "text-embedding-3-small"
         self._write_policy(policy)
-        self._write_settings({"OPENAI_API_KEY": "sk-test"})
+        self._write_settings({"VCO_INTENT_ADVICE_API_KEY": "sk-test", "VCO_VECTOR_DIFF_API_KEY": "sk-vector"})
 
         def transport(req: dict) -> dict:
             if req["purpose"] == "advice":
@@ -285,7 +290,7 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
         policy["context"]["vector_diff"]["enabled"] = True
         policy["context"]["vector_diff"]["embedding_model"] = "text-embedding-3-small"
         self._write_policy(policy)
-        self._write_settings({"OPENAI_API_KEY": "sk-test"})
+        self._write_settings({"VCO_INTENT_ADVICE_API_KEY": "sk-test", "VCO_VECTOR_DIFF_API_KEY": "sk-vector"})
 
         def transport(req: dict) -> dict:
             if req["purpose"] == "advice":
@@ -319,6 +324,49 @@ class RouterAiConnectivityProbeTests(unittest.TestCase):
         self.assertEqual("ok", artifact["summary"]["advice_status"])
         self.assertEqual("vector_diff_ok", artifact["summary"]["vector_diff_status"])
         self.assertEqual("PASS", artifact["summary"]["gate_result"])
+
+    def test_old_openai_key_does_not_backfill_intent_advice_credentials(self) -> None:
+        self._write_settings({"OPENAI_API_KEY": "sk-legacy"})
+
+        with mock.patch.dict(os.environ, {}, clear=True):
+            artifact = self.module.evaluate(
+                self.root,
+                self.target_root,
+                probe_context=self.module.ProbeContext(prefix_detected=True),
+            )
+
+        self.assertEqual("missing_credentials", artifact["summary"]["advice_status"])
+
+    def test_old_openai_key_does_not_backfill_vector_diff_credentials(self) -> None:
+        policy = self._policy()
+        policy["context"]["vector_diff"]["enabled"] = True
+        policy["context"]["vector_diff"]["embedding_model"] = "text-embedding-3-small"
+        self._write_policy(policy)
+        self._write_settings({"VCO_INTENT_ADVICE_API_KEY": "sk-intent", "OPENAI_API_KEY": "sk-legacy"})
+
+        def transport(req: dict) -> dict:
+            if req["purpose"] == "advice":
+                return {
+                    "ok": True,
+                    "status_code": 200,
+                    "error_kind": None,
+                    "error": None,
+                    "body_text": '{"output_text":"{\\"ok\\":true}"}',
+                    "json": {"output_text": '{"ok":true}'},
+                    "latency_ms": 2,
+                }
+            raise AssertionError("vector diff transport should not run without VCO_VECTOR_DIFF_API_KEY")
+
+        with mock.patch.dict(os.environ, {}, clear=True):
+            artifact = self.module.evaluate(
+                self.root,
+                self.target_root,
+                probe_context=self.module.ProbeContext(prefix_detected=True),
+                transport=transport,
+            )
+
+        self.assertEqual("ok", artifact["summary"]["advice_status"])
+        self.assertEqual("vector_diff_missing_credentials", artifact["summary"]["vector_diff_status"])
 
     def test_evaluate_does_not_mutate_router_policy_files(self) -> None:
         self._write_settings({})

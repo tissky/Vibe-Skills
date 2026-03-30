@@ -14,7 +14,7 @@ Relevant distribution surfaces: `dist/manifests/vibeskills-core.json` and, for C
 
 - no guarantee that host-side plugins are enabled
 - no guarantee that plugin-backed MCP has been registered or authorized
-- no guarantee that provider secrets such as `OPENAI_API_KEY` are ready
+- no guarantee that reputation-bound keys such as `VCO_INTENT_ADVICE_API_KEY` (and optional `VCO_VECTOR_DIFF_API_KEY`) are ready
 - no claim that a runnable bash flow on Linux/macOS is equal to the full Windows path
 
 ## Host / Platform Prerequisite Judgment

@@ -50,18 +50,19 @@
 ### Codex
 
 - 维护 `~/.codex/settings.json`
-- 如需 AI 治理 advice 的常见 OpenAI-compatible 在线路径，优先配置：
-  - `OPENAI_API_KEY`
-  - 可选 `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
+- 如需 AI 治理 advice 的常见配置路径，优先配置：
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - 可选 `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
+- 向量 diff（可选）：`VCO_VECTOR_DIFF_API_KEY` + 可选 `VCO_VECTOR_DIFF_BASE_URL` + `VCO_VECTOR_DIFF_MODEL`
 
 ### Claude Code
 
 - 维护 `~/.claude/settings.json`
-- 如需 AI 治理 advice 的常见 OpenAI-compatible 在线路径，优先补：
-  - `OPENAI_API_KEY`
-  - 可选 `OPENAI_BASE_URL` / `OPENAI_API_BASE`
-  - `VCO_RUCNLPIR_MODEL`
+- 如需 AI 治理 advice 的常见配置路径，优先补：
+  - `VCO_INTENT_ADVICE_API_KEY`
+  - 可选 `VCO_INTENT_ADVICE_BASE_URL`
+  - `VCO_INTENT_ADVICE_MODEL`
 
 ### Cursor
 
