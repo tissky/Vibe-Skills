@@ -58,7 +58,10 @@ def detect_skill_hit(stdout: str) -> bool:
 
     if isinstance(payload, list):
         for entry in payload:
-            if isinstance(entry, dict) and entry.get("name") == "vibe":
+            if isinstance(entry, dict) and (
+                entry.get("name") == "vibe"
+                or str(entry.get("location") or "").endswith("/skills/vibe/SKILL.md")
+            ):
                 return True
 
     return ("\"name\": \"vibe\"" in stdout) or ("skills/vibe/SKILL.md" in stdout)
@@ -175,20 +178,22 @@ def main():
             if debug_config["returncode"] != 0:
                 failures.append("opencode debug config failed in isolated env after preview install")
 
-            debug_skill = run([opencode_cli, "debug", "skill"], cwd=repo_root, env=env)
+            debug_skill = run([opencode_cli, "debug", "skill", "--pure"], cwd=repo_root, env=env)
             cli_probe["debug_skill"] = debug_skill
             skill_hits = detect_skill_hit(debug_skill["stdout"])
             cli_probe["debug_skill_detects_vibe"] = skill_hits
             if debug_skill["returncode"] != 0:
-                warnings.append("opencode debug skill failed in isolated env")
+                failures.append("opencode debug skill failed in isolated env")
             if not skill_hits:
-                warning = "opencode debug skill did not enumerate the installed vibe skill in the isolated OpenCode root"
+                warning = "opencode debug skill --pure did not enumerate the installed vibe skill in the isolated OpenCode root"
                 if skill_output_looks_truncated(debug_skill["stdout"]):
                     warning += " (CLI output appears truncated)"
                     cli_probe["notes"].append(
                         "OpenCode debug skill can emit truncated skill dumps when many skills are installed; debug config and debug agent remain the authoritative startup proof surfaces."
                     )
-                warnings.append(warning)
+                    warnings.append(warning)
+                else:
+                    failures.append(warning)
 
             debug_agent = run([opencode_cli, "debug", "agent", "vibe-plan"], cwd=repo_root, env=env)
             cli_probe["debug_agent_detects_vibe_plan"] = debug_agent["returncode"] == 0 and "vibe-plan" in (debug_agent["stdout"] + debug_agent["stderr"])

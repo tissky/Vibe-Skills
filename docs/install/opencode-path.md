@@ -113,6 +113,7 @@ python3 ./scripts/verify/runtime_neutral/opencode_preview_smoke.py --repo-root .
 
 - `opencode debug paths` 能正确解析隔离的 OpenCode 根目录
 - `opencode debug config` 能在安装后继续通过配置解析
+- `opencode debug skill --pure` 能识别安装后的 `vibe` skill
 - `opencode debug agent vibe-plan` 能识别安装后的 agent
 
 补充说明：

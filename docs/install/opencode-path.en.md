@@ -113,6 +113,7 @@ The committed smoke verifier has been validated on local OpenCode CLI `1.2.27` a
 
 - `opencode debug paths` resolves the isolated OpenCode root correctly
 - `opencode debug config` still parses successfully after install
+- `opencode debug skill --pure` detects the installed `vibe` skill
 - `opencode debug agent vibe-plan` detects the installed agent
 
 Additional note:
