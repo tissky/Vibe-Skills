@@ -9,6 +9,12 @@
 
 This document summarizes the install commands and default roots for the six supported hosts.
 
+Public Linux / macOS prerequisites:
+
+- the shell entrypoints are maintained against the macOS system Bash 3.2 baseline
+- `python3` / `python` must satisfy **Python 3.10+**
+- launching from `zsh` is not the actual problem; the real compatibility boundary is the resolved `bash` / `python3` version
+
 ## Supported Hosts and Install Styles
 
 | Host | Install style | Default root | Notes |

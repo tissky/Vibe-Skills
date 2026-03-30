@@ -37,12 +37,24 @@ If the user names a version outside the public version surface, say so directly 
 - Linux / macOS use `bash`
 - Windows use `pwsh`
 
+Additional contract:
+
+- the Linux / macOS shell entrypoints must stay runnable on the macOS system Bash 3.2 baseline; do not reintroduce Bash 4+ builtins such as `mapfile`
+- those shell entrypoints now validate **Python 3.10+** before dispatching into adapter, doctor, or bootstrap helper scripts
+- when a user launches from macOS `zsh`, the real compatibility boundary is the resolved `bash` and `python3` binaries, not `zsh` itself
+
 ## Rule 6: Map public version names to real script profiles
 
 - `Full Version + Customizable Governance` -> `full`
 - `Framework Only + Customizable Governance` -> `minimal`
 
 Do not keep pretending the framework version is `framework-only`; the current scripts actually accept `minimal` / `full`.
+
+## Rule 6.5: Separate bootstrap prerequisites from optional external runtimes
+
+- the base prerequisite for `install.sh` / `check.sh` / `scripts/bootstrap/one-shot-setup.sh` is a repo-owned **Python 3.10+** floor
+- external runtimes such as `ruc-nlpir` may still need their own isolated venv, but that is not the same thing as the bootstrap prerequisite floor
+- do not describe an optional upstream/runtime preference for 3.11 as if the whole public installer were 3.11-only
 
 ## Rule 7: Describe Codex as the default recommended path
 

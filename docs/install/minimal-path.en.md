@@ -19,6 +19,12 @@ Relevant distribution surfaces: `dist/manifests/vibeskills-core.json` and, for C
 
 ## Host / Platform Prerequisite Judgment
 
+For the Linux / macOS shell path, the prerequisite floor is:
+
+- the `bash` entrypoints are maintained to stay compatible with the macOS system Bash 3.2 baseline
+- `python3` / `python` must satisfy **Python 3.10+**
+- if you launch from `zsh`, the real issue is usually the resolved `bash` or `python3` binary version, not `zsh` itself
+
 ### Strongest Reference Lane (Codex)
 
 According to `docs/universalization/host-capability-matrix.md`, Codex is currently the `supported-with-constraints` reference lane, which still includes host-managed surfaces.
@@ -58,6 +64,8 @@ bash ./check.sh
 ```
 
 > Tip: if you want Linux doctor/gate behavior to move closer to the authoritative path, install `pwsh`. Otherwise some PowerShell governance gates may be skipped with explicit warnings. That is an expected degraded path, not a disguised success.
+
+> macOS note: if the command fails before the install logic starts and reports a Python compatibility error, first make sure `python3 --version` is at least `3.10`. That is separate from any optional external-runtime venv.
 
 ## Truth-First Acceptance Criteria
 

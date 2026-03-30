@@ -37,12 +37,24 @@
 - Linux / macOS 使用 `bash`
 - Windows 使用 `pwsh`
 
+补充约束：
+
+- Linux / macOS 的 shell 入口现在按 **macOS 自带 Bash 3.2 可运行** 这一基线维护，不能再偷偷引入 `mapfile` 这类 Bash 4+ 专属能力
+- 这些 shell 入口在进入 adapter / doctor / bootstrap Python helper 之前，会先检查 **Python 3.10+**
+- 如果用户在 macOS 的 `zsh` 里运行命令，真正决定成败的不是 `zsh` 本身，而是被调用到的 `bash` / `python3` 可执行文件版本
+
 ## 规则 6：公开版本名必须映射到真实 profile
 
 - `全量版本 + 可自定义添加治理` -> `full`
 - `仅核心框架 + 可自定义添加治理` -> `minimal`
 
 不要再把框架版本伪装成 `framework-only`，因为当前脚本真实接受的是 `minimal` / `full`。
+
+## 规则 6.5：把 bootstrap 先决条件和可选外部 runtime 区分清楚
+
+- `install.sh` / `check.sh` / `scripts/bootstrap/one-shot-setup.sh` 的基础 Python 门槛是仓库自身入口要求，当前按 **Python 3.10+** 处理
+- `ruc-nlpir` 这类外部 upstream/runtime 需要单独 venv，它不是公开安装器本体的同义词
+- 不要把 “外部 runtime 可能偏好 3.11” 说成 “整个仓库安装器硬要求 3.11”
 
 ## 规则 7：Codex 按默认推荐路径描述
 
