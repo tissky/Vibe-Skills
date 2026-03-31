@@ -74,6 +74,8 @@ class InstalledRuntimeUninstallTests(unittest.TestCase):
         target_root = self.root / "claude-root"
         self.install_host("claude-code", target_root)
         settings_path = target_root / "settings.json"
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+        self.assertIn("vibeskills", settings)
         sentinel = target_root / "commands" / "user.md"
         sentinel.parent.mkdir(parents=True, exist_ok=True)
         sentinel.write_text("user\n", encoding="utf-8")
@@ -83,6 +85,31 @@ class InstalledRuntimeUninstallTests(unittest.TestCase):
         self.assertFalse((target_root / ".vibeskills").exists())
         self.assertTrue(sentinel.exists())
         self.assertFalse(settings_path.exists())
+
+    def test_claude_code_uninstall_preserves_preexisting_settings(self) -> None:
+        target_root = self.root / "claude-root-preserve"
+        settings_path = target_root / "settings.json"
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
+        settings_path.write_text(
+            json.dumps(
+                {
+                    "env": {"ANTHROPIC_API_KEY": "secret"},
+                    "model": "claude-sonnet-4-6",
+                },
+                ensure_ascii=False,
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+        )
+
+        self.install_host("claude-code", target_root)
+        self.uninstall_host("claude-code", target_root)
+
+        self.assertTrue(settings_path.exists())
+        mutated = json.loads(settings_path.read_text(encoding="utf-8"))
+        self.assertEqual({"ANTHROPIC_API_KEY": "secret"}, mutated["env"])
+        self.assertEqual("claude-sonnet-4-6", mutated["model"])
+        self.assertNotIn("vibeskills", mutated)
 
     def test_cursor_uninstall_removes_vibe_managed_surface(self) -> None:
         target_root = self.root / "cursor-root"

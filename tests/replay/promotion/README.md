@@ -6,7 +6,11 @@ no-overclaim constraints for host lanes.
 Current fixture:
 
 - `openclaw-runtime-core-preview.json`
+- `claude-code-managed-closure.json`
 
 OpenClaw is intentionally locked at `preview` in replay truth until fresh
 evidence and bundle requirements are complete. Promotion fixtures in this
 directory are guardrails, not escalation claims.
+
+Claude Code is intentionally locked below platform promotion until Windows/macOS
+fresh-machine proof exists and Linux proof is recut as a frozen bundle.

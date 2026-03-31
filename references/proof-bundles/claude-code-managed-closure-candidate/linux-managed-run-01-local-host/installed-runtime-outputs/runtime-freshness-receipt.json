@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-03-31T07:31:45Z",
+  "gate_result": "PASS",
+  "release": {
+    "version": "2.3.55",
+    "updated": "2026-03-30"
+  },
+  "target_root": "/tmp/claude-linux-proof-L350f0/target-root",
+  "installed_root": "/tmp/claude-linux-proof-L350f0/target-root/skills/vibe",
+  "receipt_version": 1
+}
