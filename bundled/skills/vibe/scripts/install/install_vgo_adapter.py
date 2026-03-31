@@ -4,9 +4,20 @@ import json
 import os
 import stat
 import shutil
+import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
+
+COMMON_DIR = Path(__file__).resolve().parents[1] / "common"
+if str(COMMON_DIR) not in sys.path:
+    sys.path.insert(0, str(COMMON_DIR))
+
+from runtime_contracts import (
+    SKILL_ONLY_ACTIVATION_HOSTS,
+    resolve_packaging_contract,
+    uses_skill_only_activation,
+)
 
 REQUIRED_CORE = [
     "dialectic",
@@ -29,13 +40,6 @@ OPTIONAL_WORKFLOW = [
     "receiving-code-review",
     "verification-before-completion",
 ]
-SKILL_ONLY_ACTIVATION_HOSTS = {
-    "claude-code",
-    "cursor",
-    "windsurf",
-    "openclaw",
-    "opencode",
-}
 HOST_BRIDGE_COMMAND_CANDIDATES = {
     "claude-code": ["claude", "claude-code"],
     "cursor": ["cursor-agent", "cursor"],
@@ -54,6 +58,7 @@ HOST_BRIDGE_COMMAND_ENV = {
 ledger_state = {
     "created_paths": set(),
     "managed_json_paths": set(),
+    "merged_files": {},
     "template_generated": set(),
     "specialist_wrapper_paths": [],
 }
@@ -83,6 +88,17 @@ def record_managed_json(path: Path) -> None:
     except FileNotFoundError:
         resolved = path
     ledger_state["managed_json_paths"].add(str(resolved))
+
+
+def record_merged_file(path: Path, *, created_if_absent: bool) -> None:
+    try:
+        resolved = path.resolve()
+    except FileNotFoundError:
+        resolved = path
+    ledger_state["merged_files"][str(resolved)] = {
+        "path": str(resolved),
+        "created_if_absent": bool(created_if_absent),
+    }
 
 
 def record_generated_from_template(path: Path) -> None:
@@ -125,12 +141,6 @@ def write_json(data):
 def write_json_file(path: Path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
-def uses_skill_only_activation(host_id: str) -> bool:
-    return (host_id or "").strip().lower() in SKILL_ONLY_ACTIVATION_HOSTS
-
-
 def is_relative_to(path: Path, base: Path) -> bool:
     try:
         path.relative_to(base)
@@ -189,6 +199,21 @@ def copy_tree(src: Path, dst: Path):
             track_created_path(target)
 
 
+def copy_skill_roots_without_self_shadow(src: Path, dst: Path, repo_root: Path):
+    if not src.exists():
+        return
+    dst.mkdir(parents=True, exist_ok=True)
+    track_created_path(dst)
+    for child in sorted(src.iterdir(), key=lambda item: item.name):
+        target = dst / child.name
+        if same_path(target, repo_root):
+            continue
+        if child.is_dir():
+            copy_dir_replace(child, target)
+        else:
+            copy_file(child, target)
+
+
 def copy_file(src: Path, dst: Path):
     if src.exists() and dst.exists() and same_path(src, dst):
         return
@@ -208,6 +233,17 @@ def restore_skill_entrypoint_if_needed(skill_root: Path):
     if skill_md.exists() or not mirror_md.exists():
         return
     mirror_md.rename(skill_md)
+
+
+def sanitize_skill_entrypoint_for_runtime_mirror(skill_root: Path):
+    skill_md = skill_root / "SKILL.md"
+    mirror_md = skill_root / "SKILL.runtime-mirror.md"
+    if mirror_md.exists():
+        if skill_md.exists():
+            skill_md.unlink()
+        return
+    if skill_md.exists():
+        skill_md.rename(mirror_md)
 
 
 def parent_dir(path: Path | None) -> Path | None:
@@ -258,7 +294,7 @@ def embedded_registry():
             },
             {
                 "id": "claude-code",
-                "status": "preview",
+                "status": "supported-with-constraints",
                 "install_mode": "preview-guidance",
                 "check_mode": "preview-guidance",
                 "bootstrap_mode": "preview-guidance",
@@ -482,6 +518,111 @@ def merge_json_object(path: Path, patch: dict):
     write_json_file(path, merged)
 
 
+def load_json_object(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Failed to parse JSON settings file: {path} ({exc})") from exc
+    if not isinstance(payload, dict):
+        raise SystemExit(f"Expected JSON object in settings file: {path}")
+    return payload
+
+
+def should_replace_claude_pretooluse_hook_entry(
+    entry: dict,
+    *,
+    managed_description: str,
+    hook_command: str,
+) -> bool:
+    existing_hooks = entry.get("hooks")
+    existing_command = ""
+    if isinstance(existing_hooks, list) and existing_hooks:
+        first_hook = existing_hooks[0]
+        if isinstance(first_hook, dict):
+            existing_command = str(first_hook.get("command") or "").strip()
+    if existing_command:
+        return existing_command == hook_command
+    description = str(entry.get("description") or "").strip()
+    return bool(description) and description == managed_description
+
+
+def upsert_claude_pretooluse_hook(settings: dict, hook_command: str) -> None:
+    managed_description = "VibeSkills managed write guard"
+    hooks = settings.get("hooks")
+    if not isinstance(hooks, dict):
+        hooks = {}
+    pre_tool_use = hooks.get("PreToolUse")
+    if not isinstance(pre_tool_use, list):
+        pre_tool_use = []
+
+    managed_entry = {
+        "matcher": "Write",
+        "hooks": [
+            {
+                "type": "command",
+                "command": hook_command,
+            }
+        ],
+        "description": managed_description,
+    }
+
+    next_pre_tool_use = []
+    replaced = False
+    for entry in pre_tool_use:
+        if not isinstance(entry, dict):
+            next_pre_tool_use.append(entry)
+            continue
+        if should_replace_claude_pretooluse_hook_entry(
+            entry,
+            managed_description=managed_description,
+            hook_command=hook_command,
+        ):
+            if not replaced:
+                next_pre_tool_use.append(managed_entry)
+                replaced = True
+            continue
+        next_pre_tool_use.append(entry)
+
+    if not replaced:
+        next_pre_tool_use.append(managed_entry)
+
+    hooks["PreToolUse"] = next_pre_tool_use
+    settings["hooks"] = hooks
+
+
+def install_claude_managed_settings(repo_root: Path, target_root: Path) -> list[str]:
+    settings_path = target_root / "settings.json"
+    created_if_absent = not settings_path.exists()
+    settings = load_json_object(settings_path)
+
+    hooks_root = target_root / "hooks"
+    hooks_root.mkdir(parents=True, exist_ok=True)
+    track_created_path(hooks_root)
+    hook_path = hooks_root / "write-guard.js"
+    copy_file(repo_root / "hooks" / "write-guard.js", hook_path)
+
+    hook_command = f"node {hook_path.resolve()}"
+    settings["vibeskills"] = {
+        "managed": True,
+        "host_id": "claude-code",
+        "skills_root": str((target_root / "skills").resolve()),
+        "runtime_skill_entry": str((target_root / "skills" / "vibe" / "SKILL.md").resolve()),
+        "hooks_root": str(hooks_root.resolve()),
+        "managed_hook_command": hook_command,
+        "managed_hook_description": "VibeSkills managed write guard",
+        "explicit_vibe_skill_invocation": ["/vibe", "$vibe"],
+    }
+    upsert_claude_pretooluse_hook(settings, hook_command)
+    write_json_file(settings_path, settings)
+    if created_if_absent:
+        track_created_path(settings_path)
+    record_managed_json(settings_path)
+    record_merged_file(settings_path, created_if_absent=created_if_absent)
+    return [str(settings_path.resolve()), str(hook_path.resolve())]
+
+
 def path_points_inside_target_root(value: object, target_root: Path) -> bool:
     if not isinstance(value, str) or not value.strip():
         return False
@@ -631,13 +772,18 @@ def is_closed_ready_required(adapter: dict) -> bool:
 
 def sync_vibe_canonical(repo_root: Path, target_root: Path, target_rel: str):
     governance = load_json(repo_root / "config" / "version-governance.json")
+    packaging = resolve_packaging_contract(governance, repo_root)
     canonical_root = (repo_root / governance["source_of_truth"]["canonical_root"]).resolve()
     target_vibe_root = target_root / target_rel
-    for rel in governance["packaging"]["mirror"]["files"]:
+    if same_path(canonical_root, target_vibe_root):
+        return
+    if target_vibe_root.exists():
+        shutil.rmtree(target_vibe_root)
+    for rel in packaging["mirror"]["files"]:
         src = canonical_root / rel
         if src.exists():
             copy_file(src, target_vibe_root / rel)
-    for rel in governance["packaging"]["mirror"]["directories"]:
+    for rel in packaging["mirror"]["directories"]:
         src = canonical_root / rel
         dst = target_vibe_root / rel
         if src.exists():
@@ -692,19 +838,29 @@ def materialize_generated_nested_compatibility(governance: dict, installed_root:
     if same_path(installed_root, nested_root):
         return
 
-    if nested_root.exists():
-        shutil.rmtree(nested_root)
+    nested_skills_root = nested_root.parent
+    source_skills_root = installed_root.parent
 
-    packaging = governance.get("packaging") or {}
-    mirror = packaging.get("mirror") or {}
-    for rel in mirror.get("files") or []:
+    if nested_skills_root.exists():
+        shutil.rmtree(nested_skills_root)
+
+    for skill_dir in sorted(source_skills_root.iterdir()):
+        if not skill_dir.is_dir() or skill_dir.name == installed_root.name:
+            continue
+        destination = nested_skills_root / skill_dir.name
+        copy_dir_replace(skill_dir, destination)
+        sanitize_skill_entrypoint_for_runtime_mirror(destination)
+
+    packaging = resolve_packaging_contract(governance, installed_root)
+    for rel in packaging["mirror"]["files"]:
         src = installed_root / rel
         if src.exists():
             copy_file(src, nested_root / rel)
-    for rel in mirror.get("directories") or []:
+    for rel in packaging["mirror"]["directories"]:
         src = installed_root / rel
         if src.exists():
             copy_dir_replace(src, nested_root / rel)
+    sanitize_skill_entrypoint_for_runtime_mirror(nested_root)
 
 
 def runtime_core_vibe_relpath(repo_root: Path) -> str:
@@ -733,6 +889,10 @@ def write_install_ledger(
         "canonical_vibe_root": str((target_root / canonical_vibe_rel).resolve()),
         "created_paths": sorted(ledger_state["created_paths"]),
         "managed_json_paths": sorted(ledger_state["managed_json_paths"]),
+        "merged_files": [
+            ledger_state["merged_files"][path]
+            for path in sorted(ledger_state["merged_files"])
+        ],
         "generated_from_template_if_absent": sorted(ledger_state["template_generated"]),
         "specialist_wrapper_paths": ledger_state["specialist_wrapper_paths"],
         "external_fallback_used": external_fallback_used,
@@ -776,7 +936,12 @@ def install_runtime_core(repo_root: Path, target_root: Path, profile: str, allow
         if include_command_surfaces or entry["target"] != "commands"
     ]
     for entry in copy_directories:
-        copy_tree(repo_root / entry["source"], target_root / entry["target"])
+        src_root = repo_root / entry["source"]
+        dst_root = target_root / entry["target"]
+        if entry["target"] == "skills":
+            copy_skill_roots_without_self_shadow(src_root, dst_root, repo_root)
+        else:
+            copy_tree(src_root, dst_root)
         if entry["target"] == "skills":
             for skill_dir in (target_root / "skills").iterdir():
                 if skill_dir.is_dir():
@@ -861,8 +1026,7 @@ def install_codex_payload(repo_root: Path, target_root: Path):
 
 
 def install_claude_guidance_payload(repo_root: Path, target_root: Path):
-    # Hook and preview-settings installation are intentionally frozen until
-    # cross-host compatibility issues are resolved.
+    install_claude_managed_settings(repo_root, target_root)
     return
 
 
@@ -912,8 +1076,10 @@ def main():
     elif mode == "preview-guidance":
         if adapter["id"] == "opencode":
             install_opencode_guidance_payload(repo_root, target_root)
-        elif adapter["id"] in {"claude-code", "cursor"}:
+        elif adapter["id"] == "claude-code":
             install_claude_guidance_payload(repo_root, target_root)
+        elif adapter["id"] == "cursor":
+            pass
         else:
             raise SystemExit(f"Unsupported preview-guidance adapter id: {adapter['id']}")
     elif mode == "runtime-core":

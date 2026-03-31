@@ -1,474 +1,658 @@
-﻿# VCO Skills Codex Ecosystem
+<div align="right">
+  <b>🇬🇧 English</b> &nbsp;|&nbsp; <a href="./README.zh.md">🇨🇳 中文</a>
+</div>
 
-面向 Codex 运行时的 Vibe Code Orchestrator（VCO）生态仓库。这个仓库不是“单一技能包”，而是一个可安装、可验证、可演进的路由与执行体系，覆盖从任务分级、技能路由到质量门禁的完整链路。
+<br/>
 
-## 目标与定位
+<div align="center">
 
-本仓库解决三个核心问题：
+<a href="https://github.com/foryourhealth111-pixel/Vibe-Skills">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=45&pause=1000&color=7B61FF&center=true&vCenter=true&width=600&height=100&lines=Vibe+Skills;Your+AI+OS" alt="VibeSkills Typing Logo" />
+</a>
 
-1. 如何在 Codex 中稳定路由到正确的技能与执行流。
-2. 如何在多来源技能生态里保持可重复安装与可控升级。
-3. 如何通过可执行门禁持续控制误路由和质量波动。
+<br/>
 
-## 生态组成
+<img src="./logo.png" width="260px" alt="VibeSkills Logo"/>
 
-### 1. VCO 核心编排层
+<br/><br/>
 
-- `SKILL.md` 定义了 VCO v2.3 的分级执行模型（M/L/XL）。
-- `scripts/router/resolve-pack-route.ps1` 负责 Pack 路由决策。
-- `config/*` 提供路由参数、候选技能、别名和规则配置。
+### More than a skill collection — your **personal AI operating system**
 
-### 2. AIOS-Core 集成层
+If your AI supports skills, VibeSkills works. 340+ skills spanning coding, research, data science & creative work.
 
-已将 `SynkraAI/aios-core` 的工作方法纳入 VCO 生态，以 Pack 方式并入路由系统：
+<br/>
 
-- Pack: `aios-core`
-- 任务默认技能（`defaults_by_task`）：
-  - `planning -> aios-pm`
-  - `coding -> aios-dev`
-  - `review -> aios-qa`
-  - `debug -> aios-devops`
-  - `research -> aios-analyst`
-- 适合 PRD、Backlog、PO/PM 协作、QA Gate、DevOps 排障等 Agentic Agile 流程。
+<a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/stargazers">
+  <img src="https://img.shields.io/github/stars/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=github&color=7B61FF&label=STARS" alt="stars">
+</a>
+<a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/network/members">
+  <img src="https://img.shields.io/github/forks/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=git&color=45a1ff&label=FORKS" alt="forks">
+</a>
+<a href="https://github.com/foryourhealth111-pixel/Vibe-Skills/pulse">
+  <img src="https://img.shields.io/github/last-commit/foryourhealth111-pixel/Vibe-Skills?style=for-the-badge&logo=git-lfs&color=32CD32&label=MOMENTUM" alt="last commit">
+</a>
+<a href="https://gitcgr.com/foryourhealth111-pixel/Vibe-Skills">
+  <img src="https://gitcgr.com/badge/foryourhealth111-pixel/Vibe-Skills.svg" alt="gitcgr" />
+</a>
 
-### 3. 兼容与增强层
+<br/><br/>
 
-- `bundled/skills/*`：Codex 兼容技能镜像。
-- `bundled/superpowers-skills/*`：规划、调试、代码评审等工作流增强技能。
-- 可选外部增强（按需安装）：`SuperClaude_Framework` 命令集、`claude-flow`。
-- `ralph-loop` 采用双引擎接入：
-  - `compat`（默认）：本地状态循环，手动 `--next`，稳定低依赖
-  - `open`（可选）：委托 `open-ralph-wiggum` 自动循环后端（`--engine open`）
+<img src="https://komarev.com/ghpvc/?username=vibe-skills-foryourhealth&label=NODES+ACTIVE&color=0078d7&style=for-the-badge" alt="Visitors">
+&nbsp;
+<img src="https://img.shields.io/badge/Architecture-VCO_Runtime-orange?style=for-the-badge" alt="Arch">
+&nbsp;
+<img src="https://img.shields.io/badge/Skills-340%2B-blueviolet?style=for-the-badge" alt="Skills Count">
 
-### 4. OpenSpec 治理层（零冲突接入）
+<br/><br/>
 
-OpenSpec 以“后置治理”方式接入，不参与现有 Pack 路由打分，确保路由分配稳定：
+🧠 Planning · 🛠️ Engineering · 🤖 AI · 🔬 Research · 🎨 Creation
 
-- 治理策略：`config/openspec-policy.json`
-- 路由输出附加治理建议（不改变 selected pack/skill）：`scripts/router/resolve-pack-route.ps1`
-- 治理执行器（M 级 Lite 卡片、L/XL Full 产物检查）：`scripts/governance/invoke-openspec-governance.ps1`
-- 渐进切换脚本（默认仅 L/XL planning 触发 confirm）：`scripts/governance/set-openspec-rollout.ps1`
-- 单命令软发布脚本（先验后切，失败时仅输出手动回退命令，需用户确认后执行）：`scripts/governance/publish-openspec-soft-rollout.ps1`
-- 设计说明：`docs/openspec-vco-integration.md`
+<br/>
 
-当前默认策略：`soft-lxl-planning`（`mode=soft`，`soft_confirm_scope={grades:[L,XL], task_types:[planning]}`）。
+<a href="./docs/install/one-click-install-release-copy.en.md">
+  <img src="https://img.shields.io/badge/⚡_Get_Started-7B61FF?style=for-the-badge" alt="Install">
+</a>
+&nbsp;
+<a href="./docs/quick-start.en.md">
+  <img src="https://img.shields.io/badge/📖_Quick_Start-2d3748?style=for-the-badge" alt="Docs">
+</a>
+&nbsp;
+<a href="./README.zh.md">
+  <img src="https://img.shields.io/badge/🇨🇳_中文-45a1ff?style=for-the-badge" alt="Chinese">
+</a>
 
-### 5. GSD-Lite 规划增强层（零双轨接入）
+<br/><br/>
 
-GSD 仅以“协议钩子层”接入，不引入第二编排器、不引入第二命令面：
+<kbd>Install</kbd> &nbsp;→&nbsp;
+<kbd>/vibe or $vibe</kbd> &nbsp;→&nbsp;
+<kbd>Smart Routing</kbd> &nbsp;→&nbsp;
+<kbd>M / L / XL Execution</kbd> &nbsp;→&nbsp;
+<kbd>Governance Verification</kbd> &nbsp;→&nbsp;
+<kbd>✅ Delivery</kbd>
 
-- 覆盖范围：仅 `L/XL + planning`（可配置）
-- 接入方式：`protocols/think.md` preflight hook + `protocols/team.md` wave contract hook
-- 路由边界：不参与 Pack 打分，不改变 selected pack/skill
-- 配置文件：`config/gsd-overlay.json`
-- 模式切换：`scripts/governance/set-gsd-overlay-rollout.ps1`
-- 设计说明：`docs/gsd-vco-overlay-integration.md`
+</div>
 
-### 6. prompts.chat Prompt 资产增强层（零冲突接入）
+## 📋 Table of Contents
 
-prompts.chat 仅作为 Prompt 资产层接入，不引入第二路由器：
+- [What makes it different](#-what-makes-it-different)
+- [Who is it for](#-who-is-it-for)
+- [Intelligent Routing](#-intelligent-routing-how-340-skills-collaborate-without-conflict)
+- [Memory System](#-memory-system-ai-that-truly-remembers)
+- [Full Capability Map](#-full-capability-map-your-all-in-one-workbench)
+- [Installation & Management](#️-installation--skills-management)
+- [Getting Started](#-getting-started)
 
-- 覆盖范围：`planning/research`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `prompt_overlay_advice`
-- 路由边界：不替换 Pack 选择，仅在 prompt/doc 语义冲突时提升为 `confirm_required`
-- 配置文件：`config/prompt-overlay.json`
-- 设计说明：`docs/prompt-overlay-integration.md`
 
-### 7. Memory Governance 增强层（零冲突接入）
+<details>
+<summary><b>🔑 New here? Quick glossary of key terms (click to expand)</b></summary>
 
-Memory governance 以“后置建议层”接入，不改变现有 Pack 路由决策：
+<br/>
 
-- 覆盖范围：`M/L/XL + planning/coding/review/debug/research`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `memory_governance_advice`
-- 路由边界：不替换 Pack 选择，不引入第二控制面
-- 配置文件：`config/memory-governance.json`
-- 设计说明：`docs/memory-governance-integration.md`
+| Term | Plain-English Meaning |
+|:---|:---|
+| **VibeSkills / VCO** | This project. VCO = Vibe Code Orchestrator — the runtime engine behind the skills. |
+| **Skill** | A focused capability module (e.g., `tdd-guide`, `code-review`). Think of skills as expert assistants the system calls on demand. |
+| **Governed runtime** | When you invoke `/vibe`, the system follows a structured process — clarify → plan → execute → verify — instead of diving in blindly. |
+| **Canonical Router** | The internal logic that decides which skill to activate for your task. Just invoke `/vibe` and let it route automatically. |
+| **M / L / XL grade** | Task complexity level. M = quick focused task, L = multi-step task, XL = large task with parallel work. Automatically selected. |
+| **Frozen requirement** | Once you confirm the plan, it is "frozen" — the system will not silently change scope mid-task. |
+| **Root / Child lane** | In XL tasks, there is a "root" coordinator and "child" worker agents. Prevents conflicting outputs from parallel agents. |
+| **Proof bundle** | Evidence that a task was actually completed correctly — test results, output, verification logs. |
 
-核心边界：
-- `state_store` 只做会话状态
-- `Serena` 只做显式项目决策
-- `ruflo` 只做短期会话向量缓存
-- `Cognee` 只做长期图记忆与关系检索
-- `episodic-memory` 在 VCO 治理路径中停用
+</details>
 
-### 8. Data Scale Overlay（xan 大 CSV 增强，零冲突接入）
+> [!IMPORTANT]
+> ### 🎯 Core Vision
+>
+> VibeSkills evolves with the times — ensuring it stays genuinely useful while **dramatically lowering the barrier to cutting-edge vibecoding technology**, eliminating the cognitive anxiety and steep learning curve that comes with new AI tools.
+>
+> **Whether or not you have a programming background, you can directly harness the most advanced AI capabilities with minimal effort.**
+> Productivity gains from AI should be available to everyone.
 
-Data scale overlay 仅作为“后置数据探针层”接入，不替代 Pack 路由、不引入第二编排器：
-
-- 覆盖范围：默认 `docs-media + coding/research`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `data_scale_advice`
-- 决策依据：真实文件信号（路径存在性、大小、格式、采样估计行数），不是仅靠用户说“大/小”
-- 路由边界：保持 pack 不变；仅在同 pack 候选内做 mode-gated skill 选择增强（`spreadsheet/xlsx/xan`）
-- 配置文件：`config/data-scale-overlay.json`
-- 设计说明：`docs/data-scale-overlay-integration.md`
-
-### 9. Quality Debt Overlay（fuck-u-code 增强，零冲突接入）
-
-Quality debt overlay 仅作为“后置质量债务建议层”接入，不替代 Pack 路由、不引入第二编排器：
-
-- 覆盖范围：默认 `code-quality + coding/review`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `quality_debt_advice`
-- 决策依据：风险关键词 + 抑制关键词 + 侧重 facet（maintainability/test/security）
-- 路由边界：保持 `selected pack/skill` 不变，strict 阶段也仅提升 advice 为 `confirm_required`
-- 外部工具：`fuck-u-code` 可选接入，缺失时仅返回 `tool_unavailable`，不阻断主流程
-- 配置文件：`config/quality-debt-overlay.json`
-- 设计说明：`docs/quality-debt-overlay-integration.md`
-
-### 10. Framework Interop Overlay（ivy 跨框架互操作增强，零冲突接入）
-
-Framework interop overlay 仅作为“后置跨框架迁移建议层”接入，不替代 Pack 路由、不引入第二编排器：
-
-- 覆盖范围：默认 `data-ml/ai-llm + L/XL + coding/research`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `framework_interop_advice`
-- 决策依据：跨框架迁移信号 + 框架实体识别 + 抑制关键词降噪
-- 路由边界：保持 `selected pack/skill` 不变，strict 阶段仅将建议提升为 `confirm_required`
-- 外部工具：`ivy` 可选接入，缺失时仅返回 `tool_unavailable`，不阻断主流程
-- 配置文件：`config/framework-interop-overlay.json`
-- 设计说明：`docs/framework-interop-overlay-integration.md`
-
-### 11. ML Lifecycle Overlay（Made-With-ML 生命周期治理增强，零冲突接入）
-
-ML lifecycle overlay 仅作为“后置生命周期治理建议层”接入，不替代 Pack 路由、不引入第二编排器：
-
-- 覆盖范围：默认 `data-ml/ai-llm + planning/coding/review/research`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `ml_lifecycle_advice`
-- 决策依据：生命周期阶段信号（develop/evaluate/deploy/iterate）+ 证据工件覆盖率（run/eval/baseline/tests/monitoring）
-- 路由边界：保持 `selected pack/skill` 不变，strict 阶段仅将建议提升为 `confirm_required`
-- 外部工具：`mlflow` 可选接入，缺失时仅返回 `tool_unavailable`，不阻断主流程
-- 配置文件：`config/ml-lifecycle-overlay.json`
-- 设计说明：`docs/ml-lifecycle-overlay-integration.md`
-
-### 12. Python Clean Code Overlay（clean-code-python 增强，零冲突接入）
-
-Python clean-code overlay 仅作为“后置 Python 质量建议层”接入，不替代 Pack 路由、不引入第二编排器：
-
-- 覆盖范围：默认 `coding/review/debug`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `python_clean_code_advice`
-- 决策依据：`.py/.pyi` 文件信号 + Python 语义 + clean-code 原则/反模式 + 抑制关键词
-- 路由边界：保持 `selected pack/skill` 不变，strict 阶段仅将建议提升为 `confirm_required`
-- 外部工具：无强依赖，缺少外部工具不影响主流程
-- 配置文件：`config/python-clean-code-overlay.json`
-- 设计说明：`docs/python-clean-code-overlay-integration.md`
-
-### 13. System Design Overlay（system-design-primer 架构覆盖增强，零冲突接入）
-
-System design overlay 仅作为“后置架构覆盖建议层”接入，不替代 Pack 路由、不引入第二编排器：
-
-- 覆盖范围：默认 `L/XL + planning/research/review`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `system_design_advice`
-- 决策依据：架构语义信号 + 架构覆盖维度评分（requirements/NFR/capacity/cache/partition/recovery/observability/cost）+ 抑制关键词
-- 路由边界：保持 `selected pack/skill` 不变，strict 阶段仅将建议提升为 `confirm_required`
-- 外部工具：无强依赖，缺少外部工具不影响主流程
-- 配置文件：`config/system-design-overlay.json`
-- 设计说明：`docs/system-design-overlay-integration.md`
-
-### 14. CUDA Kernel Overlay（LeetCUDA CUDA内核优化增强，零冲突接入）
-
-CUDA kernel overlay 仅作为“后置 CUDA 内核优化建议层”接入，不替代 Pack 路由、不引入第二编排器：
-
-- 覆盖范围：默认 `M/L/XL + coding/debug/research`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 输出 `cuda_kernel_advice`
-- 决策依据：CUDA语义信号 + 文件/环境信号（`.cu/.ptx/nvcc/nvidia-smi`）+ 优化覆盖维度评分（memory/tensor-core/occupancy/profiling/correctness/fallback）
-- 路由边界：保持 `selected pack/skill` 不变，strict 阶段仅将建议提升为 `confirm_required`
-- 外部工具：无强依赖，缺少 CUDA 环境或工具不影响主流程
-- 许可证边界：`LeetCUDA` 为 GPL-3.0，上游仅作为方法论参考，不 vendoring 源码
-- 配置文件：`config/cuda-kernel-overlay.json`
-- 设计说明：`docs/cuda-kernel-overlay-integration.md`
-
-### 15. Observability & Consistency Governance（严格、轻量、低上下文压力）
-
-Observability governance 以“后置遥测层”接入，不影响既有路由分配：
-
-- 覆盖范围：`M/L/XL + planning/coding/review/debug/research`（可配置）
-- 接入方式：`resolve-pack-route.ps1` 写入隐私安全路由事件（JSONL）
-- 数据策略：默认仅 `prompt_hash` + 结构化路由字段，不落地原始 prompt
-- 学习策略：离线建议（manual apply），不自动改路由阈值
-- 回退策略：发布失败时只告知并输出手动回退命令，必须用户确认后执行
-- 配置文件：`config/observability-policy.json`
-- 设计说明：`docs/observability-consistency-governance.md`
-
-## 当前路由能力（Strict-Ready）
-
-本版本已经包含稳定性收敛与规则化路由增强：
-
-1. `pack-manifest.json` 支持 `defaults_by_task`。
-2. `skill-routing-rules.json` 支持：
-   - `task_allow`
-   - `positive_keywords`
-   - `negative_keywords`
-   - `equivalent_group`
-   - `canonical_for_task`
-3. 路由器新增关键行为：
-   - 先做 `task_allow` 硬过滤
-   - 再做正负关键词打分
-   - 低置信度不再“首候选兜底”，改为按 `defaults_by_task` 兜底
-   - top1/top2 过近时进入 `confirm_required`
-4. 已提供技能重叠画像文档：`docs/skills-overlap-matrix.md`。
-
-## 仓库关键组件
-
-| 路径 | 作用 |
-|---|---|
-| `config/pack-manifest.json` | Pack 定义、触发词、候选技能、`defaults_by_task` |
-| `config/router-thresholds.json` | 路由权重、阈值、候选评分参数 |
-| `config/skill-keyword-index.json` | 技能关键词索引（含中英） |
-| `config/skill-routing-rules.json` | 任务硬过滤与正负关键词规则 |
-| `config/openspec-policy.json` | OpenSpec 治理策略（mode/profile/升级触发） |
-| `config/gsd-overlay.json` | GSD-Lite 规划增强策略（post-route hook） |
-| `config/prompt-overlay.json` | prompts.chat Prompt 资产增强策略（post-route ambiguity guard） |
-| `config/memory-governance.json` | Memory governance 策略（角色边界 + disabled memory） |
-| `config/data-scale-overlay.json` | Data scale overlay 策略（真实文件探针 + spreadsheet/xlsx/xan 选择增强） |
-| `config/quality-debt-overlay.json` | Quality debt overlay 策略（风险信号评分 + 可选外部分析器提示） |
-| `config/framework-interop-overlay.json` | Framework interop overlay 策略（跨框架迁移信号评分 + Ivy advisory） |
-| `config/ml-lifecycle-overlay.json` | ML lifecycle overlay 策略（生命周期阶段识别 + 证据工件完备度 advisory） |
-| `config/python-clean-code-overlay.json` | Python clean-code overlay 策略（`.py` 自动触发 + 原则/反模式 advisory） |
-| `config/system-design-overlay.json` | System design overlay 策略（架构语义 + 覆盖维度 advisory） |
-| `config/cuda-kernel-overlay.json` | CUDA kernel overlay 策略（CUDA优化语义 + 文件/环境信号 + 证据完备度 advisory） |
-| `config/observability-policy.json` | 可观测性策略（隐私安全遥测 + 分桶学习 + 手动应用） |
-| `scripts/router/resolve-pack-route.ps1` | 路由核心执行器 |
-| `scripts/governance/invoke-openspec-governance.ps1` | OpenSpec 后置治理执行器（零冲突） |
-| `scripts/governance/set-openspec-rollout.ps1` | OpenSpec 模式渐进切换（off/shadow/soft/strict） |
-| `scripts/governance/publish-openspec-soft-rollout.ps1` | OpenSpec soft-lxl-planning 单命令发布（先验后切 + 后验门禁） |
-| `scripts/governance/set-gsd-overlay-rollout.ps1` | GSD-Lite 模式切换（off/shadow/soft/strict） |
-| `scripts/verify/*.ps1` | 回归矩阵、审计、稳定性门禁 |
-| `scripts/learn/vibe-adaptive-train.ps1` | 基于遥测的离线阈值建议（手动审核应用） |
-| `docs/skills-overlap-matrix.md` | 技能重叠分类与路由建议 |
-| `docs/openspec-vco-integration.md` | OpenSpec 与 VCO 的分层集成说明 |
-| `docs/gsd-vco-overlay-integration.md` | GSD-Lite 与 VCO 的非冗余接入说明 |
-| `docs/prompt-overlay-integration.md` | prompts.chat 与 VCO 的非冗余接入说明 |
-| `docs/memory-governance-integration.md` | Memory governance 与 VCO 的非冲突接入说明 |
-| `docs/data-scale-overlay-integration.md` | Data scale overlay 与 VCO 的非冲突接入说明 |
-| `docs/quality-debt-overlay-integration.md` | Quality debt overlay 与 VCO 的非冲突接入说明 |
-| `docs/framework-interop-overlay-integration.md` | Framework interop overlay 与 VCO 的非冲突接入说明 |
-| `docs/ml-lifecycle-overlay-integration.md` | ML lifecycle overlay 与 VCO 的非冲突接入说明 |
-| `docs/python-clean-code-overlay-integration.md` | Python clean-code overlay 与 VCO 的非冲突接入说明 |
-| `docs/system-design-overlay-integration.md` | System design overlay 与 VCO 的非冲突接入说明 |
-| `docs/cuda-kernel-overlay-integration.md` | CUDA kernel overlay 与 VCO 的非冲突接入说明 |
-| `docs/observability-consistency-governance.md` | 可观测性与一致性治理设计（低上下文压力 + 手动确认回退） |
-| `bundled/skills/vibe/config/*` | 与主配置镜像同步的 bundled 配置 |
-
-## 搭建与安装流程
-
-### 前置要求
-
-- Windows PowerShell 7+（或兼容 PowerShell）
-- `git`
-- 可选：`npm`（安装外部增强时使用）
-
-### 快速安装（Codex 本地）
-
-```powershell
-pwsh -File .\install.ps1 -Profile full
-pwsh -File .\check.ps1 -Profile full
-```
-
-提醒：如果要启用 AI 智能治理层（如 LLM acceleration / governance overlay），不要沿用仓库里的公开示例值。安装前应由用户明确提供 `url`、`apikey`、`model`；如果由 AI 帮助安装或生成配置，提示词也要先提醒用户确认这三项，再继续落盘。
-
-### 安装可选外部增强
-
-```powershell
-pwsh -File .\install.ps1 -Profile full -InstallExternal
-```
-
-说明：当前安装器为 Codex-only 主模式。`plugins-manifest.codex.json` 中的插件安装命令不会被自动执行，会输出手动安装提示，避免跨运行时误装。  
-`-InstallExternal` 会尝试安装 `claude-flow` 与 `@th0rgal/ralph-wiggum`（open 引擎）。
-`ivy` 作为可选 Python 依赖默认不自动安装，安装器仅做可用性提示（建议手动执行 `pip install ivy`）。
-
-### 指定安装目录
-
-```powershell
-pwsh -File .\install.ps1 -Profile full -TargetRoot "$env:USERPROFILE\.codex"
-```
-
-## 日常使用
-
-### 1. 路由验证（建议每次改配置后执行）
-
-```powershell
-pwsh -File .\scripts\verify\vibe-pack-routing-smoke.ps1
-pwsh -File .\scripts\verify\vibe-pack-regression-matrix.ps1
-pwsh -File .\scripts\verify\vibe-skill-index-routing-audit.ps1
-pwsh -File .\scripts\verify\vibe-routing-stability-gate.ps1 -WriteArtifacts
-pwsh -File .\scripts\verify\vibe-routing-stability-gate.ps1 -Strict
-pwsh -File .\scripts\verify\vibe-openspec-governance-gate.ps1
-pwsh -File .\scripts\verify\vibe-gsd-overlay-gate.ps1
-pwsh -File .\scripts\verify\vibe-prompt-overlay-gate.ps1
-pwsh -File .\scripts\verify\vibe-memory-governance-gate.ps1
-pwsh -File .\scripts\verify\vibe-data-scale-overlay-gate.ps1
-pwsh -File .\scripts\verify\vibe-quality-debt-overlay-gate.ps1
-pwsh -File .\scripts\verify\vibe-framework-interop-gate.ps1
-pwsh -File .\scripts\verify\vibe-ml-lifecycle-overlay-gate.ps1
-pwsh -File .\scripts\verify\vibe-python-clean-code-overlay-gate.ps1
-pwsh -File .\scripts\verify\vibe-system-design-overlay-gate.ps1
-pwsh -File .\scripts\verify\vibe-cuda-kernel-overlay-gate.ps1
-```
-
-### 2. OpenSpec 软发布（先验后切，默认不回退）
-
-```powershell
-# 当前推荐：单命令发布到 soft-lxl-planning
-# 内置流程：Precheck(Strict) -> Switch -> Postcheck(Strict + Governance Gate)
-pwsh -File .\scripts\governance\publish-openspec-soft-rollout.ps1
-```
-
-默认语义：
-
-- precheck 失败：直接终止，不切换，不回退
-- postcheck 失败：默认保持当前状态并失败退出（不自动回退，避免掩盖问题）
-
-仅在“特殊事故”场景下显式启用应急回退：
-
-```powershell
-pwsh -File .\scripts\governance\publish-openspec-soft-rollout.ps1 `
-  -EnableEmergencyRollbackOnFailure `
-  -RollbackStage shadow
-```
-
-手动阶段切换（不带门禁）仍可用：
-
-```powershell
-pwsh -File .\scripts\governance\set-openspec-rollout.ps1 -Stage soft-lxl-planning
-
-pwsh -File .\scripts\governance\set-openspec-rollout.ps1 -Stage shadow
-```
-
-### 3. GSD-Lite Overlay 切换（协议增强，不改路由）
-
-```powershell
-# 仅记录建议，不影响执行
-pwsh -File .\scripts\governance\set-gsd-overlay-rollout.ps1 -Stage shadow
-
-# 建议默认：仅 L/XL planning 进入 soft 确认策略
-pwsh -File .\scripts\governance\set-gsd-overlay-rollout.ps1 -Stage soft-lxl-planning
-
-# 更严格：L/XL planning 都强制确认
-pwsh -File .\scripts\governance\set-gsd-overlay-rollout.ps1 -Stage strict-lxl-planning
-```
-
-### 4. 生态同步（从本地兼容源更新 bundled）
-
-```powershell
-pwsh -File .\scripts\bootstrap\sync-local-compat.ps1
-```
-
-### 5. Ralph 双引擎用法（可选）
-
-```powershell
-# 默认 compat 引擎（本地状态循环）
-powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\\.codex\\skills\\ralph-loop\\scripts\\ralph-loop.ps1" `
-  Build a todo API --max-iterations 10 --completion-promise DONE
-
-# open 引擎（open-ralph-wiggum 自动循环后端）
-powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\\.codex\\skills\\ralph-loop\\scripts\\ralph-loop.ps1" `
-  --engine open Build a todo API --max-iterations 10 --completion-promise DONE
-```
-
-边界约束：
-
-- `ralph-loop` 与 XL team orchestration 互斥。
-- `open` 引擎建议保持 no-commit 模式，循环结束后再走 VCO 质量门禁与人工提交。
-
-## 使用到的上游项目与方法论
-
-| 项目 / 来源 | 用途 |
-|---|---|
-| `SynkraAI/aios-core` | 引入 Agentic Agile 角色化协作（PM/PO/QA/DevOps 等） |
-| `Th0rgal/open-ralph-wiggum` | 作为 `ralph-loop --engine open` 的可选自动循环后端（不替代 VCO 路由层） |
-| `f/prompts.chat` | 提供 prompt 模板检索/改写/发布能力，作为 VCO prompt 资产增强层 |
-| `medialab/xan` | 提供超大 CSV 低内存处理能力，作为 data-scale overlay 的可选执行后端 |
-| `Done-0/fuck-u-code` | 提供离线质量债务分析思路，作为 quality-debt overlay 的可选分析后端 |
-| `ivy-llc/ivy` | 提供跨框架互操作能力，作为 framework-interop overlay 的可选 advisory 后端 |
-| `GokuMohandas/Made-With-ML` | 提供 ML 生命周期治理方法论，作为 ml-lifecycle overlay 的阶段/证据 advisory 语义来源 |
-| `zedr/clean-code-python` | 提供 Python clean-code 原则体系，作为 python-clean-code-overlay 的原则/反模式 advisory 语义来源 |
-| `donnemartin/system-design-primer` | 提供系统设计覆盖维度方法论，作为 system-design-overlay 的架构完整性 advisory 语义来源 |
-| `xlite-dev/LeetCUDA` | 提供 CUDA kernel 优化方法论，作为 cuda-kernel-overlay 的 CUDA 优化证据/维度 advisory 语义来源 |
-| `x1xhlol/system-prompts-and-models-of-ai-tools` | 作为外部语料镜像来源，提取路由信号与关键词候选，服务 VCO 路由优化 |
-| `muratcankoylan/Agent-Skills-for-Context-Engineering` | 作为 Context Retro Advisor 的专家知识源，驱动 CER 复盘框架 |
-| `SuperClaude_Framework`（可选） | 提供 `sc` 命令体系兼容能力 |
-| `claude-flow`（可选） | 外部编排增强能力 |
-| 本仓库 VCO 核心 | 分级执行、Pack 路由、规则门禁、验证体系 |
-
-## 外部项目融合说明
-
-### A. `system-prompts-and-models-of-ai-tools` 在 VCO 中的作用
-
-这部分不是“直接抄系统提示词进 VCO”，而是作为外部语料输入到一条受控的数据化流程：
-
-1. 语料镜像到 `third_party/system-prompts-mirror`
-2. 通过 `scripts/research/extract-prompt-signals.ps1` 抽取 prompt/tool 信号
-3. 通过 `scripts/research/generate-vco-suggestions.ps1` 生成候选路由关键词
-4. 通过 `scripts/verify/vibe-external-corpus-gate.ps1` 做门禁对比后再决定是否采纳
-
-对应文档与产物：
-
-- 流程说明：`docs/external-corpus-integration.md`
-- 信号抽取：`scripts/research/extract-prompt-signals.ps1`
-- 候选生成：`scripts/research/generate-vco-suggestions.ps1`
-- 安全门禁：`scripts/verify/vibe-external-corpus-gate.ps1`
-- 产物目录：`outputs/external-corpus/`
-
-核心原则：外部语料用于“路由信号工程”，不直接污染 `SKILL.md` 主编排协议。
-
-### B. `Agent-Skills-for-Context-Engineering` 在 VCO 中的作用
-
-这部分融合在 VCO 的 LEARN / retro 闭环，定位是 advisory-only（建议层），不自动改配置：
-
-1. 在 `SKILL.md` 中作为 Context Retro Advisor 的指导知识源
-2. 在 `protocols/retro.md` 中落地为可执行的复盘流程
-3. 输出统一 CER（Context Evidence Report）结构，支撑跨迭代对比
-
-对应文档与组件：
-
-- 设计文档：`docs/context-retro-advisor-design.md`
-- 执行协议：`protocols/retro.md`
-- CER 模板与 Schema：`templates/cer-report.*`
-- CER 对比工具：`scripts/verify/cer-compare.ps1`
-
-核心价值：把“上下文工程经验”变成可量化、可对比、可复用的复盘资产，而不是一次性结论。
-
-## 许可证与第三方边界
-
-- 本仓库根许可证：`Apache-2.0`（见 `LICENSE`）。
-- 仓库简版公告：`NOTICE`（仓库名/年份/作者规范化）。
-- 第三方来源与边界清单：`THIRD_PARTY_LICENSES.md`。
-- 第三方上游项目保留其各自许可证，不因本仓库发布而被重新授权。
-- 外部语料（如 `system-prompts-and-models-of-ai-tools`）默认作为“研究输入”处理，不应将原始语料直接并入核心编排协议。
-- 若你在 `third_party/` 本地镜像外部仓库并进行再分发，请自行确保满足对应上游许可证义务。
-
-## 当前版本更新重点
-
-- 完成 AIOS-Core Pack 级集成与默认任务技能映射。
-- 完成路由规则层升级（`skill-routing-rules` + `defaults_by_task`）。
-- 完成 OpenSpec 治理层零冲突接入（后置治理，不参与 Pack 打分，不改 selected pack/skill）。
-- 完成 GSD-Lite 规划增强层接入（协议钩子模式，不引入第二编排器/第二命令面）。
-- 完成 prompts.chat Prompt 资产增强层接入（post-route advice，不替换 Pack 选择，仅处理 prompt/doc 冲突确认）。
-- 完成 Memory Governance 增强层接入（post-route advice，不替换 Pack 选择，明确五层记忆边界并停用 episodic-memory）。
-- 完成 Data Scale Overlay 接入（post-route data probe，不替换 Pack 选择，按真实文件规模/格式增强 `spreadsheet/xlsx/xan` 选择）。
-- 完成 Quality Debt Overlay 接入（post-route risk advisory，不替换 Pack 选择，严格模式仅输出 confirm_required 建议）。
-- 完成 Framework Interop Overlay 接入（post-route interop advisory，不替换 Pack 选择，跨框架迁移场景输出 `framework_interop_advice`）。
-- 完成 ML Lifecycle Overlay 接入（post-route lifecycle advisory，不替换 Pack 选择，输出 `ml_lifecycle_advice` 以刻画阶段与证据完备度）。
-- 完成 Python Clean Code Overlay 接入（post-route Python quality advisory，不替换 Pack 选择，输出 `python_clean_code_advice` 并支持 `.py` 文件自动触发）。
-- 完成 System Design Overlay 接入（post-route architecture advisory，不替换 Pack 选择，输出 `system_design_advice` 以刻画架构覆盖完整度）。
-- 完成 CUDA Kernel Overlay 接入（post-route CUDA advisory，不替换 Pack 选择，输出 `cuda_kernel_advice` 以刻画 CUDA 优化证据完备度）。
-- 新增 OpenSpec 单命令 soft 发布脚本（`publish-openspec-soft-rollout.ps1`）：
-  - 固定流程：`precheck -> switch -> postcheck`
-  - 默认不自动回退，失败保持可见
-  - 仅在显式应急开关下执行回退
-- 新增 GSD-Lite 模式切换脚本（`set-gsd-overlay-rollout.ps1`）：
-  - 支持 `off|shadow|soft-lxl-planning|strict-lxl-planning`
-  - 默认推荐 `soft-lxl-planning`
-- 完成 strict-ready 稳定性收敛：
-  - 对高重叠组进行非粗暴精调（正负关键词 + 任务硬过滤 + 同义样本分组）。
-  - 新增/扩展稳定性指标：`route_stability`、`top1_top2_gap`、`fallback_rate`、`misroute_rate`。
-
-## 贡献与发布建议
-
-1. 先改 `config/` 与 `scripts/router/`。
-2. 运行全部 `scripts/verify/` 门禁。
-3. 同步 `bundled/skills/vibe/config/` 镜像配置。
-4. 更新 `docs/`（尤其是 overlap matrix 与验证产物）。
-5. 再提交并发布。
+<br/>
 
 ---
 
-如果你希望把该仓库作为“团队默认 VCO 基线”，建议将 `vibe-routing-stability-gate.ps1 -Strict` 纳入 CI 的必过步骤。
+
+## ✨ What makes it different?
+
+> Traditional skill repos answer: _"What tools do I have?"_
+> **VibeSkills tackles the core pain point of heavy AI users: _"How do I manage and invoke large numbers of Skills, and get work done efficiently and reliably?"_**
+
+<sub>Works with **Claude Code** · **Codex** · **Windsurf** · **OpenClaw** · **OpenCode** · **Cursor** and any AI environment that supports the Skills protocol. Native **MCP** compatibility.</sub>
+
+<br/>
+
+<div align="center">
+
+| ❌ &nbsp;Traditional Pain Points (you've probably felt these) | ✅ &nbsp;VibeSkills Solutions (what we've built) |
+|:---|:---|
+| **Skills never activate**: Hundreds of capabilities in the repo, but AI rarely remembers to use them — activation rate is extremely low. | **🧠 Intelligent Routing**: The system automatically routes to the right skill based on context — no need to memorize a skill list. |
+| **Blind execution**: AI dives in without clarifying requirements — fast but off-target, projects gradually become black boxes. | **🧭 Governed Workflow**: Clarify → Verify → Trace is enforced in a unified process; every step is auditable. |
+| **Conflicting tools**: Lack of coordination between plugins and workflows leads to environment pollution or infinite loops. | **🧩 Global Governance**: 129 contract rules define safety boundaries and fallback mechanisms for long-term stability. |
+| **Messy workspace**: After extended use, repos become cluttered; new Agents miss project details when taking over, causing handoff gaps. | **📁 Semantic Directory Governance**: Fixed-architecture file storage so any new AI conversation instantly understands the project context. |
+| **AI bad habits**: Deletes main files while clearing backups; writes silent fallbacks then confidently claims "it's done". | **🛡️ Built-in Safety Rules**: Governed execution blocks dangerous bulk deletion and blind recursive wipes by default; fallback mechanisms must always show explicit warnings. |
+| **Manual workflow discipline**: Users must maintain their own AI collaboration process from experience — high learning cost. | **🚦 Framework-guided end-to-end**: Requirements → Plan → Multi-agent execution → Automated test iteration — fully managed. |
+| **Skill dispatch chaos in multi-agent runs**: Hard to assign the right skills to each agent for different tasks. | **🤖 Automatic Skill Dispatch**: Multi-agent workflows automatically assign the corresponding Skills to each Agent's task. |
+
+</div>
+
+<br/>
+
+---
+
+
+## 👥 Who is it for?
+
+_Which of those pain points hit home? Find your position — what comes next will land harder._
+
+<details>
+<summary>Is this for you? Click to expand</summary>
+
+<br/>
+
+<div align="center">
+
+| Audience | Description |
+|:---:|:---|
+| 🎯 **Users who need reliable delivery** | Want AI to be a dependable partner, not a runaway horse |
+| ⚡ **Power users heavily relying on AI/Agents** | Need a unified foundation to support large-scale workflows |
+| 🏢 **Small teams with high standardization needs** | Want AI workflows to be more maintainable and transferable |
+| 😩 **Practitioners exhausted by skill sprawl** | Already tired of tool hunting — just want a ready-to-use solution |
+
+</div>
+
+> _If you're looking for a single small script, this may be overkill. But if you want to use AI more reliably, smoothly, and sustainably — this is your indispensable foundation._
+
+</details>
+
+<br/>
+
+---
+
+
+## 🔀 Intelligent Routing: How 340+ Skills Collaborate Without Conflict
+
+_You know this is for you. Next question: 340+ skills in one system — how do they stay out of each other's way?_
+
+With 340+ skills, you might wonder: _"Won't similar skills conflict? How does the system know which one to use?"_
+
+### How routing works
+
+VibeSkills uses a **Canonical Router** as the single authoritative routing decision center:
+
+```mermaid
+graph LR
+    A[User Task] --> B{Canonical Router}
+    B --> C[Intent Recognition]
+    C --> D[Keyword Extraction]
+    D --> E[Skill Matching]
+    E --> F[Conflict Detection]
+    F --> G[Priority Ranking]
+    G --> H[Routing Decision]
+    H --> I[Execute Skill]
+
+    style B fill:#7B61FF,stroke:#fff,stroke-width:2px,color:#fff
+    style F fill:#FF9800,stroke:#fff,stroke-width:2px,color:#fff
+```
+
+VibeSkills follows a `Clarify ➔ Plan ➔ Execute ➔ Verify` governed workflow to ensure every task goes through complete quality control:
+
+- **Requirements Clarification**: Skills like `speckit-clarify` define clear boundaries and acceptance criteria
+- **Architecture Planning**: Skills like `aios-architect` design the implementation path
+- **Execution Layer**: 340+ skills called on demand to complete the actual work
+- **Quality Verification**: Skills like `tdd-guide` and `code-review` ensure delivery quality
+
+---
+
+### Why this design?
+
+Traditional skill repos let AI "freely choose" — the result:
+
+- ❌ AI can't remember what skills exist
+- ❌ Similar skills conflict with each other
+- ❌ Execution paths are unpredictable
+
+VibeSkills routing guarantees:
+
+- ✅ **Determinism**: Same task always follows the same routing logic
+- ✅ **Traceability**: Every routing decision has a clear rationale
+- ✅ **Control**: Users can override default routing via explicit invocation (e.g. `/vibe`)
+- ✅ **Stability**: 129 governance rules prevent conflicts and divergence
+
+---
+
+### M / L / XL Execution Levels
+
+After selecting the primary skill, the router also automatically determines the execution level based on task complexity:
+
+<div align="center">
+
+| Level | Use Case | Characteristics |
+|:---:|:---|:---|
+| **M** | Narrow-scope work with clear boundaries | Single-agent, token-efficient, fast response |
+| **L** | Medium complexity requiring design, planning, and review | Native serial execution by planned steps; bounded delegated units only when explicitly planned |
+| **XL** | Large tasks — parallelizable, long-running, multi-agent wave execution | Wave-sequential orchestration with step-level bounded parallelism for independent units only |
+
+</div>
+
+> The system automatically selects the level after requirements clarification, before plan execution. Users only need to invoke `/vibe` or `$vibe`.
+>
+> When the system calls a specialist skill internally (like `tdd-guide` or `code-review`), it is always scoped to a specific phase — they assist without taking over the overall coordination. In XL tasks with multiple agents, worker agents (child lanes) can suggest specialist help, but the coordinator (root) approves it before execution.
+>
+> You can also express an explicit preference:
+> ```text
+> Please execute this task according to the plan, launching XL-level workflow /vibe
+> ```
+
+---
+
+<details>
+<summary><b>🔍 Routing FAQ (click to expand)</b></summary>
+
+<br/>
+
+**One route or multiple per task?**
+
+Core principle: A task typically routes to one primary skill, but that skill can invoke others as sub-processes.
+
+- **Single primary route**: The Canonical Router selects **the single best-matching primary skill**
+- **Skill composition**: The primary skill can invoke others as needed during execution (e.g. `vibe` can invoke `speckit-clarify`, `aios-architect`, etc.)
+- **Governed coordination**: Multi-skill collaboration is controlled by governance rules, not arbitrary combinations
+
+<br/>
+
+**How are conflicts between similar skills handled?**
+
+When multiple skills appear capable of completing a task, the router avoids conflicts through:
+
+1. **Priority rules**: Each skill has a clear priority and applicable scenario
+2. **Context matching**: Analyzes task complexity, multi-phase needs, and explicit user preferences
+3. **Mutual exclusion rules**: 129 rules include exclusion rules preventing conflicting combinations
+4. **Graceful degradation**: When the preferred skill is unavailable, fallback by priority — no infinite loops
+
+<br/>
+
+**Will too many options cause token explosion?**
+
+No. Routing doesn't dump all options into the model — it uses a smart trigger mechanism:
+
+```
+User command → AI-assisted governance extracts intent keywords → keywords trigger skill routing
+```
+
+The governance framework adds ~30k initial context overhead, but does not cause token explosion.
+
+<br/>
+
+**Real example: User says "Help me refactor this project"**
+
+1. Intent recognition → Complex refactoring task
+2. Keyword extraction → refactor, project, code quality
+3. Skill matching → `vibe` / `autonomous-builder` / `systematic-debugging`
+4. Routing decision → Choose `vibe` (refactoring needs multi-phase: clarify → plan → execute → verify)
+
+</details>
+
+<br/>
+
+---
+
+
+## 🧠 Memory System: AI That Truly Remembers
+
+_Routing solves "which skill". But there's a deeper question: when the conversation ends, does AI remember you?_
+
+Sound familiar?
+
+<div align="center">
+
+| ❌ Pain Point | ✅ VibeSkills Solution | Component |
+|:---|:---|:---:|
+| Re-explaining project context every new session | Architecture decisions & conventions auto-loaded on startup | `Serena` |
+| AI hits the same bugs again; insights vanish with context | One sentence saves to Obsidian + GitHub permanently | `knowledge-steward` |
+| Long tasks — AI gradually "forgets" early context | In-session semantic vector cache, instant retrieval | `ruflo` |
+| Cross-project knowledge can't accumulate | Entity relationship graphs grow richer over time | `Cognee` |
+| Long task interrupted — hard to hand off to new agent | Auto-folds into working + tool + evidence memory | `deepagent-memory-fold` |
+
+</div>
+
+<br/>
+
+<details>
+<summary><b>📐 Expand: Four-Tier Architecture, Memory Skills & Governance Rules</b></summary>
+
+<br/>
+
+VibeSkills builds a **four-tier memory system** — one authoritative component per memory need:
+
+| Tier | Component | Scope | Core Purpose |
+|:---:|:---:|:---:|:---|
+| **L1 Session** | `state_store` | Current session | Execution progress, intermediate results, temp state — always-on "workbench" |
+| **L2 Project** | `Serena` | Current project | Architecture decisions, conventions — written only after explicit user confirmation |
+| **L3 Short-term Semantic** | `ruflo` | Intra-session | Vector cache for fast context retrieval within long-running tasks |
+| **L4 Long-term Graph** | `Cognee` | Cross-session | Entity linking, relationship graphs, long-horizon knowledge accumulation |
+
+> **Optional extensions**: `mem0` as a personal preference backend (opt-in); `Letta` provides memory block mapping vocabulary — neither replaces the four canonical tiers.
+
+<br/>
+
+**Three Dedicated Memory Skills**
+
+| Skill | Role | Trigger |
+|:---:|:---|:---|
+| `knowledge-steward` | **Knowledge Keeper**: Saves insights, bug fixes, and prompts to Obsidian + GitHub permanently | "save this prompt" / "log this bug" / "save this insight" |
+| `digital-brain` | **Second Brain**: Structured personal knowledge base — identity, content, network, retrospectives | Invoke directly; ideal for a personal knowledge OS |
+| `deepagent-memory-fold` | **Context Fold**: Compresses large context into structured working/tool/evidence memory for seamless handoff | Triggers at context limit or manually |
+
+<br/>
+
+**Governance**: Single source of truth (no dual-track) · Explicit write only (`Serena` requires confirmation) · `episodic-memory` permanently disabled · `mem0` limited to personal preferences · Kill switch on every external backend
+
+</details>
+
+
+---
+
+
+## ✦ Full Capability Map: Your All-in-One Workbench
+
+_Routing + memory form the dispatch nervous system. Here's the full capability map they power — end to end._
+
+Unrolled across a "real workflow", VibeSkills has laid out a complete **end-to-end capability chain**:
+
+<br/>
+
+<div align="center">
+
+| Domain | Coverage | Representative Engines |
+|:---|:---|:---|
+| **💡 Requirements & Clarification** | No more black-box starts: turn vague ideas into clearly-bounded, verifiable problem definitions | `brainstorming`, `speckit-clarify` |
+| **📋 Planning & Breakdown** | Decompose ambitious goals into specs, plans, tasks, milestones, and execution flows | `writing-plans`, `speckit-specify`, `aios-po` |
+| **🏗️ Architecture & Tech Selection** | Design frontend/backend boundaries, APIs, data layers, deployment, and tech stack comparisons | `aios-architect`, `architecture-patterns` |
+| **💻 Development & Implementation** | New features, scaffolding, engineering integration, and precise cross-file implementation | `autonomous-builder`, `speckit-implement` |
+| **🔧 Debugging & Refactoring** | Beyond surface patches: locate errors, analyze root causes, restore project-level maintainability | `error-resolver`, `systematic-debugging` |
+| **🛡️ Testing & Quality Control** | Unit tests, regression verification, quality gates — mandatory verification before completion | `tdd-guide`, `aios-qa`, `code-review` |
+| **🚀 Collaboration & Release** | Handle Issues/PRs, fix CI, process reviews, and automated deployment | `aios-devops`, `gh-fix-ci`, `vercel-deploy` |
+| **🤖 Compound Workflows** | Freeze requirements, dispatch tasks, multi-Agent coordination, execution tracing, env cleanup | `vibe`, `swarm_*`, `hive-mind-advanced` |
+| **🔌 External Ecosystem** | Bridge browsers, web scraping, design files, third-party services, and context memory | `mcp-integration`, `playwright`, `scrapling` |
+| **📊 Data & AI Engineering** | EDA, cleaning & stats, to model training, RAG retrieval, and experiment tracking | `senior-ml-engineer`, `statistical-analysis` |
+| **🔬 Research & Life Sciences** | **Core strength**: literature review, bioinformatics, single-cell analysis, drug discovery | `literature-review`, `biopython`, `scanpy` |
+| **📐 Math & Scientific Computing** | Symbolic derivation, Bayesian modeling, multi-objective optimization, simulation, quantum computing | `sympy`, `pymc-bayesian-modeling`, `qiskit` |
+| **🎨 Multimedia & Presentation** | Interactive charts, publication-quality figures, slides, audio/video production | `plotly`, `generate-image`, `video-studio` |
+
+</div>
+
+<br/>
+
+<details>
+<summary><b>👉 Expand: Explore the complete 340+ full-stack capability matrix</b></summary>
+
+<br/>
+
+> 💡 **Why governance matters**: The vast skill library below is not a collection of isolated scripts — it is an ecosystem governed by the VCO runtime. Through domain matrix classification, the system automatically invokes the right tool at the right context node, without requiring you to manually search through skills.
+
+---
+
+### 🧠 Requirements, Planning & Product Management
+
+> **Turn big ideas into actionable plans**: requirement insights, problem definition, Sprint planning, task breakdown, and constraint collection. Ensure direction is clear, boundaries are defined, and milestones are verifiable before writing a single line of code.
+
+`.system`, `aios-pm`, `aios-po`, `aios-sm`, `aios-squad-creator`, `aios-ux-design-expert`, `brainstorming`, `create-plan`, `designing-experiments`, `planning-with-files`, `shared-templates`, `speckit-analyze`, `speckit-checklist`, `speckit-clarify`, `speckit-constitution`, `speckit-plan`, `speckit-specify`, `speckit-tasks`, `speckit-taskstoissues`, `subagent-driven-development`, `think-harder`, `treatment-plans`, `ux-researcher-designer`, `writing-plans`
+
+---
+
+### 🛠️ Software Engineering & Architecture
+
+> **The true engineering foundation**: from scaffolding, cross-file changes, API design to microservice architecture evaluation. Not just code output — also context memory, toolchain orchestration, and multi-phase intelligent Agent coordination.
+
+`aios-architect`, `aios-dev`, `aios-master`, `architecture-patterns`, `autonomous-builder`, `cancel-ralph`, `coding-tutor`, `context-fundamentals`, `context-hunter`, `cs-foundations`, `deepagent-memory-fold`, `deepagent-toolchain-plan`, `evaluating-code-models`, `get-available-resources`, `hive-mind-advanced`, `local-vco-roles`, `nowait-reasoning-optimizer`, `prompt-lookup`, `ralph-loop`, `skill-creator`, `skill-lookup`, `spec-kit-vibe-compat`, `speckit-implement`, `superclaude-framework-compat`, `theme-factory`, `vibe`, `webthinker-deep-research`
+
+---
+
+### 🔧 Debugging, Testing & Quality Assurance
+
+> **Guarding the lifeline of code and systems**: unit tests, root cause analysis, dependency conflict resolution, security vulnerability reviews, and a complete TDD guide — ensuring systems never enter a "breaks after every change" black-box state.
+
+`aios-qa`, `build-error-resolver`, `code-review`, `code-review-excellence`, `code-reviewer`, `data-quality-checker`, `data-quality-frameworks`, `debugging-strategies`, `deslop`, `detecting-performance-regressions`, `error-resolver`, `evals-context`, `experiment-failure-analysis`, `generating-test-reports`, `ml-data-leakage-guard`, `performance-testing`, `property-based-testing`, `providing-performance-optimization-advice`, `receiving-code-review`, `requesting-code-review`, `reviewing-code`, `security-best-practices`, `security-ownership-map`, `security-reviewer`, `security-threat-model`, `systematic-debugging`, `tdd-guide`, `verification-before-completion`, `verification-quality-assurance`, `windows-hook-debugging`
+
+---
+
+### 📊 Data Analysis & Statistical Modeling
+
+> **Let data tell the truth**: a one-stop data processing engine from data cleaning, missing value handling, and exploratory analysis (EDA) to advanced statistical testing, regression models, and time series forecasting.
+
+`aios-data-engineer`, `anomaly-detector`, `correlation-analyzer`, `dask`, `data-artist`, `data-exploration-visualization`, `data-normalization-tool`, `detecting-data-anomalies`, `excel-analysis`, `exploratory-data-analysis`, `feature-importance-analyzer`, `geopandas`, `hypothesis-testing`, `metric-calculator`, `networkx`, `performing-causal-analysis`, `performing-regression-analysis`, `polars`, `preprocessing-data-with-automated-pipelines`, `regression-analysis-helper`, `running-clustering-algorithms`, `scientific-data-preprocessing`, `splitting-datasets`, `spreadsheet`, `statistical-analysis`, `statistics-math`, `statsmodels`, `usfiscaldata`, `vaex`, `xlsx`
+
+---
+
+### 🤖 Machine Learning & AI Engineering
+
+> **Full-stack AI model development**: beyond just calling APIs — feature engineering, model training, fine-tuning, interpretability (SHAP), large model evaluation (Evals), and reinforcement learning workflows.
+
+`LQF_Machine_Learning_Expert_Guide`, `aeon`, `datamol`, `deepchem`, `embedding-strategies`, `engineering-features-for-machine-learning`, `evaluating-llms-harness`, `evaluating-machine-learning-models`, `explaining-machine-learning-models`, `geniml`, `ml-pipeline-workflow`, `openai-knowledge`, `pufferlib`, `pytorch-lightning`, `scikit-learn`, `scikit-survival`, `senior-computer-vision`, `senior-data-scientist`, `senior-ml-engineer`, `senior-prompt-engineer`, `shap`, `similarity-search-patterns`, `sparse-autoencoder-training`, `stable-baselines3`, `tensorboard`, `timesfm-forecasting`, `torch-geometric`, `torch_geometric`, `torchdrug`, `training-machine-learning-models`, `transformer-lens-interpretability`, `transformers`, `umap-learn`, `unsloth`, `weights-and-biases`
+
+---
+
+### 🧬 Life Sciences & Bioinformatics
+
+> **A formidable interdisciplinary powerhouse**: single-cell sequencing analysis, protein structure folding, drug molecule discovery, genomics alignment — seamlessly integrated with cloud-based biology lab systems.
+
+`adaptyv`, `alphafold-database`, `anndata`, `arboreto`, `benchling-integration`, `biopython`, `bioservices`, `cellxgene-census`, `cobrapy`, `deeptools`, `diffdock`, `dnanexus-integration`, `esm`, `etetoolkit`, `flowio`, `gene-database`, `gget`, `ginkgo-cloud-lab`, `gtars`, `histolab`, `imaging-data-commons`, `labarchive-integration`, `lamindb`, `latchbio-integration`, `matchms`, `medchem`, `molfeat`, `neurokit2`, `neuropixels-analysis`, `omero-integration`, `opentrons-integration`, `pathml`, `protocolsio-integration`, `pydeseq2`, `pydicom`, `pyhealth`, `pylabrobot`, `pyopenms`, `pysam`, `pytdc`, `rdkit`, `scanpy`, `scikit-bio`, `scvi-tools`, `tiledbvcf`
+
+---
+
+### 🔬 Scientific Computing & Mathematical Logic
+
+> **Precise derivation and complex system simulation**: symbolic math, Bayesian probabilistic programming, quantum computing simulation, multi-objective optimization, and rigorous propositional logic and mathematical proof assistance.
+
+`astropy`, `cirq`, `dialectic`, `fluidsim`, `gradient-methods`, `math`, `math-model-selector`, `math-tools`, `mathematical-logic-expert`, `matlab`, `pennylane`, `pymatgen`, `pymc`, `pymc-bayesian-modeling`, `pymoo`, `propositional-logic`, `qiskit`, `qutip`, `rowan`, `simpy`, `sympy`, `xan`
+
+---
+
+### 📚 Scientific Literature & Academic Writing
+
+> **The expressway for academic productivity**: precise search across dozens of databases (PubMed, arXiv, etc.), systematic review matrix organization, citation management, and the complete publication pipeline from drafting to peer review.
+
+`bgpt-paper-search`, `biorxiv-database`, `brenda-database`, `chembl-database`, `citation-management`, `clinical-decision-support`, `clinical-reports`, `clinicaltrials-database`, `clinpgx-database`, `clinvar-database`, `comprehensive-research-agent`, `content-research-writer`, `cosmic-database`, `datacommons-client`, `documentation-lookup`, `drugbank-database`, `ena-database`, `ensembl-database`, `fda-database`, `geo-database`, `gwas-database`, `hmdb-database`, `hypothesis-generation`, `kegg-database`, `literature-matrix`, `literature-review`, `manuscript-as-code`, `market-research-reports`, `metabolomics-workbench-database`, `open-notebook`, `openalex-database`, `opentargets-database`, `paper-2-web`, `pdb-database`, `peer-review`, `pubchem-database`, `pubmed-database`, `pyzotero`, `reactome-database`, `research-grants`, `research-lookup`, `scholar-evaluation`, `scholarly-publishing`, `scientific-brainstorming`, `scientific-critical-thinking`, `scientific-reporting`, `scientific-writing`, `string-database`, `submission-checklist`, `uniprot-database`, `uspto-database`, `zinc-database`
+
+---
+
+### 🎨 Multimedia, Visualization & Documentation
+
+> **Making knowledge and data visible**: interactive chart generation, publication-quality scientific figures, slide creation, audio/video production, and deep read/write parsing of Word, PDF, and other office documents.
+
+`algorithmic-art`, `creating-data-visualizations`, `data-storytelling`, `datavis`, `doc`, `docs-review`, `docs-write`, `document-skills`, `docx`, `docx-comment-reply`, `figma`, `figma-implement-design`, `file-organizer`, `g2-legend-expert`, `generate-image`, `imagegen`, `infographics`, `latex-posters`, `latex-submission-pipeline`, `markdown-mermaid-writing`, `markitdown`, `matplotlib`, `pdf`, `plotly`, `pptx-posters`, `report-generator`, `scientific-schematics`, `scientific-slides`, `scientific-visualization`, `screenshot`, `seaborn`, `slides-as-code`, `smart-file-writer`, `speech`, `structured-content-storage`, `transcribe`, `venue-templates`, `video-studio`, `visualization-best-practices`, `vscode-release-notes-writer`, `writing-docs`
+
+---
+
+### 🔌 External Integrations, Automation & Deployment
+
+> **Breaking the limits of the runtime**: seamlessly connect external browsers, design platforms, and cloud services via MCP protocol and Playwright automation — plus CI/CD pipeline support and one-click automated deployment.
+
+`aios-devops`, `alpha-vantage`, `claude-skills`, `commit-with-reflection`, `denario`, `digital-brain`, `edgartools`, `flashrag-evidence`, `fred-economic-data`, `geomaster`, `gh-address-comments`, `gh-fix-ci`, `hedgefundmonitor`, `hypogenic`, `iso-13485-certification`, `jupyter-notebook`, `knowledge-steward`, `mcp-integration`, `modal`, `modal-labs`, `netlify-deploy`, `openai-docs`, `perplexity-search`, `playwright`, `prowler-docs`, `scrapling`, `sentry`, `skypilot-multi-cloud-orchestration`, `vercel-deploy`
+
+</details>
+
+<br/>
+
+---
+
+
+## 📊 Why is it powerful?
+
+_Now for the numbers. This isn't a demo project — it's a running system._
+
+The runtime core behind **VibeSkills** is **VCO**. This is not a single-point tool or a "code completion" script — it is a **super-capability network** that has been deeply integrated and governed:
+
+<br/>
+
+<div align="center">
+
+|                              🧩 Skill Modules                               |                            🌍 Ecosystem                            |                               ⚖️ Governance Rules                                |
+| :---------------------------------------------------------------------: | :---------------------------------------------------------------: | :----------------------------------------------------------------------: |
+| <h2>340+</h2>Directly callable Skills<br/>covering the full chain from requirements to delivery | <h2>19+</h2>Absorbed high-value upstream<br/>open-source projects and best practices | <h2>129</h2>Policy rules and contracts<br/>ensuring stable, traceable, divergence-free execution |
+
+</div>
+
+<br/>
+
+---
+
+
+## ⚙️ Installation & Skills Management
+
+_Skills keep growing — but you don't need to manage them individually._
+
+### Uninstall: Owned-only cleanup
+
+Running `uninstall.ps1` or `uninstall.sh --host <host>` is the partner surface to install. By default it performs a ledger-first, owned-only cleanup that only touches paths recorded in `.vibeskills/install-ledger.json`, `*.host-closure.json`, or the documented legacy surfaces. The full contract lives in [`docs/uninstall-governance.md`](./docs/uninstall-governance.md) so operators always know which host files Vibe actually owns.
+
+The `.vibeskills` brand is now split into two layers on purpose:
+
+- host-sidecar: `<target-root>/.vibeskills/host-settings.json`, `host-closure.json`, `install-ledger.json`, `bin/*`
+- workspace-sidecar: `<workspace-root>/.vibeskills/project.json`, `.vibeskills/docs/requirements/*`, `.vibeskills/docs/plans/*`, `.vibeskills/outputs/runtime/vibe-sessions/*`
+
+This keeps host install state separate from governed workspace/runtime artifacts while preserving the existing relative runtime contract. Explicit `ArtifactRoot` overrides still work when operators need a different artifact location.
+
+### Install: One entry, two public versions
+
+<div align="center">
+
+| | Single Public Entry |
+|:---:|:---|
+| **Install** | [⚡ Prompt-based install (recommended)](./docs/install/one-click-install-release-copy.en.md) |
+| **Public versions inside the same entry** | `Full Version + Customizable Governance` / `Framework Only + Customizable Governance` |
+| **Result** | choose host + action + version in one place, then copy the matching prompt |
+
+</div>
+
+### Customize: Add your own skills
+
+→ [Custom workflow & skill onboarding guide](./docs/install/custom-workflow-onboarding.en.md)
+
+## 📦 Standing on the Shoulders of Giants
+
+_These capabilities weren't built from scratch. VibeSkills' foundation is the continuous integration of the best open-source solutions into one governed system._
+
+We know that building in isolation can't keep pace with the rapidly evolving AI landscape. The core strength of VibeSkills comes from continuously absorbing the most mature methods and architectures from the open-source community, and bringing them under a single unified governance and orchestration system.
+
+> 🙏 **Special Thanks & Acknowledgements**
+>
+> This project continuously integrates, absorbs, and governs the core strengths of the following excellent open-source projects:
+>
+> `superpower` · `claude-scientific-skills` · `get-shit-done` · `aios-core` · `OpenSpec` · `ralph-claude-code` · `SuperClaude_Framework` · `spec-kit` · `Agent-S` · `mem0` · `scrapling` · `claude-flow` · `serena` · `everything-claude-code` · `DeepAgent` and more
+>
+> _Thank you to all authors for your generous contributions — without these brilliant stars, VibeSkills would not exist. We have done our best to properly attribute and credit all absorbed repositories. If anything was missed, please open an Issue and we will correct it promptly._
+
+<br/>
+
+---
+
+
+## 🚀 Getting Started
+
+_You know what this is now. All it takes from here is one prompt:_
+
+> ⚠️ **Invocation note**: This project uses a **Skills format architecture**. Please invoke it through your host environment's Skills invocation method — **do not** run it as a standalone CLI program.
+
+<br/>
+
+<div align="center">
+
+| Host Environment | Invocation | Example |
+|:---:|:---:|:---|
+| **Claude Code** | `/vibe` | `I want you to design a XXX /vibe` |
+| **Codex** | `$vibe` | `I want you to design a XXXX $vibe` |
+| **OpenCode** | `/vibe` | `Use the vibe skill to plan this change.` |
+| **OpenClaw** | Skills entry | Refer to the host docs |
+| **Cursor / Windsurf** | Skills entry | Refer to each platform's Skills docs |
+
+</div>
+
+<br/>
+
+> 💡 **Tip**: To keep every message within the VibeSkills governed workflow, append `$vibe` or `/vibe` to each of your messages. A message without the invocation syntax is treated as a regular request outside the governed runtime.
+
+**Currently supported platforms**: `codex` (most complete governed path) · `claude-code` · `cursor` · `windsurf` (supported install-and-use path with runtime-adapter integration) · `openclaw` (preview runtime-core path) · `opencode` (preview adapter path)
+
+<br/>
+
+---
+
+<details>
+<summary><b>📚 Documentation & Installation Guides (click to expand)</b></summary>
+
+<br/>
+
+**Understand the system**
+
+- 📖 [System architecture & philosophy](./docs/quick-start.en.md)
+- 📜 [VibeSkills Manifesto](./docs/manifesto.en.md)
+
+**Installation & Configuration**
+
+- ⚡️ [Prompt-based install (recommended)](./docs/install/one-click-install-release-copy.en.md)
+- 🧩 [Custom workflow onboarding](./docs/install/custom-workflow-onboarding.en.md)
+- 📄 [OpenClaw host notes](./docs/install/openclaw-path.en.md)
+- 📄 [OpenCode host notes](./docs/install/opencode-path.en.md)
+- 📁 [Manual copy install (offline)](./docs/install/manual-copy-install.en.md)
+- 🛠 [Advanced install command reference](./docs/install/recommended-full-path.en.md)
+- 🧊 [Cold start & other environments](./docs/cold-start-install-paths.en.md)
+
+</details>
+
+<br/>
+
+<div align="center">
+
+### 🤝 Join the Community · Build Together
+
+Give it a try! If you have questions, ideas, or suggestions, feel free to open an issue — I'll take every piece of feedback seriously and make improvements.
+
+<br/>
+
+**This project is fully open source. All contributions are welcome!**
+
+Whether it's fixing bugs, improving performance, adding features, or improving documentation — every PR is deeply appreciated.
+
+```
+Fork → Modify → Pull Request → Merge ✅
+```
+
+<br/>
+
+> ⭐ If this project helps you, a **Star** is the greatest support you can give!
+> Your support is the enriched uranium that fuels this nuclear-powered donkey 🫏
+
+<br/>
+
+Thank you to the **LinuxDo** community for your support!
+
+[![LinuxDo](https://img.shields.io/badge/Community-LinuxDo-blue?style=for-the-badge)](https://linux.do/)
+
+Tech discussions, AI frontiers, AI experience sharing — all at Linuxdo!
+
+</div>
+
+<br/>
+
+---
+
+## Star History
+<div align="center">
+<a href="https://www.star-history.com/?repos=foryourhealth111-pixel%2FVibe-Skills&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=foryourhealth111-pixel/Vibe-Skills&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=foryourhealth111-pixel/Vibe-Skills&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=foryourhealth111-pixel/Vibe-Skills&type=date&legend=top-left" />
+ </picture>
+</a>
+
+---
+
+<div align="center">
+  <p><i>Transform the parts of real work most prone to going off the rails into a system that is more callable, more governable, and more maintainable over time.</i></p>
+  <br/>
+  <sub>Made with ❤️ &nbsp;·&nbsp; <a href="https://github.com/foryourhealth111-pixel/Vibe-Skills">GitHub</a> &nbsp;·&nbsp; <a href="./README.zh.md">中文</a></sub>
+</div>

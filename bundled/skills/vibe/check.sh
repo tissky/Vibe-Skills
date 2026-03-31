@@ -835,6 +835,8 @@ fi
 if [[ "${ADAPTER_CHECK_MODE}" == "preview-guidance" ]]; then
   if [[ "${HOST_ID}" == "opencode" ]]; then
     info_note "opencode preview now runs as skills-only activation; the real opencode.json stays untouched and sidecar state is verified"
+  elif [[ "${HOST_ID}" == "claude-code" ]]; then
+    info_note "claude-code preview now verifies sidecar state plus a managed settings.json and hook surface"
   else
     info_note "${HOST_ID} preview now runs as skills-only activation; host-native config files stay untouched and sidecar state is verified"
   fi
@@ -844,6 +846,60 @@ if [[ "${ADAPTER_CHECK_MODE}" == "runtime-core" ]]; then
 fi
 if [[ "${HOST_ID}" == "claude-code" || "${HOST_ID}" == "cursor" || "${HOST_ID}" == "windsurf" || "${HOST_ID}" == "openclaw" || "${HOST_ID}" == "opencode" ]]; then
   check_path "host settings sidecar" "${TARGET_ROOT}/.vibeskills/host-settings.json"
+fi
+if [[ "${HOST_ID}" == "claude-code" ]]; then
+  check_path "settings.json" "${TARGET_ROOT}/settings.json"
+  managed_host_id="$(json_query_scalar_from_file "${TARGET_ROOT}/settings.json" 'vibeskills.host_id' 2>/dev/null || true)"
+  if [[ "${managed_host_id}" == "claude-code" ]]; then
+    echo "[OK] settings.json managed vibeskills node"
+    PASS=$((PASS+1))
+  else
+    echo "[FAIL] settings.json managed vibeskills node"
+    FAIL=$((FAIL+1))
+  fi
+  hook_script_path="${TARGET_ROOT}/hooks/write-guard.js"
+  check_path "managed Claude hook script" "${hook_script_path}"
+  python_bin_for_hook_check="$(pick_python_for_adapter || true)"
+  if [[ -z "${python_bin_for_hook_check}" ]]; then
+    print_python_requirement_error "Claude hook verification"
+    echo "[FAIL] settings.json managed Claude hook command"
+    FAIL=$((FAIL+1))
+  else
+    hook_check_result="$(
+    "${python_bin_for_hook_check}" - "${TARGET_ROOT}/settings.json" "${hook_script_path}" <<'PY' 2>/dev/null || true
+import json, sys
+settings_path, hook_path = sys.argv[1], sys.argv[2]
+with open(settings_path, encoding='utf-8-sig') as fh:
+    payload = json.load(fh)
+hooks = payload.get("hooks", {})
+entries = hooks.get("PreToolUse", [])
+expected = f"node {hook_path}"
+for entry in entries:
+    if not isinstance(entry, dict):
+        continue
+    if str(entry.get("description") or "").strip() != "VibeSkills managed write guard":
+        continue
+    nested = entry.get("hooks")
+    if not isinstance(nested, list) or not nested:
+        continue
+    first = nested[0]
+    if not isinstance(first, dict):
+        continue
+    if str(first.get("command") or "").strip() == expected:
+        print("ok")
+        raise SystemExit(0)
+print("missing")
+raise SystemExit(1)
+PY
+    )"
+    if [[ "${hook_check_result}" == "ok" ]]; then
+      echo "[OK] settings.json managed Claude hook command"
+      PASS=$((PASS+1))
+    else
+      echo "[FAIL] settings.json managed Claude hook command"
+      FAIL=$((FAIL+1))
+    fi
+  fi
 fi
 check_path "host closure manifest" "${TARGET_ROOT}/.vibeskills/host-closure.json"
 if [[ -f "${TARGET_ROOT}/.vibeskills/host-closure.json" ]]; then
@@ -867,7 +923,20 @@ fi
 check_codex_duplicate_skill_surface
 check_path "upstream lock" "${TARGET_ROOT}/config/upstream-lock.json"
 check_path "vibe version governance config" "${TARGET_ROOT}/${runtime_target_rel}/config/version-governance.json"
-check_path "vibe release ledger" "${runtime_skill_root}/references/release-ledger.jsonl"
+installed_runtime_governance="${runtime_skill_root}/config/version-governance.json"
+runtime_release_ledger_required="true"
+if [[ -f "${installed_runtime_governance}" ]]; then
+  if ! json_query_lines_from_file "${installed_runtime_governance}" 'packaging.mirror.directories' 2>/dev/null | grep -Fxq 'references' && \
+     ! json_query_lines_from_file "${installed_runtime_governance}" 'packaging.allow_bundled_only' 2>/dev/null | grep -Fxq 'references/release-ledger.jsonl'; then
+    runtime_release_ledger_required="false"
+  fi
+fi
+if [[ "${runtime_release_ledger_required}" == "true" ]]; then
+  check_path "vibe release ledger" "${runtime_skill_root}/references/release-ledger.jsonl"
+else
+  echo "[OK] vibe release ledger skipped (not packaged into installed runtime contract)"
+  PASS=$((PASS+1))
+fi
 for n in vibe dialectic local-vco-roles spec-kit-vibe-compat superclaude-framework-compat ralph-loop cancel-ralph tdd-guide think-harder; do
   check_path "skill/${n}" "${TARGET_ROOT}/skills/${n}/SKILL.md"
 done
