@@ -124,6 +124,49 @@ class InstallProfileDifferentiationTests(unittest.TestCase):
                 minimal_ledger["payload_summary"]["installed_file_count"],
             )
 
+    def test_minimal_reinstall_prunes_previously_managed_full_profile_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            target_root = Path(tempdir) / "shared-root"
+            target_root.mkdir(parents=True, exist_ok=True)
+
+            self.install_profile(target_root, profile="full")
+            ledger = self.install_profile(target_root, profile="minimal")
+
+            installed_skills = {
+                candidate.name
+                for candidate in (target_root / "skills").iterdir()
+                if candidate.is_dir()
+            }
+
+            self.assertEqual(MINIMAL_REQUIRED_SKILLS, installed_skills)
+            self.assertNotIn(REPRESENTATIVE_NON_CORE_SKILL, installed_skills)
+            self.assertEqual(sorted(MINIMAL_REQUIRED_SKILLS), ledger["managed_skill_names"])
+            self.assertEqual(sorted(MINIMAL_REQUIRED_SKILLS), ledger["payload_summary"]["installed_skill_names"])
+
+    def test_payload_summary_ignores_preexisting_foreign_host_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            target_root = Path(tempdir) / "shared-root"
+            foreign_skill_root = target_root / "skills" / "foreign-user-skill"
+            foreign_file = target_root / "host-notes.txt"
+            target_root.mkdir(parents=True, exist_ok=True)
+            foreign_skill_root.mkdir(parents=True, exist_ok=True)
+            (foreign_skill_root / "SKILL.md").write_text("---\nname: foreign-user-skill\n---\n", encoding="utf-8")
+            foreign_file.write_text("user content\n", encoding="utf-8")
+
+            ledger = self.install_profile(target_root, profile="minimal")
+
+            installed_skills = {
+                candidate.name
+                for candidate in (target_root / "skills").iterdir()
+                if candidate.is_dir()
+            }
+            mirrored_foreign_skill = target_root / "skills" / "vibe" / "bundled" / "skills" / "foreign-user-skill"
+            self.assertIn("foreign-user-skill", installed_skills)
+            self.assertFalse(mirrored_foreign_skill.exists())
+            self.assertNotIn("foreign-user-skill", ledger["payload_summary"]["installed_skill_names"])
+            self.assertEqual(sorted(MINIMAL_REQUIRED_SKILLS), ledger["payload_summary"]["installed_skill_names"])
+            self.assertLess(ledger["payload_summary"]["installed_file_count"], count_files(target_root))
+
 
 if __name__ == "__main__":
     unittest.main()
