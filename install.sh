@@ -162,10 +162,12 @@ canonical_repo_available() {
   [[ -n "${current}" ]] || return 1
   current="$(cd "${current}" 2>/dev/null && pwd || true)"
   [[ -n "${current}" ]] || return 1
+  local origin="${current}"
 
   while [[ -n "${current}" ]]; do
     if [[ -e "${current}/.git" && -f "${current}/config/version-governance.json" ]]; then
-      return 0
+      [[ "${origin}" == "${current}" ]] && return 0
+      return 1
     fi
     local parent
     parent="$(dirname "${current}")"

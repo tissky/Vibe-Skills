@@ -24,7 +24,7 @@ function Test-CanonicalRepoExecution {
   return (Test-VgoCanonicalRepoExecution -StartPath $RepoRoot)
 }
 function Get-PreferredPythonCommand {
-  foreach ($candidate in @('python', 'python3')) {
+  foreach ($candidate in @('python', 'python3', 'py')) {
     if (Get-Command $candidate -ErrorAction SilentlyContinue) {
       return $candidate
     }
@@ -129,30 +129,39 @@ function Update-InstallLedgerPayloadSummary {
     [string]$TargetRoot
   )
 
-  $pythonCommand = Get-PreferredPythonCommand
-  if (-not $pythonCommand) {
-    throw "Post-install ledger refresh requires Python 3.10+."
+  $ledgerPath = Join-Path $TargetRoot '.vibeskills\install-ledger.json'
+  if (-not (Test-Path -LiteralPath $ledgerPath -PathType Leaf)) {
+    throw "Install ledger missing for refresh: $ledgerPath"
   }
 
-  $pythonInstaller = Join-Path $RepoRoot 'scripts\install\install_vgo_adapter.py'
-  if (-not (Test-Path -LiteralPath $pythonInstaller)) {
-    throw "Adapter installer script missing for ledger refresh: $pythonInstaller"
+  try {
+    $ledger = Get-Content -LiteralPath $ledgerPath -Raw -Encoding UTF8 | ConvertFrom-Json -AsHashtable
+  } catch {
+    throw ("Failed to parse install ledger for refresh: " + $_.Exception.Message)
   }
 
-  $cmd = @($pythonCommand)
-  if ([System.IO.Path]::GetFileName($pythonCommand).ToLowerInvariant() -eq 'py') {
-    $cmd += '-3'
+  $skillsRoot = Join-Path $TargetRoot 'skills'
+  $installedSkillNames = @()
+  if (Test-Path -LiteralPath $skillsRoot -PathType Container) {
+    $installedSkillNames = @(
+      Get-ChildItem -LiteralPath $skillsRoot -Directory -Force |
+        Where-Object { -not $_.Name.StartsWith('.') } |
+        Sort-Object Name |
+        ForEach-Object { $_.Name }
+    )
   }
-  $cmd += @(
-    $pythonInstaller,
-    '--target-root', $TargetRoot,
-    '--refresh-install-ledger'
-  )
 
-  & $cmd[0] @($cmd[1..($cmd.Count - 1)]) | Out-Null
-  if ($LASTEXITCODE -ne 0) {
-    throw ("Install ledger refresh failed with exit code {0}." -f $LASTEXITCODE)
+  $installedFileCount = @(
+    Get-ChildItem -LiteralPath $TargetRoot -Recurse -File -Force -ErrorAction SilentlyContinue
+  ).Count
+
+  $ledger['payload_summary'] = [ordered]@{
+    installed_skill_count = @($installedSkillNames).Count
+    installed_skill_names = @($installedSkillNames)
+    installed_file_count = $installedFileCount
   }
+
+  Write-VgoUtf8NoBomText -Path $ledgerPath -Content ($ledger | ConvertTo-Json -Depth 20)
 }
 function Copy-DirContent {
   param(

@@ -24,7 +24,7 @@ function Test-CanonicalRepoExecution {
   return (Test-VgoCanonicalRepoExecution -StartPath $RepoRoot)
 }
 function Get-PreferredPythonCommand {
-  foreach ($candidate in @('python', 'python3')) {
+  foreach ($candidate in @('python', 'python3', 'py')) {
     if (Get-Command $candidate -ErrorAction SilentlyContinue) {
       return $candidate
     }
@@ -121,6 +121,47 @@ function Invoke-InstalledRuntimeFreshnessGate {
       throw 'Frontmatter BOM gate failed after install.'
     }
   }
+}
+
+function Update-InstallLedgerPayloadSummary {
+  param(
+    [string]$RepoRoot,
+    [string]$TargetRoot
+  )
+
+  $ledgerPath = Join-Path $TargetRoot '.vibeskills\install-ledger.json'
+  if (-not (Test-Path -LiteralPath $ledgerPath -PathType Leaf)) {
+    throw "Install ledger missing for refresh: $ledgerPath"
+  }
+
+  try {
+    $ledger = Get-Content -LiteralPath $ledgerPath -Raw -Encoding UTF8 | ConvertFrom-Json -AsHashtable
+  } catch {
+    throw ("Failed to parse install ledger for refresh: " + $_.Exception.Message)
+  }
+
+  $skillsRoot = Join-Path $TargetRoot 'skills'
+  $installedSkillNames = @()
+  if (Test-Path -LiteralPath $skillsRoot -PathType Container) {
+    $installedSkillNames = @(
+      Get-ChildItem -LiteralPath $skillsRoot -Directory -Force |
+        Where-Object { -not $_.Name.StartsWith('.') } |
+        Sort-Object Name |
+        ForEach-Object { $_.Name }
+    )
+  }
+
+  $installedFileCount = @(
+    Get-ChildItem -LiteralPath $TargetRoot -Recurse -File -Force -ErrorAction SilentlyContinue
+  ).Count
+
+  $ledger['payload_summary'] = [ordered]@{
+    installed_skill_count = @($installedSkillNames).Count
+    installed_skill_names = @($installedSkillNames)
+    installed_file_count = $installedFileCount
+  }
+
+  Write-VgoUtf8NoBomText -Path $ledgerPath -Content ($ledger | ConvertTo-Json -Depth 20)
 }
 function Copy-DirContent {
   param(
@@ -492,6 +533,7 @@ if ($StrictOffline) {
 }
 Invoke-CodexDuplicateSkillQuarantine -TargetRoot $TargetRoot -HostId $HostId
 Invoke-InstalledRuntimeFreshnessGate -RepoRoot $RepoRoot -TargetRoot $TargetRoot -SkipGate:$SkipRuntimeFreshnessGate
+Update-InstallLedgerPayloadSummary -RepoRoot $RepoRoot -TargetRoot $TargetRoot
 Write-Host ""
 Write-Host "Installation complete." -ForegroundColor Green
 $checkShellPath = Get-VgoPowerShellCommand

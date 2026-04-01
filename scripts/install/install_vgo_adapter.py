@@ -889,12 +889,28 @@ def load_runtime_core_packaging(repo_root: Path, profile: str) -> dict:
     return packaging
 
 
+def resolve_bundled_skills_root(repo_root: Path, packaging: dict) -> Path:
+    source_rel = str(packaging.get("bundled_skills_source") or "bundled/skills")
+    candidates: list[Path] = []
+
+    parent = repo_root.parent
+    if parent.name == "skills":
+        candidates.append(parent)
+    candidates.append(repo_root / source_rel)
+
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    return repo_root / source_rel
+
+
 def materialize_allowlisted_skills(repo_root: Path, target_root: Path, packaging: dict) -> None:
     skills_allowlist = list(packaging.get("skills_allowlist") or [])
     if not skills_allowlist:
         return
 
-    bundled_root = repo_root / str(packaging.get("bundled_skills_source") or "bundled/skills")
+    bundled_root = resolve_bundled_skills_root(repo_root, packaging)
     if not bundled_root.exists():
         raise SystemExit(f"Bundled skills source missing for allowlisted packaging: {bundled_root}")
 
@@ -1020,6 +1036,8 @@ def install_runtime_core(repo_root: Path, target_root: Path, profile: str, allow
     ]
     for entry in copy_directories:
         src_root = repo_root / entry["source"]
+        if entry["target"] == "skills" and entry["source"] == str(packaging.get("bundled_skills_source") or "bundled/skills"):
+            src_root = resolve_bundled_skills_root(repo_root, packaging)
         dst_root = target_root / entry["target"]
         if entry["target"] == "skills":
             copy_skill_roots_without_self_shadow(src_root, dst_root, repo_root)

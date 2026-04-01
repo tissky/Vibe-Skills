@@ -11,6 +11,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+BUNDLED_VIBE_ROOT = REPO_ROOT / "bundled" / "skills" / "vibe"
 STRICT_READY_HOSTS = [
     ("claude-code", "VGO_CLAUDE_CODE_SPECIALIST_BRIDGE_COMMAND"),
     ("cursor", "VGO_CURSOR_SPECIALIST_BRIDGE_COMMAND"),
@@ -18,6 +19,21 @@ STRICT_READY_HOSTS = [
     ("openclaw", "VGO_OPENCLAW_SPECIALIST_BRIDGE_COMMAND"),
     ("opencode", "VGO_OPENCODE_SPECIALIST_BRIDGE_COMMAND"),
 ]
+MINIMAL_REQUIRED_SKILLS = {
+    "vibe",
+    "dialectic",
+    "local-vco-roles",
+    "spec-kit-vibe-compat",
+    "superclaude-framework-compat",
+    "ralph-loop",
+    "cancel-ralph",
+    "tdd-guide",
+    "think-harder",
+    "brainstorming",
+    "writing-plans",
+    "subagent-driven-development",
+    "systematic-debugging",
+}
 
 
 def resolve_powershell() -> str | None:
@@ -281,6 +297,35 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         for wrapper_path in ledger["specialist_wrapper_paths"]:
             self.assertTrue(Path(wrapper_path).exists(), f"wrapper missing: {wrapper_path}")
 
+    def test_bundled_shell_install_supports_minimal_profile(self) -> None:
+        target_root = self.root / "bundled-minimal-target"
+        target_root.mkdir(parents=True, exist_ok=True)
+
+        result = subprocess.run(
+            [
+                "bash",
+                str(BUNDLED_VIBE_ROOT / "install.sh"),
+                "--host",
+                "codex",
+                "--profile",
+                "minimal",
+                "--target-root",
+                str(target_root),
+            ],
+            cwd=BUNDLED_VIBE_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        installed_skills = {
+            candidate.name
+            for candidate in (target_root / "skills").iterdir()
+            if candidate.is_dir()
+        }
+        self.assertEqual(MINIMAL_REQUIRED_SKILLS, installed_skills)
+        self.assertIn("Install done.", result.stdout)
+
     def test_installed_shell_scripts_work_without_repo_level_adapter_registry(self) -> None:
         for profile in ("minimal", "full"):
             with self.subTest(profile=profile):
@@ -450,6 +495,46 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         self.assertIn(str(host_settings_path.resolve()), ledger["managed_json_paths"])
         self.assertNotIn(str((target_root / "mcp_config.json").resolve()), ledger["managed_json_paths"])
         self.assertTrue(ledger["specialist_wrapper_paths"])
+
+    def test_powershell_install_succeeds_without_python_on_path(self) -> None:
+        powershell = resolve_powershell()
+        if powershell is None:
+            self.skipTest("PowerShell executable not available in PATH")
+
+        target_root = self.root / "pwsh-no-python-target"
+        target_root.mkdir(parents=True, exist_ok=True)
+        empty_bin = self.root / "empty-bin"
+        empty_bin.mkdir(parents=True, exist_ok=True)
+        env = os.environ.copy()
+        env["PATH"] = str(empty_bin)
+
+        result = subprocess.run(
+            [
+                powershell,
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(REPO_ROOT / "install.ps1"),
+                "-HostId",
+                "codex",
+                "-Profile",
+                "full",
+                "-TargetRoot",
+                str(target_root),
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+            env=env,
+        )
+
+        ledger_path = target_root / ".vibeskills" / "install-ledger.json"
+        self.assertIn("Installation complete.", result.stdout)
+        self.assertTrue(ledger_path.exists())
+        ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+        self.assertIn("payload_summary", ledger)
+        self.assertGreater(ledger["payload_summary"]["installed_file_count"], 0)
 
     def test_powershell_fallback_install_preserves_existing_opencode_config_without_mutation(self) -> None:
         powershell = resolve_powershell()
