@@ -10,6 +10,7 @@
 
 - 当前根需求：[`../requirements/2026-04-04-remaining-architecture-closure.md`](../requirements/2026-04-04-remaining-architecture-closure.md)
 - 当前根计划：[`2026-04-04-remaining-architecture-closure-plan.md`](./2026-04-04-remaining-architecture-closure-plan.md)
+- 当前安装文档对齐计划：[`2026-04-04-install-docs-registry-alignment-plan.md`](./2026-04-04-install-docs-registry-alignment-plan.md)
 - 当前架构一致性刷新计划：[`2026-04-04-architecture-consistency-audit-refresh-plan.md`](./2026-04-04-architecture-consistency-audit-refresh-plan.md)
 - 当前状态脊柱补齐计划：[`2026-04-04-status-spine-catch-up-plan.md`](./2026-04-04-status-spine-catch-up-plan.md)
 - 最近完成的高价值 contract cutover：[`2026-04-04-release-cut-gate-contract-delegation-plan.md`](./2026-04-04-release-cut-gate-contract-delegation-plan.md)
