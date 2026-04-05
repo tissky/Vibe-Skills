@@ -21,7 +21,7 @@ Primary policy:
 
 ## Current Entry
 
-- [`2026-04-05-platform-references-priority-slimming.md`](./2026-04-05-platform-references-priority-slimming.md): 冻结本轮 `platform/` 空壳清理与 `references/` 优先级精简的治理范围、保留边界和验收标准。
+- [`2026-04-05-scripts-secondary-surfaces-slimming.md`](./2026-04-05-scripts-secondary-surfaces-slimming.md): 冻结本轮 `scripts/overlay + scripts/research/learn` 次级脚本面收口的治理范围、保留边界和验收标准。
 
 ## Contract-Retained Baselines
 
