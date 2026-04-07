@@ -13,7 +13,7 @@ CLI_SRC = REPO_ROOT / 'apps' / 'vgo-cli' / 'src'
 if str(CLI_SRC) not in sys.path:
     sys.path.insert(0, str(CLI_SRC))
 
-from vgo_cli.commands import route_command, runtime_command, verify_command
+from vgo_cli.commands import install_command, route_command, runtime_command, verify_command
 from vgo_cli.errors import CliError
 from vgo_cli.output import parse_json_output, print_install_completion_hint, print_json_payload
 
@@ -161,3 +161,83 @@ def test_runtime_command_uses_runtime_contract_for_powershell_dispatch(monkeypat
     assert recorded['shell_script'] == 'check.sh'
     assert recorded['powershell_script'] == 'scripts/runtime/custom-runtime-entrypoint.ps1'
     assert recorded['rest'] == ['--task', 'smoke']
+
+
+def test_install_command_skips_external_dependency_install_when_strict_offline(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import vgo_cli.commands as cli_commands
+
+    recorded: dict[str, object] = {}
+
+    def fake_normalize_host_id(host: str) -> str:
+        return host
+
+    def fake_resolve_target_root(host_id: str, target_root: str | None) -> Path:
+        recorded['resolved_host'] = host_id
+        return Path(target_root or tmp_path / 'target').resolve()
+
+    def fake_assert_target_root_matches_host_intent(target_root: Path, host_id: str) -> None:
+        recorded['intent_checked'] = (target_root, host_id)
+
+    def fake_install_mode_for_host(host_id: str) -> str:
+        return 'preview-guidance'
+
+    def fake_run_installer_core(repo_root: Path, argv: list[str]) -> subprocess.CompletedProcess[str]:
+        recorded['installer_repo_root'] = repo_root
+        recorded['installer_argv'] = list(argv)
+        return subprocess.CompletedProcess(
+            args=list(argv),
+            returncode=0,
+            stdout='{"install_mode":"preview-guidance","external_fallback_used":[]}\n',
+            stderr='',
+        )
+
+    def fake_reconcile_install_postconditions(
+        repo_root: Path,
+        target_root: Path,
+        host_id: str,
+        **kwargs: object,
+    ) -> dict[str, object]:
+        recorded['reconcile'] = {
+            'repo_root': repo_root,
+            'target_root': target_root,
+            'host_id': host_id,
+            **kwargs,
+        }
+        return {'install_receipt': {}, 'mcp_receipt': {}}
+
+    def fake_maybe_install_external_dependencies(repo_root: Path, install_mode: str, *, strict_offline: bool = False) -> None:
+        recorded['external_called'] = {
+            'repo_root': repo_root,
+            'install_mode': install_mode,
+            'strict_offline': strict_offline,
+        }
+
+    monkeypatch.setattr(cli_commands, 'normalize_host_id', fake_normalize_host_id)
+    monkeypatch.setattr(cli_commands, 'resolve_target_root', fake_resolve_target_root)
+    monkeypatch.setattr(cli_commands, 'assert_target_root_matches_host_intent', fake_assert_target_root_matches_host_intent)
+    monkeypatch.setattr(cli_commands, 'install_mode_for_host', fake_install_mode_for_host)
+    monkeypatch.setattr(cli_commands, 'run_installer_core', fake_run_installer_core)
+    monkeypatch.setattr(cli_commands, 'reconcile_install_postconditions', fake_reconcile_install_postconditions)
+    monkeypatch.setattr(cli_commands, 'maybe_install_external_dependencies', fake_maybe_install_external_dependencies)
+    monkeypatch.setattr(cli_commands, 'print_install_banner', lambda *args, **kwargs: None)
+    monkeypatch.setattr(cli_commands, 'print_install_completion_hint', lambda *args, **kwargs: None)
+
+    args = argparse.Namespace(
+        repo_root=str(tmp_path),
+        host='cursor',
+        target_root=str(tmp_path / 'target'),
+        profile='full',
+        require_closed_ready=False,
+        allow_external_skill_fallback=False,
+        install_external=True,
+        strict_offline=True,
+        skip_runtime_freshness_gate=False,
+        frontend='shell',
+    )
+
+    assert install_command(args) == 0
+    assert 'external_called' not in recorded
+    assert recorded['reconcile']['strict_offline'] is True

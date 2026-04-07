@@ -235,6 +235,12 @@ def build_payload_summary(target_root: Path | str, ledger: dict) -> dict[str, ob
         if isinstance(entry, dict):
             collect_owned_file(str(entry.get('path') or ''))
 
+    # The install ledger is written after the initial payload summary is built.
+    # When refreshing summaries from an on-disk install, count the ledger itself
+    # as installer-owned payload so fresh installs and refreshed ledgers agree.
+    collect_owned_file(target_root_path / '.vibeskills' / 'install-ledger.json')
+    collect_owned_file(target_root_path / '.vibeskills' / 'mcp-auto-provision.json')
+
     return {
         'installed_skill_count': len(installed_skill_names),
         'installed_skill_names': installed_skill_names,

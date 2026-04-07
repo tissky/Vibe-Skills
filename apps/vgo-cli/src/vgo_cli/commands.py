@@ -43,13 +43,20 @@ def install_command(args: argparse.Namespace) -> int:
     payload = parse_json_output(install_result)
     external_fallback_used = list(payload.get('external_fallback_used') or [])
 
-    if args.install_external:
-        maybe_install_external_dependencies(repo_root, str(payload.get('install_mode') or install_mode))
+    if args.install_external and not args.strict_offline:
+        maybe_install_external_dependencies(
+            repo_root,
+            str(payload.get('install_mode') or install_mode),
+            strict_offline=bool(args.strict_offline),
+        )
 
     reconcile_install_postconditions(
         repo_root,
         target_root,
         host_id,
+        profile=args.profile,
+        install_external=bool(args.install_external),
+        frontend=args.frontend,
         external_fallback_used=external_fallback_used,
         strict_offline=bool(args.strict_offline),
         skip_runtime_freshness_gate=bool(args.skip_runtime_freshness_gate),
