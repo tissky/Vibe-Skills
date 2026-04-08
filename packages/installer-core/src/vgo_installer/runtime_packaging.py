@@ -1,9 +1,21 @@
 from __future__ import annotations
 
+import importlib.util
+import sys
 from pathlib import Path
 from typing import Any
 
-from ._bootstrap import ensure_contracts_src_on_path
+try:
+    from ._bootstrap import ensure_contracts_src_on_path
+except ImportError:  # pragma: no cover - standalone module loading in file-based tests
+    bootstrap_path = Path(__file__).with_name('_bootstrap.py')
+    bootstrap_spec = importlib.util.spec_from_file_location('vgo_installer_runtime_packaging_bootstrap', bootstrap_path)
+    if bootstrap_spec is None or bootstrap_spec.loader is None:
+        raise
+    bootstrap_module = importlib.util.module_from_spec(bootstrap_spec)
+    sys.modules.setdefault(bootstrap_spec.name, bootstrap_module)
+    bootstrap_spec.loader.exec_module(bootstrap_module)
+    ensure_contracts_src_on_path = bootstrap_module.ensure_contracts_src_on_path
 
 ensure_contracts_src_on_path()
 
@@ -12,9 +24,6 @@ from vgo_contracts.discoverable_entry_surface import load_discoverable_entry_sur
 try:
     from ._io import load_json
 except ImportError:  # pragma: no cover - standalone module loading in file-based tests
-    import importlib.util
-    import sys
-
     io_path = Path(__file__).with_name('_io.py')
     spec = importlib.util.spec_from_file_location('vgo_installer_runtime_packaging_io', io_path)
     if spec is None or spec.loader is None:

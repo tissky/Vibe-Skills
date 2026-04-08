@@ -20,7 +20,14 @@ Go straight to:
 
 The main entry there is not a wall of commands. It is a prompt you can copy into your AI assistant.
 
-If your host already exposes discoverable `vibe` launch surfaces, the common entries are:
+The current public host-visible wrapper set is fixed to these four entries:
+
+- `vibe`
+- `vibe-want`
+- `vibe-how`
+- `vibe-do`
+
+If your host supports menu-style rendering, it will usually display them as:
 
 - `Vibe`
 - `Vibe: What Do I Want?`
@@ -29,10 +36,10 @@ If your host already exposes discoverable `vibe` launch surfaces, the common ent
 
 They still resolve to the same governed `vibe` runtime. The difference is the default stop target:
 
-- `Vibe`: run the full governed flow
-- `Vibe: What Do I Want?`: clarify goals, boundaries, and acceptance criteria first
-- `Vibe: How Do We Do It?`: freeze the requirement and plan
-- `Vibe: Do It`: execute the full governed flow without skipping requirement or plan
+- `vibe` / `Vibe`: run the full governed flow
+- `vibe-want` / `Vibe: What Do I Want?`: clarify goals, boundaries, and acceptance criteria first
+- `vibe-how` / `Vibe: How Do We Do It?`: freeze the requirement and plan
+- `vibe-do` / `Vibe: Do It`: execute the full governed flow without skipping requirement or plan
 
 If you want a heavier execution lane, use only:
 

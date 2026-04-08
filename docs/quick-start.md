@@ -20,7 +20,14 @@
 
 这里的主入口不是一堆命令，而是一段可以直接复制给 AI 的安装提示词。
 
-如果宿主已经把 `vibe` 暴露成可发现入口，你现在会看到这几种常见入口：
+当前公开投影出来的宿主可见入口固定是这四个 wrapper：
+
+- `vibe`
+- `vibe-want`
+- `vibe-how`
+- `vibe-do`
+
+如果宿主支持菜单化展示，它通常会把它们显示成这几种标签：
 
 - `Vibe`
 - `Vibe: What Do I Want?`
@@ -29,10 +36,10 @@
 
 它们都还是同一个 `vibe` governed runtime，只是默认停靠点不同：
 
-- `Vibe`：走完整受管流程
-- `Vibe: What Do I Want?`：先把目标、边界、验收标准说清楚
-- `Vibe: How Do We Do It?`：冻结 requirement 和 plan
-- `Vibe: Do It`：执行完整流程，但不会跳过 requirement / plan
+- `vibe` / `Vibe`：走完整受管流程
+- `vibe-want` / `Vibe: What Do I Want?`：先把目标、边界、验收标准说清楚
+- `vibe-how` / `Vibe: How Do We Do It?`：冻结 requirement 和 plan
+- `vibe-do` / `Vibe: Do It`：执行完整流程，但不会跳过 requirement / plan
 
 如果你希望提高执行强度，只用：
 

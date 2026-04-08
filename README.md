@@ -64,7 +64,7 @@ If your AI supports skills, VibeSkills works. 340+ skills spanning coding, resea
 <br/><br/>
 
 <kbd>Install</kbd> &nbsp;→&nbsp;
-<kbd>/vibe or $vibe</kbd> &nbsp;→&nbsp;
+<kbd>vibe | vibe-want | vibe-how | vibe-do</kbd> &nbsp;→&nbsp;
 <kbd>Smart Routing</kbd> &nbsp;→&nbsp;
 <kbd>M / L / XL Execution</kbd> &nbsp;→&nbsp;
 <kbd>Governance Verification</kbd> &nbsp;→&nbsp;
@@ -92,7 +92,7 @@ If your AI supports skills, VibeSkills works. 340+ skills spanning coding, resea
 |:---|:---|
 | **VibeSkills / VCO** | This project. VCO = Vibe Code Orchestrator — the runtime engine behind the skills. |
 | **Skill** | A focused capability module (e.g., `tdd-guide`, `code-review`). Think of skills as expert assistants the system calls on demand. |
-| **Governed runtime** | When you invoke `/vibe`, the system follows a structured process — clarify → plan → execute → verify — instead of diving in blindly. Some hosts may show discoverable labels like `Vibe: What Do I Want?` or `Vibe: Do It`, but they still resolve to the same canonical runtime authority. |
+| **Governed runtime** | When you invoke `vibe`, the system follows a structured process — clarify → plan → execute → verify — instead of diving in blindly. The public discoverable wrapper set is `vibe`, `vibe-want`, `vibe-how`, and `vibe-do`; hosts may render them as labels like `Vibe: What Do I Want?`, but they still resolve to the same canonical runtime authority. |
 | **Canonical Router** | The internal logic that decides which skill to activate for your task. Just invoke `/vibe` and let it route automatically. |
 | **M / L / XL grade** | Task complexity level. M = quick focused task, L = multi-step task, XL = large task with parallel work. Automatically selected. Public overrides are limited to `--l` and `--xl`; they are execution preferences, not separate entrypoints. |
 | **Frozen requirement** | Once you confirm the plan, it is "frozen" — the system will not silently change scope mid-task. |
@@ -236,7 +236,7 @@ After selecting the primary skill, the router also automatically determines the 
 
 </div>
 
-> The system automatically selects the level after requirements clarification, before plan execution. Users can still invoke `/vibe` or `$vibe` directly, or select a discoverable host label such as `Vibe`, `Vibe: What Do I Want?`, `Vibe: How Do We Do It?`, or `Vibe: Do It`.
+> The system automatically selects the level after requirements clarification, before plan execution. Public host-visible entry wrappers ship as `vibe`, `vibe-want`, `vibe-how`, and `vibe-do`. Hosts may render them as `Vibe`, `Vibe: What Do I Want?`, `Vibe: How Do We Do It?`, and `Vibe: Do It`, but they still route into the same governed runtime.
 >
 > When the system calls a specialist skill internally (like `tdd-guide` or `code-review`), it is always scoped to a specific phase — they assist without taking over the overall coordination. In XL tasks with multiple agents, worker agents (child lanes) can suggest specialist help, but the coordinator (root) approves it before execution.
 >
