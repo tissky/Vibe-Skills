@@ -162,8 +162,24 @@ function Check-HostVisibleDiscoverableEntries {
   }
 
   $missingPaths = New-Object System.Collections.Generic.List[string]
+  $targetRootFull = Normalize-ComparablePath -Path $TargetRoot
   foreach ($wrapperPath in $wrapperPaths) {
-    if (-not (Test-Path -LiteralPath $wrapperPath -PathType Leaf)) {
+    $candidatePath = $wrapperPath
+    if (-not [System.IO.Path]::IsPathRooted($candidatePath)) {
+      $candidatePath = Join-Path $TargetRoot $candidatePath
+    }
+    try {
+      $wrapperFull = Normalize-ComparablePath -Path $candidatePath
+    } catch {
+      $missingPaths.Add($wrapperPath)
+      continue
+    }
+    $underTarget = $false
+    if ($null -ne $wrapperFull -and $null -ne $targetRootFull) {
+      $underTarget = $wrapperFull.Equals($targetRootFull, [System.StringComparison]::OrdinalIgnoreCase) -or `
+        $wrapperFull.StartsWith($targetRootFull + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)
+    }
+    if (-not $underTarget -or -not (Test-Path -LiteralPath $candidatePath -PathType Leaf)) {
       $missingPaths.Add($wrapperPath)
     }
   }
@@ -184,7 +200,7 @@ function Normalize-ComparablePath {
     return $null
   }
 
-  return [System.IO.Path]::GetFullPath($Path).TrimEnd([char[]]@('\\','/')).ToLowerInvariant()
+  return [System.IO.Path]::GetFullPath($Path).TrimEnd([char[]]@('\','/')).ToLowerInvariant()
 }
 
 function Format-OptionalValue {

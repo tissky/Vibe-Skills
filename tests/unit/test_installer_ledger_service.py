@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACTS_SRC = ROOT / 'packages' / 'contracts' / 'src'
@@ -172,6 +173,33 @@ def test_payload_summary_counts_mcp_receipt_when_present(tmp_path) -> None:
     refreshed = build_payload_summary(tmp_path, ledger)
 
     assert refreshed['installed_file_count'] == 2
+
+
+def test_build_payload_summary_ignores_wrapper_paths_outside_target_root(tmp_path) -> None:
+    with tempfile.TemporaryDirectory() as external_dir:
+        external_wrapper = Path(external_dir) / 'vibe-how.md'
+        external_wrapper.write_text('# vibe-how\n', encoding='utf-8')
+
+        summary = build_payload_summary(
+            tmp_path,
+            {
+                'managed_skill_names': [],
+                'specialist_wrapper_paths': [str(external_wrapper)],
+                'packaging_manifest': {},
+                'runtime_roots': [],
+                'compatibility_roots': [],
+                'sidecar_roots': [],
+                'owned_tree_roots': [],
+                'created_paths': [],
+                'managed_json_paths': [],
+                'generated_from_template_if_absent': [],
+                'merged_files': [],
+                'config_rollbacks': [],
+            },
+        )
+
+    assert summary['host_visible_entry_names'] == []
+    assert summary['host_visible_entry_count'] == 0
 
 
 def test_sanitize_managed_skill_names_stays_safe_with_v2_owned_root_like_values() -> None:

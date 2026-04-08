@@ -158,15 +158,6 @@ def build_payload_summary(target_root: Path | str, ledger: dict) -> dict[str, ob
         for name in managed_skill_names
         if not name.startswith('.') and (target_root_path / 'skills' / name).is_dir()
     )
-    host_visible_entry_names: set[str] = set()
-    for raw_path in ledger.get('specialist_wrapper_paths') or []:
-        candidate = Path(str(raw_path)).resolve(strict=False)
-        if not candidate.is_file():
-            continue
-        name = candidate.parent.name if candidate.name == 'SKILL.md' else candidate.stem
-        normalized = _normalize_skill_name(name)
-        if normalized is not None:
-            host_visible_entry_names.add(normalized)
     packaging_manifest = ledger.get('packaging_manifest') if isinstance(ledger.get('packaging_manifest'), dict) else {}
     internal_skill_corpus = packaging_manifest.get('internal_skill_corpus') if isinstance(packaging_manifest, dict) else {}
     internal_skill_target = None
@@ -202,6 +193,16 @@ def build_payload_summary(target_root: Path | str, ledger: dict) -> dict[str, ob
         else:
             candidate = candidate.resolve(strict=False)
         return candidate
+
+    host_visible_entry_names: set[str] = set()
+    for raw_path in ledger.get('specialist_wrapper_paths') or []:
+        candidate = resolve_owned_candidate(str(raw_path))
+        if not is_under_target_root(candidate) or not candidate.is_file():
+            continue
+        name = candidate.parent.name if candidate.name == 'SKILL.md' else candidate.stem
+        normalized = _normalize_skill_name(name)
+        if normalized is not None:
+            host_visible_entry_names.add(normalized)
 
     def collect_owned_tree(path_value: Path | str) -> None:
         candidate = resolve_owned_candidate(path_value)

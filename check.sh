@@ -436,9 +436,24 @@ check_host_visible_discoverable_entries() {
   fi
 
   local missing_paths=()
+  local normalized_target_root
+  normalized_target_root="$(normalize_path "${TARGET_ROOT}")"
   local path=""
   for path in "${wrapper_paths[@]}"; do
-    [[ -f "${path}" ]] || missing_paths+=("${path}")
+    local candidate_path="${path}"
+    local normalized_path=""
+    if [[ "${candidate_path}" != /* ]]; then
+      candidate_path="${TARGET_ROOT}/${candidate_path}"
+    fi
+    normalized_path="$(normalize_path "${candidate_path}")"
+    case "${normalized_path}" in
+      "${normalized_target_root}"|"${normalized_target_root}/"*) ;;
+      *)
+        missing_paths+=("${path}")
+        continue
+        ;;
+    esac
+    [[ -f "${candidate_path}" ]] || missing_paths+=("${path}")
   done
 
   if [[ ${#missing_paths[@]} -eq 0 ]]; then
