@@ -22,6 +22,8 @@ _TASK_TYPE_RULES = (
     ('coding', ('implement', 'build', 'upgrade', '更新', '增强', '执行', 'extract', 'refactor', 'runtime', 'core', 'code')),
 )
 
+ALLOWED_VIBE_ENTRY_IDS = {'vibe', 'vibe-want', 'vibe-how', 'vibe-do'}
+
 
 def infer_task_type(task: str) -> str:
     task_lower = str(task).lower()
@@ -33,6 +35,8 @@ def infer_task_type(task: str) -> str:
 
 def route_runtime_task(task: str, requested_skill: str | None = None) -> RuntimeRoute:
     selected_skill = str(requested_skill or 'vibe').strip() or 'vibe'
+    if selected_skill not in ALLOWED_VIBE_ENTRY_IDS:
+        raise ValueError(f'unsupported vibe entry id: {requested_skill}')
     return RuntimeRoute(
         requested_skill=requested_skill,
         router_selected_skill=selected_skill,

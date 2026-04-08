@@ -35,3 +35,44 @@ def test_runtime_packet_execution_runs_fixed_stage_sequence() -> None:
     assert result.route['runtime_selected_skill'] == 'vibe'
     assert result.route['task_type'] == 'coding'
     assert result.plan['internal_grade'] == 'L'
+
+
+def test_runtime_packet_execution_stops_after_requested_stage_stop() -> None:
+    result = execute_runtime_packet(
+        RuntimePacket(
+            goal='produce requirement and plan only',
+            stage='skeleton_check',
+            entry_intent_id='vibe-how',
+            requested_stage_stop='xl_plan',
+        ),
+        mode='interactive_governed',
+        requested_skill='vibe-how',
+    )
+
+    assert [receipt['stage'] for receipt in result.stage_receipts] == [
+        'skeleton_check',
+        'deep_interview',
+        'requirement_doc',
+        'xl_plan',
+    ]
+    assert result.final_packet.stage == 'xl_plan'
+    assert result.route['runtime_selected_skill'] == 'vibe'
+    assert result.route['requested_skill'] == 'vibe-how'
+
+
+def test_runtime_packet_execution_applies_requested_grade_floor() -> None:
+    result = execute_runtime_packet(
+        RuntimePacket(
+            goal='extract runtime core',
+            stage='skeleton_check',
+            entry_intent_id='vibe-do',
+            requested_stage_stop='phase_cleanup',
+            requested_grade_floor='XL',
+        ),
+        mode='interactive_governed',
+        requested_skill='vibe-do',
+    )
+
+    assert result.plan['requested_grade_floor'] == 'XL'
+    assert result.plan['requested_stage_stop'] == 'phase_cleanup'
+    assert result.plan['internal_grade'] == 'XL'

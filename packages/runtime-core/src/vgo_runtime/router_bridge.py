@@ -59,6 +59,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument('--grade', default='M', choices=['M', 'L', 'XL'])
     parser.add_argument('--task-type', default='planning', choices=['planning', 'coding', 'review', 'debug', 'research'])
     parser.add_argument('--requested-skill')
+    parser.add_argument('--entry-intent-id')
+    parser.add_argument('--requested-grade-floor', choices=['L', 'XL'])
     parser.add_argument('--host-id')
     parser.add_argument('--target-root')
     parser.add_argument('--force-runtime-neutral', action='store_true')
