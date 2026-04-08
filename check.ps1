@@ -152,7 +152,7 @@ function Check-HostVisibleDiscoverableEntries {
   $wrapperPaths = if ($ledger.PSObject.Properties.Name -contains 'specialist_wrapper_paths') { @($ledger.specialist_wrapper_paths | ForEach-Object { [string]$_ }) } else { @() }
 
   if ($entryNames.Count -eq 0 -or $wrapperPaths.Count -eq 0) {
-    if ($HostId -in @('codex', 'opencode')) {
+    if ($HostId -in @('codex', 'claude-code', 'cursor', 'windsurf', 'openclaw', 'opencode')) {
       Write-Host '[FAIL] host-visible discoverable entries -> missing wrapper inventory' -ForegroundColor Red
       $script:fail++
     } else {

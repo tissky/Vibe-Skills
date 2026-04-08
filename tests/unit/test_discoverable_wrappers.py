@@ -27,3 +27,18 @@ def test_build_wrapper_descriptors_renders_all_discoverable_entries_for_codex() 
     assert rendered['vibe-how'].relpath.as_posix() == 'commands/vibe-how.md'
     assert 'Vibe: How Do We Do It?' in rendered['vibe-how'].content
     assert 'Use the `vibe` skill' in rendered['vibe-how'].content
+
+
+def test_build_wrapper_descriptors_renders_skill_wrappers_for_skill_only_hosts() -> None:
+    surface = load_discoverable_entry_surface(ROOT)
+
+    rendered = build_wrapper_descriptors(
+        host_id='claude-code',
+        surface=surface,
+    )
+
+    assert sorted(rendered) == ['vibe', 'vibe-do', 'vibe-how', 'vibe-want']
+    assert rendered['vibe-how'].relpath.as_posix() == 'skills/vibe-how/SKILL.md'
+    assert 'name: vibe-how' in rendered['vibe-how'].content
+    assert 'Vibe: How Do We Do It?' in rendered['vibe-how'].content
+    assert '$ARGUMENTS' in rendered['vibe-how'].content

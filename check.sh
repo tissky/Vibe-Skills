@@ -425,7 +425,7 @@ check_host_visible_discoverable_entries() {
   mapfile -t wrapper_paths < <(json_query_lines_from_file "${ledger_path}" 'specialist_wrapper_paths' 2>/dev/null || true)
 
   if [[ ${#entry_names[@]} -eq 0 || ${#wrapper_paths[@]} -eq 0 ]]; then
-    if [[ "${HOST_ID}" == "codex" || "${HOST_ID}" == "opencode" ]]; then
+    if [[ "${HOST_ID}" == "codex" || "${HOST_ID}" == "claude-code" || "${HOST_ID}" == "cursor" || "${HOST_ID}" == "windsurf" || "${HOST_ID}" == "openclaw" || "${HOST_ID}" == "opencode" ]]; then
       echo "[FAIL] host-visible discoverable entries -> missing wrapper inventory"
       FAIL=$((FAIL+1))
     else

@@ -74,6 +74,7 @@ ledger_state = {
     "merged_files": {},
     "template_generated": set(),
     "specialist_wrapper_paths": [],
+    "bridge_launcher_paths": [],
     "runtime_roots": set(),
     "compatibility_roots": set(),
     "sidecar_roots": set(),
@@ -144,6 +145,15 @@ def record_specialist_wrapper(path: Path) -> None:
         resolved = str(path)
     if resolved not in ledger_state["specialist_wrapper_paths"]:
         ledger_state["specialist_wrapper_paths"].append(resolved)
+
+
+def record_bridge_launcher(path: Path) -> None:
+    try:
+        resolved = str(path.resolve())
+    except FileNotFoundError:
+        resolved = str(path)
+    if resolved not in ledger_state["bridge_launcher_paths"]:
+        ledger_state["bridge_launcher_paths"].append(resolved)
 
 
 def record_runtime_root(path: Path | str) -> None:
@@ -228,6 +238,7 @@ def materialization_state_from_ledger_state() -> MaterializationLedgerState:
         merged_files=dict(ledger_state["merged_files"]),
         generated_from_template_if_absent=set(ledger_state["template_generated"]),
         specialist_wrapper_paths=list(ledger_state["specialist_wrapper_paths"]),
+        bridge_launcher_paths=list(ledger_state["bridge_launcher_paths"]),
         runtime_roots=set(ledger_state["runtime_roots"]),
         compatibility_roots=set(ledger_state["compatibility_roots"]),
         sidecar_roots=set(ledger_state["sidecar_roots"]),
@@ -569,12 +580,19 @@ def main(argv: list[str] | None = None):
     else:
         raise SystemExit(f"Unsupported adapter install mode: {mode}")
 
-    for wrapper_path in materialize_host_visible_wrappers(
+    wrapper_paths = materialize_host_visible_wrappers(
         repo_root=repo_root,
         target_root=target_root,
         host_id=adapter["id"],
         surface=dict(packaging.get("public_skill_surface") or {}),
-    ):
+    )
+    discoverable_entry_surface = str((packaging.get("public_skill_surface") or {}).get("discoverable_entry_surface") or "").strip()
+    if discoverable_entry_surface and adapter.get("discoverable_entries") and not wrapper_paths:
+        raise SystemExit(
+            "Discoverable wrapper projection for "
+            f"'{adapter['id']}' produced no host-visible entries."
+        )
+    for wrapper_path in wrapper_paths:
         track_created_path(wrapper_path)
         record_specialist_wrapper(wrapper_path)
 
@@ -583,7 +601,7 @@ def main(argv: list[str] | None = None):
         adapter,
         track_created_path=track_created_path,
         record_managed_json=record_managed_json,
-        record_specialist_wrapper=record_specialist_wrapper,
+        record_bridge_launcher=record_bridge_launcher,
     )
     record_sidecar_root(target_root / ".vibeskills")
     require_closed_ready_effective = bool(args.require_closed_ready and is_closed_ready_required(adapter))
