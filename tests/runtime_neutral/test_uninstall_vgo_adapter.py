@@ -228,6 +228,18 @@ class UnifiedUninstallTests(unittest.TestCase):
             self.assertIn(rel, payload["deleted_paths"])
             self.assertFalse((self.target_root / rel).exists())
 
+    def test_legacy_cursor_uninstall_preserves_codex_only_compatibility_projection(self) -> None:
+        rel = "skills/vibe-upgrade/SKILL.md"
+        path = self.target_root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("---\nname: fixture\n---\n", encoding="utf-8")
+
+        _, payload = self.run_python_uninstall(host="cursor")
+
+        self.assertTrue(path.exists())
+        self.assertNotIn(rel, payload["deleted_paths"])
+        self.assertIn(rel, payload["skipped_foreign_paths"])
+
     def test_planner_uses_host_closure_and_mutates_shared_json_owned_only(self) -> None:
         closure_path = self.target_root / ".vibeskills" / "host-closure.json"
         wrapper_path = self.target_root / ".vibeskills" / "bin" / "cursor-specialist-wrapper.sh"

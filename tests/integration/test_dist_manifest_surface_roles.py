@@ -301,3 +301,15 @@ def test_codex_command_templates_are_labeled_as_compatibility_shims() -> None:
         "commands/vibe-do-it.md",
     ):
         assert "compatibility shim" in _read_text(rel).lower(), rel
+
+
+def test_vibe_wrapper_skill_templates_declare_canonical_vibe_delegation() -> None:
+    for rel in (
+        "bundled/skills/vibe-what-do-i-want/SKILL.md",
+        "bundled/skills/vibe-how-do-we-do/SKILL.md",
+        "bundled/skills/vibe-do-it/SKILL.md",
+        "bundled/skills/vibe-upgrade/SKILL.md",
+    ):
+        text = _read_text(rel).lower()
+        assert "canonical `vibe`" in text or "canonical vibe" in text, rel
+        assert "only governed runtime authority" in text, rel

@@ -259,6 +259,7 @@ def build_payload_summary(target_root: Path | str, ledger: dict) -> dict[str, ob
     # as installer-owned payload so fresh installs and refreshed ledgers agree.
     collect_owned_file(target_root_path / '.vibeskills' / 'install-ledger.json')
     collect_owned_file(target_root_path / '.vibeskills' / 'mcp-auto-provision.json')
+    collect_owned_file(target_root_path / '.vibeskills' / 'upgrade-status.json')
 
     return {
         'installed_skill_count': len(installed_skill_names),

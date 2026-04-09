@@ -15,8 +15,9 @@ for src in (CLI_SRC, RUNTIME_SRC):
     if str(src) not in sys.path:
         sys.path.insert(0, str(src))
 
-from vgo_cli.commands import install_command, route_command, runtime_command, verify_command
+from vgo_cli.commands import install_command, route_command, runtime_command, upgrade_command, verify_command
 from vgo_cli.errors import CliError
+from vgo_cli.main import build_parser
 from vgo_cli.output import parse_json_output, print_install_completion_hint, print_json_payload
 from vgo_runtime import router_bridge
 
@@ -359,3 +360,57 @@ def test_install_command_skips_external_dependency_install_when_strict_offline(
     assert install_command(args) == 0
     assert 'external_called' not in recorded
     assert recorded['reconcile']['strict_offline'] is True
+
+
+def test_build_parser_exposes_upgrade_subcommand() -> None:
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            'upgrade',
+            '--repo-root',
+            'repo-root',
+            '--host',
+            'codex',
+        ]
+    )
+
+    assert args.command == 'upgrade'
+    assert args.host == 'codex'
+    assert args.handler is upgrade_command
+
+
+def test_upgrade_command_delegates_to_upgrade_service(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    import vgo_cli.commands as cli_commands
+
+    recorded: dict[str, object] = {}
+    resolved_target_root = tmp_path / 'resolved-target'
+
+    def fake_upgrade_runtime(**kwargs: object) -> dict[str, object]:
+        recorded.update(kwargs)
+        return {'changed': False}
+
+    monkeypatch.setattr(cli_commands, 'resolve_target_root', lambda host_id, target_root: resolved_target_root)
+    monkeypatch.setattr(cli_commands, 'assert_target_root_matches_host_intent', lambda target_root, host_id: None)
+    monkeypatch.setattr(cli_commands, 'upgrade_runtime', fake_upgrade_runtime)
+
+    args = argparse.Namespace(
+        repo_root=str(tmp_path),
+        frontend='shell',
+        profile='full',
+        host='codex',
+        target_root='',
+        install_external=False,
+        strict_offline=False,
+        require_closed_ready=False,
+        allow_external_skill_fallback=False,
+        skip_runtime_freshness_gate=False,
+    )
+
+    assert upgrade_command(args) == 0
+    assert recorded['repo_root'] == tmp_path.resolve()
+    assert recorded['target_root'] == resolved_target_root
+    assert recorded['host_id'] == 'codex'
+    assert recorded['profile'] == 'full'
+    assert recorded['frontend'] == 'shell'
+    assert resolved_target_root.is_dir()

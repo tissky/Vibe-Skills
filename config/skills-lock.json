@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generated_at": "2026-04-08T19:46:52+08:00",
+  "generated_at": "2026-04-09T19:29:51+08:00",
   "source": "bundled/skills",
-  "skill_count": 342,
-  "total_bytes": 21176975.0,
+  "skill_count": 343,
+  "total_bytes": 21177958.0,
   "skills": [
     {
       "name": ".system",
@@ -2628,6 +2628,14 @@
       "bytes": 708,
       "skill_md_hash": "03167f9b514c07a9494d0e02114d7030dbe0447189f9aae6d60ac915ccdbf6ae",
       "dir_hash": "a4040c4db1d1328e555e551ff63e25d370a3375586255960913f9a0c9edea071"
+    },
+    {
+      "name": "vibe-upgrade",
+      "relative_path": "bundled/skills/vibe-upgrade",
+      "file_count": 1,
+      "bytes": 983,
+      "skill_md_hash": "0ded1670f72081378ebf51b71c7860344a213a6a74017c3e7f3a418949c5136b",
+      "dir_hash": "b98fbce0059d57d91715e73d02a831cb115af70e6feb6432b277c802201fbb72"
     },
     {
       "name": "vibe-what-do-i-want",

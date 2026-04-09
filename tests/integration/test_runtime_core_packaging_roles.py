@@ -16,6 +16,7 @@ MODULE_PATH = REPO_ROOT / 'packages' / 'installer-core' / 'src' / 'vgo_installer
 CODEX_VIBE_WRAPPER_SKILLS = [
     'vibe-do-it',
     'vibe-how-do-we-do',
+    'vibe-upgrade',
     'vibe-what-do-i-want',
 ]
 

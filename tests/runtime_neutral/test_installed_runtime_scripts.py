@@ -35,6 +35,7 @@ CODEX_WRAPPER_SKILL_NAMES = {
     "vibe-what-do-i-want",
     "vibe-how-do-we-do",
     "vibe-do-it",
+    "vibe-upgrade",
 }
 
 
@@ -347,6 +348,29 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         )
         for skill_name in CODEX_WRAPPER_SKILL_NAMES:
             self.assertTrue((skills_root / skill_name / "SKILL.md").exists(), skill_name)
+
+    def test_shell_install_materializes_upgrade_runtime_modules(self) -> None:
+        self.install_shell_runtime("codex")
+
+        installed_root = self.target_root / "skills" / "vibe" / "apps" / "vgo-cli" / "src" / "vgo_cli"
+        self.assertTrue((installed_root / "upgrade_state.py").exists())
+        self.assertTrue((installed_root / "upgrade_service.py").exists())
+        self.assertTrue((installed_root / "version_reminder.py").exists())
+
+    def test_shell_install_writes_upgrade_status_sidecar(self) -> None:
+        self.install_shell_runtime("codex")
+
+        status_path = self.target_root / ".vibeskills" / "upgrade-status.json"
+        self.assertTrue(status_path.exists())
+        payload = json.loads(status_path.read_text(encoding="utf-8"))
+
+        self.assertEqual("codex", payload["host_id"])
+        self.assertEqual(str(self.target_root.resolve()), payload["target_root"])
+        self.assertEqual("main", payload["repo_default_branch"])
+        self.assertTrue(payload["repo_remote"].endswith("/Vibe-Skills.git"))
+        self.assertTrue(payload["installed_version"])
+        self.assertTrue(payload["installed_commit"])
+        self.assertFalse(payload["update_available"])
 
     def test_installed_codex_check_accepts_hyphen_command_shim_surface(self) -> None:
         self.install_shell_runtime("codex")

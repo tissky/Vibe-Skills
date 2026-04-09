@@ -17,6 +17,7 @@ FULL_PUBLIC_WRAPPER_SKILLS = {
     "vibe-what-do-i-want",
     "vibe-how-do-we-do",
     "vibe-do-it",
+    "vibe-upgrade",
 }
 
 
@@ -137,7 +138,7 @@ class InstallProfileDifferentiationTests(unittest.TestCase):
                 full_ledger["payload_summary"]["installed_skill_count"],
                 minimal_ledger["payload_summary"]["installed_skill_count"],
             )
-            self.assertEqual(4, full_ledger["payload_summary"]["public_skill_count"])
+            self.assertEqual(len(FULL_PUBLIC_WRAPPER_SKILLS), full_ledger["payload_summary"]["public_skill_count"])
             self.assertEqual(sorted(FULL_PUBLIC_WRAPPER_SKILLS), full_ledger["payload_summary"]["public_skill_names"])
             self.assertEqual(["vibe", "vibe-do", "vibe-how", "vibe-want"], full_ledger["payload_summary"]["host_visible_entry_names"])
             self.assertEqual(4, full_ledger["payload_summary"]["host_visible_entry_count"])
@@ -151,6 +152,7 @@ class InstallProfileDifferentiationTests(unittest.TestCase):
                     "skills/vibe-what-do-i-want",
                     "skills/vibe-how-do-we-do",
                     "skills/vibe-do-it",
+                    "skills/vibe-upgrade",
                 }.issubset(set(full_ledger["compatibility_roots"]))
             )
 

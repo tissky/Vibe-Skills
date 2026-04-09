@@ -103,7 +103,8 @@
       "compatibility_skill_projections": [
         "vibe-what-do-i-want",
         "vibe-how-do-we-do",
-        "vibe-do-it"
+        "vibe-do-it",
+        "vibe-upgrade"
       ]
     }
   },
@@ -143,7 +144,8 @@
     "projected_skill_names": [
       "vibe-what-do-i-want",
       "vibe-how-do-we-do",
-      "vibe-do-it"
+      "vibe-do-it",
+      "vibe-upgrade"
     ],
     "host_allowlist": [
       "codex"

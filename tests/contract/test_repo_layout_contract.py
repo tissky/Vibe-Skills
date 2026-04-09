@@ -17,6 +17,7 @@ REQUIRED_CODEX_VIBE_WRAPPER_SKILLS = [
     "bundled/skills/vibe-what-do-i-want/SKILL.md",
     "bundled/skills/vibe-how-do-we-do/SKILL.md",
     "bundled/skills/vibe-do-it/SKILL.md",
+    "bundled/skills/vibe-upgrade/SKILL.md",
 ]
 
 

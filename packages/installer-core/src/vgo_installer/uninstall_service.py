@@ -15,6 +15,7 @@ from vgo_contracts.runtime_surface_contract import uses_skill_only_activation
 from vgo_contracts.mirror_topology_contract import resolve_generated_nested_compatibility_suffix
 
 from .adapter_registry import resolve_adapter
+from .materializer import compatibility_projection_names
 from .runtime_packaging import resolve_runtime_core_packaging
 
 
@@ -123,6 +124,13 @@ def runtime_core_inventory(repo_root: Path) -> set[str]:
                     continue
                 inventory.update(collect_file_inventory(candidate, f"{target_prefix}/{candidate.name}"))
 
+    projections = packaging.get("compatibility_skill_projections") or {}
+    projection_root = normalize_relpath(str(projections.get("target_root") or "skills")) or "skills"
+    projected_names = compatibility_projection_names(packaging, host_id=None)
+    bundled_source = repo_root / str(packaging.get("bundled_skills_source") or "bundled/skills")
+    for name in projected_names:
+        inventory.update(collect_file_inventory(bundled_source / name, f"{projection_root}/{name}"))
+
     target_rel = normalize_relpath(
         (packaging.get("canonical_vibe_payload") or {}).get("target_relpath")
         or (packaging.get("canonical_vibe_mirror") or {}).get("target_relpath")
@@ -147,6 +155,9 @@ def runtime_core_inventory(repo_root: Path) -> set[str]:
 
 def host_inventory(repo_root: Path, host_id: str) -> set[str]:
     inventory = runtime_core_inventory(repo_root)
+    packaging = resolve_runtime_core_packaging(repo_root, "full")
+    projections = packaging.get("compatibility_skill_projections") or {}
+    projection_root = normalize_relpath(str(projections.get("target_root") or "skills")) or "skills"
     if host_id == "codex":
         inventory.update(collect_file_inventory(repo_root / "rules", "rules"))
         inventory.update(collect_file_inventory(repo_root / "agents" / "templates", "agents/templates"))
@@ -155,6 +166,7 @@ def host_inventory(repo_root: Path, host_id: str) -> set[str]:
         inventory.update(collect_file_inventory(repo_root / "bundled" / "skills" / "vibe-what-do-i-want", "skills/vibe-what-do-i-want"))
         inventory.update(collect_file_inventory(repo_root / "bundled" / "skills" / "vibe-how-do-we-do", "skills/vibe-how-do-we-do"))
         inventory.update(collect_file_inventory(repo_root / "bundled" / "skills" / "vibe-do-it", "skills/vibe-do-it"))
+        inventory.update(collect_file_inventory(repo_root / "bundled" / "skills" / "vibe-upgrade", "skills/vibe-upgrade"))
         inventory.update(
             {
                 "commands/vibe-what-do-i-want.md",
@@ -170,6 +182,9 @@ def host_inventory(repo_root: Path, host_id: str) -> set[str]:
         inventory.add("opencode.json.example")
     elif host_id in {"windsurf", "openclaw"}:
         inventory.update(collect_file_inventory(repo_root / "commands", "global_workflows"))
+    if host_id != "codex":
+        for name in compatibility_projection_names(packaging, host_id="codex"):
+            inventory.difference_update(collect_file_inventory(repo_root / "bundled" / "skills" / name, f"{projection_root}/{name}"))
     if uses_skill_only_activation(host_id):
         inventory.add(".vibeskills/host-settings.json")
         inventory.add(".vibeskills/host-closure.json")
