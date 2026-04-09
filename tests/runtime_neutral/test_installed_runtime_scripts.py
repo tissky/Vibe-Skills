@@ -1007,6 +1007,60 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         self.assertNotEqual(0, check_result.returncode)
         self.assertIn("duplicate Codex-discovered vibe skill surface", check_result.stdout)
 
+    def test_powershell_check_fails_when_legacy_agents_duplicate_is_reintroduced_with_trailing_separator(self) -> None:
+        powershell = resolve_powershell()
+        if powershell is None:
+            self.skipTest("PowerShell executable not available in PATH")
+
+        home_root = self.root / "home-trailing"
+        target_root = home_root / ".codex"
+        target_root.mkdir(parents=True, exist_ok=True)
+
+        env = os.environ.copy()
+        env["HOME"] = str(home_root)
+
+        install_cmd = [
+            powershell,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(REPO_ROOT / "install.ps1"),
+            "-HostId",
+            "codex",
+            "-Profile",
+            "full",
+            "-TargetRoot",
+            str(target_root),
+        ]
+        subprocess.run(install_cmd, capture_output=True, text=True, check=True, env=env)
+
+        duplicate_root = home_root / ".agents" / "skills" / "vibe"
+        duplicate_root.mkdir(parents=True, exist_ok=True)
+        (duplicate_root / "SKILL.md").write_text(
+            "---\nname: vibe\ndescription: legacy duplicate\n---\n",
+            encoding="utf-8",
+        )
+
+        installed_root = target_root / "skills" / "vibe"
+        check_cmd = [
+            powershell,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(installed_root / "check.ps1"),
+            "-HostId",
+            "codex",
+            "-Profile",
+            "full",
+            "-TargetRoot",
+            str(target_root) + os.sep,
+        ]
+        check_result = subprocess.run(check_cmd, capture_output=True, text=True, env=env)
+        self.assertNotEqual(0, check_result.returncode)
+        self.assertIn("duplicate Codex-discovered vibe skill surface", check_result.stdout)
+
     def test_powershell_install_require_closed_ready_enforces_real_host_closure(self) -> None:
         powershell = resolve_powershell()
         if powershell is None:

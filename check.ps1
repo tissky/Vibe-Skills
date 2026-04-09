@@ -44,12 +44,21 @@ function Resolve-CodexDuplicateSkillRoot {
     return $null
   }
 
-  $leaf = [System.IO.Path]::GetFileName([System.IO.Path]::GetFullPath($TargetRoot)).ToLowerInvariant()
+  $normalizedTargetRoot = [System.IO.Path]::GetFullPath($TargetRoot)
+  $rootPath = [System.IO.Path]::GetPathRoot($normalizedTargetRoot)
+  if (-not [string]::IsNullOrWhiteSpace($rootPath) -and $normalizedTargetRoot.Length -gt $rootPath.Length) {
+    $normalizedTargetRoot = $normalizedTargetRoot.TrimEnd(
+      [System.IO.Path]::DirectorySeparatorChar,
+      [System.IO.Path]::AltDirectorySeparatorChar
+    )
+  }
+
+  $leaf = [System.IO.Path]::GetFileName($normalizedTargetRoot).ToLowerInvariant()
   if ($leaf -ne '.codex') {
     return $null
   }
 
-  $parent = Get-VgoParentPath -Path $TargetRoot
+  $parent = Get-VgoParentPath -Path $normalizedTargetRoot
   if ([string]::IsNullOrWhiteSpace($parent)) {
     return $null
   }
