@@ -79,7 +79,7 @@ Child-governed lanes must not:
 - `L` execution is handled in `do.md` as serial native execution; this protocol is not the default L executor.
 - `XL` execution is wave-sequential by dependency.
 - Parallel work in `XL` is step-scoped and bounded to independent units only.
-- Specialist dispatch can be executable as bounded units only when root-approved in the frozen plan.
+- Specialist routing is expected on governed runs, and eligible bounded specialist recommendations should become executable dispatch by default.
 - Specialist dispatch is phase-bound: `pre_execution`, `in_execution`, `post_execution`, `verification`.
 - In `XL`, specialist lanes may join bounded parallel windows only when their write scopes are disjoint and their lane policy allows it.
 
@@ -120,7 +120,7 @@ Within XL execution, a specialist skill is a bounded helper, not a replacement r
 Rules:
 
 - `vibe` keeps final control of stage order, plan authority, and completion claims
-- specialist dispatch should be declared in the frozen plan before execution
+- specialist recommendations should always be surfaced in governed runtime output, and safe bounded recommendations should aggressively promote into effective dispatch
 - each specialist receives a bounded subtask contract plus the frozen requirement context
 - specialist outputs must stay in the native format or workflow expected by that specialist skill
 - each approved specialist also carries phase binding, lane policy, write scope, and review mode
@@ -130,7 +130,7 @@ Rules:
 Hierarchy-specific dispatch semantics:
 
 - `approved_dispatch`: specialist usage approved by root and frozen in plan; child lanes may execute directly
-- `local_suggestion`: child-lane specialist suggestion; advisory until explicit root escalation approval
+- `local_suggestion`: residual child-lane specialist suggestion that remains advisory only after safe same-round auto-promotion has been exhausted or blocked
 
 Escalation rule:
 

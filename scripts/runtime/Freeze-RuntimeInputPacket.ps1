@@ -300,6 +300,46 @@ function Get-VibeSpecialistBindingProfile {
     }
 }
 
+function Get-VibeFallbackSpecialistSkillIds {
+    param(
+        [Parameter(Mandatory)] [string]$TaskType,
+        [Parameter(Mandatory)] [object]$Policy,
+        [AllowEmptyString()] [string]$RouterSelectedSkill = '',
+        [AllowEmptyString()] [string]$RuntimeSelectedSkill = ''
+    )
+
+    $skillIds = @()
+    if (-not [string]::IsNullOrWhiteSpace($RouterSelectedSkill) -and
+        -not [string]::Equals($RouterSelectedSkill, $RuntimeSelectedSkill, [System.StringComparison]::OrdinalIgnoreCase)) {
+        $skillIds += [string]$RouterSelectedSkill
+    }
+
+    $fallbackByTaskType = if ($Policy.PSObject.Properties.Name -contains 'fallback_specialists_by_task_type') {
+        $Policy.fallback_specialists_by_task_type
+    } else {
+        $null
+    }
+    if ($null -eq $fallbackByTaskType) {
+        return @($skillIds | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+    }
+
+    foreach ($key in @($TaskType, 'default')) {
+        if ([string]::IsNullOrWhiteSpace([string]$key)) {
+            continue
+        }
+        if (-not ($fallbackByTaskType.PSObject.Properties.Name -contains $key)) {
+            continue
+        }
+        foreach ($skillId in @($fallbackByTaskType.$key)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$skillId)) {
+                $skillIds += [string]$skillId
+            }
+        }
+    }
+
+    return @($skillIds | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+}
+
 function New-VibeSpecialistRecommendation {
     param(
         [Parameter(Mandatory)] [string]$RepoRoot,
@@ -418,6 +458,7 @@ function Get-VibeSpecialistRecommendations {
         [Parameter(Mandatory)] [string]$Task,
         [Parameter(Mandatory)] [object]$RouteResult,
         [Parameter(Mandatory)] [string]$RuntimeSelectedSkill,
+        [AllowEmptyString()] [string]$RouterSelectedSkill = '',
         [Parameter(Mandatory)] [string]$TaskType,
         [Parameter(Mandatory)] [object]$Policy,
         [AllowNull()] [object]$PromotionPolicy = $null,
@@ -540,6 +581,68 @@ function Get-VibeSpecialistRecommendations {
             -TargetRoot $TargetRoot `
             -HostId $HostId)
         $seen[$skillId] = $true
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($RouterSelectedSkill) -and
+        -not [string]::Equals($RouterSelectedSkill, $RuntimeSelectedSkill, [System.StringComparison]::OrdinalIgnoreCase) -and
+        -not $seen.ContainsKey($RouterSelectedSkill) -and
+        @($recommendations).Count -lt $limit) {
+        $customMetadata = if ($customAdmissionIndex.ContainsKey($RouterSelectedSkill)) { $customAdmissionIndex[$RouterSelectedSkill] } else { $null }
+        $recommendations += (New-VibeSpecialistRecommendation `
+            -RepoRoot $RepoRoot `
+            -Task $Task `
+            -SkillId $RouterSelectedSkill `
+            -Source 'route_selected' `
+            -TaskType $TaskType `
+            -Reason 'canonical router selected a specialist candidate for governed bounded execution' `
+            -PackId $null `
+            -Confidence 0.0 `
+            -Rank (@($recommendations).Count + 1) `
+            -DispatchContract $dispatchContractForRecommendation `
+            -PromotionPolicy $PromotionPolicy `
+            -CustomMetadata $customMetadata `
+            -TargetRoot $TargetRoot `
+            -HostId $HostId)
+        $seen[$RouterSelectedSkill] = $true
+    }
+
+    $requiredRecommendationCount = 1
+    if ($Policy.PSObject.Properties.Name -contains 'required_specialist_recommendation_count' -and $Policy.required_specialist_recommendation_count -ne $null) {
+        $requiredRecommendationCount = [int]$Policy.required_specialist_recommendation_count
+    }
+    foreach ($fallbackSkillId in @(Get-VibeFallbackSpecialistSkillIds `
+            -TaskType $TaskType `
+            -Policy $Policy `
+            -RouterSelectedSkill $RouterSelectedSkill `
+            -RuntimeSelectedSkill $RuntimeSelectedSkill)) {
+        if (@($recommendations).Count -ge $limit) {
+            break
+        }
+        if (@($recommendations).Count -ge $requiredRecommendationCount) {
+            break
+        }
+        if ($seen.ContainsKey($fallbackSkillId)) {
+            continue
+        }
+
+        $customMetadata = if ($customAdmissionIndex.ContainsKey($fallbackSkillId)) { $customAdmissionIndex[$fallbackSkillId] } else { $null }
+        $reason = "policy fallback specialist for task type '{0}'" -f $TaskType
+        $recommendations += (New-VibeSpecialistRecommendation `
+            -RepoRoot $RepoRoot `
+            -Task $Task `
+            -SkillId $fallbackSkillId `
+            -Source ("fallback:{0}" -f $TaskType) `
+            -TaskType $TaskType `
+            -Reason $reason `
+            -PackId $null `
+            -Confidence 0.0 `
+            -Rank (@($recommendations).Count + 1) `
+            -DispatchContract $dispatchContractForRecommendation `
+            -PromotionPolicy $PromotionPolicy `
+            -CustomMetadata $customMetadata `
+            -TargetRoot $TargetRoot `
+            -HostId $HostId)
+        $seen[$fallbackSkillId] = $true
     }
 
     return @($recommendations)
@@ -738,6 +841,7 @@ $specialistRecommendations = @(Get-VibeSpecialistRecommendations `
     -Task $Task `
     -RouteResult $routeResult `
     -RuntimeSelectedSkill $runtimeSelectedSkill `
+    -RouterSelectedSkill $routerSelectedSkill `
     -TaskType $taskType `
     -Policy $policy `
     -PromotionPolicy $runtime.skill_promotion_policy `

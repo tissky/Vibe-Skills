@@ -452,7 +452,11 @@ function Resolve-VibeEffectiveSpecialistDispatch {
         return [pscustomobject]$result
     }
 
-    if (@($frozenApprovedDispatch).Count -eq 0) {
+    $requireExistingRootDispatch = $false
+    if ($autoAbsorbGate.PSObject.Properties.Name -contains 'require_existing_root_dispatch' -and $null -ne $autoAbsorbGate.require_existing_root_dispatch) {
+        $requireExistingRootDispatch = [bool]$autoAbsorbGate.require_existing_root_dispatch
+    }
+    if ($requireExistingRootDispatch -and @($frozenApprovedDispatch).Count -eq 0) {
         $result.auto_absorb_gate.status = 'requires_existing_root_dispatch'
         return [pscustomobject]$result
     }

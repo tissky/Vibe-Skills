@@ -748,7 +748,7 @@ function New-VibeRuntimeInputPacketProjection {
             escalation_required = [bool]$SpecialistDispatch.escalation_required
             escalation_status = [string]$SpecialistDispatch.escalation_status
             approval_owner = if ($Policy.child_specialist_suggestion_contract.PSObject.Properties.Name -contains 'approval_owner') { [string]$Policy.child_specialist_suggestion_contract.approval_owner } else { 'root_vibe' }
-            status = if ($Policy.child_specialist_suggestion_contract.PSObject.Properties.Name -contains 'status') { [string]$Policy.child_specialist_suggestion_contract.status } else { 'advisory_until_root_approval' }
+            status = if ($Policy.child_specialist_suggestion_contract.PSObject.Properties.Name -contains 'status') { [string]$Policy.child_specialist_suggestion_contract.status } else { 'auto_promote_when_safe_same_round' }
         }
         overlay_decisions = @($OverlayDecisions)
         authority_flags = $AuthorityFlagsProjection

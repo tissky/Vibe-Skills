@@ -166,7 +166,8 @@ if (@($approvedDispatch).Count -gt 0 -or @($localSuggestions).Count -gt 0) {
     $lines += @(
         '',
         '## Specialist Skill Dispatch Plan',
-        '- Specialist dispatch is advisory and bounded; it does not transfer runtime authority away from vibe.',
+        '- Specialist routing is mandatory and bounded inside governed `vibe`; it does not transfer runtime authority away from vibe.',
+        '- Eligible specialist recommendations should auto-promote into `approved_dispatch` by default.',
         '- Each specialist must be invoked through its native workflow, input contract, and validation style.',
         '- Specialist outputs remain subordinate to the frozen requirement and the governed plan.'
     )
@@ -188,7 +189,7 @@ if (@($approvedDispatch).Count -gt 0 -or @($localSuggestions).Count -gt 0) {
         $lines += @(
             '',
             '## Child Specialist Escalation Suggestions',
-            '- These suggestions are advisory only until root-governed approval updates the canonical dispatch surface.'
+            '- These are residual suggestions only after same-round safe auto-promotion; anything still listed here requires explicit escalation.'
         )
         foreach ($recommendation in @($localSuggestions)) {
             $lines += @(

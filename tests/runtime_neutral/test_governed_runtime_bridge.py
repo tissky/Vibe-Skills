@@ -202,6 +202,7 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
                 check=True,
+                env={**os.environ, "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "1"},
             )
 
             payload = json.loads(completed.stdout)
@@ -276,6 +277,7 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
                 self.assertIn("## Assumptions", requirement_doc)
                 self.assertIn("## Runtime Input Truth", requirement_doc)
                 self.assertIn("## Specialist Recommendations", requirement_doc)
+                self.assertIn("Eligible recommendations should auto-promote", requirement_doc)
             self.assertEqual("requirements", requirement_doc_path.parent.name)
             self.assertEqual("plans", execution_plan_path.parent.name)
             execution_plan = execution_plan_path.read_text(encoding="utf-8")

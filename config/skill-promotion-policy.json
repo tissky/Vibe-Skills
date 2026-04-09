@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "updated_at": "2026-04-06",
+  "updated_at": "2026-04-10",
   "promotion_enabled": true,
-  "default_mode": "recall_first",
+  "default_mode": "aggressive_dispatch_first",
   "allow_auto_dispatch_when_non_destructive": true,
   "require_contract_complete": true,
   "destructive_prompt_patterns": {

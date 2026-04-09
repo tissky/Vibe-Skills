@@ -85,16 +85,17 @@
     "field_name": "local_specialist_suggestions",
     "escalation_required": true,
     "approval_owner": "root_vibe",
-    "status": "advisory_until_root_approval",
+    "status": "auto_promote_when_safe_same_round",
     "auto_absorb_gate": {
       "enabled": true,
       "same_round": true,
       "approval_source": "root_vibe_auto_absorb_gate",
       "required_runtime_skill": "vibe",
+      "require_existing_root_dispatch": false,
       "require_known_recommendation": true,
       "require_native_workflow": true,
       "require_native_usage_required": true,
-      "max_auto_absorb_count": 4,
+      "max_auto_absorb_count": 6,
       "disable_env": "VGO_DISABLE_CHILD_SPECIALIST_AUTO_ABSORB",
       "force_escalation_env": "VGO_FORCE_CHILD_SPECIALIST_ESCALATION"
     }
@@ -200,6 +201,27 @@
     "llm_acceleration_advice",
     "heartbeat_advice"
   ],
-  "specialist_recommendation_limit": 4,
+  "required_specialist_recommendation_count": 1,
+  "specialist_recommendation_limit": 6,
+  "fallback_specialists_by_task_type": {
+    "planning": [
+      "writing-plans"
+    ],
+    "debug": [
+      "systematic-debugging"
+    ],
+    "research": [
+      "brainstorming"
+    ],
+    "coding": [
+      "test-driven-development"
+    ],
+    "review": [
+      "requesting-code-review"
+    ],
+    "default": [
+      "writing-plans"
+    ]
+  },
   "bounded_router_task_type_default": "planning"
 }

@@ -36,6 +36,7 @@ def run_runtime(
     *,
     mode: str = "interactive_governed",
     script_relative_path: str = "scripts/runtime/invoke-vibe-runtime.ps1",
+    run_id: str | None = None,
     governance_scope: str = "root",
     root_run_id: str = "",
     parent_run_id: str = "",
@@ -53,7 +54,7 @@ def run_runtime(
         raise unittest.SkipTest("PowerShell executable not available in PATH")
 
     script_path = REPO_ROOT / script_relative_path
-    run_id = "pytest-topology-" + uuid.uuid4().hex[:10]
+    effective_run_id = run_id or ("pytest-topology-" + uuid.uuid4().hex[:10])
     approved = approved_specialist_skill_ids or []
     delegation_envelope_path: Path | None = None
     if (
@@ -66,7 +67,7 @@ def run_runtime(
     ):
         delegation_envelope_path = write_delegation_envelope_fixture(
             artifact_root,
-            child_run_id=run_id,
+            child_run_id=effective_run_id,
             root_run_id=root_run_id,
             parent_run_id=parent_run_id,
             parent_unit_id=parent_unit_id,
@@ -112,7 +113,7 @@ def run_runtime(
             f"-Task '{task}' "
             f"-Mode {mode} "
             f"-GovernanceScope {governance_scope} "
-            f"-RunId '{run_id}' "
+            f"-RunId '{effective_run_id}' "
             f"{root_segment}"
             f"{parent_segment}"
             f"{parent_unit_segment}"
@@ -133,7 +134,7 @@ def run_runtime(
         capture_output=True,
         text=True,
         check=True,
-        env={**os.environ, **(extra_env or {})},
+        env={**os.environ, "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "1", **(extra_env or {})},
     )
     stdout = completed.stdout.strip()
     if stdout in ("", "null"):
@@ -872,13 +873,16 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             if not approved_skill_ids:
                 self.skipTest("Root run did not expose approved specialist dispatch skill ids")
 
+            parent_unit_id = "pytest-child-topology-unit"
+            child_run_id = "pytest-topology-" + uuid.uuid4().hex[:10]
             child_payload = run_runtime(
                 task=composite_task + " Child lane requests extra specialist help beyond approved dispatch.",
                 artifact_root=artifact_root,
+                run_id=child_run_id,
                 governance_scope="child",
                 root_run_id=str(root_summary["run_id"]),
                 parent_run_id=str(root_summary["run_id"]),
-                parent_unit_id="pytest-child-topology-unit",
+                parent_unit_id=parent_unit_id,
                 inherited_requirement_doc_path=Path(root_artifacts["requirement_doc"]),
                 inherited_execution_plan_path=Path(root_artifacts["execution_plan"]),
                 approved_specialist_skill_ids=approved_skill_ids[:1],
@@ -888,7 +892,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             child_execution_manifest = load_json(child_summary["artifacts"]["execution_manifest"])
 
             specialist_dispatch = child_runtime_input["specialist_dispatch"]
-            self.assertEqual("advisory_until_root_approval", str(specialist_dispatch["status"]))
+            self.assertEqual("auto_promote_when_safe_same_round", str(specialist_dispatch["status"]))
             frozen_local_ids = {
                 str(entry.get("skill_id", "")).strip()
                 for entry in list(specialist_dispatch.get("local_specialist_suggestions") or [])
@@ -965,13 +969,16 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             if len(approved_skill_ids) < 1:
                 self.skipTest("Root run did not expose approved specialist dispatch skill ids")
 
+            parent_unit_id = "pytest-child-topology-fallback-unit"
+            child_run_id = "pytest-topology-" + uuid.uuid4().hex[:10]
             child_payload = run_runtime(
                 task=composite_task + " Child lane requests extra specialist help beyond approved dispatch.",
                 artifact_root=artifact_root,
+                run_id=child_run_id,
                 governance_scope="child",
                 root_run_id=str(root_summary["run_id"]),
                 parent_run_id=str(root_summary["run_id"]),
-                parent_unit_id="pytest-child-topology-fallback-unit",
+                parent_unit_id=parent_unit_id,
                 inherited_requirement_doc_path=Path(root_artifacts["requirement_doc"]),
                 inherited_execution_plan_path=Path(root_artifacts["execution_plan"]),
                 approved_specialist_skill_ids=approved_skill_ids[:1],
@@ -1023,13 +1030,16 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             if len(approved_skill_ids) < 1:
                 self.skipTest("Root run did not expose approved specialist dispatch skill ids")
 
+            parent_unit_id = "pytest-child-topology-live-native-unit"
+            child_run_id = "pytest-topology-" + uuid.uuid4().hex[:10]
             child_payload = run_runtime(
                 task=composite_task + " Child lane requests extra specialist help beyond approved dispatch.",
                 artifact_root=temp_path,
+                run_id=child_run_id,
                 governance_scope="child",
                 root_run_id=str(root_summary["run_id"]),
                 parent_run_id=str(root_summary["run_id"]),
-                parent_unit_id="pytest-child-topology-live-native-unit",
+                parent_unit_id=parent_unit_id,
                 inherited_requirement_doc_path=Path(root_artifacts["requirement_doc"]),
                 inherited_execution_plan_path=Path(root_artifacts["execution_plan"]),
                 approved_specialist_skill_ids=approved_skill_ids[:1],
@@ -1053,7 +1063,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 {"auto_approved_same_round", "partially_auto_approved_same_round"},
             )
 
-    def test_child_divergent_specialist_request_without_overlap_escalates_without_crashing(self) -> None:
+    def test_child_divergent_specialist_request_without_overlap_auto_promotes_when_safe(self) -> None:
         cases = [
             (
                 "L",
@@ -1077,14 +1087,16 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                         governance_scope="root",
                     )
                     root_summary = root_payload["summary"]
-
+                    parent_unit_id = f"pytest-{expected_grade.lower()}-divergent-child-unit"
+                    child_run_id = "pytest-topology-" + uuid.uuid4().hex[:10]
                     child_payload = run_runtime(
                         task=root_task + " Child lane divergence into a new specialist demand set.",
                         artifact_root=artifact_root,
+                        run_id=child_run_id,
                         governance_scope="child",
                         root_run_id=str(root_summary["run_id"]),
                         parent_run_id=str(root_summary["run_id"]),
-                        parent_unit_id=f"pytest-{expected_grade.lower()}-divergent-child-unit",
+                        parent_unit_id=parent_unit_id,
                         inherited_requirement_doc_path=Path(root_summary["artifacts"]["requirement_doc"]),
                         inherited_execution_plan_path=Path(root_summary["artifacts"]["execution_plan"]),
                         approved_specialist_skill_ids=["totally-non-overlap-skill-id"],
@@ -1101,32 +1113,17 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                     )
 
                     specialist_dispatch = child_runtime_input["specialist_dispatch"]
-                    self.assertEqual([], list(specialist_dispatch["approved_dispatch"]))
-                    self.assertEqual([], list(specialist_dispatch["approved_skill_ids"]))
                     self.assertGreaterEqual(len(list(specialist_dispatch["local_specialist_suggestions"])), 1)
-                    self.assertTrue(bool(specialist_dispatch["escalation_required"]))
-                    self.assertEqual("root_approval_required", str(specialist_dispatch["escalation_status"]))
+                    self.assertEqual("auto_promote_when_safe_same_round", str(specialist_dispatch["status"]))
 
                     specialist_accounting = child_execution_manifest["specialist_accounting"]
-                    self.assertEqual(0, int(specialist_accounting["approved_dispatch_count"]))
-                    self.assertEqual(0, int(specialist_accounting["executed_specialist_unit_count"]))
-                    self.assertEqual(0, int(specialist_accounting["degraded_specialist_unit_count"]))
-                    self.assertEqual(0, int(specialist_accounting["specialist_skill_count"]))
-                    self.assertEqual([], list(specialist_accounting["specialist_dispatch_outcomes"]))
-                    self.assertGreaterEqual(int(specialist_accounting["local_suggestion_count"]), 1)
-                    self.assertTrue(bool(specialist_accounting["escalation_required"]))
-
-                    escalation_request_path = specialist_accounting.get("escalation_request_path")
-                    self.assertTrue(escalation_request_path)
-                    self.assertTrue(Path(escalation_request_path).exists())
-                    escalation_request = load_json(escalation_request_path)
-                    self.assertEqual(
-                        sorted(str(skill_id) for skill_id in escalation_request["requested_specialist_skill_ids"]),
-                        sorted(
-                            str(entry.get("skill_id", "")).strip()
-                            for entry in list(specialist_accounting["local_specialist_suggestions"])
-                            if str(entry.get("skill_id", "")).strip()
-                        ),
+                    self.assertGreaterEqual(int(specialist_accounting["approved_dispatch_count"]), 1)
+                    self.assertGreaterEqual(int(specialist_accounting["specialist_skill_count"]), 1)
+                    self.assertFalse(bool(specialist_accounting["escalation_required"]))
+                    self.assertGreaterEqual(len(list(specialist_accounting["specialist_dispatch_outcomes"])), 1)
+                    self.assertIn(
+                        str(specialist_accounting["auto_absorb_gate"]["status"]),
+                        {"auto_approved_same_round", "partially_auto_approved_same_round"},
                     )
                     self.assertEqual("completed_local_scope", child_execution_manifest["status"])
                     self.assertFalse(bool(child_execution_manifest["authority"]["completion_claim_allowed"]))

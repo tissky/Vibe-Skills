@@ -114,6 +114,15 @@ def extract_split_specialist_dispatch_function() -> str:
 
 
 class SkillPromotionFreezeContractTests(unittest.TestCase):
+    def test_runtime_input_policy_requires_recommendation_floor_and_fallback_specialists(self) -> None:
+        policy = load_json(REPO_ROOT / "config" / "runtime-input-packet-policy.json")
+
+        self.assertEqual(1, int(policy["required_specialist_recommendation_count"]))
+        fallback_by_task_type = policy["fallback_specialists_by_task_type"]
+        for task_type in ("planning", "debug", "research", "coding", "review", "default"):
+            with self.subTest(task_type=task_type):
+                self.assertGreaterEqual(len(as_list(fallback_by_task_type[task_type])), 1)
+
     def test_eligible_matched_skill_is_approved_and_not_ghosted(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = freeze_runtime_packet(ML_PROMPT, Path(tempdir))

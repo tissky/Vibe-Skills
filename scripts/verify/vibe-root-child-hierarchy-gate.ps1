@@ -62,7 +62,7 @@ foreach ($token in @(
     'allow_global_dispatch',
     'allow_completion_claim',
     'specialist_dispatch',
-    'advisory_until_root_approval',
+    'auto_promote_when_safe_same_round',
     'escalation_required',
     'auto_absorb_gate'
 )) {

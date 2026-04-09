@@ -217,7 +217,7 @@ if ($runtimeInputPacket) {
         $lines += @(
             '',
             '## Specialist Recommendations',
-            'These are bounded native specialist suggestions carried inside the governed `vibe` runtime. They do not replace runtime authority.'
+            'These are mandatory bounded native specialist recommendations carried inside the governed `vibe` runtime. Eligible recommendations should auto-promote into bounded dispatch while `vibe` remains the only runtime authority.'
         )
         foreach ($recommendation in $specialistRecommendations) {
             $lines += @(

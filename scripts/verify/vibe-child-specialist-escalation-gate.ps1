@@ -65,13 +65,13 @@ $runtimeEntryPath = Get-VgoRuntimeEntrypointPath -RepoRoot $repoRoot -RuntimeCon
 $results = @()
 
 $policyText = Get-Content -LiteralPath (Join-Path $repoRoot 'config\runtime-input-packet-policy.json') -Raw -Encoding UTF8
-foreach ($token in @('specialist_dispatch', 'local_specialist_suggestions', 'escalation_required', 'advisory_until_root_approval', 'auto_absorb_gate')) {
+foreach ($token in @('specialist_dispatch', 'local_specialist_suggestions', 'escalation_required', 'auto_promote_when_safe_same_round', 'auto_absorb_gate')) {
     Add-Assertion -Results ([ref]$results) -Condition ($policyText.Contains($token)) -Message ("runtime input policy contains specialist escalation token: {0}" -f $token)
 }
 
 $teamText = Get-Content -LiteralPath (Join-Path $repoRoot 'protocols\team.md') -Raw -Encoding UTF8
 $stableDocText = Get-Content -LiteralPath (Join-Path $repoRoot 'docs\root-child-vibe-hierarchy-governance.md') -Raw -Encoding UTF8
-Add-Assertion -Results ([ref]$results) -Condition ($teamText.Contains('advisory until the governed plan chooses to dispatch it')) -Message 'team protocol keeps specialist recommendation advisory-first'
+Add-Assertion -Results ([ref]$results) -Condition ($teamText.Contains('safe bounded recommendations should aggressively promote into effective dispatch')) -Message 'team protocol documents aggressive specialist promotion'
 Add-Assertion -Results ([ref]$results) -Condition ($stableDocText.Contains('same-round auto-approve safe suggestions')) -Message 'stable hierarchy doc documents root-governed same-round absorb path'
 
 $runId = "child-specialist-escalation-" + [System.Guid]::NewGuid().ToString('N').Substring(0, 8)
@@ -170,7 +170,7 @@ if ($hasChildSummary) {
     Add-Assertion -Results ([ref]$results) -Condition ($null -ne $specialistDispatch) -Message 'runtime packet exposes specialist dispatch surface'
 
     if ($null -ne $specialistDispatch) {
-        Add-Assertion -Results ([ref]$results) -Condition ([string]$specialistDispatch.status -eq 'advisory_until_root_approval') -Message 'child specialist suggestions remain advisory until root approval'
+        Add-Assertion -Results ([ref]$results) -Condition ([string]$specialistDispatch.status -eq 'auto_promote_when_safe_same_round') -Message 'child specialist policy prefers same-round safe auto-promotion'
         if (@($localSuggestions).Count -gt 0) {
             Add-Assertion -Results ([ref]$results) -Condition ([bool]$specialistDispatch.escalation_required) -Message 'child local specialist suggestions require escalation'
             Add-Assertion -Results ([ref]$results) -Condition ([string]$specialistDispatch.escalation_status -eq 'root_approval_required') -Message 'child local specialist escalation status is root_approval_required'

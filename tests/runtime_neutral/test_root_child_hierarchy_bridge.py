@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import tempfile
@@ -56,6 +57,7 @@ def run_governed_runtime(task: str, artifact_root: Path) -> dict[str, object]:
         capture_output=True,
         text=True,
         check=True,
+        env={**os.environ, "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "1"},
     )
     stdout = completed.stdout.strip()
     if stdout in ("", "null"):
@@ -122,6 +124,7 @@ def run_child_runtime(
         capture_output=True,
         text=True,
         check=True,
+        env={**os.environ, "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "1"},
     )
     stdout = completed.stdout.strip()
     if stdout in ("", "null"):
@@ -188,12 +191,14 @@ class RootChildHierarchyBridgeTests(unittest.TestCase):
             "governance_scope",
             "hierarchy_contract",
             "child_specialist_suggestion_contract",
+            "required_specialist_recommendation_count",
+            "fallback_specialists_by_task_type",
             "allow_requirement_freeze",
             "allow_plan_freeze",
             "allow_global_dispatch",
             "allow_completion_claim",
             "specialist_dispatch",
-            "advisory_until_root_approval",
+            "auto_promote_when_safe_same_round",
             "escalation_required",
         ]
         for token in expected_tokens:
@@ -249,7 +254,7 @@ class RootChildHierarchyBridgeTests(unittest.TestCase):
                     artifact_root=artifact_root,
                 )
 
-    def test_child_specialist_suggestions_are_advisory_until_root_approval(self) -> None:
+    def test_child_specialist_policy_prefers_same_round_auto_promotion(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             artifact_root = Path(tempdir)
             root_payload = run_governed_runtime(
@@ -329,13 +334,18 @@ class RootChildHierarchyBridgeTests(unittest.TestCase):
                     with self.subTest(suggestion=str(suggestion.get("skill_id", ""))):
                         self.assertNotIn(str(suggestion.get("skill_id", "")), approved_ids)
 
-            self.assertEqual("advisory_until_root_approval", str(specialist_dispatch.get("status", "")))
+            self.assertEqual("auto_promote_when_safe_same_round", str(specialist_dispatch.get("status", "")))
             self.assertEqual("child", execution_manifest["governance_scope"])
             self.assertFalse(execution_manifest["authority"]["completion_claim_allowed"])
             self.assertEqual("vibe", execution_manifest["route_runtime_alignment"]["runtime_selected_skill"])
             self.assertTrue(bool(execution_manifest["dispatch_integrity"]["proof_passed"]))
             self.assertTrue(bool(execution_manifest["dispatch_integrity"]["local_suggestions_contained"]))
             self.assertTrue(bool(execution_manifest["dispatch_integrity"]["executed_specialists_subset_of_approved_dispatch"]))
+            if local_suggestions:
+                self.assertIn(
+                    str(execution_manifest["specialist_accounting"]["auto_absorb_gate"]["status"]),
+                    {"auto_approved_same_round", "partially_auto_approved_same_round"},
+                )
             self.assertEqual(child_run_id, delegation_validation_receipt["child_run_id"])
             self.assertEqual(str(envelope_path.resolve()), str(Path(delegation_validation_receipt["envelope_path"]).resolve()))
             self.assertTrue(bool(delegation_validation_receipt["write_scope_valid"]))

@@ -362,7 +362,7 @@ class RuntimeContractSchemaTests(unittest.TestCase):
                 "}; "
                 "$runtime = [pscustomobject]@{ host_adapter = [pscustomobject]@{ requested_id = 'openclaw'; id = 'openclaw'; status = 'preview'; install_mode = 'scaffold'; check_mode = 'audit'; bootstrap_mode = 'bounded' }; host_closure = [pscustomobject]@{ path = '/tmp/closure.json' } }; "
                 "$dispatch = [pscustomobject]@{ approved_dispatch = @([pscustomobject]@{ skill_id = 'systematic-debugging' }); local_specialist_suggestions = @([pscustomobject]@{ skill_id = 'think-harder' }); escalation_required = $true; escalation_status = 'pending_root_approval' }; "
-                "$policy = [pscustomobject]@{ freeze_before_requirement_doc = $true; child_specialist_suggestion_contract = [pscustomobject]@{ approval_owner = 'root_vibe'; status = 'advisory_until_root_approval' } }; "
+                "$policy = [pscustomobject]@{ freeze_before_requirement_doc = $true; child_specialist_suggestion_contract = [pscustomobject]@{ approval_owner = 'root_vibe'; status = 'auto_promote_when_safe_same_round' } }; "
                 "$packet = New-VibeRuntimeInputPacketProjection "
                 "-RunId 'run-7' "
                 "-Task 'debug task' "

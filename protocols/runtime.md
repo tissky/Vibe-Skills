@@ -157,8 +157,8 @@ Rules:
 - later stages must append a matching lineage entry for the same governed run
 - spawned subagent prompts must end with `$vibe`
 - milestone evidence must be written before phase completion
-- if the canonical router surfaces specialist skills, record them as bounded native specialist recommendations under `vibe` governance
-- root-approved specialist dispatch may execute as bounded native units; non-approved specialist ideas remain advisory escalation requests
+- governed `vibe` runs must record bounded native specialist recommendations under `vibe` governance and should not leave the recommendation surface empty
+- eligible specialist recommendations should auto-promote into bounded native units; only blocked, degraded, or forced-escalation ideas remain advisory escalation requests
 - approved specialist dispatch must be phase-bound as `pre_execution`, `in_execution`, `post_execution`, or `verification`
 - approved specialist dispatch must carry lane policy, write scope, and review mode so execution remains deterministic and conflict-aware
 - `L` uses explicit serial specialist steps; `XL` may use bounded parallel specialist lanes only when root-approved and write-scope-safe
@@ -253,9 +253,9 @@ Explicitly forbidden for child-governed lanes:
 
 Specialist dispatch semantics under hierarchy:
 
-- `approved_dispatch`: specialist execution approved by root and recorded in frozen plan
+- `approved_dispatch`: specialist execution approved by root and recorded in frozen plan, including same-round auto-absorb approval for safe child-lane recommendations
 - approved dispatch must include phase binding, lane policy, write scope, and review mode so downstream child lanes do not improvise governance semantics
-- `local_suggestion`: child-surfaced specialist suggestion that remains advisory in the frozen packet until root-governed execution either escalates it or auto-absorbs it through the same-round approval gate
+- `local_suggestion`: residual child-surfaced specialist suggestion that remains advisory only when root-governed execution blocks it, degrades it, or explicit policy forces escalation instead of same-round auto-absorb
 
 ## Artifact Contract
 
