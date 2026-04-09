@@ -23,12 +23,15 @@ def test_build_wrapper_descriptors_renders_all_discoverable_entries_for_codex() 
         surface=surface,
     )
 
-    assert sorted(rendered) == ['vibe', 'vibe-do', 'vibe-how', 'vibe-want']
+    assert sorted(rendered) == ['vibe', 'vibe-do', 'vibe-how', 'vibe-upgrade', 'vibe-want']
     assert rendered['vibe-how'].relpath.as_posix() == 'commands/vibe-how.md'
+    assert rendered['vibe-upgrade'].relpath.as_posix() == 'commands/vibe-upgrade.md'
     assert 'Vibe: How Do We Do It?' in rendered['vibe-how'].content
+    assert 'Vibe: Upgrade' in rendered['vibe-upgrade'].content
     assert 'Use the `vibe` skill' in rendered['vibe-how'].content
     assert 'Default stop target: `xl_plan`' in rendered['vibe-how'].content
     assert 'Default stop target: `requirement_doc`' in rendered['vibe-want'].content
+    assert 'Public grade flags allowed: no' in rendered['vibe-upgrade'].content
 
 
 def test_build_wrapper_descriptors_renders_skill_wrappers_for_skill_only_hosts() -> None:
@@ -39,9 +42,12 @@ def test_build_wrapper_descriptors_renders_skill_wrappers_for_skill_only_hosts()
         surface=surface,
     )
 
-    assert sorted(rendered) == ['vibe', 'vibe-do', 'vibe-how', 'vibe-want']
+    assert sorted(rendered) == ['vibe', 'vibe-do', 'vibe-how', 'vibe-upgrade', 'vibe-want']
     assert rendered['vibe-how'].relpath.as_posix() == 'skills/vibe-how/SKILL.md'
+    assert rendered['vibe-upgrade'].relpath.as_posix() == 'skills/vibe-upgrade/SKILL.md'
     assert 'name: vibe-how' in rendered['vibe-how'].content
+    assert 'name: vibe-upgrade' in rendered['vibe-upgrade'].content
     assert 'Vibe: How Do We Do It?' in rendered['vibe-how'].content
+    assert 'Vibe: Upgrade' in rendered['vibe-upgrade'].content
     assert 'Default stop target: `xl_plan`' in rendered['vibe-how'].content
     assert '$ARGUMENTS' in rendered['vibe-how'].content
