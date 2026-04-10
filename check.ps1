@@ -197,15 +197,7 @@ function Normalize-ComparablePath {
     return $null
   }
 
-  try {
-    $fullPath = [System.IO.Path]::GetFullPath($Path).TrimEnd([char[]]@('\','/'))
-    if ([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)) {
-      return $fullPath.ToLowerInvariant()
-    }
-    return $fullPath
-  } catch {
-    return $null
-  }
+  return [System.IO.Path]::GetFullPath($Path).TrimEnd([char[]]@('\','/')).ToLowerInvariant()
 }
 
 function ConvertTo-IntCheckValue {
@@ -363,10 +355,15 @@ function Test-ReceiptTargetFreshness {
   } else {
     Format-OptionalValue -Value $receiptVersionCheck.raw
   }
+  $expectedVersionFailureDetail = if ($expectedReceiptContractVersionCheck.valid) {
+    [string]$expectedReceiptContractVersion
+  } else {
+    Format-OptionalValue -Value $expectedReceiptContractVersionCheck.raw
+  }
   Check-Condition `
     -Label 'vibe runtime freshness receipt version' `
-    -Condition ($receiptVersionCheck.valid -and $receiptVersionCheck.value -ge $expectedReceiptContractVersion) `
-    -FailureDetail $receiptVersionFailureDetail
+    -Condition ($expectedReceiptContractVersionCheck.valid -and $receiptVersionCheck.valid -and $receiptVersionCheck.value -ge $expectedReceiptContractVersion) `
+    -FailureDetail ("receipt={0}; expected={1}" -f $receiptVersionFailureDetail, $expectedVersionFailureDetail)
 
   Check-Condition -Label 'vibe runtime freshness receipt target_root' -Condition ($receiptTargetRoot -eq $expectedTargetRoot) -FailureDetail (Format-OptionalValue -Value ([string]$receipt.target_root))
   Check-Condition -Label 'vibe runtime freshness receipt installed_root' -Condition ($receiptInstalledRoot -eq $expectedInstalledRoot) -FailureDetail (Format-OptionalValue -Value ([string]$receipt.installed_root))

@@ -91,7 +91,7 @@ class CheckInstalledRuntimeRootTests(unittest.TestCase):
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    str(REPO_ROOT / "check.ps1"),
+                    str(installed_root / "check.ps1"),
                     "-HostId",
                     "codex",
                     "-Profile",
@@ -147,7 +147,7 @@ class CheckInstalledRuntimeRootTests(unittest.TestCase):
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    str(REPO_ROOT / "check.ps1"),
+                    str(installed_root / "check.ps1"),
                     "-HostId",
                     "codex",
                     "-Profile",
@@ -163,6 +163,64 @@ class CheckInstalledRuntimeRootTests(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("[FAIL] vibe runtime freshness receipt version", result.stdout)
         self.assertNotIn("Cannot convert value", result.stderr)
+
+    def test_check_ps1_fails_closed_when_expected_receipt_contract_version_is_invalid(self) -> None:
+        powershell = resolve_powershell()
+        if powershell is None:
+            self.skipTest("PowerShell executable not available in PATH")
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            target_root = Path(tempdir) / ".codex"
+            install_minimal_codex_runtime(target_root)
+            installed_root = target_root / "skills" / "vibe"
+            governance_path = installed_root / "config" / "version-governance.json"
+            installed_governance = json.loads(governance_path.read_text(encoding="utf-8-sig"))
+            installed_governance["runtime"]["installed_runtime"]["receipt_contract_version"] = "abc"
+            governance_path.write_text(json.dumps(installed_governance) + "\n", encoding="utf-8")
+
+            release = installed_governance.get("release") or {}
+            receipt_path = installed_root / "outputs" / "runtime-freshness-receipt.json"
+            receipt_path.parent.mkdir(parents=True, exist_ok=True)
+            receipt_path.write_text(
+                json.dumps(
+                    {
+                        "gate_result": "PASS",
+                        "receipt_version": 2,
+                        "target_root": str(target_root),
+                        "installed_root": str(installed_root),
+                        "release": {
+                            "version": str(release.get("version") or ""),
+                            "updated": str(release.get("updated") or ""),
+                        },
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    powershell,
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(installed_root / "check.ps1"),
+                    "-HostId",
+                    "codex",
+                    "-Profile",
+                    "minimal",
+                    "-TargetRoot",
+                    str(target_root),
+                ],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("[FAIL] vibe runtime freshness receipt version", result.stdout)
+        self.assertIn("expected=", result.stdout)
 
 
 if __name__ == "__main__":
