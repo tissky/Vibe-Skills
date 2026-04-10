@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -122,9 +123,9 @@ class CrossHostMemoryIdentityTests(unittest.TestCase):
                 "@($first, $second) | ConvertTo-Json -Depth 10 }"
             )
 
-        expected_identity_root = f"{workspace_root_text}/.vibeskills/project.json"
-        self.assertEqual(expected_identity_root, payload[0]["workspace_memory_identity_root"])
-        self.assertEqual(expected_identity_root, payload[1]["workspace_memory_identity_root"])
+        expected_identity_root = os.path.normpath(str(Path(workspace_root_text) / ".vibeskills" / "project.json"))
+        self.assertEqual(expected_identity_root, os.path.normpath(payload[0]["workspace_memory_identity_root"]))
+        self.assertEqual(expected_identity_root, os.path.normpath(payload[1]["workspace_memory_identity_root"]))
         self.assertEqual(payload[0]["workspace_memory_identity_scope"], payload[1]["workspace_memory_identity_scope"])
         self.assertEqual(
             payload[0]["workspace_memory_driver_contract"],
