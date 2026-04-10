@@ -43,8 +43,14 @@ def refresh_installed_status(repo_root: Path, target_root: Path, host_id: str) -
     return merged
 
 
-def refresh_upstream_status(repo_root: Path, target_root: Path, current_status: dict[str, object]) -> dict[str, object]:
-    if not is_upstream_cache_stale(current_status):
+def refresh_upstream_status(
+    repo_root: Path,
+    target_root: Path,
+    current_status: dict[str, object],
+    *,
+    force_refresh: bool = False,
+) -> dict[str, object]:
+    if not force_refresh and not is_upstream_cache_stale(current_status):
         return current_status
 
     repo_url = str(current_status.get('repo_remote') or '').strip()
@@ -56,8 +62,11 @@ def refresh_upstream_status(repo_root: Path, target_root: Path, current_status: 
     commit_result = run_subprocess(['git', 'rev-parse', 'FETCH_HEAD'], cwd=repo_root)
     if commit_result.returncode != 0:
         raise CliError(commit_result.stderr.strip() or 'Failed to resolve fetched upstream commit.')
+    remote_commit = commit_result.stdout.strip()
+    if not remote_commit:
+        raise CliError('Failed to resolve fetched upstream commit.')
 
-    release_result = run_subprocess(['git', 'show', 'FETCH_HEAD:config/version-governance.json'], cwd=repo_root)
+    release_result = run_subprocess(['git', 'show', f'{remote_commit}:config/version-governance.json'], cwd=repo_root)
     if release_result.returncode != 0:
         raise CliError(release_result.stderr.strip() or 'Failed to read fetched release metadata.')
     release_payload = json.loads(release_result.stdout or '{}')
@@ -66,7 +75,7 @@ def refresh_upstream_status(repo_root: Path, target_root: Path, current_status: 
     merged = merge_upgrade_status(
         current_status,
         remote={
-            'remote_latest_commit': commit_result.stdout.strip(),
+            'remote_latest_commit': remote_commit,
             'remote_latest_version': str(release.get('version') or '').strip(),
             'remote_latest_checked_at': None,
         },
@@ -75,12 +84,13 @@ def refresh_upstream_status(repo_root: Path, target_root: Path, current_status: 
     return merged
 
 
-def reset_repo_to_official_head(repo_root: Path, branch: str) -> None:
+def reset_repo_to_official_head(repo_root: Path, branch: str, target_commit: str | None = None) -> None:
+    target_ref = str(target_commit or '').strip() or 'FETCH_HEAD'
     commands = (
         ['git', 'reset', '--hard', 'HEAD'],
         ['git', 'clean', '-fd'],
-        ['git', 'checkout', '-B', branch, 'FETCH_HEAD'],
-        ['git', 'reset', '--hard', 'FETCH_HEAD'],
+        ['git', 'checkout', '-B', branch, target_ref],
+        ['git', 'reset', '--hard', target_ref],
     )
     for command in commands:
         result = run_subprocess(command, cwd=repo_root)
@@ -184,7 +194,7 @@ def upgrade_runtime(
         )
 
     before = refresh_installed_status(resolved_repo_root, target_root, host_id)
-    status = refresh_upstream_status(resolved_repo_root, target_root, before)
+    status = refresh_upstream_status(resolved_repo_root, target_root, before, force_refresh=True)
     if not bool(status.get('update_available')):
         print(
             'Vibe-Skills already current: '
@@ -193,7 +203,8 @@ def upgrade_runtime(
         return {'changed': False, 'before': before, 'after': status}
 
     branch = str(status.get('repo_default_branch') or 'main').strip() or 'main'
-    reset_repo_to_official_head(resolved_repo_root, branch)
+    target_commit = str(status.get('remote_latest_commit') or '').strip() or None
+    reset_repo_to_official_head(resolved_repo_root, branch, target_commit)
     reinstall_runtime(
         repo_root=resolved_repo_root,
         target_root=target_root,
