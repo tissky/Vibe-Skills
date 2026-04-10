@@ -371,7 +371,17 @@ function Get-VibeWorkspaceRoot {
         [Parameter(Mandatory)] [string]$RepoRoot
     )
 
-    return [System.IO.Path]::GetFullPath($RepoRoot)
+    $resolved = [System.IO.Path]::GetFullPath($RepoRoot)
+    $segments = $resolved -split '[\\/]'
+    $worktreeIndex = [Array]::IndexOf($segments, '.worktrees')
+    if ($worktreeIndex -gt 0) {
+        $prefix = $segments[0..($worktreeIndex - 1)] -join [System.IO.Path]::DirectorySeparatorChar
+        if (-not [string]::IsNullOrWhiteSpace($prefix)) {
+            return [System.IO.Path]::GetFullPath($prefix)
+        }
+    }
+
+    return $resolved
 }
 
 function Get-VibeWorkspaceSidecarRoot {
@@ -388,6 +398,14 @@ function Get-VibeWorkspaceProjectDescriptorPath {
     )
 
     return [System.IO.Path]::GetFullPath((Join-Path (Get-VibeWorkspaceSidecarRoot -RepoRoot $RepoRoot) 'project.json'))
+}
+
+function Get-VibeWorkspaceMemoryPlaneContract {
+    return [pscustomobject]@{
+        identity_scope = 'workspace'
+        driver_contract = 'workspace_shared_memory_v1'
+        logical_owners = @('state_store', 'serena', 'ruflo', 'cognee')
+    }
 }
 
 function Get-VibeHostSidecarRoot {
@@ -442,6 +460,7 @@ function New-VibeWorkspaceArtifactProjection {
     $workspaceRoot = Get-VibeWorkspaceRoot -RepoRoot $RepoRoot
     $workspaceSidecarRoot = Get-VibeWorkspaceSidecarRoot -RepoRoot $RepoRoot
     $projectDescriptorPath = Get-VibeWorkspaceProjectDescriptorPath -RepoRoot $RepoRoot
+    $memoryPlane = Get-VibeWorkspaceMemoryPlaneContract
     $useDefaultWorkspaceSidecar = [string]::IsNullOrWhiteSpace($ArtifactRoot)
 
     if ($useDefaultWorkspaceSidecar) {
@@ -463,6 +482,10 @@ function New-VibeWorkspaceArtifactProjection {
         artifact_root_source = $artifactRootSource
         default_workspace_sidecar_artifact_root = [bool]$useDefaultWorkspaceSidecar
         host_sidecar_root = Get-VibeHostSidecarRoot -Runtime $Runtime -RouterTargetRoot $RouterTargetRoot
+        workspace_memory_identity_root = $projectDescriptorPath
+        workspace_memory_identity_scope = [string]$memoryPlane.identity_scope
+        workspace_memory_driver_contract = [string]$memoryPlane.driver_contract
+        workspace_memory_logical_owners = [string[]]@($memoryPlane.logical_owners)
     }
 }
 
@@ -473,6 +496,7 @@ function Initialize-VibeWorkspaceProjectDescriptor {
     )
 
     $storage = New-VibeWorkspaceArtifactProjection -RepoRoot $RepoRoot -Runtime $Runtime
+    $memoryPlane = Get-VibeWorkspaceMemoryPlaneContract
     $descriptorPath = [string]$storage.project_descriptor_path
     $descriptor = [pscustomobject]@{
         schema_version = 1
@@ -486,6 +510,12 @@ function Initialize-VibeWorkspaceProjectDescriptor {
             requirement_root = 'docs/requirements'
             execution_plan_root = 'docs/plans'
             session_root = 'outputs/runtime/vibe-sessions'
+        }
+        memory_plane = [pscustomobject]@{
+            identity_root = [string]$storage.project_descriptor_path
+            identity_scope = [string]$memoryPlane.identity_scope
+            driver_contract = [string]$memoryPlane.driver_contract
+            logical_owners = [string[]]@($memoryPlane.logical_owners)
         }
         host_sidecar_root = if ([string]::IsNullOrWhiteSpace([string]$storage.host_sidecar_root)) { $null } else { [string]$storage.host_sidecar_root }
     }

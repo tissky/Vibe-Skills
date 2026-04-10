@@ -50,13 +50,18 @@ def run_governed_runtime(task: str, artifact_root: Path, env: dict[str, str] | N
             "$result | ConvertTo-Json -Depth 20 }"
         ),
     ]
+    effective_env = os.environ.copy()
+    effective_env["VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION"] = "1"
+    if env:
+        effective_env.update(env)
+
     completed = subprocess.run(
         command,
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         encoding="utf-8",
-        env=env,
+        env=effective_env,
         check=True,
     )
     stdout = completed.stdout.strip()
@@ -69,6 +74,51 @@ def run_governed_runtime(task: str, artifact_root: Path, env: dict[str, str] | N
 
 
 class MemoryRuntimeActivationTests(unittest.TestCase):
+    def test_runtime_activation_report_keeps_required_stage_shape_and_owner_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            payload = run_governed_runtime(
+                "Audit current governed memory activation contracts before refactoring shared memory.",
+                artifact_root=Path(tempdir),
+            )
+            report = json.loads(
+                Path(payload["summary"]["artifacts"]["memory_activation_report"]).read_text(encoding="utf-8")
+            )
+
+            stages = report["stages"]
+            self.assertEqual(6, len(stages))
+
+            stage_by_name = {stage["stage"]: stage for stage in stages}
+            self.assertEqual(
+                {"state_store", "Cognee"},
+                {action["owner"] for action in stage_by_name["skeleton_check"]["read_actions"]},
+            )
+            self.assertEqual(
+                {"Serena", "Cognee"},
+                {action["owner"] for action in stage_by_name["xl_plan"]["read_actions"]},
+            )
+            self.assertEqual(
+                {"state_store", "ruflo"},
+                {action["owner"] for action in stage_by_name["plan_execute"]["write_actions"]},
+            )
+            self.assertEqual(
+                {"Serena", "state_store", "Cognee"},
+                {action["owner"] for action in stage_by_name["phase_cleanup"]["write_actions"]},
+            )
+
+            for stage in stages:
+                with self.subTest(stage=stage["stage"]):
+                    self.assertIn("read_actions", stage)
+                    self.assertIn("write_actions", stage)
+                    self.assertIn("context_injection", stage)
+                    if stage["stage"] in {"requirement_doc", "xl_plan", "plan_execute"}:
+                        self.assertIsInstance(stage["context_injection"], dict)
+                        self.assertIn("injected_item_count", stage["context_injection"])
+                        self.assertIn("estimated_tokens", stage["context_injection"])
+                        self.assertIn("disclosure_level", stage["context_injection"])
+                        self.assertIn("selected_capsules", stage["context_injection"])
+                    else:
+                        self.assertIsNone(stage["context_injection"])
+
     def test_runtime_emits_stage_aware_memory_activation_report(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = run_governed_runtime(

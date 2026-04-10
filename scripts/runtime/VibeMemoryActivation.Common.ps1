@@ -84,6 +84,8 @@ function Get-VibeBoundedMemoryItems {
     )
 
     $bounded = [System.Collections.Generic.List[string]]::new()
+    $totalChars = 0
+    $maxCharsTotal = [int]$Budget.max_tokens * 4
     foreach ($item in @($Items)) {
         if ([string]::IsNullOrWhiteSpace($item)) {
             continue
@@ -96,7 +98,22 @@ function Get-VibeBoundedMemoryItems {
         if ($text.Length -gt [int]$Budget.max_chars_per_item) {
             $text = $text.Substring(0, [int]$Budget.max_chars_per_item).TrimEnd() + '...'
         }
+        $remainingChars = $maxCharsTotal - $totalChars
+        if ($remainingChars -le 0) {
+            break
+        }
+        if ($text.Length -gt $remainingChars) {
+            if ($remainingChars -le 3) {
+                $text = $text.Substring(0, $remainingChars)
+            } else {
+                $text = $text.Substring(0, $remainingChars - 3).TrimEnd() + '...'
+            }
+        }
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            break
+        }
         $bounded.Add($text) | Out-Null
+        $totalChars += $text.Length
     }
     return @($bounded)
 }
@@ -129,6 +146,8 @@ function Get-VibeMemoryReadActionObject {
         status = [string]$BackendResult.status
         item_count = [int]$BackendResult.item_count
         items = @($BackendResult.items)
+        capsule_count = if ($BackendResult.PSObject.Properties.Name -contains 'capsule_count') { [int]$BackendResult.capsule_count } else { 0 }
+        capsules = if ($BackendResult.PSObject.Properties.Name -contains 'capsules') { @($BackendResult.capsules) } else { @() }
         artifact_path = if ($BackendResult.artifact_path) { [string]$BackendResult.artifact_path } else { $null }
         project_key = if ($BackendResult.project_key) { [string]$BackendResult.project_key } else { $null }
         project_key_source = if ($BackendResult.project_key_source) { [string]$BackendResult.project_key_source } else { $null }
@@ -248,6 +267,251 @@ function Get-VibeRufloReadAction {
     return Get-VibeMemoryReadActionObject -Owner 'ruflo' -BackendResult $result
 }
 
+function Get-VibeMemoryDisclosureLevel {
+    param(
+        [Parameter(Mandatory)] [string]$Stage
+    )
+
+    switch ($Stage) {
+        'skeleton_check' { return 'L1_capsule_titles' }
+        'deep_interview' { return 'L1_capsule_titles' }
+        'requirement_doc' { return 'L2_capsule_summary' }
+        'xl_plan' { return 'L2_capsule_summary' }
+        'plan_execute' { return 'L3_evidence_pack' }
+        'phase_cleanup' { return 'L0_presence' }
+        default { return 'L1_capsule_titles' }
+    }
+}
+
+function Get-VibeStableShortHash {
+    param(
+        [Parameter(Mandatory)] [string]$Text
+    )
+
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $hashBytes = $sha256.ComputeHash($bytes)
+    } finally {
+        $sha256.Dispose()
+    }
+
+    $hex = [System.BitConverter]::ToString($hashBytes).Replace('-', '').ToLowerInvariant()
+    return $hex.Substring(0, 16)
+}
+
+function ConvertTo-VibeMemoryTimestampString {
+    param(
+        [AllowNull()] [object]$Value
+    )
+
+    if ($null -eq $Value) {
+        return $null
+    }
+
+    if ($Value -is [datetime]) {
+        return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    }
+
+    $text = [string]$Value
+    if ([string]::IsNullOrWhiteSpace($text)) {
+        return $null
+    }
+
+    $parsed = [datetime]::MinValue
+    if ([datetime]::TryParse($text, [ref]$parsed)) {
+        return $parsed.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    }
+
+    return $text
+}
+
+function Get-VibeActionCapsuleCandidates {
+    param(
+        [Parameter(Mandatory)] [object]$Action,
+        [Parameter(Mandatory)] [string]$Stage
+    )
+
+    $artifactPath = if ($Action.PSObject.Properties.Name -contains 'artifact_path' -and -not [string]::IsNullOrWhiteSpace([string]$Action.artifact_path)) {
+        [string]$Action.artifact_path
+    } else {
+        $null
+    }
+    $actionItems = @($Action.items)
+    $backendCapsules = if ($Action.PSObject.Properties.Name -contains 'capsules') { @($Action.capsules) } else { @() }
+    $candidates = [System.Collections.Generic.List[object]]::new()
+
+    if (@($backendCapsules).Count -gt 0) {
+        for ($index = 0; $index -lt @($backendCapsules).Count; $index++) {
+            $backendCapsule = $backendCapsules[$index]
+            $summaryLines = [System.Collections.Generic.List[string]]::new()
+            $primaryLine = $null
+            if ($index -lt $actionItems.Count -and -not [string]::IsNullOrWhiteSpace([string]$actionItems[$index])) {
+                $primaryLine = [string]$actionItems[$index]
+            } elseif (-not [string]::IsNullOrWhiteSpace([string]$backendCapsule.summary)) {
+                $primaryLine = [string]$backendCapsule.summary
+            } else {
+                $primaryLine = ('{0} memory capsule' -f [string]$Action.owner)
+            }
+            $summaryLines.Add($primaryLine) | Out-Null
+
+            $backendSummary = [string]$backendCapsule.summary
+            if (-not [string]::IsNullOrWhiteSpace($backendSummary) -and $backendSummary -ne $primaryLine -and $summaryLines.Count -lt 3) {
+                $summaryLines.Add($backendSummary) | Out-Null
+            }
+
+            $title = [string]$primaryLine
+            if ($title.Length -gt 140) {
+                $title = $title.Substring(0, 140).TrimEnd() + '...'
+            }
+
+            $capsuleId = if (-not [string]::IsNullOrWhiteSpace([string]$backendCapsule.capsule_id)) {
+                [string]$backendCapsule.capsule_id
+            } else {
+                Get-VibeStableShortHash -Text ('{0}|{1}|{2}' -f $Stage, [string]$Action.owner, $title)
+            }
+
+            $candidates.Add([pscustomobject]@{
+                capsule_id = $capsuleId
+                owner = if (-not [string]::IsNullOrWhiteSpace([string]$backendCapsule.owner)) { [string]$backendCapsule.owner } else { [string]$Action.owner }
+                lane = if (-not [string]::IsNullOrWhiteSpace([string]$backendCapsule.lane)) { [string]$backendCapsule.lane } else { $null }
+                kind = if (-not [string]::IsNullOrWhiteSpace([string]$backendCapsule.kind)) { [string]$backendCapsule.kind } else { $null }
+                updated_at = ConvertTo-VibeMemoryTimestampString -Value $backendCapsule.updated_at
+                title = $title
+                why_now = ('Matched {0} memory for {1}.' -f [string]$Action.owner, $Stage)
+                expansion_ref = if ($artifactPath) { ('{0}#{1}' -f $artifactPath, $capsuleId) } else { ('inline:{0}' -f $capsuleId) }
+                summary_lines = @($summaryLines)
+            }) | Out-Null
+        }
+        return @($candidates)
+    }
+
+    $summaryLines = [System.Collections.Generic.List[string]]::new()
+    foreach ($item in $actionItems) {
+        $text = [string]$item
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            continue
+        }
+        if ($summaryLines.Count -ge 3) {
+            break
+        }
+        $summaryLines.Add($text) | Out-Null
+    }
+
+    if ($summaryLines.Count -eq 0) {
+        return @()
+    }
+
+    $title = [string]$summaryLines[0]
+    if ($title.Length -gt 140) {
+        $title = $title.Substring(0, 140).TrimEnd() + '...'
+    }
+
+    $capsuleId = Get-VibeStableShortHash -Text ('{0}|{1}|{2}' -f $Stage, [string]$Action.owner, $title)
+    $candidates.Add([pscustomobject]@{
+        capsule_id = $capsuleId
+        owner = [string]$Action.owner
+        lane = $null
+        kind = 'fallback_digest'
+        updated_at = $null
+        title = $title
+        why_now = ('Matched {0} memory for {1}.' -f [string]$Action.owner, $Stage)
+        expansion_ref = if ($artifactPath) { ('{0}#{1}' -f $artifactPath, $capsuleId) } else { ('inline:{0}' -f $capsuleId) }
+        summary_lines = @($summaryLines)
+    }) | Out-Null
+    return @($candidates)
+}
+
+function New-VibeSelectedMemoryCapsules {
+    param(
+        [Parameter(Mandatory)] [AllowEmptyCollection()] [object[]]$ReadActions,
+        [Parameter(Mandatory)] [string]$Stage,
+        [Parameter(Mandatory)] [object]$Budget
+    )
+
+    $capsules = [System.Collections.Generic.List[object]]::new()
+    $candidateGroups = @()
+    foreach ($action in @($ReadActions)) {
+        $group = @(Get-VibeActionCapsuleCandidates -Action $action -Stage $Stage)
+        if (@($group).Count -gt 0) {
+            $candidateGroups += ,$group
+        }
+    }
+
+    $round = 0
+    while ($capsules.Count -lt [int]$Budget.top_k) {
+        $addedInRound = $false
+        foreach ($group in @($candidateGroups)) {
+            if ($round -lt @($group).Count) {
+                $capsules.Add($group[$round]) | Out-Null
+                $addedInRound = $true
+                if ($capsules.Count -ge [int]$Budget.top_k) {
+                    break
+                }
+            }
+        }
+
+        if (-not $addedInRound) {
+            break
+        }
+
+        $round++
+    }
+
+    return @($capsules)
+}
+
+function New-VibeProgressiveDisclosureContextPack {
+    param(
+        [Parameter(Mandatory)] [object]$Runtime,
+        [Parameter(Mandatory)] [AllowEmptyCollection()] [object[]]$ReadActions,
+        [Parameter(Mandatory)] [string]$SessionRoot,
+        [Parameter(Mandatory)] [string]$Stage,
+        [Parameter(Mandatory)] [string]$ArtifactName,
+        [AllowEmptyString()] [string]$SourceStage = ''
+    )
+
+    $budget = Get-VibeMemoryBudgetSpec -Runtime $Runtime -Stage $Stage
+    $selectedCapsules = @(New-VibeSelectedMemoryCapsules -ReadActions $ReadActions -Stage $Stage -Budget $budget)
+
+    $items = @()
+    foreach ($capsule in @($selectedCapsules)) {
+        foreach ($line in @($capsule.summary_lines)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$line)) {
+                $items += [string]$line
+            }
+        }
+    }
+
+    $boundedItems = Get-VibeBoundedMemoryItems -Items $items -Budget $budget
+    $estimatedTokens = Get-VibeEstimatedTokenCount -Items @($boundedItems)
+    $artifactPath = Join-Path (Get-VibeMemoryArtifactsRoot -SessionRoot $SessionRoot) $ArtifactName
+    $artifact = [pscustomobject]@{
+        stage = $Stage
+        source_stage = if ([string]::IsNullOrWhiteSpace($SourceStage)) { $null } else { $SourceStage }
+        owner = 'state_store'
+        disclosure_level = Get-VibeMemoryDisclosureLevel -Stage $Stage
+        generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+        capsule_count = @($selectedCapsules).Count
+        selected_capsules = @($selectedCapsules)
+        items = @($boundedItems)
+        estimated_tokens = $estimatedTokens
+        budget = $budget
+    }
+    Write-VibeJsonArtifact -Path $artifactPath -Value $artifact
+
+    return [pscustomobject]@{
+        context_path = $artifactPath
+        disclosure_level = [string]$artifact.disclosure_level
+        capsule_count = @($selectedCapsules).Count
+        selected_capsules = @($selectedCapsules)
+        injected_item_count = @($boundedItems).Count
+        estimated_tokens = $estimatedTokens
+        budget = $budget
+        items = @($boundedItems)
+    }
+}
+
 function New-VibePlanMemoryContextPack {
     param(
         [Parameter(Mandatory)] [object]$Runtime,
@@ -257,35 +521,12 @@ function New-VibePlanMemoryContextPack {
         [string]$ArtifactName = 'plan-context-pack.json'
     )
 
-    $budget = Get-VibeMemoryBudgetSpec -Runtime $Runtime -Stage $Stage
-    $items = @()
-    foreach ($action in @($ReadActions)) {
-        foreach ($item in @($action.items)) {
-            if (-not [string]::IsNullOrWhiteSpace([string]$item)) {
-                $items += [string]$item
-            }
-        }
-    }
-    $boundedItems = Get-VibeBoundedMemoryItems -Items $items -Budget $budget
-    $estimatedTokens = Get-VibeEstimatedTokenCount -Items @($boundedItems)
-    $artifactPath = Join-Path (Get-VibeMemoryArtifactsRoot -SessionRoot $SessionRoot) $ArtifactName
-    $artifact = [pscustomobject]@{
-        stage = $Stage
-        owner = 'state_store'
-        generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-        items = @($boundedItems)
-        estimated_tokens = $estimatedTokens
-        budget = $budget
-    }
-    Write-VibeJsonArtifact -Path $artifactPath -Value $artifact
-
-    return [pscustomobject]@{
-        context_path = $artifactPath
-        injected_item_count = @($boundedItems).Count
-        estimated_tokens = $estimatedTokens
-        budget = $budget
-        items = @($boundedItems)
-    }
+    return New-VibeProgressiveDisclosureContextPack `
+        -Runtime $Runtime `
+        -ReadActions $ReadActions `
+        -SessionRoot $SessionRoot `
+        -Stage $Stage `
+        -ArtifactName $ArtifactName
 }
 
 function Get-VibeDecisionCandidates {
@@ -472,36 +713,13 @@ function New-VibeRequirementContextPack {
         [Parameter(Mandatory)] [string]$SessionRoot
     )
 
-    $budget = Get-VibeMemoryBudgetSpec -Runtime $Runtime -Stage 'requirement_doc'
-    $items = @()
-    foreach ($action in @($ReadActions)) {
-        foreach ($item in @($action.items)) {
-            if (-not [string]::IsNullOrWhiteSpace([string]$item)) {
-                $items += [string]$item
-            }
-        }
-    }
-    $boundedItems = Get-VibeBoundedMemoryItems -Items @($items) -Budget $budget
-    $estimatedTokens = Get-VibeEstimatedTokenCount -Items @($boundedItems)
-    $artifactPath = Join-Path (Get-VibeMemoryArtifactsRoot -SessionRoot $SessionRoot) 'requirement-context-pack.json'
-    $artifact = [pscustomobject]@{
-        stage = 'requirement_doc'
-        source_stage = 'skeleton_check'
-        owner = 'state_store'
-        generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-        items = @($boundedItems)
-        estimated_tokens = $estimatedTokens
-        budget = $budget
-    }
-    Write-VibeJsonArtifact -Path $artifactPath -Value $artifact
-
-    return [pscustomobject]@{
-        context_path = $artifactPath
-        injected_item_count = @($boundedItems).Count
-        estimated_tokens = $estimatedTokens
-        budget = $budget
-        items = @($boundedItems)
-    }
+    return New-VibeProgressiveDisclosureContextPack `
+        -Runtime $Runtime `
+        -ReadActions $ReadActions `
+        -SessionRoot $SessionRoot `
+        -Stage 'requirement_doc' `
+        -ArtifactName 'requirement-context-pack.json' `
+        -SourceStage 'bounded_memory_recall'
 }
 
 function New-VibeExecutionMemoryWriteAction {
@@ -685,7 +903,9 @@ function New-VibeMemoryActivationReport {
         [Parameter(Mandatory)] [AllowEmptyCollection()] [object[]]$DeepInterviewReadActions,
         [Parameter(Mandatory)] [object]$RequirementContextPack,
         [Parameter(Mandatory)] [AllowEmptyCollection()] [object[]]$XlPlanReadActions,
+        [Parameter(Mandatory)] [object]$PlanContextPack,
         [Parameter(Mandatory)] [AllowEmptyCollection()] [object[]]$PlanExecuteReadActions,
+        [Parameter(Mandatory)] [object]$PlanExecuteContextPack,
         [Parameter(Mandatory)] [AllowEmptyCollection()] [object[]]$PlanExecuteWriteActions,
         [Parameter(Mandatory)] [AllowEmptyCollection()] [object[]]$CleanupWriteActions,
         [Parameter(Mandatory)] [object]$CleanupFoldAction
@@ -712,19 +932,38 @@ function New-VibeMemoryActivationReport {
                 estimated_tokens = [int]$RequirementContextPack.estimated_tokens
                 budget = $RequirementContextPack.budget
                 artifact_path = [string]$RequirementContextPack.context_path
+                disclosure_level = [string]$RequirementContextPack.disclosure_level
+                capsule_count = [int]$RequirementContextPack.capsule_count
+                selected_capsules = @($RequirementContextPack.selected_capsules)
             }
             write_actions = @()
         },
         [pscustomobject]@{
             stage = 'xl_plan'
             read_actions = @($XlPlanReadActions)
-            context_injection = $null
+            context_injection = [pscustomobject]@{
+                injected_item_count = [int]$PlanContextPack.injected_item_count
+                estimated_tokens = [int]$PlanContextPack.estimated_tokens
+                budget = $PlanContextPack.budget
+                artifact_path = [string]$PlanContextPack.context_path
+                disclosure_level = [string]$PlanContextPack.disclosure_level
+                capsule_count = [int]$PlanContextPack.capsule_count
+                selected_capsules = @($PlanContextPack.selected_capsules)
+            }
             write_actions = @()
         },
         [pscustomobject]@{
             stage = 'plan_execute'
             read_actions = @($PlanExecuteReadActions)
-            context_injection = $null
+            context_injection = [pscustomobject]@{
+                injected_item_count = [int]$PlanExecuteContextPack.injected_item_count
+                estimated_tokens = [int]$PlanExecuteContextPack.estimated_tokens
+                budget = $PlanExecuteContextPack.budget
+                artifact_path = [string]$PlanExecuteContextPack.context_path
+                disclosure_level = [string]$PlanExecuteContextPack.disclosure_level
+                capsule_count = [int]$PlanExecuteContextPack.capsule_count
+                selected_capsules = @($PlanExecuteContextPack.selected_capsules)
+            }
             write_actions = @($PlanExecuteWriteActions)
         },
         [pscustomobject]@{

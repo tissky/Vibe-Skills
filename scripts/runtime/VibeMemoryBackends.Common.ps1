@@ -138,6 +138,10 @@ function Invoke-VibeMemoryBackendAction {
             status = [string]$laneResolution.reason
             items = @()
             item_count = 0
+            capsule_count = 0
+            capsules = @()
+            suppressed_count = 0
+            workspace_memory_plane = $null
             artifact_path = $null
             store_path = $null
             project_key = $null
@@ -154,6 +158,10 @@ function Invoke-VibeMemoryBackendAction {
             status = 'memory_backend_driver_missing'
             items = @()
             item_count = 0
+            capsule_count = 0
+            capsules = @()
+            suppressed_count = 0
+            workspace_memory_plane = $null
             artifact_path = $null
             store_path = [string]$laneResolution.store_path
             project_key = $laneResolution.project_key
@@ -194,6 +202,10 @@ function Invoke-VibeMemoryBackendAction {
                 status = 'memory_backend_invocation_failed'
                 items = @()
                 item_count = 0
+                capsule_count = 0
+                capsules = @()
+                suppressed_count = 0
+                workspace_memory_plane = $null
                 artifact_path = $null
                 store_path = [string]$laneResolution.store_path
                 project_key = $laneResolution.project_key
@@ -209,6 +221,10 @@ function Invoke-VibeMemoryBackendAction {
                 status = 'memory_backend_missing_response'
                 items = @()
                 item_count = 0
+                capsule_count = 0
+                capsules = @()
+                suppressed_count = 0
+                workspace_memory_plane = $null
                 artifact_path = $null
                 store_path = [string]$laneResolution.store_path
                 project_key = $laneResolution.project_key
@@ -223,6 +239,10 @@ function Invoke-VibeMemoryBackendAction {
             status = [string]$response.status
             items = @($response.items)
             item_count = [int]$response.item_count
+            capsule_count = if ($response.PSObject.Properties.Name -contains 'capsule_count') { [int]$response.capsule_count } else { 0 }
+            capsules = if ($response.PSObject.Properties.Name -contains 'capsules') { @($response.capsules) } else { @() }
+            suppressed_count = if ($response.PSObject.Properties.Name -contains 'suppressed_count') { [int]$response.suppressed_count } else { 0 }
+            workspace_memory_plane = if ($response.PSObject.Properties.Name -contains 'workspace_memory_plane') { $response.workspace_memory_plane } else { $null }
             artifact_path = $responsePath
             store_path = [string]$response.store_path
             project_key = if ($response.project_key) { [string]$response.project_key } else { $laneResolution.project_key }
@@ -235,6 +255,10 @@ function Invoke-VibeMemoryBackendAction {
             status = 'memory_backend_exception'
             items = @()
             item_count = 0
+            capsule_count = 0
+            capsules = @()
+            suppressed_count = 0
+            workspace_memory_plane = $null
             artifact_path = $null
             store_path = [string]$laneResolution.store_path
             project_key = $laneResolution.project_key

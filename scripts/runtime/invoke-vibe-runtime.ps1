@@ -325,7 +325,9 @@ if (Test-VibeGovernedStageReached -TerminalStage $terminalStage -TargetStage 'ph
         -DeepInterviewReadActions @($memoryDeepInterviewRead) `
         -RequirementContextPack $requirementMemoryContext `
         -XlPlanReadActions $xlPlanReadActions `
+        -PlanContextPack $planMemoryContext `
         -PlanExecuteReadActions @($memoryPlanExecuteRead) `
+        -PlanExecuteContextPack $executionMemoryContext `
         -PlanExecuteWriteActions @($memoryExecuteWrite, $memoryExecuteRufloWrite) `
         -CleanupWriteActions @($memoryCleanupDecision, $memoryCleanupCognee) `
         -CleanupFoldAction $memoryCleanupFold
