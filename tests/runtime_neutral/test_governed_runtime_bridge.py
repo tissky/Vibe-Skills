@@ -57,6 +57,8 @@ DOC_TASK = "Reformat the project README headings and spacing without changing ap
 DOC_CODE_TASK = "Implement the markdown export pipeline for the docs renderer and add targeted verification for the parser."
 DOC_DECK_TASK = "Build the release deck slides and refine presentation spacing without changing application code."
 DOC_HOST_KEYWORD_TASK = "Refresh codex onboarding documentation for 用户 handoff without changing application code."
+API_DOC_TASK = "Update API documentation for the authentication flow and refresh endpoint examples."
+WIREFRAME_TASK = "Prototype onboarding screen wireframe with desktop and mobile layout coverage."
 
 
 def resolve_python_command_spec_via_powershell(command_spec: str, path_entries: list[Path]) -> dict[str, object]:
@@ -737,6 +739,150 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
             )
             self.assertIn("## Baseline Document Quality Dimensions", requirement_doc)
             self.assertIn("- Structure Integrity", requirement_doc)
+
+    def test_write_requirement_doc_treats_api_documentation_tasks_as_document_artifacts(self) -> None:
+        script_path = REPO_ROOT / "scripts" / "runtime" / "Write-RequirementDoc.ps1"
+        run_id = "pytest-requirement-doc-api-documentation"
+        shell = resolve_powershell()
+        if shell is None:
+            self.skipTest("PowerShell executable not available in PATH")
+
+        intent_contract = {
+            "title": "API documentation refresh",
+            "goal": API_DOC_TASK,
+            "deliverable": "Updated API documentation only.",
+            "constraints": [
+                "Do not change application code.",
+            ],
+            "acceptance_criteria": [
+                "Requirement document is frozen before execution.",
+            ],
+            "non_goals": [
+                "Do not implement backend or frontend code changes.",
+            ],
+            "autonomy_mode": "interactive_governed",
+            "assumptions": [
+                "Only documentation artifacts change.",
+            ],
+        }
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir)
+            intent_contract_path = artifact_root / "intent-contract.json"
+            intent_contract_path.write_text(
+                json.dumps(intent_contract, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            command = [
+                shell,
+                "-NoLogo",
+                "-NoProfile",
+                "-Command",
+                (
+                    "& { "
+                    f"$result = & '{script_path}' "
+                    f"-Task '{API_DOC_TASK}' "
+                    "-Mode interactive_governed "
+                    f"-RunId '{run_id}' "
+                    f"-IntentContractPath '{intent_contract_path}' "
+                    f"-ArtifactRoot '{artifact_root}'; "
+                    "$result | ConvertTo-Json -Depth 20 }"
+                ),
+            ]
+            completed = subprocess.run(
+                command,
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+            payload = json.loads(completed.stdout)
+            requirement_doc_path = Path(payload["requirement_doc_path"])
+            self.assertTrue(requirement_doc_path.exists())
+
+            requirement_doc = requirement_doc_path.read_text(encoding="utf-8")
+            self.assertIn("## Artifact Review Requirements", requirement_doc)
+            self.assertIn(
+                "- Review the touched document artifact directly against each frozen baseline document quality dimension.",
+                requirement_doc,
+            )
+            self.assertIn("## Code Task TDD Evidence Requirements", requirement_doc)
+            self.assertIn("No code-task TDD evidence requirements were frozen for this run.", requirement_doc)
+            self.assertIn("## Baseline Document Quality Dimensions", requirement_doc)
+            self.assertIn("- Structure Integrity", requirement_doc)
+            self.assertIn("## Baseline UI Quality Dimensions", requirement_doc)
+            self.assertIn("No baseline UI quality dimensions were frozen for this run.", requirement_doc)
+
+    def test_write_requirement_doc_treats_wireframe_tasks_as_visual_artifacts_without_tdd(self) -> None:
+        script_path = REPO_ROOT / "scripts" / "runtime" / "Write-RequirementDoc.ps1"
+        run_id = "pytest-requirement-doc-wireframe"
+        shell = resolve_powershell()
+        if shell is None:
+            self.skipTest("PowerShell executable not available in PATH")
+
+        intent_contract = {
+            "title": "Onboarding wireframe prototype",
+            "goal": WIREFRAME_TASK,
+            "deliverable": "Wireframe-only onboarding screen design artifact.",
+            "constraints": [
+                "Do not implement production code in this phase.",
+            ],
+            "acceptance_criteria": [
+                "Requirement document is frozen before execution.",
+            ],
+            "non_goals": [
+                "Do not convert the wireframe into production UI code.",
+            ],
+            "autonomy_mode": "interactive_governed",
+            "assumptions": [
+                "The deliverable is a visual design artifact, not implementation code.",
+            ],
+        }
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir)
+            intent_contract_path = artifact_root / "intent-contract.json"
+            intent_contract_path.write_text(
+                json.dumps(intent_contract, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            command = [
+                shell,
+                "-NoLogo",
+                "-NoProfile",
+                "-Command",
+                (
+                    "& { "
+                    f"$result = & '{script_path}' "
+                    f"-Task '{WIREFRAME_TASK}' "
+                    "-Mode interactive_governed "
+                    f"-RunId '{run_id}' "
+                    f"-IntentContractPath '{intent_contract_path}' "
+                    f"-ArtifactRoot '{artifact_root}'; "
+                    "$result | ConvertTo-Json -Depth 20 }"
+                ),
+            ]
+            completed = subprocess.run(
+                command,
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+            payload = json.loads(completed.stdout)
+            requirement_doc_path = Path(payload["requirement_doc_path"])
+            self.assertTrue(requirement_doc_path.exists())
+
+            requirement_doc = requirement_doc_path.read_text(encoding="utf-8")
+            self.assertIn("## Code Task TDD Evidence Requirements", requirement_doc)
+            self.assertIn("No code-task TDD evidence requirements were frozen for this run.", requirement_doc)
+            self.assertIn("## Baseline Document Quality Dimensions", requirement_doc)
+            self.assertIn("No baseline document quality dimensions were frozen for this run.", requirement_doc)
+            self.assertIn("## Baseline UI Quality Dimensions", requirement_doc)
+            self.assertIn("- Structure Completeness", requirement_doc)
+            self.assertIn("- Responsive Stability", requirement_doc)
 
     def test_resolve_vgo_python_command_spec_falls_back_to_python3(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

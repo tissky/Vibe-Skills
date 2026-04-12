@@ -39,7 +39,7 @@ function Test-VibeTaskNeedsDocumentArtifactBaseline {
     $text = ('{0} {1}' -f $Task, $Deliverable).ToLowerInvariant()
     $docOnlySignals = 'without changing (application )?code|without code changes|document-only'
     $documentArtifactSignals = 'readme|documentation|docx|pdf|pptx|headings|spacing|formatting|markdown|slide|slides|presentation|deck|\bdocument\b|\bdocs\b'
-    $codeImplementationSignals = 'failing test|stack trace|debug|bug|fix|refactor|script|function|class|endpoint|api|component|module|backend|frontend|dashboard|page|screen|unit test|integration test|parser|exporter|renderer|pipeline|service|library|cli'
+    $codeImplementationSignals = 'failing test|stack trace|debug|bug|fix|refactor|implement|build|develop|production code|source code|unit test|integration test|script|function|class|parser|exporter|renderer|pipeline|service|module|cli'
 
     if ($text -match $docOnlySignals) {
         return $true
@@ -74,12 +74,13 @@ function Test-VibeTaskNeedsCodeTaskTddEvidence {
     )
 
     $text = ('{0} {1}' -f $Task, $Deliverable).ToLowerInvariant()
+    $codeImplementationSignals = 'failing test|stack trace|debug|bug|fix|refactor|implement|build|develop|production code|source code|unit test|integration test|script|function|class|parser|exporter|renderer|pipeline|service|module|cli'
 
     if ((Test-VibeTaskNeedsDocumentArtifactBaseline -Task $Task -Deliverable $Deliverable) -or ($text -match 'image|logo|illustration|diagram')) {
         return $false
     }
 
-    return $text -match 'failing test|stack trace|debug|bug|fix|refactor|implement|build|feature|code|script|function|class|endpoint|api|component|module|frontend|backend|dashboard|page|screen|unit test|integration test'
+    return $text -match $codeImplementationSignals
 }
 
 function Get-VibeDefaultCodeTaskTddEvidenceRequirements {
