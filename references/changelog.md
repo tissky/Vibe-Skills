@@ -3,7 +3,7 @@
 ## v3.0.2 (2026-04-13)
 
 - Release cut by `scripts/governance/release-cut.ps1`.
-- Fill in detailed release notes before merge.
+- Detailed release notes: `docs/releases/v3.0.2.md`.
 
 
 This file is the stable current changelog surface used by release governance.

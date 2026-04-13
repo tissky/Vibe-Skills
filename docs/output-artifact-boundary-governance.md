@@ -47,4 +47,4 @@ Required terms for this stage:
 - tracked outputs remain fully allowlisted;
 - disallowed runtime roots are not tracked;
 - policy count stays aligned with the tracked legacy set;
-- stage2 mirrored fixture copies exist under the declared fixture roots.
+- `stage2_mirrored` fixture copies exist under the declared fixture roots.

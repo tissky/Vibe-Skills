@@ -174,6 +174,31 @@ function Invoke-ReleaseGateScript {
     & $GatePath
 }
 
+function Invoke-SyncBundledVibeScript {
+    param(
+        [Parameter(Mandatory)] [string]$ScriptPath,
+        [switch]$Preview,
+        [string]$PreviewOutputPath = '',
+        [switch]$PruneBundledExtras
+    )
+
+    $arguments = @()
+    if ($Preview -and (Test-ScriptDeclaresParameter -ScriptPath $ScriptPath -ParameterName 'Preview')) {
+        $arguments += '-Preview'
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($PreviewOutputPath) -and (Test-ScriptDeclaresParameter -ScriptPath $ScriptPath -ParameterName 'PreviewOutputPath')) {
+        $arguments += '-PreviewOutputPath'
+        $arguments += $PreviewOutputPath
+    }
+
+    if ($PruneBundledExtras -and (Test-ScriptDeclaresParameter -ScriptPath $ScriptPath -ParameterName 'PruneBundledExtras')) {
+        $arguments += '-PruneBundledExtras'
+    }
+
+    & $ScriptPath @arguments
+}
+
 function Get-ReleaseSummary {
     param(
         [Parameter(Mandatory)] [psobject]$Governance,
@@ -492,7 +517,7 @@ if ($Preview) {
     $syncPreviewPath = Join-Path $previewRoot 'sync-bundled-vibe-from-release-cut.json'
     if (Test-Path -LiteralPath $syncScript) {
         # operator-preview contract requires sync-bundled-vibe.ps1 -Preview before apply.
-        & $syncScript -Preview -PreviewOutputPath $syncPreviewPath -PruneBundledExtras
+        Invoke-SyncBundledVibeScript -ScriptPath $syncScript -Preview -PreviewOutputPath $syncPreviewPath -PruneBundledExtras
         if ($LASTEXITCODE -ne 0) {
             throw 'sync-bundled-vibe preview failed'
         }
@@ -583,7 +608,7 @@ if (Test-Path -LiteralPath $releaseReadmePath) {
 }
 
 if (Test-Path -LiteralPath $syncScript) {
-    & $syncScript -PruneBundledExtras
+    Invoke-SyncBundledVibeScript -ScriptPath $syncScript -PruneBundledExtras
     if ($LASTEXITCODE -ne 0) {
         throw 'sync-bundled-vibe failed'
     }

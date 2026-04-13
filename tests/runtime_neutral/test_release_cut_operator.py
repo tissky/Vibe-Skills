@@ -412,6 +412,37 @@ class ReleaseCutOperatorTests(unittest.TestCase):
         self.assertTrue(artifact_path.exists())
         self.assertEqual("generated", artifact_path.read_text(encoding="utf-8").strip())
 
+    def test_release_cut_tolerates_sync_script_without_preview_or_prune_parameters(self) -> None:
+        self._write(
+            "scripts/governance/sync-bundled-vibe.ps1",
+            textwrap.dedent(
+                """
+                param(
+                    [switch]$IncludeGeneratedCompatibilityTargets
+                )
+
+                if ($args.Count -gt 0) {
+                    Write-Error ("unexpected legacy sync args: " + ($args -join ' '))
+                    exit 1
+                }
+
+                Write-Host "legacy sync stub ok"
+                """
+            ).strip() + "\n",
+        )
+
+        preview_path = self.root / "outputs" / "governance" / "preview" / "release-cut.json"
+        self._run_release_cut("-Version", "9.9.9", "-Updated", "2026-03-30", "-Preview", "-PreviewOutputPath", str(preview_path))
+
+        preview_payload = json.loads(preview_path.read_text(encoding="utf-8"))
+        self.assertIsNone(preview_payload["preview"]["sync_preview_receipt"])
+
+        self._run_release_cut("-Version", "9.9.9", "-Updated", "2026-03-30")
+
+        note_path = self.root / "docs" / "releases" / "v9.9.9.md"
+        self.assertTrue(note_path.exists())
+        self.assertIn("## Validation Notes", note_path.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -544,6 +544,7 @@
       "artifact_basename": "vibe-release-evidence-bundle-gate",
       "required_assets": [
         "docs/release-evidence-bundle-v3-governance.md",
+        "references/release-evidence-bundle-contract.md",
         "outputs/release/release-evidence-bundle.json",
         "scripts/verify/vibe-release-evidence-bundle-gate.ps1"
       ],

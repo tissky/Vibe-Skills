@@ -28,7 +28,7 @@
       "title": "memory runtime v3 governance",
       "status": "completed",
       "first_execution_slice": true,
-      "primary_goal": "? mem0?Letta ? memory tier router ????? memory runtime contract?",
+      "primary_goal": "把 `mem0` / Letta / memory tier router 收束成统一 memory runtime contract",
       "depends_on": [
         63
       ],
@@ -49,7 +49,7 @@
       "track": "memory-runtime",
       "title": "mem0 soft rollout pilot",
       "status": "completed",
-      "primary_goal": "? mem0 ? opt-in backend ??????? soft rollout pilot?",
+      "primary_goal": "把 `mem0` 从 opt-in policy 提升到可审计的 soft pilot",
       "depends_on": [
         64
       ],
@@ -69,7 +69,7 @@
       "track": "memory-runtime",
       "title": "Letta conformance evaluator",
       "status": "completed",
-      "primary_goal": "? Letta policy vocabulary ??????? contract?tool-rule ? compaction ???",
+      "primary_goal": "把 Letta policy vocabulary 变成可校验 contract / tool-rule / compaction 检查",
       "depends_on": [
         64,
         65
@@ -91,7 +91,7 @@
       "title": "BrowserOps provider scorecard v2",
       "status": "completed",
       "first_execution_slice": true,
-      "primary_goal": "? browser-use ??? BrowserOps providers ???? scorecard ? route evidence?",
+      "primary_goal": "把 `browser-use` 与既有 providers 做统一 scorecard / route evidence",
       "depends_on": [
         63
       ],
@@ -111,7 +111,7 @@
       "track": "browser-runtime",
       "title": "BrowserOps soft rollout candidate",
       "status": "completed",
-      "primary_goal": "?? BrowserOps soft candidate??? fallback?telemetry?confirm bias ? operator ???",
+      "primary_goal": "形成 BrowserOps soft candidate，要求 fallback / telemetry / confirm bias 全量接线",
       "depends_on": [
         67
       ],
@@ -131,7 +131,7 @@
       "title": "DesktopOps replay suite",
       "status": "completed",
       "first_execution_slice": true,
-      "primary_goal": "? Agent-S shadow ????? replay?failure taxonomy ? checkpoint corpus?",
+      "primary_goal": "为 Agent-S shadow 合同层建立 replay / failure taxonomy / checkpoint corpus",
       "depends_on": [
         63
       ],
@@ -150,7 +150,7 @@
       "track": "desktop-runtime",
       "title": "DesktopOps soft candidate",
       "status": "completed",
-      "primary_goal": "? DesktopOps ? shadow ???????? soft candidate??????? takeover?",
+      "primary_goal": "把 DesktopOps 从 shadow plan 推进到可运行 soft candidate，但仍禁止默认 takeover",
       "depends_on": [
         69
       ],
@@ -171,7 +171,7 @@
       "title": "Docling extraction contract v2",
       "status": "completed",
       "first_execution_slice": true,
-      "primary_goal": "?? Docling ?? schema???? admission filter ???? document contract?",
+      "primary_goal": "形成 `Docling` 输出 schema、模板、admission filter 的第二代合同",
       "depends_on": [
         63
       ],
@@ -191,7 +191,7 @@
       "track": "document-runtime",
       "title": "document plane benchmark",
       "status": "completed",
-      "primary_goal": "? Docling / markitdown / pdf/docx ???? golden corpus ? benchmark?",
+      "primary_goal": "为 Docling / markitdown / pdf/docx 路由建立 golden corpus 与 benchmark",
       "depends_on": [
         71
       ],
@@ -212,7 +212,7 @@
       "title": "connector admission scorecard",
       "status": "completed",
       "first_execution_slice": true,
-      "primary_goal": "? connector landscape ??????????????????? scorecard?",
+      "primary_goal": "把 connector landscape 变成有风险等级、能力映射、准入证据的 scorecard",
       "depends_on": [
         63
       ],
@@ -234,7 +234,7 @@
       "track": "connector-runtime",
       "title": "connector action ledger",
       "status": "completed",
-      "primary_goal": "??????? action contract?side-effect ledger ? rollback contract?",
+      "primary_goal": "为外部动作建立 action contract、side-effect ledger、rollback contract",
       "depends_on": [
         73
       ],
@@ -255,7 +255,7 @@
       "title": "prompt intelligence productization",
       "status": "completed",
       "first_execution_slice": true,
-      "primary_goal": "? Prompt-Engineering-Guide ?????? prompt cards?risk checklist ? route hints?",
+      "primary_goal": "把 Prompt-Engineering-Guide 的模式沉淀为 prompt cards / risk checklist / route hints",
       "depends_on": [
         63
       ],
@@ -276,7 +276,7 @@
       "track": "cross-plane",
       "title": "unified task contract",
       "status": "completed",
-      "primary_goal": "?? Browser?Desktop?Document?Connector ????????",
+      "primary_goal": "打通 Browser / Desktop / Document / Connector 的统一任务合同",
       "depends_on": [
         64,
         67,
@@ -300,7 +300,7 @@
       "track": "cross-plane",
       "title": "replay and execution ledger",
       "status": "completed",
-      "primary_goal": "???????confirm?rollback ? replay ????? ledger?",
+      "primary_goal": "把跨平面动作、confirm、rollback、replay 归一到一套 ledger",
       "depends_on": [
         76
       ],
@@ -319,7 +319,7 @@
       "track": "promotion",
       "title": "promotion board v2",
       "status": "completed",
-      "primary_goal": "?? plane ? scorecard?threshold?stage ? evidence ?? promotion board v2?",
+      "primary_goal": "把各 plane 的 scorecard / threshold / stage / evidence 并入 promotion board v2",
       "depends_on": [
         76,
         77
@@ -340,7 +340,7 @@
       "track": "operations",
       "title": "operator cockpit and SLOs",
       "status": "completed",
-      "primary_goal": "? telemetry?drift?replay ? rollback ?? operator ?? cockpit ? SLO?",
+      "primary_goal": "把 telemetry / drift / replay / rollback 变成 operator 可读 cockpit 与 SLO",
       "depends_on": [
         78
       ],
@@ -359,7 +359,7 @@
       "track": "operations",
       "title": "rollback and freshness drills",
       "status": "completed",
-      "primary_goal": "? rollback?install?freshness ? parity drill ??? operator playbook?",
+      "primary_goal": "把 rollback / install / freshness / parity drill 固化成 operator playbook",
       "depends_on": [
         79
       ],
@@ -378,7 +378,7 @@
       "track": "release",
       "title": "release train v2",
       "status": "completed",
-      "primary_goal": "? soft / strict candidate ? release evidence?install SOP ? operator readiness ??? release train?",
+      "primary_goal": "把 soft / strict_candidate 的 release evidence、install SOP、operator readiness 统一到 release train",
       "depends_on": [
         78,
         79,
@@ -399,7 +399,7 @@
       "track": "closure",
       "title": "wave64-82 closure gate",
       "status": "completed",
-      "primary_goal": "? Wave64-82 ? closure gate??????????? upstream intake ???",
+      "primary_goal": "对 Wave64-82 做 closure gate，并决定是否允许下一轮 upstream intake 扩张",
       "depends_on": [
         81
       ],
