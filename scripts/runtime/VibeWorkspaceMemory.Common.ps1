@@ -1,13 +1,36 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Get-VibeWorkspaceMemoryDriverConfig {
+    param(
+        [Parameter(Mandatory)] [object]$Runtime
+    )
+
+    if ($null -eq $Runtime -or $null -eq $Runtime.PSObject -or -not ($Runtime.PSObject.Properties.Name -contains 'memory_backend_adapters')) {
+        return $null
+    }
+
+    $memoryBackendAdapters = $Runtime.memory_backend_adapters
+    if ($null -eq $memoryBackendAdapters -or $null -eq $memoryBackendAdapters.PSObject -or -not ($memoryBackendAdapters.PSObject.Properties.Name -contains 'driver')) {
+        return $null
+    }
+
+    return $memoryBackendAdapters.driver
+}
+
 function Get-VibeWorkspaceMemoryDriverScriptPath {
     param(
         [Parameter(Mandatory)] [object]$Runtime
     )
 
-    $driverPath = if ($Runtime.memory_backend_adapters -and $Runtime.memory_backend_adapters.driver -and $Runtime.memory_backend_adapters.driver.script_path) {
-        [string]$Runtime.memory_backend_adapters.driver.script_path
+    $driver = Get-VibeWorkspaceMemoryDriverConfig -Runtime $Runtime
+    $driverPath = if (
+        $null -ne $driver -and
+        $null -ne $driver.PSObject -and
+        $driver.PSObject.Properties.Name -contains 'script_path' -and
+        -not [string]::IsNullOrWhiteSpace([string]$driver.script_path)
+    ) {
+        [string]$driver.script_path
     } else {
         'scripts/runtime/workspace_memory_driver.py'
     }
@@ -21,8 +44,17 @@ function Resolve-VibeWorkspaceMemoryCommandSpec {
         [Parameter(Mandatory)] [object]$Runtime
     )
 
-    $driver = $Runtime.memory_backend_adapters.driver
-    $command = if ($driver -and $driver.command) { [string]$driver.command } else { '${VGO_PYTHON}' }
+    $driver = Get-VibeWorkspaceMemoryDriverConfig -Runtime $Runtime
+    $command = if (
+        $null -ne $driver -and
+        $null -ne $driver.PSObject -and
+        $driver.PSObject.Properties.Name -contains 'command' -and
+        -not [string]::IsNullOrWhiteSpace([string]$driver.command)
+    ) {
+        [string]$driver.command
+    } else {
+        '${VGO_PYTHON}'
+    }
     return Resolve-VgoPythonCommandSpec -Command $command
 }
 

@@ -1221,13 +1221,19 @@ function New-VibeSpecialistUserDisclosureProjection {
             continue
         }
 
-        $entrypoint = if (Test-VibeObjectHasProperty -InputObject $dispatch -PropertyName 'native_skill_entrypoint') { [string]$dispatch.native_skill_entrypoint } else { '' }
-        if ([string]::IsNullOrWhiteSpace($entrypoint) -or -not [System.IO.Path]::IsPathRooted($entrypoint)) {
-            if ([bool]$resolvedPolicy.require_entrypoint_path) {
-                continue
-            }
+        $entrypointRaw = if (Test-VibeObjectHasProperty -InputObject $dispatch -PropertyName 'native_skill_entrypoint') { [string]$dispatch.native_skill_entrypoint } else { '' }
+        $entrypoint = $null
+        $entrypointMissing = $false
+        $entrypointPathInvalid = $false
+        $entrypointPathState = 'resolved'
+        if ([string]::IsNullOrWhiteSpace($entrypointRaw)) {
+            $entrypointMissing = $true
+            $entrypointPathState = 'missing'
+        } elseif (-not [System.IO.Path]::IsPathRooted($entrypointRaw)) {
+            $entrypointPathInvalid = $true
+            $entrypointPathState = 'invalid'
         } else {
-            $entrypoint = [System.IO.Path]::GetFullPath($entrypoint)
+            $entrypoint = [System.IO.Path]::GetFullPath($entrypointRaw)
         }
 
         $seenSkillIds[$skillId] = $true
@@ -1235,6 +1241,11 @@ function New-VibeSpecialistUserDisclosureProjection {
             [pscustomobject]@{
                 skill_id = $skillId
                 native_skill_entrypoint = if ([string]::IsNullOrWhiteSpace($entrypoint)) { $null } else { $entrypoint }
+                native_skill_entrypoint_raw = if ([string]::IsNullOrWhiteSpace($entrypointRaw)) { $null } else { $entrypointRaw }
+                entrypoint_path_state = $entrypointPathState
+                entrypoint_missing = $entrypointMissing
+                entrypoint_path_invalid = $entrypointPathInvalid
+                entrypoint_requirement_satisfied = if ([bool]$resolvedPolicy.require_entrypoint_path) { -not $entrypointMissing -and -not $entrypointPathInvalid } else { $true }
                 native_skill_description = if ([bool]$resolvedPolicy.include_description -and (Test-VibeObjectHasProperty -InputObject $dispatch -PropertyName 'native_skill_description') -and -not [string]::IsNullOrWhiteSpace([string]$dispatch.native_skill_description)) { [string]$dispatch.native_skill_description } else { $null }
                 dispatch_phase = if ((Test-VibeObjectHasProperty -InputObject $dispatch -PropertyName 'dispatch_phase') -and -not [string]::IsNullOrWhiteSpace([string]$dispatch.dispatch_phase)) { [string]$dispatch.dispatch_phase } else { $null }
                 write_scope = if ((Test-VibeObjectHasProperty -InputObject $dispatch -PropertyName 'write_scope') -and -not [string]::IsNullOrWhiteSpace([string]$dispatch.write_scope)) { [string]$dispatch.write_scope } else { $null }
@@ -1249,7 +1260,7 @@ function New-VibeSpecialistUserDisclosureProjection {
 
     $renderedLines = @([string]$resolvedPolicy.header)
     foreach ($entry in $routedSkills) {
-        $renderedLines += ('- {0} -> {1}' -f [string]$entry.skill_id, [string]$entry.native_skill_entrypoint)
+        $renderedLines += ('- {0} -> {1}' -f [string]$entry.skill_id, (Get-VibeSpecialistEntrypointDisplayText -SkillRecord $entry))
     }
 
     return [pscustomobject]@{
@@ -1264,6 +1275,56 @@ function New-VibeSpecialistUserDisclosureProjection {
         routed_skills = [object[]]$routedSkills.ToArray()
         rendered_text = ($renderedLines -join "`n")
     }
+}
+
+function Get-VibeSpecialistEntrypointDisplayText {
+    param(
+        [AllowNull()] [object]$SkillRecord = $null
+    )
+
+    if ($null -eq $SkillRecord) {
+        return 'path unavailable'
+    }
+
+    $resolvedEntrypoint = if (
+        (Test-VibeObjectHasProperty -InputObject $SkillRecord -PropertyName 'native_skill_entrypoint') -and
+        -not [string]::IsNullOrWhiteSpace([string]$SkillRecord.native_skill_entrypoint)
+    ) {
+        [string]$SkillRecord.native_skill_entrypoint
+    } else {
+        $null
+    }
+    if (-not [string]::IsNullOrWhiteSpace($resolvedEntrypoint)) {
+        return $resolvedEntrypoint
+    }
+
+    $rawEntrypoint = if (
+        (Test-VibeObjectHasProperty -InputObject $SkillRecord -PropertyName 'native_skill_entrypoint_raw') -and
+        -not [string]::IsNullOrWhiteSpace([string]$SkillRecord.native_skill_entrypoint_raw)
+    ) {
+        [string]$SkillRecord.native_skill_entrypoint_raw
+    } elseif (
+        (Test-VibeObjectHasProperty -InputObject $SkillRecord -PropertyName 'native_skill_entrypoint') -and
+        -not [string]::IsNullOrWhiteSpace([string]$SkillRecord.native_skill_entrypoint)
+    ) {
+        [string]$SkillRecord.native_skill_entrypoint
+    } else {
+        $null
+    }
+
+    $entrypointMissing = if ((Test-VibeObjectHasProperty -InputObject $SkillRecord -PropertyName 'entrypoint_missing')) { [bool]$SkillRecord.entrypoint_missing } else { $false }
+    $entrypointPathInvalid = if ((Test-VibeObjectHasProperty -InputObject $SkillRecord -PropertyName 'entrypoint_path_invalid')) { [bool]$SkillRecord.entrypoint_path_invalid } else { $false }
+    if ($entrypointPathInvalid -and -not [string]::IsNullOrWhiteSpace($rawEntrypoint)) {
+        return ('{0} (invalid entrypoint path)' -f $rawEntrypoint)
+    }
+    if ($entrypointMissing) {
+        return 'path unavailable (missing entrypoint path)'
+    }
+    if (-not [string]::IsNullOrWhiteSpace($rawEntrypoint)) {
+        return $rawEntrypoint
+    }
+
+    return 'path unavailable'
 }
 
 function Get-VibeSpecialistLifecycleDisclosurePath {
@@ -1336,7 +1397,14 @@ function New-VibeSpecialistConsultationLifecycleLayerProjection {
         return $null
     }
 
-    $windowId = if ((Test-VibeObjectHasProperty -InputObject $ConsultationReceipt -PropertyName 'window_id') -and -not [string]::IsNullOrWhiteSpace([string]$ConsultationReceipt.window_id)) { [string]$ConsultationReceipt.window_id } else { 'discussion' }
+    $windowId = if ((Test-VibeObjectHasProperty -InputObject $ConsultationReceipt -PropertyName 'window_id') -and -not [string]::IsNullOrWhiteSpace([string]$ConsultationReceipt.window_id)) {
+        [string]$ConsultationReceipt.window_id
+    } else {
+        $null
+    }
+    if ($windowId -notin @('discussion', 'planning')) {
+        throw 'Enabled specialist consultation receipts must declare window_id as discussion or planning.'
+    }
     $skills = New-Object System.Collections.Generic.List[object]
     $renderedLines = @(('Specialist consultation during {0}:' -f $windowId))
     foreach ($disclosure in @($ConsultationReceipt.user_disclosures)) {
@@ -1362,7 +1430,7 @@ function New-VibeSpecialistConsultationLifecycleLayerProjection {
                 summary = if ($consultedUnit -and (Test-VibeObjectHasProperty -InputObject $consultedUnit -PropertyName 'summary')) { [string]$consultedUnit.summary } else { $null }
             }
         ) | Out-Null
-        $renderedLines += ('- {0}: {1} ({2})' -f [string]$disclosure.skill_id, [string]$disclosure.why_now, [string]$disclosure.native_skill_entrypoint)
+        $renderedLines += ('- {0}: {1} ({2})' -f [string]$disclosure.skill_id, [string]$disclosure.why_now, (Get-VibeSpecialistEntrypointDisplayText -SkillRecord $disclosure))
     }
 
     if ($skills.Count -eq 0) {
@@ -1420,11 +1488,15 @@ function New-VibeSpecialistExecutionLifecycleLayerProjection {
                 skill_id = $skillId
                 why_now = 'approved for execution-time specialist dispatch under governed vibe'
                 native_skill_entrypoint = if ((Test-VibeObjectHasProperty -InputObject $entry -PropertyName 'native_skill_entrypoint') -and -not [string]::IsNullOrWhiteSpace([string]$entry.native_skill_entrypoint)) { [string]$entry.native_skill_entrypoint } else { $null }
+                native_skill_entrypoint_raw = if ((Test-VibeObjectHasProperty -InputObject $entry -PropertyName 'native_skill_entrypoint_raw') -and -not [string]::IsNullOrWhiteSpace([string]$entry.native_skill_entrypoint_raw)) { [string]$entry.native_skill_entrypoint_raw } else { $null }
+                entrypoint_path_state = if ((Test-VibeObjectHasProperty -InputObject $entry -PropertyName 'entrypoint_path_state') -and -not [string]::IsNullOrWhiteSpace([string]$entry.entrypoint_path_state)) { [string]$entry.entrypoint_path_state } else { 'resolved' }
+                entrypoint_missing = if ((Test-VibeObjectHasProperty -InputObject $entry -PropertyName 'entrypoint_missing')) { [bool]$entry.entrypoint_missing } else { $false }
+                entrypoint_path_invalid = if ((Test-VibeObjectHasProperty -InputObject $entry -PropertyName 'entrypoint_path_invalid')) { [bool]$entry.entrypoint_path_invalid } else { $false }
                 native_skill_description = if ((Test-VibeObjectHasProperty -InputObject $entry -PropertyName 'native_skill_description') -and -not [string]::IsNullOrWhiteSpace([string]$entry.native_skill_description)) { [string]$entry.native_skill_description } else { $null }
                 state = $state
             }
         ) | Out-Null
-        $renderedLines += ('- {0}: approved for execution ({1})' -f $skillId, [string]$entry.native_skill_entrypoint)
+        $renderedLines += ('- {0}: approved for execution ({1})' -f $skillId, (Get-VibeSpecialistEntrypointDisplayText -SkillRecord $entry))
     }
 
     if ($skills.Count -eq 0) {
@@ -1516,7 +1588,7 @@ function Get-VibeSpecialistLifecycleDisclosureMarkdownLines {
                 ('- Skill: {0}' -f [string]$skill.skill_id),
                 ('  State: {0}' -f [string]$skill.state),
                 ('  Why now: {0}' -f [string]$skill.why_now),
-                ('  Loaded from: {0}' -f [string]$skill.native_skill_entrypoint)
+                ('  Loaded from: {0}' -f (Get-VibeSpecialistEntrypointDisplayText -SkillRecord $skill))
             )
         }
     }
@@ -1602,7 +1674,7 @@ function New-VibeHostUserBriefingSegmentProjection {
             continue
         }
         $state = if ((Test-VibeObjectHasProperty -InputObject $skill -PropertyName 'state') -and -not [string]::IsNullOrWhiteSpace([string]$skill.state)) { [string]$skill.state } else { 'reported' }
-        $entrypoint = if ((Test-VibeObjectHasProperty -InputObject $skill -PropertyName 'native_skill_entrypoint') -and -not [string]::IsNullOrWhiteSpace([string]$skill.native_skill_entrypoint)) { [string]$skill.native_skill_entrypoint } else { 'path unavailable' }
+        $entrypoint = Get-VibeSpecialistEntrypointDisplayText -SkillRecord $skill
         $whyNow = if ((Test-VibeObjectHasProperty -InputObject $skill -PropertyName 'why_now') -and -not [string]::IsNullOrWhiteSpace([string]$skill.why_now)) { [string]$skill.why_now } else { 'no additional rationale recorded' }
         $segmentLines += ('- {0} [{1}] from {2}' -f $skillId, $state, $entrypoint)
         $segmentLines += ('  Why: {0}' -f $whyNow)

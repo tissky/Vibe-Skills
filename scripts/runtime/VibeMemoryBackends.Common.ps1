@@ -1,6 +1,31 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Get-VibeMemoryBackendAdaptersConfig {
+    param(
+        [Parameter(Mandatory)] [object]$Runtime
+    )
+
+    if ($null -eq $Runtime -or $null -eq $Runtime.PSObject -or -not ($Runtime.PSObject.Properties.Name -contains 'memory_backend_adapters')) {
+        return $null
+    }
+
+    return $Runtime.memory_backend_adapters
+}
+
+function Get-VibeMemoryBackendDriverConfig {
+    param(
+        [Parameter(Mandatory)] [object]$Runtime
+    )
+
+    $memoryBackendAdapters = Get-VibeMemoryBackendAdaptersConfig -Runtime $Runtime
+    if ($null -eq $memoryBackendAdapters -or $null -eq $memoryBackendAdapters.PSObject -or -not ($memoryBackendAdapters.PSObject.Properties.Name -contains 'driver')) {
+        return $null
+    }
+
+    return $memoryBackendAdapters.driver
+}
+
 function Test-VibeMemoryTruthyEnvironmentValue {
     param(
         [AllowEmptyString()] [string]$Value = ''
@@ -18,8 +43,14 @@ function Resolve-VibeMemoryBackendRoot {
         [Parameter(Mandatory)] [object]$Runtime
     )
 
-    $rootEnvName = if ($Runtime.memory_backend_adapters -and $Runtime.memory_backend_adapters.backend_root_env) {
-        [string]$Runtime.memory_backend_adapters.backend_root_env
+    $memoryBackendAdapters = Get-VibeMemoryBackendAdaptersConfig -Runtime $Runtime
+    $rootEnvName = if (
+        $null -ne $memoryBackendAdapters -and
+        $null -ne $memoryBackendAdapters.PSObject -and
+        $memoryBackendAdapters.PSObject.Properties.Name -contains 'backend_root_env' -and
+        -not [string]::IsNullOrWhiteSpace([string]$memoryBackendAdapters.backend_root_env)
+    ) {
+        [string]$memoryBackendAdapters.backend_root_env
     } else {
         'VIBE_MEMORY_BACKEND_ROOT'
     }
@@ -37,7 +68,16 @@ function Get-VibeMemoryLaneConfig {
         [Parameter(Mandatory)] [string]$LaneId
     )
 
-    $lanes = $Runtime.memory_backend_adapters.lanes
+    $memoryBackendAdapters = Get-VibeMemoryBackendAdaptersConfig -Runtime $Runtime
+    $lanes = if (
+        $null -ne $memoryBackendAdapters -and
+        $null -ne $memoryBackendAdapters.PSObject -and
+        $memoryBackendAdapters.PSObject.Properties.Name -contains 'lanes'
+    ) {
+        $memoryBackendAdapters.lanes
+    } else {
+        $null
+    }
     if ($null -eq $lanes -or -not ($lanes.PSObject.Properties.Name -contains $LaneId)) {
         throw "Missing memory backend lane config for: $LaneId"
     }
@@ -81,8 +121,17 @@ function Resolve-VibeMemoryBackendCommand {
         [Parameter(Mandatory)] [object]$Runtime
     )
 
-    $driver = $Runtime.memory_backend_adapters.driver
-    $command = if ($driver -and $driver.command) { [string]$driver.command } else { '${VGO_PYTHON}' }
+    $driver = Get-VibeMemoryBackendDriverConfig -Runtime $Runtime
+    $command = if (
+        $null -ne $driver -and
+        $null -ne $driver.PSObject -and
+        $driver.PSObject.Properties.Name -contains 'command' -and
+        -not [string]::IsNullOrWhiteSpace([string]$driver.command)
+    ) {
+        [string]$driver.command
+    } else {
+        '${VGO_PYTHON}'
+    }
     return Resolve-VgoPythonCommandSpec -Command $command
 }
 
@@ -150,8 +199,18 @@ function Invoke-VibeMemoryBackendAction {
         }
     }
 
-    $driver = $Runtime.memory_backend_adapters.driver
-    $driverScript = [System.IO.Path]::GetFullPath((Join-Path ([string]$Runtime.repo_root) ([string]$driver.script_path)))
+    $driver = Get-VibeMemoryBackendDriverConfig -Runtime $Runtime
+    $driverScriptRelative = if (
+        $null -ne $driver -and
+        $null -ne $driver.PSObject -and
+        $driver.PSObject.Properties.Name -contains 'script_path' -and
+        -not [string]::IsNullOrWhiteSpace([string]$driver.script_path)
+    ) {
+        [string]$driver.script_path
+    } else {
+        'scripts/runtime/memory_backend_driver.py'
+    }
+    $driverScript = [System.IO.Path]::GetFullPath((Join-Path ([string]$Runtime.repo_root) $driverScriptRelative))
     if (-not (Test-Path -LiteralPath $driverScript)) {
         return [pscustomobject]@{
             ok = $false

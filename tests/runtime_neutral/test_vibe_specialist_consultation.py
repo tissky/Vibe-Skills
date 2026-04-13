@@ -115,6 +115,35 @@ def run_runtime(
     return completed
 
 
+def run_runtime_common_json(command_body: str, *, check: bool = True) -> object | subprocess.CompletedProcess[str]:
+    shell = resolve_powershell()
+    if shell is None:
+        raise unittest.SkipTest("PowerShell executable not available in PATH")
+
+    completed = subprocess.run(
+        [
+            shell,
+            "-NoLogo",
+            "-NoProfile",
+            "-Command",
+            f"& {{ . {_ps_single_quote(str(RUNTIME_COMMON))}; {command_body} }}",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=check,
+        env=dict(os.environ),
+    )
+    if not check:
+        return completed
+
+    stdout = completed.stdout.strip()
+    if stdout in ("", "null"):
+        return None
+    return json.loads(stdout)
+
+
 def create_fake_codex_command(directory: Path) -> Path:
     suffix = ".cmd" if os.name == "nt" else ""
     command_path = directory / f"codex{suffix}"
@@ -218,6 +247,101 @@ def create_incomplete_fake_codex_command(directory: Path) -> Path:
 
 
 class VibeSpecialistConsultationTests(unittest.TestCase):
+    def test_user_disclosure_projection_retains_entries_with_missing_or_invalid_entrypoints(self) -> None:
+        result = run_runtime_common_json(
+            """
+            $policy = [pscustomobject]@{
+                enabled = $true
+                stage = 'plan_execute'
+                mode = 'approved_dispatch_pre_execution_unified_once'
+                timing = 'before_execution'
+                scope = 'approved_dispatch_only'
+                aggregation = 'unified_once'
+                path_source = 'native_skill_entrypoint'
+                require_entrypoint_path = $true
+                include_description = $true
+                header = 'Pre-dispatch specialist disclosure:'
+            }
+            $approvedDispatch = @(
+                [pscustomobject]@{
+                    skill_id = 'systematic-debugging'
+                    native_skill_entrypoint = 'bundled/skills/systematic-debugging/SKILL.md'
+                    native_skill_description = 'debug'
+                    dispatch_phase = 'plan_execute'
+                    write_scope = 'read_only'
+                    review_mode = 'consultation_only'
+                },
+                [pscustomobject]@{
+                    skill_id = 'brainstorming'
+                    native_skill_description = 'plan'
+                    dispatch_phase = 'plan_execute'
+                    write_scope = 'read_only'
+                    review_mode = 'consultation_only'
+                }
+            )
+            $result = New-VibeSpecialistUserDisclosureProjection -ApprovedDispatch $approvedDispatch -Policy $policy
+            $result | ConvertTo-Json -Depth 20
+            """
+        )
+
+        assert isinstance(result, dict)
+        self.assertEqual(2, result["routed_skill_count"])
+        entries = {item["skill_id"]: item for item in list(result["routed_skills"])}
+        self.assertEqual({"systematic-debugging", "brainstorming"}, set(entries))
+
+        invalid_entry = entries["systematic-debugging"]
+        self.assertIsNone(invalid_entry["native_skill_entrypoint"])
+        self.assertEqual("bundled/skills/systematic-debugging/SKILL.md", invalid_entry["native_skill_entrypoint_raw"])
+        self.assertEqual("invalid", invalid_entry["entrypoint_path_state"])
+        self.assertFalse(bool(invalid_entry["entrypoint_missing"]))
+        self.assertTrue(bool(invalid_entry["entrypoint_path_invalid"]))
+        self.assertFalse(bool(invalid_entry["entrypoint_requirement_satisfied"]))
+
+        missing_entry = entries["brainstorming"]
+        self.assertIsNone(missing_entry["native_skill_entrypoint"])
+        self.assertIsNone(missing_entry["native_skill_entrypoint_raw"])
+        self.assertEqual("missing", missing_entry["entrypoint_path_state"])
+        self.assertTrue(bool(missing_entry["entrypoint_missing"]))
+        self.assertFalse(bool(missing_entry["entrypoint_path_invalid"]))
+        self.assertFalse(bool(missing_entry["entrypoint_requirement_satisfied"]))
+
+        self.assertIn(
+            "systematic-debugging -> bundled/skills/systematic-debugging/SKILL.md (invalid entrypoint path)",
+            result["rendered_text"],
+        )
+        self.assertIn(
+            "brainstorming -> path unavailable (missing entrypoint path)",
+            result["rendered_text"],
+        )
+
+    def test_consultation_lifecycle_projection_rejects_missing_window_id(self) -> None:
+        completed = run_runtime_common_json(
+            """
+            $receipt = [pscustomobject]@{
+                enabled = $true
+                stage = 'requirement_doc'
+                user_disclosures = @(
+                    [pscustomobject]@{
+                        skill_id = 'systematic-debugging'
+                        why_now = 'need debugging guidance before requirement freeze'
+                        native_skill_entrypoint = 'scripts/runtime/systematic-debugging/SKILL.md'
+                    }
+                )
+                consulted_units = @()
+            }
+            $result = New-VibeSpecialistConsultationLifecycleLayerProjection -ConsultationReceipt $receipt
+            $result | ConvertTo-Json -Depth 20
+            """,
+            check=False,
+        )
+
+        assert isinstance(completed, subprocess.CompletedProcess)
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn(
+            "Enabled specialist consultation receipts must declare window_id as",
+            completed.stderr,
+        )
+
     def test_consultation_window_invokes_specialist_and_emits_progressive_disclosure(self) -> None:
         shell = resolve_powershell()
         if shell is None:

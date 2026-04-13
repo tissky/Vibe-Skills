@@ -211,11 +211,11 @@ class PlaneLock:
             self._handle = None
 
 
-def tokenize(text: str) -> set[str]:
+def tokenize(text: str, *, filter_stop_tokens: bool = True) -> set[str]:
     return {
         token
         for token in re.findall(r"[a-z0-9_/-]{3,}", text.lower())
-        if token and token not in STOP_TOKENS
+        if token and (not filter_stop_tokens or token not in STOP_TOKENS)
     }
 
 
@@ -356,11 +356,14 @@ def classify_noise(record: dict[str, Any]) -> str | None:
         " ".join(str(v) for v in record.get("keywords") or []),
         " ".join(str(v) for v in record.get("evidence_paths") or []),
     ]
-    tokens = tokenize(" ".join(text_parts))
-    if not tokens:
+    raw_tokens = tokenize(" ".join(text_parts), filter_stop_tokens=False)
+    if not raw_tokens:
         return "empty_payload"
-    if tokens & SIGNAL_TOKENS:
+    if raw_tokens & SIGNAL_TOKENS:
         return None
+    tokens = {token for token in raw_tokens if token not in STOP_TOKENS}
+    if not tokens:
+        return "noise_only_tokens"
     noise_token_count = len(tokens & NOISE_TOKENS)
     signal_token_count = len(tokens - NOISE_TOKENS)
     noise_ratio = float(noise_token_count) / float(len(tokens)) if tokens else 0.0

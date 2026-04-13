@@ -225,6 +225,8 @@ def run_plan_execute(
     requirement_doc_path: Path,
     execution_plan_path: Path,
     runtime_input_packet_path: Path,
+    *,
+    extra_env: dict[str, str] | None = None,
 ) -> dict[str, object]:
     shell = resolve_powershell()
     if shell is None:
@@ -256,6 +258,7 @@ def run_plan_execute(
         capture_output=True,
         text=True,
         check=True,
+        env={**os.environ, **(extra_env or {})},
     )
     return json.loads(completed.stdout)
 
@@ -586,6 +589,48 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 sum(len(list(specialist_phase_bindings.get(phase) or [])) for phase in specialist_phase_bindings),
                 len(approved_dispatch),
             )
+
+    def test_plan_shadow_recognizes_specialist_lifecycle_headers_without_legacy_dispatch_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir)
+            fake_codex = create_fake_codex_command(artifact_root)
+            payload = run_runtime(
+                task="I have a failing test and a stack trace. Help me debug systematically before proposing fixes.",
+                artifact_root=artifact_root,
+                governance_scope="root",
+            )
+            summary = payload["summary"]
+            requirement_doc_path = Path(summary["artifacts"]["requirement_doc"])
+            execution_plan_path = Path(summary["artifacts"]["execution_plan"])
+            runtime_input_packet_path = Path(summary["artifacts"]["runtime_input_packet"])
+
+            execution_plan = execution_plan_path.read_text(encoding="utf-8")
+            self.assertIn("## Specialist Skill Dispatch Plan", execution_plan)
+            execution_plan_path.write_text(
+                execution_plan.replace(
+                    "## Specialist Skill Dispatch Plan",
+                    "## Unified Specialist Lifecycle Disclosure",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+
+            execution_payload = run_plan_execute(
+                task="I have a failing test and a stack trace. Help me debug systematically before proposing fixes.",
+                artifact_root=artifact_root,
+                requirement_doc_path=requirement_doc_path,
+                execution_plan_path=execution_plan_path,
+                runtime_input_packet_path=runtime_input_packet_path,
+                extra_env={
+                    "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
+                    "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_CODEX_EXECUTABLE": str(fake_codex),
+                },
+            )
+            execution_manifest = load_json(execution_payload["execution_manifest_path"])
+
+            self.assertGreaterEqual(execution_manifest["plan_shadow"]["specialist_dispatch_unit_count"], 1)
+            self.assertGreaterEqual(execution_manifest["plan_shadow"]["candidate_unit_count"], 1)
 
     def test_l_grade_requires_native_serial_child_lane_execution(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
