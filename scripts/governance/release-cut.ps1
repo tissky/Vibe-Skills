@@ -36,6 +36,24 @@ function Write-Json {
     Write-Text -Path $Path -Content ($Payload | ConvertTo-Json -Depth 100)
 }
 
+function Ensure-TrailingNewline {
+    param([Parameter(Mandatory)] [string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+    if ($bytes.Length -eq 0) {
+        return
+    }
+
+    $lastByte = $bytes[$bytes.Length - 1]
+    if ($lastByte -ne 0x0A -and $lastByte -ne 0x0D) {
+        Append-VgoUtf8NoBomText -Path $Path -Content ([Environment]::NewLine)
+    }
+}
+
 function Update-MaintenanceSection {
     param(
         [string]$Path,
@@ -121,6 +139,64 @@ function Sync-DistManifestOutputs {
     if ($LASTEXITCODE -ne 0) {
         throw 'distribution manifest sync failed'
     }
+}
+
+function Test-ScriptDeclaresParameter {
+    param(
+        [Parameter(Mandatory)] [string]$ScriptPath,
+        [Parameter(Mandatory)] [string]$ParameterName
+    )
+
+    $tokens = $null
+    $parseErrors = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($ScriptPath, [ref]$tokens, [ref]$parseErrors)
+    if ($null -eq $ast -or $null -eq $ast.ParamBlock) {
+        return $false
+    }
+
+    foreach ($parameter in @($ast.ParamBlock.Parameters)) {
+        if ($null -ne $parameter.Name -and $parameter.Name.VariablePath.UserPath -eq $ParameterName) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Invoke-ReleaseGateScript {
+    param([Parameter(Mandatory)] [string]$GatePath)
+
+    if (Test-ScriptDeclaresParameter -ScriptPath $GatePath -ParameterName 'WriteArtifacts') {
+        & $GatePath -WriteArtifacts:$true
+        return
+    }
+
+    & $GatePath
+}
+
+function Invoke-SyncBundledVibeScript {
+    param(
+        [Parameter(Mandatory)] [string]$ScriptPath,
+        [switch]$Preview,
+        [string]$PreviewOutputPath = '',
+        [switch]$PruneBundledExtras
+    )
+
+    $arguments = @()
+    if ($Preview -and (Test-ScriptDeclaresParameter -ScriptPath $ScriptPath -ParameterName 'Preview')) {
+        $arguments += '-Preview'
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($PreviewOutputPath) -and (Test-ScriptDeclaresParameter -ScriptPath $ScriptPath -ParameterName 'PreviewOutputPath')) {
+        $arguments += '-PreviewOutputPath'
+        $arguments += $PreviewOutputPath
+    }
+
+    if ($PruneBundledExtras -and (Test-ScriptDeclaresParameter -ScriptPath $ScriptPath -ParameterName 'PruneBundledExtras')) {
+        $arguments += '-PruneBundledExtras'
+    }
+
+    & $ScriptPath @arguments
 }
 
 function Get-ReleaseSummary {
@@ -418,6 +494,7 @@ $releaseReadmeRel = 'docs/releases/README.md'
 $releaseReadmePath = Join-Path $repoRoot $releaseReadmeRel
 $distManifestRels = @(Get-DistManifestOutputRelativePaths -RepoRoot $repoRoot)
 $releaseSummary = Get-ReleaseSummary -Governance $governance -Version $Version
+$syncScript = Join-Path $repoRoot 'scripts\governance\sync-bundled-vibe.ps1'
 $applyGateScripts = if ($RunGates) { Get-ReleaseGateScriptsFromContract -PreviewContract $previewContract } else { @() }
 $postcheckGateScripts = if ($RunGates) { Get-ReleasePostcheckScriptsFromContract -PreviewContract $previewContract -FallbackScripts $applyGateScripts } else { @() }
 $head = (git -C $repoRoot rev-parse --short HEAD).Trim()
@@ -437,6 +514,15 @@ if ($Preview) {
         [ordered]@{ path = [string]$_; action = 'sync generated dist manifest from authoritative source config' }
     })
 
+    $syncPreviewPath = Join-Path $previewRoot 'sync-bundled-vibe-from-release-cut.json'
+    if (Test-Path -LiteralPath $syncScript) {
+        # operator-preview contract requires sync-bundled-vibe.ps1 -Preview before apply.
+        Invoke-SyncBundledVibeScript -ScriptPath $syncScript -Preview -PreviewOutputPath $syncPreviewPath -PruneBundledExtras
+        if ($LASTEXITCODE -ne 0) {
+            throw 'sync-bundled-vibe preview failed'
+        }
+    }
+
     $artifact = [ordered]@{
         operator = 'release-cut'
         contract_version = if ($null -ne $previewContract -and $previewContract.PSObject.Properties.Name -contains 'contract_version') { $previewContract.contract_version } else { 1 }
@@ -454,6 +540,7 @@ if ($Preview) {
         preview = [ordered]@{
             generated_at = (Get-Date).ToString('s')
             planned_file_actions = $plannedFileActions
+            sync_preview_receipt = if (Test-Path -LiteralPath $syncPreviewPath) { (Get-VgoRelativePathPortable -BasePath $repoRoot -TargetPath $syncPreviewPath) } else { $null }
             planned_gates = $applyGateScripts
         }
         postcheck = [ordered]@{
@@ -481,6 +568,7 @@ foreach ($rel in $maintenanceFiles) {
 Ensure-ChangelogHeader -Path $changelogPath -Version $Version -Updated $Updated
 
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $ledgerPath) | Out-Null
+Ensure-TrailingNewline -Path $ledgerPath
 $entry = [ordered]@{
     recorded_at = (Get-Date).ToString('s')
     version = $Version
@@ -519,6 +607,13 @@ if (Test-Path -LiteralPath $releaseReadmePath) {
     Update-ReleasesReadmeSurface -Path $releaseReadmePath -Version $Version -Updated $Updated -Summary $releaseSummary
 }
 
+if (Test-Path -LiteralPath $syncScript) {
+    Invoke-SyncBundledVibeScript -ScriptPath $syncScript -PruneBundledExtras
+    if ($LASTEXITCODE -ne 0) {
+        throw 'sync-bundled-vibe failed'
+    }
+}
+
 Sync-DistManifestOutputs -RepoRoot $repoRoot
 
 if ($RunGates) {
@@ -527,7 +622,7 @@ if ($RunGates) {
         if (-not (Test-Path -LiteralPath $gatePath)) {
             throw "required gate script missing: $rel"
         }
-        & $gatePath
+        Invoke-ReleaseGateScript -GatePath $gatePath
         if ($LASTEXITCODE -ne 0) {
             throw "gate failed: $rel"
         }

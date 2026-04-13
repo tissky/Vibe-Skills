@@ -363,6 +363,86 @@ class ReleaseCutOperatorTests(unittest.TestCase):
         self.assertIn("## Migration Notes", note)
         self.assertNotIn("TODO", note.upper())
 
+    def test_apply_appends_release_ledger_entry_when_file_has_no_trailing_newline(self) -> None:
+        ledger_path = self.root / "references" / "release-ledger.jsonl"
+        ledger_path.write_text('{"version":"9.9.8","updated":"2026-03-29","git_head":"deadbee"}', encoding="utf-8")
+
+        self._run_release_cut("-Version", "9.9.9", "-Updated", "2026-03-30")
+
+        lines = ledger_path.read_text(encoding="utf-8").splitlines()
+        self.assertEqual(2, len(lines))
+        entries = [json.loads(line) for line in lines]
+        self.assertEqual("9.9.8", entries[0]["version"])
+        self.assertEqual("9.9.9", entries[1]["version"])
+        self.assertEqual("2026-03-30", entries[1]["updated"])
+
+    def test_apply_runs_gates_with_write_artifacts_when_supported(self) -> None:
+        self._write(
+            "scripts/verify/vibe-generated-asset-gate.ps1",
+            textwrap.dedent(
+                """
+                param([switch]$WriteArtifacts)
+
+                $artifactPath = Join-Path $PSScriptRoot '..\\..\\outputs\\verify\\generated-asset.txt'
+                if (-not $WriteArtifacts) {
+                    Write-Error 'WriteArtifacts switch is required for generated asset gate.'
+                    exit 1
+                }
+
+                $parent = Split-Path -Parent $artifactPath
+                if (-not (Test-Path -LiteralPath $parent)) {
+                    New-Item -ItemType Directory -Force -Path $parent | Out-Null
+                }
+
+                Set-Content -LiteralPath $artifactPath -Value 'generated' -Encoding UTF8
+                """
+            ).strip() + "\n",
+        )
+
+        contract_path = self.root / "config" / "operator-preview-contract.json"
+        payload = json.loads(contract_path.read_text(encoding="utf-8"))
+        payload["operators"]["release-cut"]["apply_gates"] = [
+            "scripts/verify/vibe-generated-asset-gate.ps1",
+        ]
+        contract_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        self._run_release_cut("-Version", "9.9.9", "-Updated", "2026-03-30", "-RunGates")
+
+        artifact_path = self.root / "outputs" / "verify" / "generated-asset.txt"
+        self.assertTrue(artifact_path.exists())
+        self.assertEqual("generated", artifact_path.read_text(encoding="utf-8").strip())
+
+    def test_release_cut_tolerates_sync_script_without_preview_or_prune_parameters(self) -> None:
+        self._write(
+            "scripts/governance/sync-bundled-vibe.ps1",
+            textwrap.dedent(
+                """
+                param(
+                    [switch]$IncludeGeneratedCompatibilityTargets
+                )
+
+                if ($args.Count -gt 0) {
+                    Write-Error ("unexpected legacy sync args: " + ($args -join ' '))
+                    exit 1
+                }
+
+                Write-Host "legacy sync stub ok"
+                """
+            ).strip() + "\n",
+        )
+
+        preview_path = self.root / "outputs" / "governance" / "preview" / "release-cut.json"
+        self._run_release_cut("-Version", "9.9.9", "-Updated", "2026-03-30", "-Preview", "-PreviewOutputPath", str(preview_path))
+
+        preview_payload = json.loads(preview_path.read_text(encoding="utf-8"))
+        self.assertIsNone(preview_payload["preview"]["sync_preview_receipt"])
+
+        self._run_release_cut("-Version", "9.9.9", "-Updated", "2026-03-30")
+
+        note_path = self.root / "docs" / "releases" / "v9.9.9.md"
+        self.assertTrue(note_path.exists())
+        self.assertIn("## Validation Notes", note_path.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

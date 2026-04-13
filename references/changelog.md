@@ -1,5 +1,11 @@
 # VCO Changelog
 
+## v3.0.2 (2026-04-13)
+
+- Release cut by `scripts/governance/release-cut.ps1`.
+- Detailed release notes: `docs/releases/v3.0.2.md`.
+
+
 This file is the stable current changelog surface used by release governance.
 
 Historical entries before `v2.3.53` now live in `references/archive/changelog/pre-v2.3.53.md`.
