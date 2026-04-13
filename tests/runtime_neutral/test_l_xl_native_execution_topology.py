@@ -606,12 +606,30 @@ class NativeExecutionTopologyTests(unittest.TestCase):
 
             execution_plan = execution_plan_path.read_text(encoding="utf-8")
             self.assertIn("## Specialist Skill Dispatch Plan", execution_plan)
-            execution_plan_path.write_text(
+            self.assertIn("## Specialist Consultation", execution_plan)
+            self.assertIn("## Unified Specialist Lifecycle Disclosure", execution_plan)
+            rewritten_plan = (
                 execution_plan.replace(
+                    "## Unified Specialist Lifecycle Disclosure",
+                    "## Lifecycle Notes",
+                    1,
+                )
+                .replace(
+                    "## Specialist Consultation",
+                    "## Consultation Notes",
+                    1,
+                )
+                .replace(
                     "## Specialist Skill Dispatch Plan",
                     "## Unified Specialist Lifecycle Disclosure",
                     1,
-                ),
+                )
+            )
+            self.assertEqual(1, rewritten_plan.count("## Unified Specialist Lifecycle Disclosure"))
+            self.assertNotIn("## Specialist Skill Dispatch Plan", rewritten_plan)
+            self.assertNotIn("## Specialist Consultation", rewritten_plan)
+            execution_plan_path.write_text(
+                rewritten_plan,
                 encoding="utf-8",
             )
 
@@ -628,8 +646,19 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 },
             )
             execution_manifest = load_json(execution_payload["execution_manifest_path"])
+            plan_shadow = load_json(execution_manifest["plan_shadow"]["path"])
 
-            self.assertGreaterEqual(execution_manifest["plan_shadow"]["specialist_dispatch_unit_count"], 1)
+            specialist_units = [
+                unit
+                for unit in plan_shadow["units"]
+                if unit["classification"] == "specialist_dispatch_unit"
+            ]
+
+            self.assertGreaterEqual(len(specialist_units), 1)
+            self.assertEqual(
+                {"Unified Specialist Lifecycle Disclosure"},
+                {unit["source_section"] for unit in specialist_units},
+            )
             self.assertGreaterEqual(execution_manifest["plan_shadow"]["candidate_unit_count"], 1)
 
     def test_l_grade_requires_native_serial_child_lane_execution(self) -> None:
