@@ -4,7 +4,7 @@
 Governed implementation plan for repairing issue #167 in an isolated worktree using failing-first tests and targeted lifecycle verification.
 
 ## Frozen Inputs
-- Requirement doc: `/home/lqf/table/table9/Vibe-Skills/.worktrees/fix-issue-167-installed-runtime-coverage/docs/requirements/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage.md`
+- Requirement doc: `docs/requirements/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage.md`
 - Source task: fix issue #167 with full lifecycle coverage
 - Approved direction: Option A, broaden installed runtime payload coverage
 
@@ -90,7 +90,7 @@ No baseline UI quality dimensions were frozen for this run.
 - Keep the write scope focused on manifests, relevant tests, governed docs, and only the lifecycle code that the tests force us to touch.
 
 ## Verification Commands
-- `git -C /home/lqf/table/table9/Vibe-Skills/.worktrees/fix-issue-167-installed-runtime-coverage status --short --branch`
+- `git status --short --branch`
 - `uv run --no-project --with pytest python -m pytest tests/runtime_neutral/test_bundled_runtime_mirror.py tests/runtime_neutral/test_governed_runtime_bridge.py::GovernedRuntimeBridgeTests::test_version_governance_bridges_governed_runtime_surfaces tests/integration/test_runtime_config_manifest_roles.py tests/integration/test_runtime_script_manifest_roles.py tests/integration/test_version_governance_runtime_roles.py -q`
 - `uv run --no-project --with pytest python -m pytest tests/integration/test_runtime_payload_dependency_coverage.py -q`
 - Add any lifecycle-specific verification command required by newly added or updated tests.

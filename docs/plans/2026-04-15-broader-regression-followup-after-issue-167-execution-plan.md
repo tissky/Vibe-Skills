@@ -4,7 +4,7 @@
 Governed follow-up plan for the four broader-regression failures exposed by the wider post-issue-167 test sweep.
 
 ## Frozen Inputs
-- Requirement doc: `/home/lqf/table/table9/Vibe-Skills/.worktrees/fix-issue-167-installed-runtime-coverage/docs/requirements/2026-04-15-broader-regression-followup-after-issue-167.md`
+- Requirement doc: `docs/requirements/2026-04-15-broader-regression-followup-after-issue-167.md`
 - Source task: continue and fix the remaining 4 broader-regression failures
 
 ## Anti-Proxy-Goal-Drift Controls

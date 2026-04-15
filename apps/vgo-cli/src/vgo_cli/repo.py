@@ -12,6 +12,8 @@ if str(CONTRACTS_SRC) not in sys.path:
 
 from vgo_contracts.installed_runtime_contract import default_installed_runtime_config, merge_installed_runtime_config
 
+_GIT_CAPTURE_TIMEOUT_SECONDS = 5
+
 
 def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding='utf-8-sig'))
@@ -27,8 +29,9 @@ def _run_git_capture(repo_root: Path, *args: str) -> str:
             ['git', '-C', str(repo_root), *args],
             capture_output=True,
             text=True,
+            timeout=_GIT_CAPTURE_TIMEOUT_SECONDS,
         )
-    except FileNotFoundError:
+    except (FileNotFoundError, subprocess.TimeoutExpired):
         return ''
     if result.returncode != 0:
         return ''

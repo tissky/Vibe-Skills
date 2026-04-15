@@ -117,5 +117,5 @@ interactive_governed
 
 ## Evidence Inputs
 - Source task: continue and fix the remaining 4 broader-regression failures
-- Prior requirement doc: `/home/lqf/table/table9/Vibe-Skills/.worktrees/fix-issue-167-installed-runtime-coverage/docs/requirements/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage.md`
-- Prior plan doc: `/home/lqf/table/table9/Vibe-Skills/.worktrees/fix-issue-167-installed-runtime-coverage/docs/plans/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage-execution-plan.md`
+- Prior requirement doc: `docs/requirements/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage.md`
+- Prior plan doc: `docs/plans/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage-execution-plan.md`

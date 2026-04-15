@@ -7,25 +7,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.issue_167_runtime_surfaces import ISSUE_167_MANAGED_RUNTIME_SURFACES
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INSTALL_SCRIPT = REPO_ROOT / "install.sh"
 UNINSTALL_SCRIPT = REPO_ROOT / "uninstall.sh"
-ISSUE_167_MANAGED_SURFACES = (
-    "docs/requirements/README.md",
-    "protocols/runtime.md",
-    "protocols/think.md",
-    "protocols/do.md",
-    "protocols/review.md",
-    "protocols/team.md",
-    "protocols/retro.md",
-    "core/skill-contracts/v1/vibe.json",
-    "scripts/verify/vibe-bootstrap-doctor-gate.ps1",
-    "scripts/verify/vibe-no-silent-fallback-contract-gate.ps1",
-    "scripts/verify/vibe-no-self-introduced-fallback-gate.ps1",
-    "scripts/verify/vibe-release-truth-consistency-gate.ps1",
-    "config/operator-preview-contract.json",
-)
 
 
 class InstalledRuntimeUninstallTests(unittest.TestCase):
@@ -173,12 +160,12 @@ class InstalledRuntimeUninstallTests(unittest.TestCase):
         self.install_host("codex", target_root)
         installed_root = target_root / "skills" / "vibe"
 
-        for relpath in ISSUE_167_MANAGED_SURFACES:
+        for relpath in ISSUE_167_MANAGED_RUNTIME_SURFACES:
             self.assertTrue((installed_root / relpath).exists(), relpath)
 
         payload = self.uninstall_host("codex", target_root)
 
-        for relpath in ISSUE_167_MANAGED_SURFACES:
+        for relpath in ISSUE_167_MANAGED_RUNTIME_SURFACES:
             self.assertFalse((installed_root / relpath).exists(), relpath)
         self.assertIn("PASS", payload["gate_result"])
 

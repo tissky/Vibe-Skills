@@ -127,6 +127,6 @@ interactive_governed
 
 ## Evidence Inputs
 - Source task: fix issue #167 with full lifecycle coverage
-- Prior governed analysis: `/home/lqf/table/table9/Vibe-Skills/docs/requirements/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage-analysis.md`
-- Prior analysis plan: `/home/lqf/table/table9/Vibe-Skills/docs/plans/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage-analysis-execution-plan.md`
+- Prior governed analysis: `docs/requirements/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage-analysis.md`
+- Prior analysis plan: `docs/plans/2026-04-15-vibe-issue-167-installed-runtime-dependency-coverage-analysis-execution-plan.md`
 - GitHub issue URL: `https://github.com/foryourhealth111-pixel/Vibe-Skills/issues/167`

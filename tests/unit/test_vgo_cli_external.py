@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 from pathlib import Path
 import subprocess
 import sys
@@ -13,6 +14,14 @@ if str(CLI_SRC) not in sys.path:
     sys.path.insert(0, str(CLI_SRC))
 
 from vgo_cli import external as cli_external
+
+
+def test_optional_install_timeout_defaults_when_env_is_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv('VGO_OPTIONAL_INSTALL_TIMEOUT_SECONDS', 'not-a-number')
+
+    module = importlib.reload(cli_external)
+
+    assert module.OPTIONAL_INSTALL_TIMEOUT_SECONDS == 15
 
 
 def test_run_optional_install_uses_bounded_timeout_and_does_not_raise(

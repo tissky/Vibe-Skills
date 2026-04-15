@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from tests.issue_167_runtime_surfaces import ISSUE_167_MANAGED_RUNTIME_SURFACES
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -35,27 +37,15 @@ def _payload_covers(relpath: str, files: set[str], directories: set[str]) -> boo
 def test_expanded_runtime_payload_covers_governed_runtime_dependency_surfaces() -> None:
     files, directories = _expanded_runtime_payload()
     required = [
-        "docs/requirements/README.md",
-        "protocols/runtime.md",
-        "protocols/think.md",
-        "protocols/do.md",
-        "protocols/review.md",
-        "protocols/team.md",
-        "protocols/retro.md",
-        "core/skill-contracts/v1/vibe.json",
+        *ISSUE_167_MANAGED_RUNTIME_SURFACES,
         "config/plugins-manifest.codex.json",
         "config/vibe-entry-surfaces.json",
         "config/secrets-policy.json",
         "config/tool-registry.json",
-        "scripts/verify/vibe-bootstrap-doctor-gate.ps1",
-        "scripts/verify/vibe-no-silent-fallback-contract-gate.ps1",
-        "scripts/verify/vibe-no-self-introduced-fallback-gate.ps1",
-        "scripts/verify/vibe-release-truth-consistency-gate.ps1",
-        "config/operator-preview-contract.json",
     ]
 
     missing = [path for path in required if not _payload_covers(path, files, directories)]
-    assert missing == []
+    assert missing == [], f"expanded runtime payload is missing governed dependency surfaces: {missing}"
 
 
 def test_runtime_script_manifest_includes_issue_167_governed_verify_gates() -> None:

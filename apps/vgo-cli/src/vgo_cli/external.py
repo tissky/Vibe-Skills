@@ -7,7 +7,17 @@ import sys
 
 from .errors import CliError
 
-OPTIONAL_INSTALL_TIMEOUT_SECONDS = max(1, int(os.environ.get('VGO_OPTIONAL_INSTALL_TIMEOUT_SECONDS', '15')))
+
+def _load_optional_install_timeout_seconds() -> int:
+    raw = os.environ.get('VGO_OPTIONAL_INSTALL_TIMEOUT_SECONDS', '15')
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        value = 15
+    return max(1, value)
+
+
+OPTIONAL_INSTALL_TIMEOUT_SECONDS = _load_optional_install_timeout_seconds()
 
 
 def report_external_fallback_usage(external_fallback_used: list[str], *, strict_offline: bool) -> None:
