@@ -19,6 +19,7 @@ from vgo_cli.repo import (
     get_official_self_repo_metadata,
     resolve_canonical_repo_root,
 )
+from vgo_cli import repo as cli_repo
 
 
 def test_get_installed_runtime_config_merges_defaults_with_governance_overrides(tmp_path: Path) -> None:
@@ -73,6 +74,51 @@ def test_get_official_self_repo_metadata_reads_explicit_governance_source(tmp_pa
 def test_real_version_governance_declares_official_self_repo_metadata() -> None:
     payload = get_official_self_repo_metadata(REPO_ROOT)
 
+
+def test_get_official_self_repo_metadata_defaults_branch_to_main_when_missing(tmp_path: Path) -> None:
+    repo_root = tmp_path / 'repo'
+    (repo_root / 'config').mkdir(parents=True)
+    (repo_root / 'config' / 'version-governance.json').write_text(
+        '{"source_of_truth": {"canonical_root": "."}}',
+        encoding='utf-8',
+    )
+
+    payload = get_official_self_repo_metadata(repo_root)
+
+    assert payload == {
+        'repo_url': '',
+        'default_branch': 'main',
+        'canonical_root': '.',
+    }
+
+
+def test_get_official_self_repo_metadata_falls_back_to_git_origin_url(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    repo_root = tmp_path / 'repo'
+    (repo_root / 'config').mkdir(parents=True)
+    (repo_root / 'config' / 'version-governance.json').write_text(
+        '{"source_of_truth": {"canonical_root": "."}}',
+        encoding='utf-8',
+    )
+
+    def fake_run(
+        command: list[str],
+        *,
+        cwd: Path | None = None,
+        capture_output: bool,
+        text: bool,
+        check: bool = False,
+        timeout: int | None = None,
+    ) -> subprocess.CompletedProcess[str]:
+        if command == ['git', '-C', str(repo_root), 'config', '--get', 'remote.origin.url']:
+            return subprocess.CompletedProcess(command, 0, stdout='https://github.com/foryourhealth111-pixel/Vibe-Skills.git\n', stderr='')
+        if command == ['git', '-C', str(repo_root), 'symbolic-ref', 'refs/remotes/origin/HEAD']:
+            return subprocess.CompletedProcess(command, 1, stdout='', stderr='missing ref')
+        raise AssertionError(f'unexpected command: {command}')
+
+    monkeypatch.setattr('vgo_cli.repo.subprocess.run', fake_run)
+
+    payload = get_official_self_repo_metadata(repo_root)
+
     assert payload == {
         'repo_url': 'https://github.com/foryourhealth111-pixel/Vibe-Skills.git',
         'default_branch': 'main',
@@ -101,13 +147,64 @@ def test_get_repo_head_commit_reads_git_rev_parse(monkeypatch: pytest.MonkeyPatc
     repo_root = tmp_path / 'repo'
     repo_root.mkdir(parents=True)
 
-    def fake_run(command: list[str], *, cwd: Path | None = None, capture_output: bool, text: bool, check: bool = False) -> subprocess.CompletedProcess[str]:
+    def fake_run(
+        command: list[str],
+        *,
+        cwd: Path | None = None,
+        capture_output: bool,
+        text: bool,
+        check: bool = False,
+        timeout: int | None = None,
+    ) -> subprocess.CompletedProcess[str]:
         assert command == ['git', '-C', str(repo_root), 'rev-parse', 'HEAD']
         assert cwd is None
         assert capture_output is True
         assert text is True
+        assert timeout == cli_repo._GIT_CAPTURE_TIMEOUT_SECONDS
         return subprocess.CompletedProcess(command, 0, stdout='deadbeef\n', stderr='')
 
     monkeypatch.setattr('vgo_cli.repo.subprocess.run', fake_run)
 
     assert get_repo_head_commit(repo_root) == 'deadbeef'
+
+
+def test_get_repo_head_commit_returns_empty_when_git_executable_is_missing(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    repo_root = tmp_path / 'repo'
+    repo_root.mkdir(parents=True)
+
+    def fake_run(
+        command: list[str],
+        *,
+        cwd: Path | None = None,
+        capture_output: bool,
+        text: bool,
+        check: bool = False,
+        timeout: int | None = None,
+    ) -> subprocess.CompletedProcess[str]:
+        raise FileNotFoundError(command[0])
+
+    monkeypatch.setattr('vgo_cli.repo.subprocess.run', fake_run)
+
+    assert get_repo_head_commit(repo_root) == ''
+
+
+def test_get_repo_head_commit_returns_empty_when_git_command_times_out(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    repo_root = tmp_path / 'repo'
+    repo_root.mkdir(parents=True)
+
+    def fake_run(
+        command: list[str],
+        *,
+        capture_output: bool,
+        text: bool,
+        timeout: int,
+    ) -> subprocess.CompletedProcess[str]:
+        raise subprocess.TimeoutExpired(command, 5)
+
+    monkeypatch.setattr(cli_repo.subprocess, 'run', fake_run)
+
+    assert get_repo_head_commit(repo_root) == ''

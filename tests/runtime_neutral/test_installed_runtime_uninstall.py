@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.issue_167_runtime_surfaces import ISSUE_167_MANAGED_RUNTIME_SURFACES
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INSTALL_SCRIPT = REPO_ROOT / "install.sh"
@@ -152,6 +154,20 @@ class InstalledRuntimeUninstallTests(unittest.TestCase):
         self.assertNotIn("host=codex block=global-vibe-bootstrap", remaining)
         self.assertIn("host=opencode block=global-vibe-bootstrap", remaining)
         self.assertIn("AGENTS.md", payload["mutated_text_paths"])
+
+    def test_codex_uninstall_removes_issue_167_governed_runtime_dependency_surfaces(self) -> None:
+        target_root = self.root / "codex-issue-167-root"
+        self.install_host("codex", target_root)
+        installed_root = target_root / "skills" / "vibe"
+
+        for relpath in ISSUE_167_MANAGED_RUNTIME_SURFACES:
+            self.assertTrue((installed_root / relpath).exists(), relpath)
+
+        payload = self.uninstall_host("codex", target_root)
+
+        for relpath in ISSUE_167_MANAGED_RUNTIME_SURFACES:
+            self.assertFalse((installed_root / relpath).exists(), relpath)
+        self.assertIn("PASS", payload["gate_result"])
 
     def test_claude_code_uninstall_removes_vibe_managed_surface(self) -> None:
         target_root = self.root / "claude-root"

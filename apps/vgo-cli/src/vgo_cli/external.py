@@ -1,10 +1,23 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
 
 from .errors import CliError
+
+
+def _load_optional_install_timeout_seconds() -> int:
+    raw = os.environ.get('VGO_OPTIONAL_INSTALL_TIMEOUT_SECONDS', '15')
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        value = 15
+    return max(1, value)
+
+
+OPTIONAL_INSTALL_TIMEOUT_SECONDS = _load_optional_install_timeout_seconds()
 
 
 def report_external_fallback_usage(external_fallback_used: list[str], *, strict_offline: bool) -> None:
@@ -17,7 +30,28 @@ def report_external_fallback_usage(external_fallback_used: list[str], *, strict_
 
 
 def _run_optional_install(command: list[str]) -> None:
-    subprocess.run(command, capture_output=True, text=True)
+    command_text = ' '.join(command)
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=OPTIONAL_INSTALL_TIMEOUT_SECONDS,
+        )
+    except (FileNotFoundError, OSError) as exc:
+        print(f'[WARN] Optional install skipped for {command_text}: {exc}')
+        return
+    except subprocess.TimeoutExpired:
+        print(
+            f'[WARN] Optional install timed out for {command_text} after '
+            f'{OPTIONAL_INSTALL_TIMEOUT_SECONDS}s; continuing without it.'
+        )
+        return
+
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or '').strip()
+        suffix = f': {detail}' if detail else f' (exit {result.returncode})'
+        print(f'[WARN] Optional install failed for {command_text}{suffix}')
 
 
 def maybe_install_external_dependencies(repo_root: object, install_mode: str, *, strict_offline: bool = False) -> None:
