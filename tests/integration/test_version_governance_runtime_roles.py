@@ -107,11 +107,13 @@ def test_required_runtime_marker_groups_keep_owners_separate_from_compatibility(
     assert "scripts/runtime/Invoke-PhaseCleanup.ps1" in runtime_support
     assert "scripts/runtime/VibeExecution.Common.ps1" in runtime_support
     assert "scripts/runtime/VibeMemoryActivation.Common.ps1" in runtime_support
+    assert "scripts/runtime/Invoke-VibeCanonicalEntry.ps1" in runtime_support
 
     assert "scripts/router/invoke-pack-route.py" in router_and_compat
     assert "scripts/router/runtime_neutral/router_contract.py" in router_and_compat
     assert "scripts/verify/runtime_neutral/router_bridge_gate.py" in router_and_compat
     assert "scripts/verify/vibe-bootstrap-doctor-gate.ps1" in verification_surfaces
+    assert "scripts/verify/vibe-canonical-entry-truth-gate.ps1" in verification_surfaces
     assert "scripts/verify/vibe-installed-runtime-freshness-gate.ps1" in verification_surfaces
     assert "scripts/verify/vibe-release-install-runtime-coherence-gate.ps1" in verification_surfaces
     assert "config/plugins-manifest.codex.json" in governance["runtime"]["installed_runtime"]["required_runtime_markers"]

@@ -38,6 +38,8 @@ def test_expanded_runtime_payload_covers_governed_runtime_dependency_surfaces() 
     files, directories = _expanded_runtime_payload()
     required = [
         *ISSUE_167_MANAGED_RUNTIME_SURFACES,
+        "scripts/runtime/Invoke-VibeCanonicalEntry.ps1",
+        "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
         "config/plugins-manifest.codex.json",
         "config/vibe-entry-surfaces.json",
         "config/secrets-policy.json",
@@ -51,6 +53,7 @@ def test_expanded_runtime_payload_covers_governed_runtime_dependency_surfaces() 
 def test_runtime_script_manifest_includes_issue_167_governed_verify_gates() -> None:
     manifest = _load_json("config/runtime-script-manifest.json")
     expected = {
+        "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
         "scripts/verify/vibe-no-silent-fallback-contract-gate.ps1",
         "scripts/verify/vibe-no-self-introduced-fallback-gate.ps1",
         "scripts/verify/vibe-release-truth-consistency-gate.ps1",
