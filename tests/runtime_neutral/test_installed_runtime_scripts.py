@@ -40,6 +40,10 @@ CODEX_WRAPPER_SKILL_NAMES = {
     "vibe-do-it",
     "vibe-upgrade",
 }
+CANONICAL_ENTRY_RUNTIME_SURFACES = (
+    "scripts/runtime/Invoke-VibeCanonicalEntry.ps1",
+    "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
+)
 
 def resolve_powershell() -> str | None:
     candidates = [
@@ -366,6 +370,13 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         for relpath in ISSUE_167_MANAGED_RUNTIME_SURFACES:
             self.assertTrue((installed_root / relpath).exists(), relpath)
 
+    def test_shell_install_materializes_canonical_entry_runtime_surfaces(self) -> None:
+        self.install_shell_runtime("codex")
+
+        installed_root = self.target_root / "skills" / "vibe"
+        for relpath in CANONICAL_ENTRY_RUNTIME_SURFACES:
+            self.assertTrue((installed_root / relpath).exists(), relpath)
+
     def test_shell_reinstall_restores_issue_167_governed_runtime_dependency_surfaces(self) -> None:
         self.install_shell_runtime("codex")
 
@@ -376,6 +387,21 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
             installed_root / "scripts" / "verify" / "vibe-no-silent-fallback-contract-gate.ps1",
             installed_root / "config" / "operator-preview-contract.json",
         ]
+        for path in removed:
+            self.assertTrue(path.exists(), path.as_posix())
+            path.unlink()
+            self.assertFalse(path.exists())
+
+        self.install_shell_runtime("codex")
+
+        for path in removed:
+            self.assertTrue(path.exists(), path.as_posix())
+
+    def test_shell_reinstall_restores_canonical_entry_runtime_surfaces(self) -> None:
+        self.install_shell_runtime("codex")
+
+        installed_root = self.target_root / "skills" / "vibe"
+        removed = [installed_root / relpath for relpath in CANONICAL_ENTRY_RUNTIME_SURFACES]
         for path in removed:
             self.assertTrue(path.exists(), path.as_posix())
             path.unlink()

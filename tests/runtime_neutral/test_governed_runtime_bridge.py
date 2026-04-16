@@ -110,6 +110,7 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
         verification_gates = set(script_manifest["role_groups"]["files"]["verification_gates"])
         self.assertTrue(
             {
+                "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
                 "scripts/verify/vibe-bootstrap-doctor-gate.ps1",
                 "scripts/verify/vibe-no-silent-fallback-contract-gate.ps1",
                 "scripts/verify/vibe-no-self-introduced-fallback-gate.ps1",
@@ -180,12 +181,14 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
         self.assertIn("scripts/runtime/Invoke-DeepInterview.ps1", required_markers)
         self.assertIn("scripts/runtime/Write-RequirementDoc.ps1", required_markers)
         self.assertIn("scripts/runtime/Write-XlPlan.ps1", required_markers)
+        self.assertIn("scripts/runtime/Invoke-VibeCanonicalEntry.ps1", required_markers)
         self.assertIn("scripts/runtime/invoke-vibe-runtime.ps1", required_markers)
         self.assertIn("scripts/runtime/Invoke-AntiProxyGoalDriftCompaction.ps1", required_markers)
         self.assertIn("scripts/runtime/Invoke-DelegatedLaneUnit.ps1", required_markers)
         self.assertIn("scripts/runtime/Invoke-PlanExecute.ps1", required_markers)
         self.assertIn("scripts/runtime/Invoke-PhaseCleanup.ps1", required_markers)
         self.assertIn("scripts/verify/vibe-bootstrap-doctor-gate.ps1", required_markers)
+        self.assertIn("scripts/verify/vibe-canonical-entry-truth-gate.ps1", required_markers)
         self.assertIn("scripts/verify/vibe-governed-runtime-contract-gate.ps1", required_markers)
         self.assertIn("config/runtime-contract.json", required_markers)
         self.assertIn("config/runtime-modes.json", required_markers)

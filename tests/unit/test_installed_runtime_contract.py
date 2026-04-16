@@ -31,6 +31,8 @@ def test_installed_runtime_contract_owns_freshness_defaults() -> None:
     assert defaults["required_runtime_markers"] == [
         "SKILL.md",
         "config/version-governance.json",
+        "scripts/runtime/Invoke-VibeCanonicalEntry.ps1",
+        "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
         "scripts/router/resolve-pack-route.ps1",
         "scripts/common/vibe-governance-helpers.ps1",
     ]
@@ -50,6 +52,8 @@ def test_installed_runtime_contract_owns_coherence_defaults_with_fresh_lists_cop
     assert fresh["shell_degraded_behavior"] == "warn_and_skip_authoritative_runtime_gate"
     assert "scripts/verify/vibe-installed-runtime-freshness-gate.ps1" in fresh["required_runtime_markers"]
     assert "scripts/verify/vibe-release-install-runtime-coherence-gate.ps1" in fresh["required_runtime_markers"]
+    assert "scripts/verify/vibe-canonical-entry-truth-gate.ps1" in fresh["required_runtime_markers"]
+    assert "scripts/runtime/Invoke-VibeCanonicalEntry.ps1" in fresh["required_runtime_markers"]
     assert "scripts/runtime/invoke-vibe-runtime.ps1" in fresh["required_runtime_markers"]
     assert "local-only" not in fresh["required_runtime_markers"]
 

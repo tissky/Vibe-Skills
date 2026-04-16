@@ -120,6 +120,7 @@ def test_runtime_script_manifest_marks_router_python_entrypoint_as_compatibility
     assert "scripts/router/resolve-pack-route.ps1" in file_groups["router_entrypoints"]
     assert all(path.startswith("scripts/verify/") for path in file_groups["verification_gates"])
     assert {
+        "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
         "scripts/verify/vibe-bootstrap-doctor-gate.ps1",
         "scripts/verify/vibe-no-silent-fallback-contract-gate.ps1",
         "scripts/verify/vibe-no-self-introduced-fallback-gate.ps1",

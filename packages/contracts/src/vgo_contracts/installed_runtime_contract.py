@@ -16,6 +16,8 @@ DEFAULT_INSTALLED_RUNTIME_SHELL_DEGRADED_BEHAVIOR = "warn_and_skip_authoritative
 FRESHNESS_REQUIRED_RUNTIME_MARKERS_DEFAULT = (
     "SKILL.md",
     "config/version-governance.json",
+    "scripts/runtime/Invoke-VibeCanonicalEntry.ps1",
+    "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
     "scripts/router/resolve-pack-route.ps1",
     "scripts/common/vibe-governance-helpers.ps1",
 )
@@ -28,6 +30,8 @@ COHERENCE_REQUIRED_RUNTIME_MARKERS_DEFAULT = (
     "scripts/common/vibe-governance-helpers.ps1",
     "scripts/verify/vibe-installed-runtime-freshness-gate.ps1",
     "scripts/verify/vibe-release-install-runtime-coherence-gate.ps1",
+    "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
+    "scripts/runtime/Invoke-VibeCanonicalEntry.ps1",
     "scripts/runtime/invoke-vibe-runtime.ps1",
     "scripts/router/resolve-pack-route.ps1",
 )
