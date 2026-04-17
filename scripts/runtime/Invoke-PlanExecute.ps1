@@ -1154,9 +1154,36 @@ $executedWithoutApproval = @($executedSpecialistSkillIds | Where-Object { $_ -no
 $localSuggestionsExecutedWithoutApproval = @($localSuggestionSkillIds | Where-Object { $_ -in $executedSpecialistSkillIds })
 $dispatchContractIncompleteSkillIds = @(
     $approvedDispatch | Where-Object {
-        -not [bool]$_.native_usage_required -or
-        -not [bool]$_.must_preserve_workflow -or
-        [string]::IsNullOrWhiteSpace([string]$_.native_skill_entrypoint)
+        $hasNativeUsageRequired = $_.PSObject.Properties.Name -contains 'native_usage_required'
+        $hasUsageRequired = $_.PSObject.Properties.Name -contains 'usage_required'
+        $effectiveUsageRequired = if ($hasUsageRequired) {
+            [bool]$_.usage_required
+        } elseif ($hasNativeUsageRequired) {
+            [bool]$_.native_usage_required
+        } else {
+            $false
+        }
+        $mustPreserveWorkflow = if ($_.PSObject.Properties.Name -contains 'must_preserve_workflow') {
+            [bool]$_.must_preserve_workflow
+        } else {
+            $false
+        }
+        $nativeEntrypoint = if ($_.PSObject.Properties.Name -contains 'native_skill_entrypoint') {
+            [string]$_.native_skill_entrypoint
+        } else {
+            ''
+        }
+        $skillRoot = if ($_.PSObject.Properties.Name -contains 'skill_root') {
+            [string]$_.skill_root
+        } else {
+            ''
+        }
+
+        (-not $hasNativeUsageRequired -and -not $hasUsageRequired) -or
+        -not $effectiveUsageRequired -or
+        -not $mustPreserveWorkflow -or
+        [string]::IsNullOrWhiteSpace($nativeEntrypoint) -or
+        [string]::IsNullOrWhiteSpace($skillRoot)
     } | ForEach-Object { [string]$_.skill_id } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
 )
 
@@ -1200,6 +1227,13 @@ $baseStatus = if ($failedUnitCount -eq 0 -and $executedUnitCount -ge [int]$profi
 $liveAttemptedSpecialistUnits = @($executedSpecialistUnits | Where-Object { [bool]$_.live_native_execution })
 $liveSpecialistUnits = @($liveAttemptedSpecialistUnits | Where-Object { [bool]$_.verification_passed })
 $failedLiveSpecialistUnits = @($liveAttemptedSpecialistUnits | Where-Object { -not [bool]$_.verification_passed })
+$directRoutedSpecialistUnits = @($executedSpecialistUnits | Where-Object {
+    -not [bool]$(if ($_.PSObject.Properties.Name -contains 'live_native_execution') { $_.live_native_execution } else { $false }) -and
+    -not [bool]$(if ($_.PSObject.Properties.Name -contains 'degraded') { $_.degraded } else { $false }) -and
+    -not [bool]$(if ($_.PSObject.Properties.Name -contains 'blocked') { $_.blocked } else { $false }) -and
+    [string]$_.execution_driver -eq 'direct_current_session_route'
+})
+$verifiedSpecialistUnits = @(@($liveSpecialistUnits) + @($directRoutedSpecialistUnits))
 $degradedSpecialistUnits = @(@($executedSpecialistUnits | Where-Object { [bool]$_.degraded }) + @($preDispatchDegradedUnits))
 $nonDegradedExecutedSpecialistUnits = @($executedSpecialistUnits | Where-Object { -not [bool]$_.degraded })
 $totalSpecialistDispatchOutcomeCount = @($nonDegradedExecutedSpecialistUnits).Count + @($blockedSpecialistUnits).Count + @($degradedSpecialistUnits).Count
@@ -1209,6 +1243,8 @@ $effectiveSpecialistExecutionStatus = if (@($liveSpecialistUnits).Count -gt 0 -a
     'live_native_partial_failures'
 } elseif (@($failedLiveSpecialistUnits).Count -gt 0) {
     'live_native_failed'
+} elseif (@($directRoutedSpecialistUnits).Count -gt 0) {
+    'direct_current_session_routed'
 } elseif (@($degradedSpecialistUnits).Count -gt 0) {
     'explicitly_degraded'
 } elseif (@($blockedSpecialistUnits).Count -gt 0) {
@@ -1322,9 +1358,11 @@ $executionManifest = [pscustomobject]@{
         }
         parallelizable_dispatch_count = @($approvedDispatch | Where-Object { [bool]$_.parallelizable_in_root_xl }).Count
         attempted_specialist_unit_count = @($liveAttemptedSpecialistUnits).Count
-        executed_specialist_unit_count = @($liveSpecialistUnits).Count
+        executed_specialist_unit_count = @($verifiedSpecialistUnits).Count
         failed_specialist_unit_count = @($failedLiveSpecialistUnits).Count
-        executed_specialist_units = @($liveSpecialistUnits)
+        direct_routed_specialist_unit_count = @($directRoutedSpecialistUnits).Count
+        direct_routed_specialist_units = @($directRoutedSpecialistUnits)
+        executed_specialist_units = @($verifiedSpecialistUnits)
         failed_specialist_units = @($failedLiveSpecialistUnits)
         blocked_specialist_unit_count = @($blockedSpecialistUnits).Count
         blocked_specialist_units = @($blockedSpecialistUnits)
@@ -1338,12 +1376,12 @@ $executionManifest = [pscustomobject]@{
             matched = @($matchedSkillIds).Count
             surfaced = @($surfacedSkillIds).Count
             dispatched = @($approvedDispatch).Count
-            executed = @($liveSpecialistUnits).Count
+            executed = @($verifiedSpecialistUnits).Count
             blocked_due_to_destructive = @($blockedSkillIds).Count
             degraded_due_to_missing_contract = @($degradedSkillIds).Count
             ghost_match = @($ghostMatchSkillIds).Count
-            executed_per_matched = if (@($matchedSkillIds).Count -gt 0) { [Math]::Round((@($liveSpecialistUnits).Count / [double]@($matchedSkillIds).Count), 4) } else { 0.0 }
-            executed_rate = if (@($approvedDispatch).Count -gt 0) { [Math]::Round((@($liveSpecialistUnits).Count / [double]@($approvedDispatch).Count), 4) } else { 0.0 }
+            executed_per_matched = if (@($matchedSkillIds).Count -gt 0) { [Math]::Round((@($verifiedSpecialistUnits).Count / [double]@($matchedSkillIds).Count), 4) } else { 0.0 }
+            executed_rate = if (@($approvedDispatch).Count -gt 0) { [Math]::Round((@($verifiedSpecialistUnits).Count / [double]@($approvedDispatch).Count), 4) } else { 0.0 }
         }
         original_local_suggestion_count = @($frozenLocalSuggestions).Count
         original_local_specialist_suggestions = @($frozenLocalSuggestions)
@@ -1383,8 +1421,9 @@ $proofManifest = [pscustomobject]@{
     specialist_recommendation_count = @($specialistRecommendations).Count
     specialist_dispatch_unit_count = [int]$specialistDispatchUnitCount
     attempted_specialist_unit_count = @($liveAttemptedSpecialistUnits).Count
-    executed_specialist_unit_count = @($liveSpecialistUnits).Count
+    executed_specialist_unit_count = @($verifiedSpecialistUnits).Count
     failed_specialist_unit_count = @($failedLiveSpecialistUnits).Count
+    direct_routed_specialist_unit_count = @($directRoutedSpecialistUnits).Count
     blocked_specialist_unit_count = @($blockedSpecialistUnits).Count
     degraded_specialist_unit_count = @($degradedSpecialistUnits).Count
     specialist_dispatch_outcome_count = $totalSpecialistDispatchOutcomeCount
@@ -1417,8 +1456,9 @@ $proofLines = @(
     ('- specialist_recommendation_count: `{0}`' -f @($specialistRecommendations).Count),
     ('- specialist_dispatch_unit_count: `{0}`' -f [int]$specialistDispatchUnitCount),
     ('- attempted_specialist_unit_count: `{0}`' -f @($liveAttemptedSpecialistUnits).Count),
-    ('- executed_specialist_unit_count: `{0}`' -f @($liveSpecialistUnits).Count),
+    ('- executed_specialist_unit_count: `{0}`' -f @($verifiedSpecialistUnits).Count),
     ('- failed_specialist_unit_count: `{0}`' -f @($failedLiveSpecialistUnits).Count),
+    ('- direct_routed_specialist_unit_count: `{0}`' -f @($directRoutedSpecialistUnits).Count),
     ('- blocked_specialist_unit_count: `{0}`' -f @($blockedSpecialistUnits).Count),
     ('- degraded_specialist_unit_count: `{0}`' -f @($degradedSpecialistUnits).Count),
     ('- auto_approved_specialist_unit_count: `{0}`' -f @($autoApprovedDispatch).Count),
@@ -1474,8 +1514,9 @@ $receipt = [pscustomobject]@{
     specialist_recommendation_count = @($specialistRecommendations).Count
     specialist_dispatch_unit_count = [int]$specialistDispatchUnitCount
     attempted_specialist_unit_count = @($liveAttemptedSpecialistUnits).Count
-    executed_specialist_unit_count = @($liveSpecialistUnits).Count
+    executed_specialist_unit_count = @($verifiedSpecialistUnits).Count
     failed_specialist_unit_count = @($failedLiveSpecialistUnits).Count
+    direct_routed_specialist_unit_count = @($directRoutedSpecialistUnits).Count
     blocked_specialist_unit_count = @($blockedSpecialistUnits).Count
     degraded_specialist_unit_count = @($degradedSpecialistUnits).Count
     specialist_dispatch_outcome_count = $totalSpecialistDispatchOutcomeCount

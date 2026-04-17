@@ -688,6 +688,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                     **os.environ,
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_SPECIALIST_CONSULTATION_MODE": "host_subprocess",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )
@@ -769,6 +771,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                     **os.environ,
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_SPECIALIST_CONSULTATION_MODE": "host_subprocess",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )
@@ -830,6 +834,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                     **os.environ,
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_SPECIALIST_CONSULTATION_MODE": "host_subprocess",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )
@@ -893,6 +899,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                         **os.environ,
                         "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                         "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                        "VGO_SPECIALIST_CONSULTATION_MODE": "host_subprocess",
+                        "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                         "VGO_CODEX_EXECUTABLE": str(fake_codex),
                     },
                 )
@@ -960,6 +968,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                     **os.environ,
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_SPECIALIST_CONSULTATION_MODE": "host_subprocess",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )
@@ -1036,6 +1046,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                     "CODEX_HOME": str(source_codex_home),
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_SPECIALIST_CONSULTATION_MODE": "host_subprocess",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )
@@ -1214,6 +1226,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                     **os.environ,
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_SPECIALIST_CONSULTATION_MODE": "host_subprocess",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )
@@ -1244,6 +1258,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                 extra_env={
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_SPECIALIST_CONSULTATION_MODE": "host_subprocess",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
                 check=False,

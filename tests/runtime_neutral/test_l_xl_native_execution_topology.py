@@ -745,13 +745,19 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                     self.assertTrue(Path(result["stdout_path"]).exists())
                     self.assertTrue(Path(result["stderr_path"]).exists())
                     if result["kind"] == "specialist_dispatch":
-                        self.assertEqual("degraded_non_authoritative", result["status"])
-                        self.assertFalse(bool(result["verification_passed"]))
-                        self.assertTrue(bool(result["degraded"]))
+                        self.assertEqual("completed", result["status"])
+                        self.assertTrue(bool(result["verification_passed"]))
+                        self.assertFalse(bool(result["degraded"]))
                         self.assertFalse(bool(result["live_native_execution"]))
+                        self.assertEqual("direct_current_session_route", result["execution_driver"])
+                        self.assertTrue(bool(result["direct_route"]))
                     else:
                         self.assertEqual("completed", result["status"])
                         self.assertTrue(bool(result["verification_passed"]))
+
+            specialist_accounting = execution_manifest["specialist_accounting"]
+            self.assertEqual("direct_current_session_routed", specialist_accounting["effective_execution_status"])
+            self.assertGreaterEqual(int(specialist_accounting["direct_routed_specialist_unit_count"]), 1)
 
             serial_order = list(topology.get("serial_execution_order") or [])
             self.assertEqual(
@@ -831,6 +837,9 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 task="I have a failing test and stack trace. Debug systematically and execute specialist workflow.",
                 artifact_root=Path(tempdir),
                 governance_scope="root",
+                extra_env={
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
+                },
             )
             summary = payload["summary"]
             execution_manifest = load_json(summary["artifacts"]["execution_manifest"])
@@ -870,6 +879,49 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                     self.assertTrue(Path(result["stdout_path"]).exists())
                     self.assertTrue(Path(result["stderr_path"]).exists())
 
+    def test_approved_specialist_dispatch_routes_directly_in_current_session_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_path = Path(tempdir)
+            fake_codex = create_fake_codex_command(temp_path)
+            payload = run_runtime(
+                task="I have a failing test and stack trace. Debug systematically and execute specialist workflow.",
+                artifact_root=temp_path,
+                governance_scope="root",
+                extra_env={
+                    "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
+                    "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_CODEX_EXECUTABLE": str(fake_codex),
+                },
+            )
+            summary = payload["summary"]
+            execution_manifest = load_json(summary["artifacts"]["execution_manifest"])
+
+            specialist_accounting = execution_manifest["specialist_accounting"]
+            self.assertEqual("native_bounded_units", specialist_accounting["execution_mode"])
+            self.assertEqual("direct_current_session_routed", specialist_accounting["effective_execution_status"])
+            self.assertGreaterEqual(int(specialist_accounting["direct_routed_specialist_unit_count"]), 1)
+            self.assertGreaterEqual(int(specialist_accounting["executed_specialist_unit_count"]), 1)
+            self.assertEqual(0, int(specialist_accounting["degraded_specialist_unit_count"]))
+            self.assertEqual("completed", execution_manifest["status"])
+
+            routed_units = list(specialist_accounting["direct_routed_specialist_units"])
+            self.assertGreaterEqual(len(routed_units), 1)
+            for unit in routed_units:
+                with self.subTest(unit_id=unit.get("unit_id", "")):
+                    self.assertTrue(bool(unit["verification_passed"]))
+                    self.assertFalse(bool(unit["degraded"]))
+                    self.assertFalse(bool(unit["live_native_execution"]))
+                    self.assertEqual("direct_current_session_route", unit["execution_driver"])
+                    result = load_json(unit["result_path"])
+                    self.assertEqual("completed", result["status"])
+                    self.assertTrue(bool(result["verification_passed"]))
+                    self.assertTrue(bool(result["direct_route"]))
+                    self.assertEqual("direct_current_session_route", result["execution_driver"])
+                    self.assertFalse(bool(result["live_native_execution"]))
+                    self.assertFalse(bool(result["degraded"]))
+                    self.assertFalse(bool(result["blocked"]))
+                    self.assertFalse(bool(result.get("prompt_path")))
+
     def test_approved_specialist_dispatch_can_execute_live_native_lane_when_adapter_enabled(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             temp_path = Path(tempdir)
@@ -889,6 +941,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 extra_env={
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )
@@ -946,6 +999,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 extra_env={
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )
@@ -1184,6 +1238,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 extra_env={
                     "VGO_ENABLE_NATIVE_SPECIALIST_EXECUTION": "1",
                     "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "0",
+                    "VGO_NATIVE_SPECIALIST_EXECUTION_MODE": "host_subprocess",
                     "VGO_CODEX_EXECUTABLE": str(fake_codex),
                 },
             )

@@ -32,10 +32,21 @@ function Get-VibeSpecialistConsultationPolicy {
         }
     }
 
+    $consultationMode = if ($null -ne $resolvedPolicy -and (Test-VibeObjectHasProperty -InputObject $resolvedPolicy -PropertyName 'mode') -and -not [string]::IsNullOrWhiteSpace([string]$resolvedPolicy.mode)) {
+        [string]$resolvedPolicy.mode
+    } else {
+        'direct_current_session_route'
+    }
+    $modeOverride = [Environment]::GetEnvironmentVariable('VGO_SPECIALIST_CONSULTATION_MODE')
+    if (-not [string]::IsNullOrWhiteSpace($modeOverride)) {
+        $consultationMode = [string]$modeOverride
+    }
+
     return [pscustomobject]@{
         enabled = if ($null -ne $resolvedPolicy -and (Test-VibeObjectHasProperty -InputObject $resolvedPolicy -PropertyName 'enabled')) { [bool]$resolvedPolicy.enabled } else { $false }
         version = if ($null -ne $resolvedPolicy -and (Test-VibeObjectHasProperty -InputObject $resolvedPolicy -PropertyName 'version')) { [int]$resolvedPolicy.version } else { 1 }
         policy_id = if ($null -ne $resolvedPolicy -and (Test-VibeObjectHasProperty -InputObject $resolvedPolicy -PropertyName 'policy_id') -and -not [string]::IsNullOrWhiteSpace([string]$resolvedPolicy.policy_id)) { [string]$resolvedPolicy.policy_id } else { 'specialist-consultation-v1' }
+        mode = $consultationMode
         max_consults_per_window = if ($null -ne $resolvedPolicy -and (Test-VibeObjectHasProperty -InputObject $resolvedPolicy -PropertyName 'max_consults_per_window')) { [int]$resolvedPolicy.max_consults_per_window } else { 2 }
         allowed_windows = @($allowedWindows)
         require_contract_complete = if ($null -ne $resolvedPolicy -and (Test-VibeObjectHasProperty -InputObject $resolvedPolicy -PropertyName 'require_contract_complete')) { [bool]$resolvedPolicy.require_contract_complete } else { $true }
@@ -556,6 +567,77 @@ function New-VibeDegradedSpecialistConsultationResult {
     }
 }
 
+function New-VibeDirectRoutedSpecialistConsultationResult {
+    param(
+        [Parameter(Mandatory)] [string]$UnitId,
+        [Parameter(Mandatory)] [object]$Consultation,
+        [Parameter(Mandatory)] [string]$SessionRoot,
+        [Parameter(Mandatory)] [ValidateSet('discussion', 'planning')] [string]$WindowId,
+        [Parameter(Mandatory)] [string]$Stage
+    )
+
+    $resultsRoot = Join-Path $SessionRoot 'consultation-results'
+    New-Item -ItemType Directory -Path $resultsRoot -Force | Out-Null
+
+    $entrypoint = if (
+        (Test-VibeObjectHasProperty -InputObject $Consultation -PropertyName 'native_skill_entrypoint') -and
+        -not [string]::IsNullOrWhiteSpace([string]$Consultation.native_skill_entrypoint)
+    ) {
+        [string]$Consultation.native_skill_entrypoint
+    } else {
+        $null
+    }
+
+    $summary = if (-not [string]::IsNullOrWhiteSpace($entrypoint)) {
+        ('Specialist was routed for direct current-session consultation. Load {0} in the current host session instead of launching a hidden host subprocess.' -f $entrypoint)
+    } else {
+        'Specialist was routed for direct current-session consultation instead of launching a hidden host subprocess.'
+    }
+
+    $result = [pscustomobject]@{
+        unit_id = $UnitId
+        kind = 'specialist_consultation'
+        status = 'completed'
+        verification_passed = $true
+        skill_id = [string]$Consultation.skill_id
+        consultation_window_id = [string]$WindowId
+        consultation_stage = [string]$Stage
+        live_native_execution = $false
+        degraded = $false
+        blocked = $false
+        direct_route = $true
+        consultation_mode = 'direct_current_session_route'
+        native_skill_entrypoint = $entrypoint
+        summary = $summary
+        consultation_notes = @(
+            'No hidden host subprocess was launched for this specialist.',
+            'The current host session should load the specialist entrypoint directly and keep vibe as the only runtime authority.'
+        )
+        adoption_notes = @(
+            'Use the specialist path already frozen in native_skill_entrypoint for same-session loading.',
+            'Do not replace vibe governance; absorb specialist guidance back into the governed artifact flow.'
+        )
+        verification_notes = @(
+            'consultation_mode:direct_current_session_route',
+            'hidden_host_subprocess:false',
+            ('native_skill_entrypoint:{0}' -f $(if ([string]::IsNullOrWhiteSpace($entrypoint)) { 'missing' } else { $entrypoint }))
+        )
+        observed_changed_files = @()
+        response_json_path = $null
+        prompt_path = $null
+        schema_path = $null
+        result_reason = 'direct_current_session_route'
+    }
+    $resultPath = Join-Path $resultsRoot ("{0}.json" -f $UnitId)
+    Write-VibeJsonArtifact -Path $resultPath -Value $result
+
+    return [pscustomobject]@{
+        category = 'consulted'
+        result = $result
+        result_path = $resultPath
+    }
+}
+
 function Invoke-VibeSpecialistConsultationUnit {
     param(
         [Parameter(Mandatory)] [string]$UnitId,
@@ -571,6 +653,15 @@ function Invoke-VibeSpecialistConsultationUnit {
     )
 
     $resolvedPolicy = Get-VibeSpecialistConsultationPolicy -Policy $Policy
+    if ([string]$resolvedPolicy.mode -eq 'direct_current_session_route') {
+        return New-VibeDirectRoutedSpecialistConsultationResult `
+            -UnitId $UnitId `
+            -Consultation $Consultation `
+            -SessionRoot $SessionRoot `
+            -WindowId $WindowId `
+            -Stage $Stage
+    }
+
     $adapterResolution = Resolve-VibeNativeSpecialistAdapter -ScriptPath $PSCommandPath
     if (-not [bool]$adapterResolution.live_execution_allowed -or $null -eq $adapterResolution.adapter) {
         return New-VibeDegradedSpecialistConsultationResult `

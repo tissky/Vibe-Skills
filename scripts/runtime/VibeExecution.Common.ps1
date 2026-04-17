@@ -659,11 +659,39 @@ function Resolve-VibeNativeSpecialistAdapter {
         -HostAdapter $runtime.host_adapter `
         -RequestedPropertyName 'requested_id' `
         -EffectivePropertyName 'id'
+    $executionMode = if (
+        $null -ne $policy -and
+        $policy.PSObject.Properties.Name -contains 'mode' -and
+        -not [string]::IsNullOrWhiteSpace([string]$policy.mode)
+    ) {
+        [string]$policy.mode
+    } else {
+        'direct_current_session_route'
+    }
+    $modeOverride = [Environment]::GetEnvironmentVariable('VGO_NATIVE_SPECIALIST_EXECUTION_MODE')
+    if (-not [string]::IsNullOrWhiteSpace($modeOverride)) {
+        $executionMode = [string]$modeOverride
+    }
     if ($null -eq $policy -or -not [bool]$policy.enabled) {
         return [pscustomobject]@{
             enabled = $false
             live_execution_allowed = $false
             reason = 'native_specialist_execution_policy_disabled'
+            runtime = $runtime
+            policy = $policy
+            adapter = $null
+            requested_host_adapter_id = [string]$runtimeHostAdapterIdentity.requested_host_id
+            effective_host_adapter_id = [string]$runtimeHostAdapterIdentity.effective_host_id
+            command_path = $null
+            invocation_arguments_prefix = @()
+        }
+    }
+
+    if ($executionMode -eq 'direct_current_session_route') {
+        return [pscustomobject]@{
+            enabled = $true
+            live_execution_allowed = $false
+            reason = 'direct_current_session_route'
             runtime = $runtime
             policy = $policy
             adapter = $null
@@ -1450,6 +1478,87 @@ function New-VibeDegradedSpecialistDispatchResult {
     }
 }
 
+function New-VibeDirectRoutedSpecialistDispatchResult {
+    param(
+        [Parameter(Mandatory)] [string]$UnitId,
+        [Parameter(Mandatory)] [object]$Dispatch,
+        [Parameter(Mandatory)] [string]$SessionRoot,
+        [AllowEmptyString()] [string]$WriteScope = '',
+        [AllowEmptyString()] [string]$ReviewMode = 'native_contract'
+    )
+
+    $logsRoot = Join-Path $SessionRoot 'execution-logs'
+    $resultsRoot = Join-Path $SessionRoot 'execution-results'
+    New-Item -ItemType Directory -Path $logsRoot -Force | Out-Null
+    New-Item -ItemType Directory -Path $resultsRoot -Force | Out-Null
+
+    $stdoutPath = Join-Path $logsRoot ("{0}.stdout.log" -f $UnitId)
+    $stderrPath = Join-Path $logsRoot ("{0}.stderr.log" -f $UnitId)
+    Write-VgoUtf8NoBomText -Path $stdoutPath -Content ''
+    Write-VgoUtf8NoBomText -Path $stderrPath -Content ''
+
+    $entrypoint = if (
+        $Dispatch.PSObject.Properties.Name -contains 'native_skill_entrypoint' -and
+        -not [string]::IsNullOrWhiteSpace([string]$Dispatch.native_skill_entrypoint)
+    ) {
+        [string]$Dispatch.native_skill_entrypoint
+    } else {
+        $null
+    }
+
+    $unitResult = [pscustomobject]@{
+        unit_id = $UnitId
+        kind = 'specialist_dispatch'
+        status = 'completed'
+        started_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.ffffffZ')
+        finished_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.ffffffZ')
+        command = ("specialist:{0}" -f [string]$Dispatch.skill_id)
+        arguments = @()
+        display_command = ("specialist:{0}" -f [string]$Dispatch.skill_id)
+        cwd = $SessionRoot
+        timeout_seconds = 0
+        expected_exit_code = 0
+        exit_code = 0
+        timed_out = $false
+        stdout_path = $stdoutPath
+        stderr_path = $stderrPath
+        stdout_preview = @()
+        stderr_preview = @()
+        expected_artifacts = @()
+        verification_passed = $true
+        specialist_skill_id = [string]$Dispatch.skill_id
+        bounded_role = [string]$Dispatch.bounded_role
+        native_usage_required = [bool]$Dispatch.native_usage_required
+        must_preserve_workflow = [bool]$Dispatch.must_preserve_workflow
+        write_scope = $WriteScope
+        review_mode = $ReviewMode
+        execution_driver = 'direct_current_session_route'
+        live_native_execution = $false
+        degraded = $false
+        blocked = $false
+        direct_route = $true
+        direct_route_entrypoint = $entrypoint
+        changed_files = @()
+        verification_notes = @(
+            'execution_mode:direct_current_session_route',
+            'hidden_host_subprocess:false',
+            ('native_skill_entrypoint:{0}' -f $(if ([string]::IsNullOrWhiteSpace($entrypoint)) { 'missing' } else { $entrypoint }))
+        )
+        bounded_output_notes = @(
+            'Load and execute the specialist in the current host session instead of launching a hidden host subprocess.',
+            'Keep vibe as the only runtime authority and absorb any specialist result back into the governed flow.'
+        )
+    }
+
+    $resultPath = Join-Path $resultsRoot ("{0}.json" -f $UnitId)
+    Write-VibeJsonArtifact -Path $resultPath -Value $unitResult
+
+    return [pscustomobject]@{
+        result = $unitResult
+        result_path = $resultPath
+    }
+}
+
 function New-VibeBlockedSpecialistDispatchResult {
     param(
         [Parameter(Mandatory)] [string]$UnitId,
@@ -1544,6 +1653,15 @@ function Invoke-VibeSpecialistDispatchUnit {
 
     $adapterResolution = Resolve-VibeNativeSpecialistAdapter -ScriptPath $PSCommandPath
     $policy = $adapterResolution.policy
+    if ([string]$adapterResolution.reason -eq 'direct_current_session_route') {
+        return New-VibeDirectRoutedSpecialistDispatchResult `
+            -UnitId $UnitId `
+            -Dispatch $Dispatch `
+            -SessionRoot $SessionRoot `
+            -WriteScope $WriteScope `
+            -ReviewMode $ReviewMode
+    }
+
     if (-not $adapterResolution.live_execution_allowed -or $null -eq $adapterResolution.adapter) {
         return New-VibeDegradedSpecialistDispatchResult `
             -UnitId $UnitId `
