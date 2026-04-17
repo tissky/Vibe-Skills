@@ -609,7 +609,22 @@ function Invoke-VibeSpecialistConsultationUnit {
         -Policy $Policy
     Write-VgoUtf8NoBomText -Path $promptPath -Content ($prompt + [Environment]::NewLine)
 
-    $beforeSnapshot = Get-VibeGitStatusSnapshot -RepoRoot $RepoRoot
+    $workingRoot = Resolve-VibeNativeSpecialistWorkingRoot `
+        -RepoRoot $RepoRoot `
+        -SessionRoot $SessionRoot `
+        -SourceArtifactPath $SourceArtifactPath
+    $codexHomeBinding = Get-VibeNativeSpecialistCodexHomeEnvironmentOverrides `
+        -AdapterResolution $adapterResolution `
+        -SkillRecord $Consultation `
+        -RunId $RunId `
+        -UnitId $UnitId
+    $environmentOverrides = if ($null -ne $codexHomeBinding -and (Test-VibeObjectHasProperty -InputObject $codexHomeBinding -PropertyName 'environment_overrides')) {
+        $codexHomeBinding.environment_overrides
+    } else {
+        $null
+    }
+
+    $beforeSnapshot = Get-VibePathStatusSnapshot -RootPath $workingRoot
     Write-VgoUtf8NoBomText -Path $beforeGitPath -Content ((@($beforeSnapshot.lines) -join [Environment]::NewLine) + [Environment]::NewLine)
 
     $arguments = @()
@@ -619,36 +634,45 @@ function Invoke-VibeSpecialistConsultationUnit {
     foreach ($item in @($adapter.arguments_prefix)) {
         $arguments += [string]$item
     }
+    foreach ($item in @(Get-VibeNativeSpecialistRepoCheckBypassArguments -AdapterResolution $adapterResolution -WorkingRoot $workingRoot)) {
+        $arguments += [string]$item
+    }
     $arguments += @(
-        '-C', $RepoRoot,
+        '-C', $workingRoot,
         '--output-schema', $schemaPath,
         '-o', $responsePath,
         $prompt
     )
 
     $startedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.ffffffZ')
-    $processResult = Invoke-VibeCapturedProcess `
-        -Command ([string]$adapterResolution.command_path) `
-        -Arguments $arguments `
-        -WorkingDirectory $RepoRoot `
-        -TimeoutSeconds ([int]$nativePolicy.default_timeout_seconds) `
-        -StdOutPath $stdoutPath `
-        -StdErrPath $stderrPath
-    $finishedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.ffffffZ')
-
-    $afterSnapshot = Get-VibeGitStatusSnapshot -RepoRoot $RepoRoot
-    Write-VgoUtf8NoBomText -Path $afterGitPath -Content ((@($afterSnapshot.lines) -join [Environment]::NewLine) + [Environment]::NewLine)
-
-    $beforeLookup = @{}
-    foreach ($path in @($beforeSnapshot.paths)) {
-        $beforeLookup[[string]$path] = $true
-    }
-    $observedChangedFiles = @()
-    foreach ($path in @($afterSnapshot.paths)) {
-        if (-not $beforeLookup.ContainsKey([string]$path)) {
-            $observedChangedFiles += [string]$path
+    $processResult = $null
+    try {
+        $processResult = Invoke-VibeCapturedProcess `
+            -Command ([string]$adapterResolution.command_path) `
+            -Arguments $arguments `
+            -WorkingDirectory $workingRoot `
+            -TimeoutSeconds ([int]$nativePolicy.default_timeout_seconds) `
+            -StdOutPath $stdoutPath `
+            -StdErrPath $stderrPath `
+            -EnvironmentOverrides $environmentOverrides
+    } finally {
+        if (
+            $null -ne $codexHomeBinding -and
+            (Test-VibeObjectHasProperty -InputObject $codexHomeBinding -PropertyName 'codex_home_root')
+        ) {
+            Remove-VibeNativeSpecialistCodexHomeRoot -CodexHomeRoot ([string]$codexHomeBinding.codex_home_root)
         }
     }
+    $finishedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.ffffffZ')
+
+    $afterSnapshot = Get-VibePathStatusSnapshot -RootPath $workingRoot
+    Write-VgoUtf8NoBomText -Path $afterGitPath -Content ((@($afterSnapshot.lines) -join [Environment]::NewLine) + [Environment]::NewLine)
+
+    $observedChangedFiles = Get-VibeObservedChangedPaths `
+        -BeforeSnapshot $beforeSnapshot `
+        -AfterSnapshot $afterSnapshot `
+        -SnapshotRoot $workingRoot `
+        -IgnoredPaths @($SessionRoot)
 
     $parsedResponse = $null
     $responseParseError = $null
@@ -677,7 +701,7 @@ function Invoke-VibeSpecialistConsultationUnit {
         command = [string]$adapterResolution.command_path
         arguments = @($arguments)
         display_command = @([string]$adapterResolution.command_path) + @($arguments) -join ' '
-        cwd = $RepoRoot
+        cwd = $workingRoot
         timeout_seconds = [int]$nativePolicy.default_timeout_seconds
         expected_exit_code = 0
         exit_code = [int]$processResult.exit_code
