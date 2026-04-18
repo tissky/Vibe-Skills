@@ -25,7 +25,7 @@ Use this skill when:
 ## Not For / Boundaries
 
 - Causal inference: use `performing-causal-analysis`
-- Continuous-target modeling: use `regression-analysis-helper`
+- Regression ownership after screening: use `performing-regression-analysis`
 - Abnormal-record detection: use `anomaly-detector`
 
 ## Typical Outputs
@@ -36,5 +36,5 @@ Use this skill when:
 
 ## Related Skills
 
-- `regression-analysis-helper` for the next modeling step
+- `performing-regression-analysis` for the next modeling step
 - `creating-data-visualizations` for general chart production

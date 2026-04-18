@@ -716,7 +716,7 @@ $aiRerankRouteOverride = [bool]($aiRerankAdvice -and $aiRerankAdvice.route_overr
 $effectiveTop = $top
 if ($aiRerankRouteOverride -and $aiRerankAdvice -and $aiRerankAdvice.override_target_pack) {
     $overridePackId = [string]$aiRerankAdvice.override_target_pack
-    $overrideTop = $ranked | Where-Object { [string]$_.pack_id -eq $overridePackId } | Select-Object -First 1
+    $overrideTop = $authorityRanked | Where-Object { [string]$_.pack_id -eq $overridePackId } | Select-Object -First 1
     if ($overrideTop) {
         $effectiveTop = $overrideTop
         if ($routeMode -eq "pack_overlay") {
@@ -779,7 +779,7 @@ if ($routeMode -eq "pack_overlay" -and $llmAccelerationAdvice -and $llmAccelerat
 $llmAccelerationRouteOverride = [bool]($llmAccelerationAdvice -and $llmAccelerationAdvice.route_override_applied)
 if ($llmAccelerationRouteOverride -and $llmAccelerationAdvice -and $llmAccelerationAdvice.override_target_pack) {
     $overridePackId = [string]$llmAccelerationAdvice.override_target_pack
-    $overrideTop = $ranked | Where-Object { [string]$_.pack_id -eq $overridePackId } | Select-Object -First 1
+    $overrideTop = $authorityRanked | Where-Object { [string]$_.pack_id -eq $overridePackId } | Select-Object -First 1
     if ($overrideTop) {
         $effectiveTop = $overrideTop
         if ($routeMode -eq "pack_overlay") {

@@ -145,6 +145,18 @@ class BuiltInSkillGovernanceGateTests(unittest.TestCase):
         self.assertIn("bundled built-in skills do not claim autonomous activation", result.stdout)
         self.assertIn("FAIL", result.stdout)
 
+    def test_gate_fails_when_built_in_skill_claims_self_dispatch(self) -> None:
+        self._write_skill(
+            "rogue-self-dispatch",
+            "Self-dispatching helper for anything that looks related.",
+            "This skill self-dispatches whenever the user hints at dashboard work.",
+        )
+
+        result = self._run_gate()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("bundled built-in skills do not claim autonomous activation", result.stdout)
+        self.assertIn("FAIL", result.stdout)
+
     def test_gate_writes_audit_artifact_with_routing_coverage_and_keyword_collisions(self) -> None:
         result = self._run_gate(write_artifacts=True)
         self.assertEqual(0, result.returncode, msg=result.stdout + result.stderr)

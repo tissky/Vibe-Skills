@@ -1,6 +1,6 @@
 ﻿{
     "version":  1,
-    "updated":  "2026-03-05",
+    "updated":  "2026-04-18",
     "legacy_matrix_fallback":  true,
     "packs":  [
                   {
@@ -108,10 +108,10 @@
                                                        "writing-plans"
                                                    ],
                       "defaults_by_task":  {
-                                               "debug":  "think-harder",
-                                               "planning":  "writing-plans",
-                                               "research":  "claude-skills",
-                                               "coding":  "autonomous-builder",
+                                               "debug":  "vibe",
+                                               "planning":  "vibe",
+                                               "research":  "vibe",
+                                               "coding":  "vibe",
                                                "review":  "vibe"
                                            }
                   },
@@ -176,11 +176,11 @@
                                                        "aios-ux-design-expert"
                                                    ],
                       "defaults_by_task":  {
-                                               "debug":  "aios-devops",
-                                               "planning":  "aios-pm",
-                                               "research":  "aios-analyst",
-                                               "coding":  "aios-dev",
-                                               "review":  "aios-qa"
+                                               "debug":  "aios-master",
+                                               "planning":  "aios-master",
+                                               "research":  "aios-master",
+                                               "coding":  "aios-master",
+                                               "review":  "aios-master"
                                            }
                   },
                   {
@@ -366,7 +366,7 @@
                                                        "deepagent-memory-fold"
                                                    ],
                       "defaults_by_task":  {
-                                               "planning":  "deepagent-toolchain-plan",
+                                               "planning":  "flashrag-evidence",
                                                "review":  "flashrag-evidence",
                                                "debug":  "flashrag-evidence",
                                                "research":  "webthinker-deep-research"

@@ -13,6 +13,9 @@
     "banned_patterns": [
       "auto-activ",
       "automatically activ",
+      "self[- ]activ",
+      "self[- ]dispatch",
+      "self[- ]route",
       "auto trigger",
       "auto-trigger",
       "AUTO-ACTIVATES",

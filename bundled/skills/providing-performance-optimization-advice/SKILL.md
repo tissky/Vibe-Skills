@@ -17,7 +17,7 @@ Treat this skill as an explicit/manual advisor for prioritizing optimization wor
 ## When to Use
 
 Use this skill when:
-- Identify performance bottlenecks in a software application.
+- Prioritizing known or suspected performance bottlenecks from existing logs, traces, benchmarks, or user reports.
 - Get recommendations for improving website loading speed.
 - Optimize database query performance.
 - Improve API response times.

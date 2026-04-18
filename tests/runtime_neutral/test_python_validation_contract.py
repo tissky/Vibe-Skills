@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import configparser
+import json
 import unittest
 from pathlib import Path
 
@@ -9,6 +10,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PYTEST_INI = REPO_ROOT / "pytest.ini"
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "vco-gates.yml"
 TARGETS_FILE = REPO_ROOT / "config" / "python-validation-targets.txt"
+PACK_MANIFEST = REPO_ROOT / "config" / "pack-manifest.json"
+RESOLVE_PACK_ROUTE = REPO_ROOT / "scripts" / "router" / "resolve-pack-route.ps1"
 CONFTEST = REPO_ROOT / "tests" / "conftest.py"
 PYTHON_HELPERS = REPO_ROOT / "scripts" / "common" / "python_helpers.sh"
 TIMESFM_OUTPUT_ROOT = REPO_ROOT / "bundled" / "skills" / "timesfm-forecasting" / "examples"
@@ -92,6 +95,39 @@ class PythonValidationContractTests(unittest.TestCase):
         )
 
         self.assertEqual([], forbidden_paths)
+
+    def test_pack_defaults_do_not_point_to_non_authority_stage_assistants(self) -> None:
+        manifest = json.loads(PACK_MANIFEST.read_text(encoding="utf-8-sig"))
+        mismatches: dict[str, dict[str, str]] = {}
+
+        for pack in manifest["packs"]:
+            authority = {skill.casefold() for skill in pack.get("route_authority_candidates", [])}
+            if not authority:
+                continue
+
+            bad_defaults = {
+                task: skill
+                for task, skill in (pack.get("defaults_by_task") or {}).items()
+                if skill.casefold() not in authority
+            }
+            if bad_defaults:
+                mismatches[pack["id"]] = bad_defaults
+
+        self.assertEqual({}, mismatches)
+
+    def test_pack_route_overrides_stay_inside_authority_ranked_results(self) -> None:
+        text = RESOLVE_PACK_ROUTE.read_text(encoding="utf-8-sig")
+        authority_lookup = (
+            "$overrideTop = $authorityRanked | Where-Object { [string]$_.pack_id -eq $overridePackId } | "
+            "Select-Object -First 1"
+        )
+        ranked_lookup = (
+            "$overrideTop = $ranked | Where-Object { [string]$_.pack_id -eq $overridePackId } | "
+            "Select-Object -First 1"
+        )
+
+        self.assertEqual(2, text.count(authority_lookup))
+        self.assertNotIn(ranked_lookup, text)
 
 
 if __name__ == "__main__":

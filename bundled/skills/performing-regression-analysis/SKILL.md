@@ -17,15 +17,16 @@ Use this skill when regression is the task owner, not just one small step inside
 ## When to Use
 
 Use this skill when:
-- Perform regression analysis on a given dataset.
-- Predict future values based on existing data using regression models.
-- Understand the relationship between independent and dependent variables.
-- Evaluate the performance of a regression model.
+- Fitting and diagnosing a regression model on a given dataset
+- Predicting future values from existing data with regression models
+- Interpreting relationships between independent and dependent variables through model coefficients
+- Evaluating regression-model residuals, assumptions, and fit quality
 
 ## Not For / Boundaries
 
 - Causal identification or policy-effect claims: use `performing-causal-analysis`
 - Pairwise screening before modeling: use `correlation-analyzer`
+- Inline regression help inside a broader ML workflow: use `regression-analysis-helper`
 - Final deliverable writing and packaging: use `scientific-reporting`
 
 ## Typical Outputs
@@ -37,4 +38,5 @@ Use this skill when:
 ## Related Skills
 
 - `correlation-analyzer` for pre-model screening
+- `regression-analysis-helper` for lightweight inline support inside a larger ML workflow
 - `scientific-reporting` when the regression needs to become a deliverable report

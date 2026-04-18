@@ -14,6 +14,7 @@ author: Jeremy Longshore <jeremy@intentsolutions.io>
 ## Purpose
 
 Use this skill when the next question is "what does the regression say?" rather than "which broad workflow should own the whole ML task?"
+In governed routing, regression ownership normally belongs to `performing-regression-analysis`.
 
 ## When to Use
 
@@ -24,6 +25,7 @@ Use this skill when:
 
 ## Not For / Boundaries
 
+- Main routed ownership of a regression task: use `performing-regression-analysis`
 - Causal identification and counterfactual claims: use `performing-causal-analysis`
 - Unsupervised grouping: use `running-clustering-algorithms`
 - General report packaging: use `scientific-reporting`
@@ -37,4 +39,5 @@ Use this skill when:
 ## Related Skills
 
 - `correlation-analyzer` for pre-model screening
+- `performing-regression-analysis` as the routed owner when regression is the main task
 - `scientific-reporting` when the regression needs to become a deliverable report

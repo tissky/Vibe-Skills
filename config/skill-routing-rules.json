@@ -1,6 +1,6 @@
 ﻿{
     "version":  1,
-    "updated":  "2026-03-05",
+    "updated":  "2026-04-18",
     "skills":  {
                    "vibe":  {
                                 "task_allow":  [
@@ -550,7 +550,9 @@
                                                               ],
                                         "negative_keywords":  [
                                                                   "unit test",
-                                                                  "ci"
+                                                                  "ci pipeline",
+                                                                  "github actions",
+                                                                  "continuous integration"
                                                               ],
                                         "equivalent_group":  null,
                                         "canonical_for_task":  [
@@ -1243,7 +1245,7 @@
                                                                            "render screenshot",
                                                                            "批判式讨论",
                                                                            "challenge my assumptions",
-                                                                           "baseline",
+                                                                           "baseline-only comparison",
                                                                            "消融实验"
                                                                        ],
                                                  "equivalent_group":  "ml-validation",
@@ -2257,7 +2259,9 @@
                                                                  ],
                                            "negative_keywords":  [
                                                                      "build script",
-                                                                     "ci",
+                                                                     "ci pipeline",
+                                                                     "github actions",
+                                                                     "continuous integration",
                                                                      "full-text",
                                                                      "structured data",
                                                                      "effect size",
@@ -2898,7 +2902,7 @@
                                                          "negative_keywords":  [
                                                                                    "deploy website"
                                                                                ],
-                                                         "equivalent_group":  null,
+                                                         "equivalent_group":  "ml-preprocessing",
                                                          "canonical_for_task":  [
 
                                                                                 ]
@@ -3150,7 +3154,6 @@
                                                                        "literature review",
                                                                        "systematic review",
                                                                        "meta-analysis",
-                                                                       "evidence table",
                                                                        "文献综述",
                                                                        "系统综述",
                                                                        "荟萃分析"
@@ -3162,6 +3165,7 @@
                                                                        "structured data",
                                                                        "effect size",
                                                                        "sample size",
+                                                                       "evidence table",
                                                                        "方法学",
                                                                        "证据表"
                                                                    ],

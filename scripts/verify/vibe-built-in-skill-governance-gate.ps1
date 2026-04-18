@@ -176,10 +176,10 @@ if (-not (Test-Path -LiteralPath $policyPath)) {
 }
 
 $policy = Get-JsonDocument -Path $policyPath
-$skillsRoot = Join-Path $repoRoot ($policy.scope.skills_root -replace '/', '\')
-$packManifestPath = Join-Path $repoRoot ($policy.scope.pack_manifest -replace '/', '\')
-$keywordIndexPath = Join-Path $repoRoot ($policy.scope.skill_keyword_index -replace '/', '\')
-$routingRulesPath = Join-Path $repoRoot ($policy.scope.skill_routing_rules -replace '/', '\')
+$skillsRoot = Join-Path $repoRoot $policy.scope.skills_root
+$packManifestPath = Join-Path $repoRoot $policy.scope.pack_manifest
+$keywordIndexPath = Join-Path $repoRoot $policy.scope.skill_keyword_index
+$routingRulesPath = Join-Path $repoRoot $policy.scope.skill_routing_rules
 
 Add-Assertion -Assertions $assertions -Pass (Test-Path -LiteralPath $skillsRoot) -Message 'bundled skills root exists' -Details $skillsRoot
 Add-Assertion -Assertions $assertions -Pass (Test-Path -LiteralPath $packManifestPath) -Message 'pack manifest exists' -Details $packManifestPath
