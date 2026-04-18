@@ -24,6 +24,35 @@ def resolve_upgrade_repo_root(repo_root: Path) -> Path | None:
     return resolve_canonical_repo_root(repo_root)
 
 
+def load_recorded_install_status(repo_root: Path, target_root: Path, host_id: str) -> dict[str, object]:
+    existing = load_upgrade_status(target_root)
+    repo_remote = str(existing.get('repo_remote') or '').strip()
+    repo_default_branch = str(existing.get('repo_default_branch') or '').strip()
+    if not repo_remote or not repo_default_branch:
+        official_repo = get_official_self_repo_metadata(repo_root)
+        repo_remote = repo_remote or str(official_repo.get('repo_url') or '').strip()
+        repo_default_branch = repo_default_branch or str(official_repo.get('default_branch') or '').strip()
+    return merge_upgrade_status(
+        existing,
+        installed={
+            'host_id': host_id,
+            'target_root': target_root,
+            'repo_remote': repo_remote,
+            'repo_default_branch': repo_default_branch,
+            'installed_version': existing.get('installed_version'),
+            'installed_commit': existing.get('installed_commit'),
+            'installed_recorded_at': existing.get('installed_recorded_at'),
+        },
+    )
+
+
+def has_recorded_install_truth(status: dict[str, object] | None) -> bool:
+    return bool(
+        str((status or {}).get('installed_version') or '').strip()
+        and str((status or {}).get('installed_commit') or '').strip()
+    )
+
+
 def refresh_installed_status(
     repo_root: Path,
     target_root: Path,
@@ -208,9 +237,10 @@ def upgrade_runtime(
             'Pass --repo-root pointing at a Vibe-Skills git checkout before invoking the upgrade runtime.'
         )
 
-    before = refresh_installed_status(resolved_repo_root, target_root, host_id, persist=False)
+    before = load_recorded_install_status(resolved_repo_root, target_root, host_id)
+    install_truth_present = has_recorded_install_truth(before)
     status = refresh_upstream_status(resolved_repo_root, target_root, before, force_refresh=True)
-    if not bool(status.get('update_available')):
+    if install_truth_present and not bool(status.get('update_available')):
         print(
             'Vibe-Skills already current: '
             f"local={status.get('installed_version') or 'unknown'}@{status.get('installed_commit') or 'unknown'}"

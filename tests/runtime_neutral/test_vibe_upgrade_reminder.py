@@ -20,13 +20,14 @@ def test_build_update_reminder_refreshes_stale_cache_and_emits_advisory(monkeypa
     calls: list[str] = []
 
     monkeypatch.setattr(
-        'vgo_cli.version_reminder.refresh_installed_status',
+        'vgo_cli.version_reminder.load_recorded_install_status',
         lambda repo_root, target_root, host_id: {
             'installed_version': '3.0.0',
             'installed_commit': 'old',
             'repo_default_branch': 'main',
         },
     )
+    monkeypatch.setattr('vgo_cli.version_reminder.has_recorded_install_truth', lambda status: True)
     monkeypatch.setattr('vgo_cli.version_reminder.is_upstream_cache_stale', lambda status: True)
 
     def fake_refresh(repo_root, target_root, current_status):
@@ -50,7 +51,7 @@ def test_build_update_reminder_refreshes_stale_cache_and_emits_advisory(monkeypa
 
 def test_build_update_reminder_uses_fresh_cache_without_refresh(monkeypatch) -> None:
     monkeypatch.setattr(
-        'vgo_cli.version_reminder.refresh_installed_status',
+        'vgo_cli.version_reminder.load_recorded_install_status',
         lambda repo_root, target_root, host_id: {
             'installed_version': '3.0.0',
             'installed_commit': 'old',
@@ -60,6 +61,7 @@ def test_build_update_reminder_uses_fresh_cache_without_refresh(monkeypatch) -> 
             'update_available': True,
         },
     )
+    monkeypatch.setattr('vgo_cli.version_reminder.has_recorded_install_truth', lambda status: True)
     monkeypatch.setattr('vgo_cli.version_reminder.is_upstream_cache_stale', lambda status: False)
     monkeypatch.setattr(
         'vgo_cli.version_reminder.refresh_upstream_status',
@@ -73,7 +75,7 @@ def test_build_update_reminder_uses_fresh_cache_without_refresh(monkeypatch) -> 
 
 def test_build_update_reminder_returns_none_when_no_update_is_available(monkeypatch) -> None:
     monkeypatch.setattr(
-        'vgo_cli.version_reminder.refresh_installed_status',
+        'vgo_cli.version_reminder.load_recorded_install_status',
         lambda repo_root, target_root, host_id: {
             'installed_version': '3.0.1',
             'installed_commit': 'same',
@@ -82,6 +84,7 @@ def test_build_update_reminder_returns_none_when_no_update_is_available(monkeypa
             'update_available': False,
         },
     )
+    monkeypatch.setattr('vgo_cli.version_reminder.has_recorded_install_truth', lambda status: True)
     monkeypatch.setattr('vgo_cli.version_reminder.is_upstream_cache_stale', lambda status: False)
 
     assert build_update_reminder(REPO_ROOT, REPO_ROOT / '.tmp-target', 'codex') is None
@@ -89,17 +92,39 @@ def test_build_update_reminder_returns_none_when_no_update_is_available(monkeypa
 
 def test_build_update_reminder_swallows_refresh_failures(monkeypatch) -> None:
     monkeypatch.setattr(
-        'vgo_cli.version_reminder.refresh_installed_status',
+        'vgo_cli.version_reminder.load_recorded_install_status',
         lambda repo_root, target_root, host_id: {
             'installed_version': '3.0.0',
             'installed_commit': 'old',
             'repo_default_branch': 'main',
         },
     )
+    monkeypatch.setattr('vgo_cli.version_reminder.has_recorded_install_truth', lambda status: True)
     monkeypatch.setattr('vgo_cli.version_reminder.is_upstream_cache_stale', lambda status: True)
     monkeypatch.setattr(
         'vgo_cli.version_reminder.refresh_upstream_status',
         lambda repo_root, target_root, current_status: (_ for _ in ()).throw(RuntimeError('network down')),
+    )
+
+    assert build_update_reminder(REPO_ROOT, REPO_ROOT / '.tmp-target', 'codex') is None
+
+
+def test_build_update_reminder_returns_none_when_target_install_truth_is_missing(monkeypatch) -> None:
+    monkeypatch.setattr(
+        'vgo_cli.version_reminder.load_recorded_install_status',
+        lambda repo_root, target_root, host_id: {
+            'installed_version': '',
+            'installed_commit': '',
+            'remote_latest_version': '3.0.3',
+            'remote_latest_commit': 'new',
+            'update_available': True,
+        },
+    )
+    monkeypatch.setattr('vgo_cli.version_reminder.has_recorded_install_truth', lambda status: False)
+    monkeypatch.setattr('vgo_cli.version_reminder.is_upstream_cache_stale', lambda status: True)
+    monkeypatch.setattr(
+        'vgo_cli.version_reminder.refresh_upstream_status',
+        lambda repo_root, target_root, current_status: (_ for _ in ()).throw(AssertionError('should not refresh')),
     )
 
     assert build_update_reminder(REPO_ROOT, REPO_ROOT / '.tmp-target', 'codex') is None
