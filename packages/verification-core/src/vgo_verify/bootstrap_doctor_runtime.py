@@ -360,19 +360,25 @@ def build_summary(
         warnings.append(f"Install state is '{install_state}'; verify the local install receipt.")
     if isinstance(host_runtime, dict) and not bool(host_runtime.get("vibe_host_ready")):
         readiness_driver = str(host_runtime.get("readiness_driver") or "")
+        effective_runtime_ready = bool(host_runtime.get("effective_runtime_ready"))
         if readiness_driver == "direct_runtime":
-            direct_runtime = host_runtime.get("direct_runtime")
-            if isinstance(direct_runtime, dict):
-                env_name = str(direct_runtime.get("executable_env") or "").strip()
-                command = str(direct_runtime.get("command") or "codex").strip()
-                if env_name:
-                    manual_actions.append(
-                        f"Direct runtime executable is not ready. Resolve '{command}' on PATH or via {env_name}."
-                    )
-                else:
-                    manual_actions.append(
-                        f"Direct runtime executable is not ready. Resolve '{command}' on PATH and re-run check."
-                    )
+            if not effective_runtime_ready:
+                direct_runtime = host_runtime.get("direct_runtime")
+                if isinstance(direct_runtime, dict):
+                    env_name = str(direct_runtime.get("executable_env") or "").strip()
+                    command = str(direct_runtime.get("command") or "codex").strip()
+                    if env_name:
+                        manual_actions.append(
+                            f"Direct runtime executable is not ready. Resolve '{command}' on PATH or via {env_name}."
+                        )
+                    else:
+                        manual_actions.append(
+                            f"Direct runtime executable is not ready. Resolve '{command}' on PATH and re-run check."
+                        )
+            else:
+                manual_actions.append(
+                    "Direct runtime is available, but the local install surfaces are incomplete. Re-run installation to refresh host closure, commands, and managed settings."
+                )
         else:
             manual_actions.append("Host runtime is not fully ready; complete the specialist bridge setup and re-run check.")
     intent_advice_api_key_state, intent_advice_api_key_source = resolved_setting_state(settings, "VCO_INTENT_ADVICE_API_KEY")

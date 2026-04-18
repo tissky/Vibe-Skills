@@ -561,6 +561,9 @@ function Resolve-VgoDirectRuntimeExecutable {
         if ($candidate) {
             $resolvedPath = [string]$candidate.Source
             $source = "path:$configuredCommand"
+        } elseif (Test-Path -LiteralPath $configuredCommand -PathType Leaf) {
+            $resolvedPath = [System.IO.Path]::GetFullPath($configuredCommand)
+            $source = "path:$configuredCommand"
         }
     }
 
