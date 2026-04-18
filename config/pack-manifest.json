@@ -1961,6 +1961,11 @@
                                                        "scientific-visualization",
                                                        "scientific-schematics"
                                                    ],
+                      "stage_assistant_candidates":  [
+                                                       "matplotlib",
+                                                       "seaborn",
+                                                       "plotly"
+                                                   ],
                       "defaults_by_task":  {
                                                "planning":  "scientific-visualization",
                                                "coding":  "scientific-visualization",

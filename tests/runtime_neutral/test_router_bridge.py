@@ -129,6 +129,11 @@ class RouterBridgeTests(unittest.TestCase):
             ["scientific-visualization", "scientific-schematics"],
             [row["skill"] for row in figure_row["candidate_ranking"]],
         )
+        self.assertTrue(
+            {"matplotlib", "seaborn", "plotly"}.issubset(
+                {row["skill"] for row in figure_row["stage_assistant_candidates"]}
+            )
+        )
 
     def test_full_text_evidence_table_prefers_bgpt_structured_paper_search(self) -> None:
         result = run_bridge(
@@ -162,6 +167,17 @@ class RouterBridgeTests(unittest.TestCase):
             "请检查这个特征工程流程有没有数据泄漏，尤其是 fit before split 和 prediction time 问题",
             "L",
             "review",
+        )
+
+        self.assertIn(result["route_mode"], {"pack_overlay", "confirm_required"})
+        self.assertEqual("data-ml", result["selected"]["pack_id"])
+        self.assertEqual("ml-data-leakage-guard", result["selected"]["skill"])
+
+    def test_baseline_leakage_research_stays_with_dedicated_guard(self) -> None:
+        result = run_bridge(
+            "请检查我的 baseline model 有没有 data leakage，尤其是 fit before split、train test split 和 prediction time 问题",
+            "L",
+            "research",
         )
 
         self.assertIn(result["route_mode"], {"pack_overlay", "confirm_required"})

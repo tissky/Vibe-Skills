@@ -201,7 +201,7 @@ function Select-PackCandidate {
     )
     $overallTop = $ranked | Select-Object -First 1
     $authorityRanked = @($ranked | Where-Object { $_.route_authority_eligible })
-    $stageAssistantRanked = @($ranked | Where-Object { $_.stage_assistant_eligible -and -not $_.route_authority_eligible -and ([double]$_.score -gt 0.0) })
+    $stageAssistantRanked = @($ranked | Where-Object { $_.stage_assistant_eligible -and -not $_.route_authority_eligible })
 
     if ($requestedCandidate) {
         return [pscustomobject]@{

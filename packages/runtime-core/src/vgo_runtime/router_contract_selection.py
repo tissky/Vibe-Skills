@@ -188,7 +188,7 @@ def select_pack_candidate(
     stage_assistant_ranked = [
         row
         for row in ranked_all
-        if bool(row["stage_assistant_eligible"]) and not bool(row["route_authority_eligible"]) and float(row["score"]) > 0.0
+        if bool(row["stage_assistant_eligible"]) and not bool(row["route_authority_eligible"])
     ]
 
     overall_top = ranked_all[0]

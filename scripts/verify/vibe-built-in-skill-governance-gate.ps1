@@ -101,7 +101,7 @@ function Write-Artifacts {
     )
 
     $dir = if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
-        Join-Path $RepoRoot 'outputs\verify'
+        Join-Path $RepoRoot 'outputs/verify'
     } else {
         $OutputDirectory
     }
@@ -166,8 +166,8 @@ function Write-Artifacts {
     $lines -join "`n" | Set-Content -LiteralPath $mdPath -Encoding UTF8
 }
 
-$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$policyPath = Join-Path $repoRoot 'config\bundled-skill-governance-policy.json'
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "../..")
+$policyPath = Join-Path $repoRoot 'config/bundled-skill-governance-policy.json'
 
 $assertions = [System.Collections.Generic.List[object]]::new()
 Add-Assertion -Assertions $assertions -Pass (Test-Path -LiteralPath $policyPath) -Message 'bundled skill governance policy exists' -Details $policyPath

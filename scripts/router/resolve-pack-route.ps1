@@ -712,22 +712,32 @@ $aiRerankAdvice = Get-AiRerankAdvice `
     -Confidence $confidence `
     -AiRerankPolicy $aiRerankPolicy
 
-$aiRerankRouteOverride = [bool]($aiRerankAdvice -and $aiRerankAdvice.route_override_applied)
+$aiRerankRouteOverrideRequested = [bool]($aiRerankAdvice -and $aiRerankAdvice.route_override_applied)
+$aiRerankRouteOverride = $false
+$aiRerankOverrideBlockReason = $null
 $effectiveTop = $top
-if ($aiRerankRouteOverride -and $aiRerankAdvice -and $aiRerankAdvice.override_target_pack) {
+if ($aiRerankRouteOverrideRequested -and $aiRerankAdvice -and $aiRerankAdvice.override_target_pack) {
     $overridePackId = [string]$aiRerankAdvice.override_target_pack
     $overrideTop = $authorityRanked | Where-Object { [string]$_.pack_id -eq $overridePackId } | Select-Object -First 1
     if ($overrideTop) {
+        $aiRerankRouteOverride = $true
         $effectiveTop = $overrideTop
         if ($routeMode -eq "pack_overlay") {
             $routeReason = "ai_rerank_override"
         }
+    } else {
+        $aiRerankOverrideBlockReason = "override_target_not_authority_eligible"
     }
+} elseif ($aiRerankRouteOverrideRequested) {
+    $aiRerankOverrideBlockReason = "missing_override_target_pack"
 }
 
 Add-RouteProbeEvent -Context $probeContext -Stage "overlay.ai_rerank" -Note "ai rerank overlay evaluated" -Data @{
     advice = Get-RouteProbeAdviceSummary -Advice $aiRerankAdvice
+    route_override_requested = [bool]$aiRerankRouteOverrideRequested
     route_override_applied = [bool]$aiRerankRouteOverride
+    route_override_block_reason = $aiRerankOverrideBlockReason
+    override_target_pack = if ($aiRerankAdvice) { [string]$aiRerankAdvice.override_target_pack } else { $null }
     top_pack_before = if ($top) { [string]$top.pack_id } else { $null }
     top_pack_after = if ($effectiveTop) { [string]$effectiveTop.pack_id } else { $null }
     route_mode_after = $routeMode
@@ -735,6 +745,7 @@ Add-RouteProbeEvent -Context $probeContext -Stage "overlay.ai_rerank" -Note "ai 
 }
 $null = Add-HeartbeatPulse -Context $heartbeatContext -Stage "overlay.ai_rerank" -Phase "overlay" -Note "ai rerank overlay evaluated" -Data @{
     route_override_applied = [bool]$aiRerankRouteOverride
+    route_override_block_reason = $aiRerankOverrideBlockReason
 }
 
 $promptOverlayRouteOverride = $false
@@ -776,28 +787,39 @@ if ($routeMode -eq "pack_overlay" -and $llmAccelerationAdvice -and $llmAccelerat
     $llmAccelerationConfirmOverride = $true
 }
 
-$llmAccelerationRouteOverride = [bool]($llmAccelerationAdvice -and $llmAccelerationAdvice.route_override_applied)
-if ($llmAccelerationRouteOverride -and $llmAccelerationAdvice -and $llmAccelerationAdvice.override_target_pack) {
+$llmAccelerationRouteOverrideRequested = [bool]($llmAccelerationAdvice -and $llmAccelerationAdvice.route_override_applied)
+$llmAccelerationRouteOverride = $false
+$llmAccelerationOverrideBlockReason = $null
+if ($llmAccelerationRouteOverrideRequested -and $llmAccelerationAdvice -and $llmAccelerationAdvice.override_target_pack) {
     $overridePackId = [string]$llmAccelerationAdvice.override_target_pack
     $overrideTop = $authorityRanked | Where-Object { [string]$_.pack_id -eq $overridePackId } | Select-Object -First 1
     if ($overrideTop) {
+        $llmAccelerationRouteOverride = $true
         $effectiveTop = $overrideTop
         if ($routeMode -eq "pack_overlay") {
             $routeReason = "llm_acceleration_override"
         }
+    } else {
+        $llmAccelerationOverrideBlockReason = "override_target_not_authority_eligible"
     }
+} elseif ($llmAccelerationRouteOverrideRequested) {
+    $llmAccelerationOverrideBlockReason = "missing_override_target_pack"
 }
 
 Add-RouteProbeEvent -Context $probeContext -Stage "overlay.llm_acceleration" -Note "llm acceleration overlay evaluated" -Data @{
     advice = Get-RouteProbeAdviceSummary -Advice $llmAccelerationAdvice
+    route_override_requested = [bool]$llmAccelerationRouteOverrideRequested
     route_override_applied = [bool]$llmAccelerationRouteOverride
     confirm_override_applied = [bool]$llmAccelerationConfirmOverride
+    route_override_block_reason = $llmAccelerationOverrideBlockReason
+    override_target_pack = if ($llmAccelerationAdvice) { [string]$llmAccelerationAdvice.override_target_pack } else { $null }
     top_pack_after = if ($effectiveTop) { [string]$effectiveTop.pack_id } else { $null }
     route_mode_after = $routeMode
     route_reason_after = $routeReason
 }
 $null = Add-HeartbeatPulse -Context $heartbeatContext -Stage "overlay.llm_acceleration" -Phase "overlay" -Note "llm acceleration overlay evaluated" -Data @{
     route_override_applied = [bool]$llmAccelerationRouteOverride
+    route_override_block_reason = $llmAccelerationOverrideBlockReason
 }
 
 $dataScaleAdvice = Get-DataScaleOverlayAdvice `
@@ -1281,7 +1303,9 @@ $result = [pscustomobject]@{
     deep_discovery_route_mode_override = [bool]$deepDiscoveryRouteModeOverride
     prompt_overlay_route_override = $promptOverlayRouteOverride
     ai_rerank_advice = $aiRerankAdvice
+    ai_rerank_route_override_requested = $aiRerankRouteOverrideRequested
     ai_rerank_route_override = $aiRerankRouteOverride
+    ai_rerank_override_block_reason = $aiRerankOverrideBlockReason
     data_scale_advice = $dataScaleAdvice
     data_scale_route_override = $dataScaleRouteOverride
     quality_debt_advice = $qualityDebtAdvice
@@ -1297,7 +1321,9 @@ $result = [pscustomobject]@{
     dialectic_team_route_override = $dialecticTeamRouteOverride
     daily_dialectic_advice = $dailyDialecticAdvice
     llm_acceleration_advice = $llmAccelerationAdvice
+    llm_acceleration_route_override_requested = $llmAccelerationRouteOverrideRequested
     llm_acceleration_route_override = $llmAccelerationRouteOverride
+    llm_acceleration_override_block_reason = $llmAccelerationOverrideBlockReason
     heartbeat_advice = $heartbeatAdvice
     heartbeat_status = $heartbeatStatus
     heartbeat_runtime_digest = $heartbeatRuntimeDigest

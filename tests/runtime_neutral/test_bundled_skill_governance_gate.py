@@ -29,6 +29,14 @@ def resolve_powershell() -> str | None:
 
 
 class BuiltInSkillGovernanceGateTests(unittest.TestCase):
+    def test_gate_script_uses_cross_platform_forward_slash_join_path_literals(self) -> None:
+        text = GATE.read_text(encoding="utf-8-sig")
+        self.assertIn("outputs/verify", text)
+        self.assertIn("../..", text)
+        self.assertIn("config/bundled-skill-governance-policy.json", text)
+        self.assertNotIn(r"outputs\\verify", text)
+        self.assertNotIn(r"config\\bundled-skill-governance-policy.json", text)
+
     def setUp(self) -> None:
         self.powershell = resolve_powershell()
         if self.powershell is None:

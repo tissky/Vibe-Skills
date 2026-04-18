@@ -1071,8 +1071,6 @@
                                                                                          "挑战我的假设",
                                                                                          "baseline",
                                                                                          "基线",
-                                                                                         "data leakage",
-                                                                                         "数据泄漏",
                                                                                          "simple model",
                                                                                          "先别写代码"
                                                                                      ],
@@ -1081,6 +1079,11 @@
                                                                                          "deploy infra",
                                                                                          "matplotlib",
                                                                                          "科研绘图",
+                                                                                         "data leakage",
+                                                                                         "data leakage check",
+                                                                                         "check data leakage",
+                                                                                         "leakage audit",
+                                                                                         "数据泄漏",
                                                                                          "fit before split",
                                                                                          "train test split",
                                                                                          "cross-validation setup",
@@ -1251,7 +1254,8 @@
                                                  "equivalent_group":  "ml-validation",
                                                  "canonical_for_task":  [
                                                                            "coding",
-                                                                           "review"
+                                                                           "review",
+                                                                           "research"
                                                                         ]
                                              },
                    "creating-data-visualizations":  {

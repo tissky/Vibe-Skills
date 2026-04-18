@@ -128,6 +128,9 @@ class PythonValidationContractTests(unittest.TestCase):
 
         self.assertEqual(2, text.count(authority_lookup))
         self.assertNotIn(ranked_lookup, text)
+        self.assertIn("ai_rerank_override_block_reason", text)
+        self.assertIn("llm_acceleration_override_block_reason", text)
+        self.assertIn("route_override_requested", text)
 
 
 if __name__ == "__main__":
