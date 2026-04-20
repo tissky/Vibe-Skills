@@ -6,9 +6,9 @@ from .router_contract_support import RepoContext, read_skill_descriptor
 
 
 # UI string constants for confirm UI rendering
-CONFIRM_UI_BATCH_PROMPT = "请尽量一次性回答下面问题；能合并回答的内容可以放在同一条消息里："
-CONFIRM_UI_ROUTE_PREFIX = "路由需要确认：当前命中候选包"
-CONFIRM_UI_COMBINED_INSTRUCTION = "你可以在同一条回复里同时回答上面的问题，并输入序号或 `$<skill>` 来指定技能。"
+CONFIRM_UI_BATCH_PROMPT = "请尽量一次性回答下面问题；能合并回答的内容可以放在同一条消息里："  # noqa: RUF001
+CONFIRM_UI_ROUTE_PREFIX = "路由需要确认：当前命中候选包"  # noqa: RUF001
+CONFIRM_UI_COMBINED_INSTRUCTION = "你可以在同一条回复里同时回答上面的问题，并输入序号或 `$<skill>` 来指定技能。"  # noqa: RUF001
 CONFIRM_UI_SIMPLE_INSTRUCTION = "回复序号或 `$<skill>` 来明确选择。"
 
 # Deep discovery first question template (from deep-discovery-policy.json)
@@ -70,7 +70,7 @@ def build_confirm_ui(repo: RepoContext, route_result: dict[str, Any], target_roo
         rendered.append(str(hazard.get("title") or "FALLBACK HAZARD ALERT"))
         rendered.append(str(hazard.get("message") or "This result came from a fallback or degraded path and is not equivalent to standard success."))
         if hazard.get("reason"):
-            rendered.append(f"触发原因：`{hazard['reason']}`。")
+            rendered.append(f"触发原因：`{hazard['reason']}`。")  # noqa: RUF001
         if hazard.get("recovery_action"):
             rendered.append(str(hazard["recovery_action"]))
         rendered.append("")
