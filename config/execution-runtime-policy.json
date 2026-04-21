@@ -49,7 +49,7 @@
               "expected_artifacts": []
             },
             {
-              "unit_id": "version-consistency-gate",
+              "unit_id": "release-install-runtime-coherence-gate",
               "kind": "powershell_file",
               "parallelizable": true,
               "write_scope": "scripts/verify",

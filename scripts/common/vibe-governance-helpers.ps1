@@ -700,7 +700,7 @@ function Get-VgoPowerShellHostPolicy {
 
 function Resolve-VgoPowerShellHost {
     $policy = Get-VgoPowerShellHostPolicy
-    $isWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
+    $runningOnWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
     $currentProcessPath = $null
     try {
         $currentProcessPath = (Get-Process -Id $PID -ErrorAction Stop).Path
@@ -710,24 +710,28 @@ function Resolve-VgoPowerShellHost {
 
     $currentLeaf = if ([string]::IsNullOrWhiteSpace($currentProcessPath)) { '' } else { [System.IO.Path]::GetFileName($currentProcessPath).ToLowerInvariant() }
     $preferPwsh = ([string]$policy.preferred_powershell_host).Trim().ToLowerInvariant() -eq 'pwsh'
+    $pwshCandidates = @(
+        @{ name = 'current-process'; path = if ($currentLeaf -like 'pwsh*') { $currentProcessPath } else { $null }; kind = 'pwsh' },
+        @{ name = 'pshome-pwsh-exe'; path = (Join-Path $PSHOME 'pwsh.exe'); kind = 'pwsh' },
+        @{ name = 'pshome-pwsh'; path = (Join-Path $PSHOME 'pwsh'); kind = 'pwsh' },
+        @{ name = 'command-pwsh'; path = (Get-Command pwsh -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1); kind = 'pwsh' },
+        @{ name = 'command-pwsh-exe'; path = (Get-Command pwsh.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1); kind = 'pwsh' }
+    )
+    $windowsPowerShellCandidates = @(
+        @{ name = 'current-process'; path = if ($currentLeaf -like 'powershell*') { $currentProcessPath } else { $null }; kind = 'windows-powershell' },
+        @{ name = 'pshome-powershell-exe'; path = (Join-Path $PSHOME 'powershell.exe'); kind = 'windows-powershell' },
+        @{ name = 'pshome-powershell'; path = (Join-Path $PSHOME 'powershell'); kind = 'windows-powershell' },
+        @{ name = 'command-powershell'; path = (Get-Command powershell -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1); kind = 'windows-powershell' },
+        @{ name = 'command-powershell-exe'; path = (Get-Command powershell.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1); kind = 'windows-powershell' }
+    )
     $orderedCandidates = @()
     if ($preferPwsh) {
-        $orderedCandidates += @(
-            @{ name = 'current-process'; path = if ($currentLeaf -like 'pwsh*') { $currentProcessPath } else { $null }; kind = 'pwsh' },
-            @{ name = 'pshome-pwsh-exe'; path = (Join-Path $PSHOME 'pwsh.exe'); kind = 'pwsh' },
-            @{ name = 'pshome-pwsh'; path = (Join-Path $PSHOME 'pwsh'); kind = 'pwsh' },
-            @{ name = 'command-pwsh'; path = (Get-Command pwsh -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1); kind = 'pwsh' },
-            @{ name = 'command-pwsh-exe'; path = (Get-Command pwsh.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1); kind = 'pwsh' }
-        )
-        if ($isWindows -and [bool]$policy.allow_windows_powershell_fallback) {
-            $orderedCandidates += @(
-                @{ name = 'current-process'; path = if ($currentLeaf -like 'powershell*') { $currentProcessPath } else { $null }; kind = 'windows-powershell' },
-                @{ name = 'pshome-powershell-exe'; path = (Join-Path $PSHOME 'powershell.exe'); kind = 'windows-powershell' },
-                @{ name = 'pshome-powershell'; path = (Join-Path $PSHOME 'powershell'); kind = 'windows-powershell' },
-                @{ name = 'command-powershell'; path = (Get-Command powershell -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1); kind = 'windows-powershell' },
-                @{ name = 'command-powershell-exe'; path = (Get-Command powershell.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1); kind = 'windows-powershell' }
-            )
+        $orderedCandidates += @($pwshCandidates)
+        if ($runningOnWindows -and [bool]$policy.allow_windows_powershell_fallback) {
+            $orderedCandidates += @($windowsPowerShellCandidates)
         }
+    } elseif ($runningOnWindows) {
+        $orderedCandidates += @($windowsPowerShellCandidates)
     }
 
     $checked = @()
@@ -776,7 +780,7 @@ function Resolve-VgoPowerShellHost {
             '{0}=<unresolved>' -f [string]$_.candidate_name
         }
     })
-    if (-not $isWindows -and [bool]$policy.require_pwsh_on_non_windows) {
+    if (-not $runningOnWindows -and [bool]$policy.require_pwsh_on_non_windows) {
         throw ("Unable to resolve a PowerShell host for governed sub-process execution. pwsh is required on non-Windows hosts. Candidates checked: {0}" -f ([string]::Join(', ', @($checkedNames))))
     }
 
@@ -813,8 +817,8 @@ function Test-VgoWindowsRunnableCommandPath {
         [AllowEmptyString()] [string]$CommandName = ''
     )
 
-    $isWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
-    if (-not $isWindows) {
+    $runningOnWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
+    if (-not $runningOnWindows) {
         return $true
     }
     if ([string]::IsNullOrWhiteSpace($Path)) {

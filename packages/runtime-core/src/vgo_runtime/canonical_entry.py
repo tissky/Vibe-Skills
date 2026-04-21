@@ -74,9 +74,14 @@ def _resolve_powershell_host(*, return_diagnostics: bool = False) -> str | dict[
     candidates: list[tuple[str, str | None, str]] = [
         ("path-pwsh", shutil.which("pwsh"), "pwsh"),
         ("path-pwsh-exe", shutil.which("pwsh.exe"), "pwsh"),
-        ("default-pwsh", r"C:\Program Files\PowerShell\7\pwsh.exe", "pwsh"),
-        ("preview-pwsh", r"C:\Program Files\PowerShell\7-preview\pwsh.exe", "pwsh"),
     ]
+    if is_windows:
+        candidates.extend(
+            [
+                ("default-pwsh", r"C:\Program Files\PowerShell\7\pwsh.exe", "pwsh"),
+                ("preview-pwsh", r"C:\Program Files\PowerShell\7-preview\pwsh.exe", "pwsh"),
+            ]
+        )
     if is_windows and policy["allow_windows_powershell_fallback"]:
         candidates.extend(
             [

@@ -21,55 +21,75 @@ if str(RUNTIME_CORE_SRC) not in sys.path:
 from vgo_runtime.powershell_bridge import run_powershell_json_command
 
 
-def _load_canonical_entry_module() -> types.ModuleType:
-    package = types.ModuleType("vgo_runtime")
-    package.__path__ = [str(RUNTIME_CORE_SRC / "vgo_runtime")]
-    sys.modules.setdefault("vgo_runtime", package)
-
-    contracts_package = types.ModuleType("vgo_contracts")
-    contracts_package.__path__ = []
-    sys.modules.setdefault("vgo_contracts", contracts_package)
-
-    canonical_contract_module = types.ModuleType("vgo_contracts.canonical_vibe_contract")
-    canonical_contract_module.resolve_canonical_vibe_contract = lambda repo_root, host_id: {
-        "fallback_policy": "blocked",
-        "allow_skill_doc_fallback": False,
-    }
-    sys.modules[canonical_contract_module.__name__] = canonical_contract_module
-
-    host_receipt_module = types.ModuleType("vgo_contracts.host_launch_receipt")
-
-    class HostLaunchReceipt:
-        def __init__(self, **kwargs):
-            self.__dict__.update(kwargs)
-
-        def model_dump(self):
-            return dict(self.__dict__)
-
-    def write_host_launch_receipt(path_or_session_root, receipt):
-        base = Path(path_or_session_root)
-        if base.suffix:
-            path = base
+def _restore_modules(originals: dict[str, types.ModuleType | None]) -> None:
+    for name, original in originals.items():
+        if original is None:
+            sys.modules.pop(name, None)
         else:
-            path = base / "host-launch-receipt.json"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(receipt.model_dump()), encoding="utf-8")
-        return path
+            sys.modules[name] = original
 
-    host_receipt_module.HostLaunchReceipt = HostLaunchReceipt
-    host_receipt_module.write_host_launch_receipt = write_host_launch_receipt
-    sys.modules[host_receipt_module.__name__] = host_receipt_module
 
-    router_module = types.ModuleType("vgo_runtime.router")
-    router_module.load_allowed_vibe_entry_ids = lambda: {"vibe", "vibe-upgrade"}
-    sys.modules[router_module.__name__] = router_module
+def _load_canonical_entry_module() -> types.ModuleType:
+    touched = {
+        "vgo_runtime",
+        "vgo_contracts",
+        "vgo_contracts.canonical_vibe_contract",
+        "vgo_contracts.host_launch_receipt",
+        "vgo_runtime.router",
+        "vgo_runtime.canonical_entry",
+    }
+    originals = {name: sys.modules.get(name) for name in touched}
+    try:
+        package = types.ModuleType("vgo_runtime")
+        package.__path__ = [str(RUNTIME_CORE_SRC / "vgo_runtime")]
+        sys.modules["vgo_runtime"] = package
 
-    spec = importlib.util.spec_from_file_location("vgo_runtime.canonical_entry", RUNTIME_CORE_SRC / "vgo_runtime" / "canonical_entry.py")
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+        contracts_package = types.ModuleType("vgo_contracts")
+        contracts_package.__path__ = []
+        sys.modules["vgo_contracts"] = contracts_package
+
+        canonical_contract_module = types.ModuleType("vgo_contracts.canonical_vibe_contract")
+        canonical_contract_module.resolve_canonical_vibe_contract = lambda repo_root, host_id: {
+            "fallback_policy": "blocked",
+            "allow_skill_doc_fallback": False,
+        }
+        sys.modules[canonical_contract_module.__name__] = canonical_contract_module
+
+        host_receipt_module = types.ModuleType("vgo_contracts.host_launch_receipt")
+
+        class HostLaunchReceipt:
+            def __init__(self, **kwargs):
+                self.__dict__.update(kwargs)
+
+            def model_dump(self):
+                return dict(self.__dict__)
+
+        def write_host_launch_receipt(path_or_session_root, receipt):
+            base = Path(path_or_session_root)
+            if base.suffix:
+                path = base
+            else:
+                path = base / "host-launch-receipt.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(receipt.model_dump()), encoding="utf-8")
+            return path
+
+        host_receipt_module.HostLaunchReceipt = HostLaunchReceipt
+        host_receipt_module.write_host_launch_receipt = write_host_launch_receipt
+        sys.modules[host_receipt_module.__name__] = host_receipt_module
+
+        router_module = types.ModuleType("vgo_runtime.router")
+        router_module.load_allowed_vibe_entry_ids = lambda: {"vibe", "vibe-upgrade"}
+        sys.modules[router_module.__name__] = router_module
+
+        spec = importlib.util.spec_from_file_location("vgo_runtime.canonical_entry", RUNTIME_CORE_SRC / "vgo_runtime" / "canonical_entry.py")
+        assert spec and spec.loader
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        _restore_modules(originals)
 
 
 def _load_cli_process_module() -> types.ModuleType:
@@ -77,22 +97,56 @@ def _load_cli_process_module() -> types.ModuleType:
     if str(cli_root) not in sys.path:
         sys.path.insert(0, str(cli_root))
 
-    package = types.ModuleType("vgo_cli")
-    package.__path__ = [str(cli_root / "vgo_cli")]
-    sys.modules.setdefault("vgo_cli", package)
+    touched = {
+        "vgo_cli",
+        "vgo_cli.errors",
+        "vgo_cli.process",
+    }
+    originals = {name: sys.modules.get(name) for name in touched}
+    try:
+        package = types.ModuleType("vgo_cli")
+        package.__path__ = [str(cli_root / "vgo_cli")]
+        sys.modules["vgo_cli"] = package
 
-    errors_spec = importlib.util.spec_from_file_location("vgo_cli.errors", cli_root / "vgo_cli" / "errors.py")
-    assert errors_spec and errors_spec.loader
-    errors_module = importlib.util.module_from_spec(errors_spec)
-    sys.modules[errors_spec.name] = errors_module
-    errors_spec.loader.exec_module(errors_module)
+        errors_spec = importlib.util.spec_from_file_location("vgo_cli.errors", cli_root / "vgo_cli" / "errors.py")
+        assert errors_spec and errors_spec.loader
+        errors_module = importlib.util.module_from_spec(errors_spec)
+        sys.modules[errors_spec.name] = errors_module
+        errors_spec.loader.exec_module(errors_module)
 
-    spec = importlib.util.spec_from_file_location("vgo_cli.process", cli_root / "vgo_cli" / "process.py")
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+        spec = importlib.util.spec_from_file_location("vgo_cli.process", cli_root / "vgo_cli" / "process.py")
+        assert spec and spec.loader
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        _restore_modules(originals)
+
+
+class DynamicLoaderIsolationTests(unittest.TestCase):
+    def test_canonical_entry_loader_restores_sys_modules(self):
+        managed = (
+            "vgo_runtime",
+            "vgo_contracts",
+            "vgo_contracts.canonical_vibe_contract",
+            "vgo_contracts.host_launch_receipt",
+            "vgo_runtime.router",
+            "vgo_runtime.canonical_entry",
+        )
+        originals = {name: sys.modules.get(name) for name in managed}
+        module = _load_canonical_entry_module()
+        self.assertEqual("vgo_runtime.canonical_entry", module.__name__)
+        for name, original in originals.items():
+            self.assertIs(sys.modules.get(name), original)
+
+    def test_cli_process_loader_restores_sys_modules(self):
+        managed = ("vgo_cli", "vgo_cli.errors", "vgo_cli.process")
+        originals = {name: sys.modules.get(name) for name in managed}
+        module = _load_cli_process_module()
+        self.assertEqual("vgo_cli.process", module.__name__)
+        for name, original in originals.items():
+            self.assertIs(sys.modules.get(name), original)
 
 
 class CliProcessPowerShellPolicyTests(unittest.TestCase):
@@ -172,6 +226,8 @@ class CliProcessPowerShellPolicyTests(unittest.TestCase):
         self.assertIsInstance(resolution, dict)
         self.assertIsNone(resolution["host_path"])
         self.assertEqual(resolution.get("error"), "pwsh is required on non-Windows hosts")
+        checked_names = [entry["candidate_name"] for entry in resolution["candidates_checked"]]
+        self.assertEqual(["path-pwsh", "path-pwsh-exe"], checked_names)
 
     def test_run_powershell_file_failure_reports_candidates_checked(self):
         module = _load_cli_process_module()
@@ -260,7 +316,7 @@ class PowerShellBridgeDiagnosticTests(unittest.TestCase):
             script_path = Path(temp_dir) / "empty.ps1"
             script_path.write_text("", encoding="utf-8")
             command = [
-                "python",
+                sys.executable,
                 "-c",
                 "import sys; sys.exit(0)",
             ]
@@ -270,12 +326,12 @@ class PowerShellBridgeDiagnosticTests(unittest.TestCase):
         self.assertIn("delegated lane payload handoff", message)
         self.assertIn("returned empty stdout", message)
         self.assertIn("cwd=", message)
-        self.assertIn("command=python", message)
+        self.assertIn(f"command={Path(sys.executable).name}", message)
 
     def test_non_zero_exit_mentions_canonical_bridge_startup(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             command = [
-                "python",
+                sys.executable,
                 "-c",
                 "import sys; sys.stderr.write('boom\\n'); sys.exit(7)",
             ]
@@ -288,6 +344,25 @@ class PowerShellBridgeDiagnosticTests(unittest.TestCase):
 
 
 class BridgeFailureLayeringTests(unittest.TestCase):
+    def test_canonical_entry_non_windows_skips_windows_install_path_candidates(self):
+        module = _load_canonical_entry_module()
+
+        def fake_which(name: str) -> str | None:
+            return None
+
+        def fake_exists(path_self: Path) -> bool:
+            return False
+
+        def fake_is_file(path_self: Path) -> bool:
+            return False
+
+        with patch.object(module.os, "name", "posix"), patch.object(module.shutil, "which", side_effect=fake_which), patch.object(module.Path, "exists", fake_exists), patch.object(module.Path, "is_file", fake_is_file):
+            resolution = module._resolve_powershell_host(return_diagnostics=True)
+
+        self.assertIsInstance(resolution, dict)
+        checked_names = [entry["candidate_name"] for entry in resolution["candidates_checked"]]
+        self.assertEqual(["path-pwsh", "path-pwsh-exe"], checked_names)
+
     def test_canonical_entry_startup_failure_is_distinct_from_payload_handoff_failure(self):
         module = _load_canonical_entry_module()
         with tempfile.TemporaryDirectory() as repo_dir:

@@ -79,13 +79,32 @@ function New-VibeProcessPreflightResult {
         [AllowNull()] [object]$Invocation = $null
     )
 
-    $resolvedCommand = try { [System.IO.Path]::GetFullPath($Command) } catch { [string]$Command }
+    $resolvedCommand = if ([string]::IsNullOrWhiteSpace($Command)) {
+        ''
+    } elseif ([System.IO.Path]::IsPathRooted($Command) -or [string]$Command -match '[\\/]') {
+        try { [System.IO.Path]::GetFullPath($Command) } catch { [string]$Command }
+    } else {
+        $commandCandidate = Get-Command -Name $Command -ErrorAction SilentlyContinue |
+            Where-Object { $_.CommandType -in @('Application', 'ExternalScript') } |
+            Select-Object -First 1
+        if ($null -ne $commandCandidate) {
+            if ($commandCandidate.PSObject.Properties.Name -contains 'Source' -and -not [string]::IsNullOrWhiteSpace([string]$commandCandidate.Source)) {
+                [string]$commandCandidate.Source
+            } elseif ($commandCandidate.PSObject.Properties.Name -contains 'Path' -and -not [string]::IsNullOrWhiteSpace([string]$commandCandidate.Path)) {
+                [string]$commandCandidate.Path
+            } else {
+                [string]$Command
+            }
+        } else {
+            [string]$Command
+        }
+    }
     $resolvedWorkingDirectory = try { [System.IO.Path]::GetFullPath($WorkingDirectory) } catch { [string]$WorkingDirectory }
     $resolvedScriptPath = if ([string]::IsNullOrWhiteSpace($ScriptPath)) { $null } else { try { [System.IO.Path]::GetFullPath($ScriptPath) } catch { [string]$ScriptPath } }
     $resolvedPythonSpec = if ([string]::IsNullOrWhiteSpace($PythonCommandSpec)) { $null } else { [string]$PythonCommandSpec }
 
-    $commandExists = Test-Path -LiteralPath $resolvedCommand
-    $commandIsFile = Test-Path -LiteralPath $resolvedCommand -PathType Leaf
+    $commandExists = (-not [string]::IsNullOrWhiteSpace($resolvedCommand)) -and (Test-Path -LiteralPath $resolvedCommand)
+    $commandIsFile = (-not [string]::IsNullOrWhiteSpace($resolvedCommand)) -and (Test-Path -LiteralPath $resolvedCommand -PathType Leaf)
     $workingDirectoryExists = Test-Path -LiteralPath $resolvedWorkingDirectory
     $workingDirectoryIsDirectory = Test-Path -LiteralPath $resolvedWorkingDirectory -PathType Container
     $scriptExists = if ($null -eq $resolvedScriptPath) { $null } else { [bool](Test-Path -LiteralPath $resolvedScriptPath) }

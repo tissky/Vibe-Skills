@@ -323,14 +323,16 @@ function Wait-VibeDelegatedLaneProcess {
     }
 
     $payload = $payloadRecovery.payload
-    $laneReceipt = Get-Content -LiteralPath ([string]($payload.lane_receipt_path)) -Raw -Encoding UTF8 | ConvertFrom-Json
-    $laneResult = if ($payload.lane_result_path -and (Test-Path -LiteralPath ([string]($payload.lane_result_path)))) {
-        Get-Content -LiteralPath ([string]($payload.lane_result_path)) -Raw -Encoding UTF8 | ConvertFrom-Json
-    } else {
-        $null
+    try {
+        $laneReceipt = Get-Content -LiteralPath ([string]($payload.lane_receipt_path)) -Raw -Encoding UTF8 | ConvertFrom-Json
+        $laneResult = if ($payload.lane_result_path -and (Test-Path -LiteralPath ([string]($payload.lane_result_path)))) {
+            Get-Content -LiteralPath ([string]($payload.lane_result_path)) -Raw -Encoding UTF8 | ConvertFrom-Json
+        } else {
+            $null
+        }
+    } finally {
+        $Handle.process.Dispose()
     }
-
-    $Handle.process.Dispose()
 
     return [pscustomobject]@{
         lane_id = [string]($Handle.lane_id)
@@ -1011,7 +1013,7 @@ function Get-VibeEffectiveExecutionPolicy {
                             -ScriptPath 'scripts/verify/vibe-installed-runtime-freshness-gate.ps1'
                         continue
                     }
-                    'version-consistency-gate' {
+                    { $_ -in @('version-consistency-gate', 'release-install-runtime-coherence-gate') } {
                         New-VibeInstalledRuntimeVerificationUnit `
                             -UnitId 'release-install-runtime-coherence-gate' `
                             -ScriptPath 'scripts/verify/vibe-release-install-runtime-coherence-gate.ps1'
