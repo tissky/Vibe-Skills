@@ -9,6 +9,7 @@ import types
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+import warnings
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -150,6 +151,43 @@ class DynamicLoaderIsolationTests(unittest.TestCase):
 
 
 class CliProcessPowerShellPolicyTests(unittest.TestCase):
+    def test_choose_powershell_reads_shared_policy_file_override(self):
+        module = _load_cli_process_module()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            policy_path = Path(temp_dir) / "powershell-host-policy.json"
+            policy_path.write_text(
+                json.dumps(
+                    {
+                        "preferred_powershell_host": "windows-powershell",
+                        "require_pwsh_on_non_windows": True,
+                        "allow_windows_powershell_fallback": True,
+                        "record_host_resolution_artifacts": True,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            pwsh_path = Path(temp_dir) / "pwsh.exe"
+            powershell_path = Path(temp_dir) / "powershell.exe"
+            pwsh_path.write_text("", encoding="utf-8")
+            powershell_path.write_text("", encoding="utf-8")
+
+            def fake_which(name: str) -> str | None:
+                mapping = {
+                    "pwsh": str(pwsh_path),
+                    "pwsh.exe": str(pwsh_path),
+                    "powershell": str(powershell_path),
+                    "powershell.exe": str(powershell_path),
+                }
+                return mapping.get(name)
+
+            with patch.object(module, "POWERSHELL_HOST_POLICY_PATH", policy_path), patch.object(module, "_is_windows_host", return_value=True), patch.object(module.shutil, "which", side_effect=fake_which):
+                resolution = module.choose_powershell(return_diagnostics=True)
+
+        self.assertIsInstance(resolution, dict)
+        self.assertEqual(resolution["host_path"], str(powershell_path))
+        self.assertEqual(resolution["host_kind"], "windows-powershell")
+        self.assertTrue(resolution["policy"]["allow_windows_powershell_fallback"])
+
     def test_choose_powershell_prefers_pwsh_over_windows_powershell(self):
         module = _load_cli_process_module()
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -248,11 +286,26 @@ class CliProcessPowerShellPolicyTests(unittest.TestCase):
         self.assertIn("path-pwsh", message)
         self.assertIn("powershell.exe", message)
 
+    def test_choose_powershell_invalid_policy_warns_and_uses_defaults(self):
+        module = _load_cli_process_module()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            policy_path = Path(temp_dir) / "powershell-host-policy.json"
+            policy_path.write_text("{invalid-json", encoding="utf-8")
+            with patch.object(module, "POWERSHELL_HOST_POLICY_PATH", policy_path), warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                policy = module._powershell_host_policy()
+
+        self.assertEqual(policy, module.POWERSHELL_HOST_POLICY_DEFAULTS)
+        self.assertEqual(1, len(caught))
+        self.assertIn("Invalid JSON in PowerShell host policy", str(caught[0].message))
+
 
 class DelegatedLaneContractTests(unittest.TestCase):
     def test_plan_execute_uses_repo_root_first_working_directory_logic(self):
         script_text = SCRIPT_PATH.read_text(encoding="utf-8")
         self.assertIn("Resolve-VibeDelegatedLaneWorkingDirectory", script_text)
+        self.assertIn("requested_lane_root = $requestedLaneRoot", script_text)
+        self.assertIn("lane_root_invalid", script_text)
         self.assertIn("requested_working_directory = if", script_text)
         self.assertIn("effective_working_directory = [string]$workingDirectoryInfo.effective_working_directory", script_text)
         self.assertIn("repo_root_invalid", script_text)
@@ -276,6 +329,7 @@ class DelegatedLaneContractTests(unittest.TestCase):
         script_text = SCRIPT_PATH.read_text(encoding="utf-8")
         self.assertIn("host_kind = if ($invocation.PSObject.Properties.Name -contains 'host_kind')", script_text)
         self.assertIn("fallback_used = [bool]$(if ($invocation.PSObject.Properties.Name -contains 'fallback_used')", script_text)
+        self.assertIn("lane_root_fallback_reason = if ($null -eq $workingDirectoryInfo.lane_root_fallback_reason)", script_text)
         self.assertIn("resolved_command = [string]($invocation.host_path)", script_text)
         self.assertIn("resolved_arguments = @($invocation.arguments)", script_text)
         self.assertIn("arguments_render_mode = 'RenderedString'", script_text)
@@ -284,6 +338,8 @@ class DelegatedLaneContractTests(unittest.TestCase):
     def test_runtime_execution_records_preflight_and_render_mode(self):
         script_text = (REPO_ROOT / "scripts" / "runtime" / "VibeExecution.Common.ps1").read_text(encoding="utf-8")
         self.assertIn("function New-VibeProcessPreflightResult", script_text)
+        self.assertIn("command = [string]$Command", script_text)
+        self.assertIn("Preflight.resolved_command", script_text)
         self.assertIn("Process preflight failed:", script_text)
         self.assertIn("arguments_render_mode = if ($usedArgumentList) { 'ArgumentList' } else { 'RenderedString' }", script_text)
         self.assertIn("launch_metadata_path", script_text)
@@ -344,6 +400,43 @@ class PowerShellBridgeDiagnosticTests(unittest.TestCase):
 
 
 class BridgeFailureLayeringTests(unittest.TestCase):
+    def test_canonical_entry_reads_shared_policy_file_override(self):
+        module = _load_canonical_entry_module()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            policy_path = Path(temp_dir) / "powershell-host-policy.json"
+            policy_path.write_text(
+                json.dumps(
+                    {
+                        "preferred_powershell_host": "windows-powershell",
+                        "require_pwsh_on_non_windows": True,
+                        "allow_windows_powershell_fallback": True,
+                        "record_host_resolution_artifacts": True,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            pwsh_path = Path(temp_dir) / "pwsh.exe"
+            powershell_path = Path(temp_dir) / "powershell.exe"
+            pwsh_path.write_text("", encoding="utf-8")
+            powershell_path.write_text("", encoding="utf-8")
+
+            def fake_which(name: str) -> str | None:
+                mapping = {
+                    "pwsh": str(pwsh_path),
+                    "pwsh.exe": str(pwsh_path),
+                    "powershell": str(powershell_path),
+                    "powershell.exe": str(powershell_path),
+                }
+                return mapping.get(name)
+
+            with patch.object(module, "POWERSHELL_HOST_POLICY_PATH", policy_path), patch.object(module.os, "name", "nt"), patch.object(module.shutil, "which", side_effect=fake_which):
+                resolution = module._resolve_powershell_host(return_diagnostics=True)
+
+        self.assertIsInstance(resolution, dict)
+        self.assertEqual(resolution["host_path"], str(powershell_path))
+        self.assertEqual(resolution["host_kind"], "windows-powershell")
+        self.assertTrue(resolution["policy"]["allow_windows_powershell_fallback"])
+
     def test_canonical_entry_non_windows_skips_windows_install_path_candidates(self):
         module = _load_canonical_entry_module()
 

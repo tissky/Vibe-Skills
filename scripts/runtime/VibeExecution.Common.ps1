@@ -238,8 +238,19 @@ function Invoke-VibeCapturedProcess {
         $startInfo.Arguments = $renderedArguments
     }
 
+    $launchMetadataResolvedCommand = if (
+        $null -ne $Preflight -and
+        $Preflight.PSObject.Properties.Name -contains 'resolved_command' -and
+        -not [string]::IsNullOrWhiteSpace([string]$Preflight.resolved_command)
+    ) {
+        [string]$Preflight.resolved_command
+    } else {
+        [string]$Command
+    }
+
     $launchMetadata = [ordered]@{
-        resolved_command = [string]$Command
+        command = [string]$Command
+        resolved_command = $launchMetadataResolvedCommand
         resolved_arguments = @($Arguments | ForEach-Object { [string]$_ })
         resolved_working_directory = [string]$WorkingDirectory
         stdout_path = [string]$StdOutPath

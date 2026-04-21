@@ -92,7 +92,26 @@ function Resolve-VibeDelegatedLaneWorkingDirectory {
         [Parameter(Mandatory)] [object]$LaneRuntime
     )
 
-    $laneRoot = [System.IO.Path]::GetFullPath([string]($LaneRuntime.lane_root))
+    $requestedLaneRoot = if (
+        $LaneRuntime.PSObject.Properties.Name -contains 'lane_root' -and
+        -not [string]::IsNullOrWhiteSpace([string]($LaneRuntime.lane_root))
+    ) {
+        [string]($LaneRuntime.lane_root)
+    } else {
+        $null
+    }
+    $resolvedLaneRoot = $null
+    $laneRootValid = $false
+    if (-not [string]::IsNullOrWhiteSpace($requestedLaneRoot)) {
+        try {
+            $resolvedLaneRoot = [System.IO.Path]::GetFullPath($requestedLaneRoot)
+            $laneRootValid = Test-Path -LiteralPath $resolvedLaneRoot -PathType Container
+        } catch {
+            $resolvedLaneRoot = $requestedLaneRoot
+            $laneRootValid = $false
+        }
+    }
+
     $requestedWorkingDirectory = if (
         $LaneRuntime.PSObject.Properties.Name -contains 'repo_root' -and
         -not [string]::IsNullOrWhiteSpace([string]($LaneRuntime.repo_root))
@@ -114,14 +133,33 @@ function Resolve-VibeDelegatedLaneWorkingDirectory {
         }
     }
 
-    $effectiveWorkingDirectory = if ($repoRootValid) { $resolvedRepoRoot } else { $laneRoot }
+    $laneRootFallbackReason = if ($laneRootValid) { $null } elseif ([string]::IsNullOrWhiteSpace($requestedLaneRoot)) { 'lane_root_missing' } else { 'lane_root_invalid' }
+    $effectiveWorkingDirectory = if ($repoRootValid) {
+        $resolvedRepoRoot
+    } elseif (-not [string]::IsNullOrWhiteSpace($resolvedLaneRoot)) {
+        $resolvedLaneRoot
+    } elseif (-not [string]::IsNullOrWhiteSpace($requestedLaneRoot)) {
+        $requestedLaneRoot
+    } else {
+        [System.IO.Path]::GetFullPath('.')
+    }
     return [pscustomobject]@{
-        lane_root = $laneRoot
+        lane_root = if (-not [string]::IsNullOrWhiteSpace($resolvedLaneRoot)) { $resolvedLaneRoot } elseif (-not [string]::IsNullOrWhiteSpace($requestedLaneRoot)) { $requestedLaneRoot } else { [System.IO.Path]::GetFullPath('.') }
+        requested_lane_root = $requestedLaneRoot
+        resolved_lane_root = $resolvedLaneRoot
+        lane_root_valid = [bool]$laneRootValid
+        lane_root_fallback_reason = if ($null -eq $laneRootFallbackReason) { $null } else { [string]$laneRootFallbackReason }
         requested_working_directory = $requestedWorkingDirectory
         resolved_repo_root = $resolvedRepoRoot
         repo_root_valid = [bool]$repoRootValid
         effective_working_directory = $effectiveWorkingDirectory
-        fallback_reason = if ($repoRootValid) { $null } elseif ([string]::IsNullOrWhiteSpace($requestedWorkingDirectory)) { 'repo_root_missing' } else { 'repo_root_invalid' }
+        fallback_reason = if ($repoRootValid) {
+            if ($null -eq $laneRootFallbackReason) { $null } else { [string]$laneRootFallbackReason }
+        } elseif ([string]::IsNullOrWhiteSpace($requestedWorkingDirectory)) {
+            'repo_root_missing'
+        } else {
+            'repo_root_invalid'
+        }
     }
 }
 
@@ -227,6 +265,10 @@ function Start-VibeDelegatedLaneProcess {
         resolved_arguments = @($invocation.arguments)
         arguments_render_mode = 'RenderedString'
         payload_contract_version = Get-VibeDelegatedLanePayloadContractVersion
+        requested_lane_root = if ($null -eq $workingDirectoryInfo.requested_lane_root) { $null } else { [string]$workingDirectoryInfo.requested_lane_root }
+        resolved_lane_root = if ($null -eq $workingDirectoryInfo.resolved_lane_root) { $null } else { [string]$workingDirectoryInfo.resolved_lane_root }
+        lane_root_valid = [bool]$workingDirectoryInfo.lane_root_valid
+        lane_root_fallback_reason = if ($null -eq $workingDirectoryInfo.lane_root_fallback_reason) { $null } else { [string]$workingDirectoryInfo.lane_root_fallback_reason }
         requested_working_directory = if ($null -eq $workingDirectoryInfo.requested_working_directory) { $null } else { [string]$workingDirectoryInfo.requested_working_directory }
         resolved_repo_root = if ($null -eq $workingDirectoryInfo.resolved_repo_root) { $null } else { [string]$workingDirectoryInfo.resolved_repo_root }
         effective_working_directory = [string]$workingDirectoryInfo.effective_working_directory

@@ -2,23 +2,76 @@ from __future__ import annotations
 
 import contextlib
 import io
+import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 from typing import Any, Callable, Sequence
+import warnings
 
 from .errors import CliError
 
 
+REPO_ROOT = Path(__file__).resolve().parents[4]
+POWERSHELL_HOST_POLICY_PATH = REPO_ROOT / "config" / "powershell-host-policy.json"
+POWERSHELL_HOST_POLICY_DEFAULTS: dict[str, Any] = {
+    "preferred_powershell_host": "pwsh",
+    "require_pwsh_on_non_windows": True,
+    "allow_windows_powershell_fallback": True,
+    "record_host_resolution_artifacts": True,
+}
+
+
 def _powershell_host_policy() -> dict[str, Any]:
-    return {
-        "preferred_powershell_host": "pwsh",
-        "require_pwsh_on_non_windows": True,
-        "allow_windows_powershell_fallback": True,
-        "record_host_resolution_artifacts": True,
-    }
+    policy = dict(POWERSHELL_HOST_POLICY_DEFAULTS)
+    try:
+        raw_payload = POWERSHELL_HOST_POLICY_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        warnings.warn(
+            f"PowerShell host policy file not found: {POWERSHELL_HOST_POLICY_PATH}; using defaults",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return policy
+    except OSError as exc:
+        warnings.warn(
+            f"Failed to read PowerShell host policy {POWERSHELL_HOST_POLICY_PATH}: {exc}; using defaults",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return policy
+
+    try:
+        payload = json.loads(raw_payload)
+    except json.JSONDecodeError as exc:
+        warnings.warn(
+            f"Invalid JSON in PowerShell host policy {POWERSHELL_HOST_POLICY_PATH}: {exc}; using defaults",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return policy
+
+    if not isinstance(payload, dict):
+        warnings.warn(
+            f"PowerShell host policy {POWERSHELL_HOST_POLICY_PATH} must contain a JSON object; using defaults",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return policy
+
+    preferred_host = str(payload.get("preferred_powershell_host", "")).strip()
+    if preferred_host:
+        policy["preferred_powershell_host"] = preferred_host
+    for key in (
+        "require_pwsh_on_non_windows",
+        "allow_windows_powershell_fallback",
+        "record_host_resolution_artifacts",
+    ):
+        if key in payload:
+            policy[key] = bool(payload[key])
+    return policy
 
 
 def _is_windows_host() -> bool:
@@ -28,24 +81,33 @@ def _is_windows_host() -> bool:
 def choose_powershell(*, return_diagnostics: bool = False) -> str | dict[str, Any] | None:
     policy = _powershell_host_policy()
     is_windows = _is_windows_host()
-    candidates: list[tuple[str, str | None, str]] = [
+    prefer_pwsh = str(policy["preferred_powershell_host"]).strip().lower() == "pwsh"
+    pwsh_candidates: list[tuple[str, str | None, str]] = [
         ("path-pwsh", shutil.which("pwsh"), "pwsh"),
         ("path-pwsh-exe", shutil.which("pwsh.exe"), "pwsh"),
     ]
     if is_windows:
-        candidates.extend(
+        pwsh_candidates.extend(
             [
                 ("default-pwsh", r"C:\Program Files\PowerShell\7\pwsh.exe", "pwsh"),
                 ("preview-pwsh", r"C:\Program Files\PowerShell\7-preview\pwsh.exe", "pwsh"),
             ]
         )
-    if is_windows and policy["allow_windows_powershell_fallback"]:
-        candidates.extend(
+    windows_powershell_candidates: list[tuple[str, str | None, str]] = []
+    if is_windows:
+        windows_powershell_candidates.extend(
             [
                 ("path-powershell", shutil.which("powershell"), "windows-powershell"),
                 ("path-powershell-exe", shutil.which("powershell.exe"), "windows-powershell"),
             ]
         )
+    candidates: list[tuple[str, str | None, str]] = []
+    if prefer_pwsh:
+        candidates.extend(pwsh_candidates)
+        if is_windows and policy["allow_windows_powershell_fallback"]:
+            candidates.extend(windows_powershell_candidates)
+    elif is_windows:
+        candidates.extend(windows_powershell_candidates)
 
     checked: list[dict[str, Any]] = []
     for name, candidate, kind in candidates:
