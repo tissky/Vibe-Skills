@@ -193,7 +193,7 @@ def _resolve_powershell_host(*, return_diagnostics: bool = False) -> str | dict[
             diagnostics = {
                 "host_path": resolved,
                 "host_kind": kind,
-                "fallback_used": kind == "windows-powershell",
+                "fallback_used": prefer_pwsh and kind == "windows-powershell",
                 "candidates_checked": checked,
                 "policy": policy,
             }

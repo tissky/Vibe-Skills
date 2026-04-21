@@ -147,7 +147,7 @@ def choose_powershell(*, return_diagnostics: bool = False) -> str | dict[str, An
             diagnostics = {
                 "host_path": resolved,
                 "host_kind": kind,
-                "fallback_used": kind == "windows-powershell",
+                "fallback_used": prefer_pwsh and kind == "windows-powershell",
                 "candidates_checked": checked,
                 "policy": policy,
             }
@@ -186,7 +186,14 @@ def print_process_output(result: subprocess.CompletedProcess[str]) -> None:
 
 def run_subprocess(command: Sequence[str], *, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     """Run a subprocess with captured UTF-8 text output."""
-    return subprocess.run(list(command), cwd=cwd, capture_output=True, text=True)
+    return subprocess.run(
+        list(command),
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
 
 
 def invoke_python_core(
