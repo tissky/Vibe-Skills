@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory)] [string]$Task,
     [string]$Mode = 'interactive_governed',
     [string]$RunId = '',
@@ -26,20 +26,7 @@ function Get-VibeRouterTaskType {
         [Parameter(Mandatory)] [string]$Task
     )
 
-    $taskLower = $Task.ToLowerInvariant()
-    if ($taskLower -match 'review|审查|评审') {
-        return 'review'
-    }
-    if ($taskLower -match 'debug|bug|错误|修复') {
-        return 'debug'
-    }
-    if ($taskLower -match 'research|调研|研究') {
-        return 'research'
-    }
-    if ($taskLower -match 'implement|build|upgrade|更新|增强|执行') {
-        return 'coding'
-    }
-    return 'planning'
+    return Get-VibeInferredTaskType -Task $Task
 }
 
 function New-VibeAdviceSnapshot {

@@ -127,3 +127,18 @@ def test_runtime_packet_execution_uses_entry_intent_when_requested_skill_is_omit
     assert result.route['requested_skill'] == 'vibe-how'
     assert result.route['router_selected_skill'] == 'vibe-how'
     assert result.route['runtime_selected_skill'] == 'vibe'
+
+
+def test_runtime_packet_execution_promotes_keyword_style_router_debug_prompt() -> None:
+    result = execute_runtime_packet(
+        RuntimePacket(
+            goal='router confidence-low fallback misroute task-classification grade-selection candidate-scoring',
+            stage='skeleton_check',
+            entry_intent_id='vibe',
+        ),
+        mode='interactive_governed',
+        requested_skill='vibe',
+    )
+
+    assert result.route['task_type'] == 'debug'
+    assert result.plan['internal_grade'] == 'L'

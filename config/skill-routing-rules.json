@@ -15,8 +15,23 @@
                                                           "$vibe",
                                                           "orchestrate",
                                                           "route",
+                                                          "router",
+                                                          "routing",
+                                                          "route confidence",
+                                                          "task type",
+                                                          "task classification",
+                                                          "grade selection",
+                                                          "candidate scoring",
+                                                          "fallback",
+                                                          "threshold",
+                                                          "runtime routing",
                                                           "编排",
-                                                          "路由"
+                                                          "路由",
+                                                          "低置信度",
+                                                          "误路由",
+                                                          "任务分类",
+                                                          "等级选择",
+                                                          "候选打分"
                                                       ],
                                 "negative_keywords":  [
                                                           "xlsx",
@@ -1109,7 +1124,15 @@
                                                                           "训练流水线"
                                                                       ],
                                                 "negative_keywords":  [
-                                                                          "latex manuscript"
+                                                                          "latex manuscript",
+                                                                          "router",
+                                                                          "routing",
+                                                                          "pack",
+                                                                          "fallback",
+                                                                          "route confidence",
+                                                                          "task classification",
+                                                                          "grade selection",
+                                                                          "candidate scoring"
                                                                       ],
                                                 "equivalent_group":  null,
                                                 "canonical_for_task":  [
@@ -3691,7 +3714,14 @@
                                                                            ],
                                                      "negative_keywords":  [
                                                                                "smiles",
-                                                                               "docking"
+                                                                               "docking",
+                                                                               "router",
+                                                                               "routing",
+                                                                               "fallback",
+                                                                               "route confidence",
+                                                                               "task classification",
+                                                                               "grade selection",
+                                                                               "candidate scoring"
                                                                            ],
                                                      "equivalent_group":  "clinical-reporting",
                                                      "canonical_for_task":  [

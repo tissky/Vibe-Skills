@@ -251,6 +251,15 @@ def route_prompt(
         priority_signal = min(max(float(pack.get("priority", 0)) / 100.0, 0.0), 1.0)
         relevance_score = float(selection.get("relevance_score", selection["score"]))
         score = ((0.5 * trigger_ratio) + (0.4 * relevance_score) + (0.1 * priority_signal))
+        fallback_selected = str(selection.get("reason") or "").startswith("fallback_")
+        weak_fallback = (
+            fallback_selected
+            and not requested_canonical
+            and trigger_ratio < 0.5
+            and relevance_score < 0.15
+        )
+        if fallback_selected and not requested_canonical:
+            score *= 0.35 if weak_fallback else 0.65
         score = round(max(0.0, min(1.0, score)), 4)
         candidate_signal = round(
             max(0.0, min(1.0, (0.75 * float(selection["score"])) + (0.25 * float(selection["top1_top2_gap"])))),
@@ -260,6 +269,8 @@ def route_prompt(
         route_authority_eligible = bool(selection.get("route_authority_eligible", selection.get("selected") is not None))
         if isinstance(custom_metadata, dict):
             route_authority_eligible = route_authority_eligible and bool(custom_metadata.get("route_authority_eligible", False))
+        if weak_fallback:
+            route_authority_eligible = False
         pack_results.append(
             {
                 "pack_id": normalize_text(pack.get("id")),

@@ -14,13 +14,13 @@
       "task_type": "planning",
       "requested_skill": null,
       "expected": {
-        "route_mode": "pack_overlay",
-        "route_reason": "candidate_signal_auto_route",
+        "route_mode": "confirm_required",
+        "route_reason": "legacy_fallback_guard",
         "selected_pack": "orchestration-core",
-        "selected_skill": "writing-plans",
-        "confidence": 0.7,
-        "top1_top2_gap": 0.525,
-        "candidate_signal": 0.615
+        "selected_skill": "vibe",
+        "confidence": 0.45,
+        "top1_top2_gap": 0.12,
+        "candidate_signal": 0.12
       }
     },
     {
@@ -30,13 +30,13 @@
       "task_type": "planning",
       "requested_skill": null,
       "expected": {
-        "route_mode": "pack_overlay",
-        "route_reason": "candidate_signal_auto_route",
+        "route_mode": "confirm_required",
+        "route_reason": "legacy_fallback_guard",
         "selected_pack": "orchestration-core",
-        "selected_skill": "writing-plans",
-        "confidence": 0.7,
-        "top1_top2_gap": 0.525,
-        "candidate_signal": 0.615
+        "selected_skill": "vibe",
+        "confidence": 0.45,
+        "top1_top2_gap": 0.12,
+        "candidate_signal": 0.12
       }
     },
     {
@@ -46,11 +46,11 @@
       "task_type": "review",
       "requested_skill": null,
       "expected": {
-        "route_mode": "confirm_required",
-        "route_reason": "confidence_requires_confirmation",
+        "route_mode": "pack_overlay",
+        "route_reason": "auto_route",
         "selected_pack": "code-quality",
         "selected_skill": "code-reviewer",
-        "confidence": 0.675,
+        "confidence": 0.7081,
         "top1_top2_gap": 0.1658,
         "candidate_signal": 0.3283
       }
@@ -114,9 +114,9 @@
         "route_reason": "confidence_requires_confirmation",
         "selected_pack": "data-ml",
         "selected_skill": "scikit-learn",
-        "confidence": 0.5475,
-        "top1_top2_gap": 0.5325,
-        "candidate_signal": 0.57
+        "confidence": 0.6306,
+        "top1_top2_gap": 0.4625,
+        "candidate_signal": 0.5525
       }
     },
     {
@@ -144,8 +144,8 @@
       "expected": {
         "route_mode": "confirm_required",
         "route_reason": "legacy_fallback_guard",
-        "selected_pack": "orchestration-core",
-        "selected_skill": "claude-skills",
+        "selected_pack": "",
+        "selected_skill": "",
         "confidence": 0.45,
         "top1_top2_gap": 0.0,
         "candidate_signal": 0.0

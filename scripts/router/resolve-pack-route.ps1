@@ -1,10 +1,10 @@
 ﻿param(
     [Parameter(Mandatory = $true)]
     [string]$Prompt,
-    [ValidateSet("M", "L", "XL")]
-    [string]$Grade = "M",
-    [ValidateSet("planning", "coding", "review", "debug", "research")]
-    [string]$TaskType = "planning",
+    [AllowEmptyString()]
+    [string]$Grade = "",
+    [AllowEmptyString()]
+    [string]$TaskType = "",
     [string]$RequestedSkill,
     [string]$HostId,
     [string]$TargetRoot,
@@ -17,6 +17,7 @@
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "..\runtime\VibeRuntime.Common.ps1")
 $routerModuleRoot = Join-Path $PSScriptRoot "modules"
 $routerModules = @(
     "00-core-utils.ps1",
@@ -58,6 +59,43 @@ foreach ($routerModule in $routerModules) {
     }
     . $routerModulePath
 }
+
+function Resolve-RouterGradeValue {
+    param(
+        [AllowEmptyString()] [string]$InputGrade,
+        [Parameter(Mandatory)] [string]$PromptText
+    )
+
+    if ([string]::IsNullOrWhiteSpace($InputGrade)) {
+        return Get-VibeInternalGrade -Task $PromptText
+    }
+
+    $normalized = $InputGrade.Trim().ToUpperInvariant()
+    if ($normalized -notin @('M', 'L', 'XL')) {
+        throw ("unsupported router grade: {0}" -f $InputGrade)
+    }
+
+    return $normalized
+}
+
+function Resolve-RouterTaskTypeValue {
+    param(
+        [AllowEmptyString()] [string]$InputTaskType,
+        [Parameter(Mandatory)] [string]$PromptText
+    )
+
+    if ([string]::IsNullOrWhiteSpace($InputTaskType)) {
+        return Get-VibeInferredTaskType -Task $PromptText
+    }
+
+    $normalized = $InputTaskType.Trim().ToLowerInvariant()
+    if ($normalized -notin @('planning', 'coding', 'review', 'debug', 'research')) {
+        throw ("unsupported router task type: {0}" -f $InputTaskType)
+    }
+
+    return $normalized
+}
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $configRoot = Join-Path $repoRoot "config"
 
@@ -352,6 +390,12 @@ $minTopGap = if ($th.min_top1_top2_gap -ne $null) { [double]$th.min_top1_top2_ga
 $minCandidateSignalForConfirmOverride = if ($th.min_candidate_signal_for_confirm_override -ne $null) { [double]$th.min_candidate_signal_for_confirm_override } else { 0.0 }
 $minCandidateSignalForAutoRoute = if ($th.min_candidate_signal_for_auto_route -ne $null) { [double]$th.min_candidate_signal_for_auto_route } else { [double]$th.auto_route }
 $enforceConfirmOnLegacyFallback = if ($rules.enforce_confirm_on_legacy_fallback -ne $null) { [bool]$rules.enforce_confirm_on_legacy_fallback } else { $false }
+$aliasResult = Resolve-Alias -Skill $RequestedSkill -AliasMap $aliasMap
+$requestedCanonical = [string]$aliasResult.canonical
+$promptNormalization = Get-RoutingPromptNormalization -PromptText $Prompt
+$promptLower = [string]$promptNormalization.normalized_lower
+$Grade = Resolve-RouterGradeValue -InputGrade $Grade -PromptText $Prompt
+$TaskType = Resolve-RouterTaskTypeValue -InputTaskType $TaskType -PromptText $Prompt
 
 $probeContext = New-RouteProbeContext `
     -ProbeSwitch:$Probe `
@@ -413,10 +457,6 @@ Add-RouteProbeEvent -Context $probeContext -Stage "router.config" -Note "core ro
 }
 $null = Add-HeartbeatPulse -Context $heartbeatContext -Stage "router.config" -Phase "router.config" -Note "router config and policy load completed"
 
-$aliasResult = Resolve-Alias -Skill $RequestedSkill -AliasMap $aliasMap
-$requestedCanonical = [string]$aliasResult.canonical
-$promptNormalization = Get-RoutingPromptNormalization -PromptText $Prompt
-$promptLower = [string]$promptNormalization.normalized_lower
 $resolvedTargetRoot = Resolve-CustomAdmissionTargetRoot -TargetRoot $TargetRoot -HostId $HostId
 $customAdmission = Get-CustomAdmissionResult -RepoRoot ([string]$repoRoot) -TargetRoot $resolvedTargetRoot -HostId $HostId -RequestedCanonical $requestedCanonical
 $openSpecAdvice = Get-OpenSpecGovernanceAdvice -PromptLower $promptLower -Grade $Grade -TaskType $TaskType -RequestedCanonical $requestedCanonical -OpenSpecPolicy $openSpecPolicy
@@ -574,8 +614,16 @@ foreach ($pack in $packsForScoring) {
     $candidateSignal = [Math]::Round([Math]::Min(1.0, [Math]::Max(0.0, $candidateSignal)), 4)
     $customMetadata = if ($pack.PSObject.Properties.Name -contains 'custom_admission') { $pack.custom_admission } else { $null }
     $routeAuthorityEligible = if ($selection.PSObject.Properties.Name -contains 'route_authority_eligible') { [bool]$selection.route_authority_eligible } else { -not [string]::IsNullOrWhiteSpace([string]$selection.selected) }
+    $fallbackSelected = ([string]$selection.reason -like 'fallback_*')
+    $weakFallback = $fallbackSelected -and [string]::IsNullOrWhiteSpace($requestedCanonical) -and $trigger -lt 0.5 -and $selectionRelevanceScore -lt 0.15 -and $intent -lt 0.2 -and $workspace -lt 0.1
+    if ($fallbackSelected -and [string]::IsNullOrWhiteSpace($requestedCanonical)) {
+        $score = if ($weakFallback) { $score * 0.35 } else { $score * 0.65 }
+    }
     if ($null -ne $customMetadata -and $customMetadata.PSObject.Properties.Name -contains 'route_authority_eligible') {
         $routeAuthorityEligible = $routeAuthorityEligible -and [bool]$customMetadata.route_authority_eligible
+    }
+    if ($weakFallback) {
+        $routeAuthorityEligible = $false
     }
 
     $packResults += [pscustomobject]@{

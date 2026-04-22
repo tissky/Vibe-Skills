@@ -1,4 +1,4 @@
-Set-StrictMode -Off
+﻿Set-StrictMode -Off
 $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot '..\common\vibe-governance-helpers.ps1')
@@ -2808,6 +2808,139 @@ function Write-VibeMarkdownArtifact {
     Write-VgoUtf8NoBomText -Path $Path -Content (($Lines -join [Environment]::NewLine) + [Environment]::NewLine)
 }
 
+function Get-VibeTaskSignalCount {
+    param(
+        [Parameter(Mandatory)] [string]$TaskLower,
+        [AllowEmptyCollection()] [string[]]$Patterns
+    )
+
+    $hits = 0
+    foreach ($pattern in @($Patterns)) {
+        if (-not [string]::IsNullOrWhiteSpace($pattern) -and $TaskLower -match $pattern) {
+            $hits++
+        }
+    }
+
+    return $hits
+}
+
+function Get-VibeInferredTaskType {
+    param(
+        [Parameter(Mandatory)] [string]$Task
+    )
+
+    $taskLower = $Task.ToLowerInvariant()
+    $reviewPatterns = @(
+        'review',
+        'code review',
+        'pr review',
+        'audit',
+        'assess',
+        '审查',
+        '评审',
+        '审核',
+        '代码评审'
+    )
+    $debugPatterns = @(
+        'debug',
+        'bug',
+        'fix',
+        'repair',
+        'patch',
+        'issue',
+        'problem',
+        'failure',
+        'failing',
+        'regression',
+        'root cause',
+        'diagnos',
+        'triage',
+        'mismatch',
+        'misroute',
+        'inaccurate',
+        'friction',
+        'error',
+        'fallback',
+        'threshold',
+        'confidence',
+        'candidate[- ]scor',
+        'grade[- ]selection',
+        'task[- ]classification',
+        '错误',
+        '修复',
+        '问题',
+        '失败',
+        '报错',
+        '排查',
+        '定位',
+        '根因',
+        '回退',
+        '回滚',
+        '低置信度',
+        '误路由'
+    )
+    $researchPatterns = @(
+        'research',
+        'survey',
+        'literature',
+        'paper',
+        'investigate',
+        '调研',
+        '研究'
+    )
+    $codingPatterns = @(
+        'implement',
+        'build',
+        'upgrade',
+        'update',
+        'enhance',
+        'modify',
+        'change',
+        'create',
+        'add',
+        'integrat',
+        'install',
+        'runtime',
+        'router',
+        'routing',
+        'workflow',
+        'contract',
+        'gate',
+        '更新',
+        '增强',
+        '执行',
+        '修改',
+        '安装',
+        '集成',
+        '运行时',
+        '路由',
+        '工作流'
+    )
+    $reviewScore = Get-VibeTaskSignalCount -TaskLower $taskLower -Patterns $reviewPatterns
+    $debugScore = Get-VibeTaskSignalCount -TaskLower $taskLower -Patterns $debugPatterns
+    $researchScore = Get-VibeTaskSignalCount -TaskLower $taskLower -Patterns $researchPatterns
+    $codingScore = Get-VibeTaskSignalCount -TaskLower $taskLower -Patterns $codingPatterns
+    $scores = [ordered]@{
+        review = $reviewScore
+        debug = $debugScore
+        research = $researchScore
+        coding = $codingScore
+    }
+
+    $maxScore = ($scores.Values | Measure-Object -Maximum).Maximum
+    if ($null -eq $maxScore -or [double]$maxScore -le 0) {
+        return 'planning'
+    }
+
+    foreach ($taskType in @('review', 'debug', 'research', 'coding')) {
+        if ([double]$scores[$taskType] -eq [double]$maxScore) {
+            return $taskType
+        }
+    }
+
+    return 'planning'
+}
+
 function Get-VibeInternalGrade {
     param(
         [Parameter(Mandatory)] [string]$Task,
@@ -2816,8 +2949,87 @@ function Get-VibeInternalGrade {
 
     $grade = ''
     $taskLower = $Task.ToLowerInvariant()
-    $xlPatterns = @('xl', 'multi-agent', 'parallel', 'wave', 'batch', '无人值守', 'autonomous', 'benchmark', 'front.*back', 'end-to-end')
-    $lPatterns = @('design', 'plan', 'architecture', 'refactor', 'migrate', 'research', 'governance', '访谈', '规划', '设计', '治理')
+    $xlPatterns = @(
+        'xl',
+        'multi-agent',
+        'parallel',
+        'wave',
+        'batch',
+        '无人值守',
+        'autonomous',
+        'benchmark',
+        'front.*back',
+        'end-to-end',
+        '\be2e\b',
+        'cross-host',
+        'multi-host',
+        'host-native',
+        'install.*runtime',
+        'runtime.*install',
+        'from install to runtime',
+        '从安装到运行',
+        '全链路',
+        '端到端'
+    )
+    $lPatterns = @(
+        'design',
+        'plan',
+        'architecture',
+        'refactor',
+        'migrate',
+        'research',
+        'governance',
+        'debug',
+        'bug',
+        'fix',
+        'repair',
+        'patch',
+        'review',
+        'code review',
+        'implement',
+        'build',
+        'upgrade',
+        'update',
+        'modify',
+        'change',
+        'install',
+        'integrat',
+        'router',
+        'routing',
+        'runtime',
+        'workflow',
+        'contract',
+        'gate',
+        'regression',
+        'verification',
+        'threshold',
+        'confidence',
+        'classification',
+        'candidate[- ]scor',
+        'heuristic',
+        'windows',
+        'claude',
+        'codex',
+        '访谈',
+        '规划',
+        '设计',
+        '治理',
+        '修复',
+        '修改',
+        '安装',
+        '调试',
+        '评审',
+        '运行时',
+        '路由',
+        '工作流',
+        '契约',
+        '回归',
+        '验证',
+        '阈值',
+        '置信度',
+        '分类',
+        '评分'
+    )
 
     foreach ($pattern in $xlPatterns) {
         if ($taskLower -match $pattern) {

@@ -10,7 +10,8 @@ RUNTIME_SRC = ROOT / 'packages' / 'runtime-core' / 'src'
 if str(RUNTIME_SRC) not in sys.path:
     sys.path.insert(0, str(RUNTIME_SRC))
 
-from vgo_runtime.router import load_allowed_vibe_entry_ids, route_runtime_task
+from vgo_runtime.router import infer_task_type, load_allowed_vibe_entry_ids, route_runtime_task
+from vgo_runtime.governance import choose_internal_grade
 
 
 def test_runtime_router_allowed_entry_ids_match_shared_surface_contract() -> None:
@@ -31,3 +32,21 @@ def test_runtime_router_rejects_entries_outside_shared_surface_contract() -> Non
         assert True
     else:
         raise AssertionError('expected unsupported entry id failure')
+
+
+def test_runtime_router_infers_debug_from_keyword_style_router_prompt() -> None:
+    task = 'router confidence-low fallback misroute task-classification grade-selection candidate-scoring'
+
+    assert infer_task_type(task) == 'debug'
+
+
+def test_runtime_governance_promotes_keyword_style_router_prompt_to_l() -> None:
+    task = 'router confidence-low fallback misroute task-classification grade-selection candidate-scoring'
+
+    assert choose_internal_grade('planning', task=task) == 'L'
+
+
+def test_runtime_governance_promotes_install_to_runtime_rollout_to_xl() -> None:
+    task = 'cross-host install to runtime end-to-end verification workflow'
+
+    assert choose_internal_grade('planning', task=task) == 'XL'
