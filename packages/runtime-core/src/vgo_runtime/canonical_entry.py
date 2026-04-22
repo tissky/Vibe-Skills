@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import sys
 from typing import Any
@@ -239,19 +240,143 @@ def _normalize_requested_entry_id(entry_id: str | None) -> str:
     return requested_entry_id
 
 
-def _resolve_effective_prompt(*, host_id: str, entry_id: str, prompt: str) -> str:
-    """Derive the runtime prompt, including the upgrade fallback prompt."""
-    prompt_text = str(prompt or "")
-    if prompt_text.strip():
-        return prompt_text
-    if entry_id != "vibe-upgrade":
-        return prompt_text
-    resolved_host_id = str(host_id or "").strip() or "current-host"
-    return (
-        f"Upgrade the local Vibe-Skills installation for host {resolved_host_id} "
-        "using the shared vgo-cli upgrade flow against the official default branch. "
-        "Reinstall the supported host surface, verify the result, and report concise before-and-after status."
+def _continuation_sessions_root(artifact_root: Path) -> Path:
+    return artifact_root / "outputs" / "runtime" / "vibe-sessions"
+
+
+def _iter_runtime_summaries(artifact_root: Path) -> list[Path]:
+    sessions_root = _continuation_sessions_root(artifact_root)
+    if not sessions_root.exists():
+        return []
+    return sorted(
+        (path for path in sessions_root.glob("*/runtime-summary.json") if path.is_file()),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
     )
+
+
+def _load_json_dict_if_exists(path: Path | None) -> dict[str, Any] | None:
+    if path is None or not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _normalize_prompt_token(text: str) -> str:
+    lowered = text.strip().lower()
+    lowered = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "-", lowered)
+    lowered = lowered.strip("-")
+    if len(lowered) > 64:
+        lowered = lowered[:64].rstrip("-")
+    return lowered
+
+
+def _extract_continuation_keywords(intent_contract: dict[str, Any]) -> list[str]:
+    keywords: list[str] = []
+
+    goal = str(intent_contract.get("goal") or "").strip()
+    if goal:
+        keywords.append(goal)
+
+    deliverable = str(intent_contract.get("deliverable") or "").strip()
+    if deliverable and deliverable.lower() != "unknown":
+        keywords.append(f"deliverable-{_normalize_prompt_token(deliverable)}")
+
+    execution_mode = str(intent_contract.get("execution_mode") or "").strip()
+    if execution_mode and execution_mode.lower() != "unspecified":
+        keywords.append(f"mode-{_normalize_prompt_token(execution_mode)}")
+
+    for prefix, values in (
+        ("constraint", intent_contract.get("constraints") or []),
+        ("capability", intent_contract.get("capabilities") or []),
+    ):
+        for value in values:
+            token = _normalize_prompt_token(str(value))
+            if token:
+                keywords.append(f"{prefix}-{token}")
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for keyword in keywords:
+        if not keyword or keyword in seen:
+            continue
+        deduped.append(keyword)
+        seen.add(keyword)
+    return deduped
+
+
+def _should_apply_continuation(entry_id: str, prompt_text: str) -> bool:
+    if entry_id not in {"vibe-how", "vibe-do"}:
+        return False
+    normalized = prompt_text.strip().lower()
+    if not normalized:
+        return False
+    if len(normalized.split()) <= 24:
+        return True
+    return normalized.startswith("execute ") or normalized.startswith("plan ")
+
+
+def _find_continuation_context(*, artifact_root: Path, entry_id: str, run_id: str | None) -> dict[str, Any] | None:
+    required_artifact = "requirement_doc" if entry_id == "vibe-how" else "execution_plan"
+    for summary_path in _iter_runtime_summaries(artifact_root):
+        if run_id and summary_path.parent.name == run_id:
+            continue
+        summary = _load_json_dict_if_exists(summary_path)
+        if not summary:
+            continue
+        artifacts = summary.get("artifacts") or {}
+        required_path = artifacts.get(required_artifact)
+        intent_contract_path = artifacts.get("intent_contract")
+        if not required_path or not Path(required_path).exists():
+            continue
+        intent_contract = _load_json_dict_if_exists(Path(intent_contract_path)) if intent_contract_path else None
+        if not intent_contract:
+            continue
+        return {
+            "summary_path": str(summary_path),
+            "run_id": str(summary.get("run_id") or summary_path.parent.name),
+            "terminal_stage": str(summary.get("terminal_stage") or ""),
+            "required_artifact": str(required_path),
+            "intent_contract": intent_contract,
+        }
+    return None
+
+
+def _build_continuation_prompt(*, prompt_text: str, entry_id: str, continuation: dict[str, Any]) -> str:
+    keywords = [f"continue-{entry_id}", *(_extract_continuation_keywords(continuation["intent_contract"]))]
+    delta = prompt_text.strip()
+    if delta:
+        keywords.append(delta)
+    return " ".join(part for part in keywords if part).strip()
+
+
+def _resolve_effective_prompt(
+    *,
+    host_id: str,
+    entry_id: str,
+    prompt: str,
+    artifact_root: Path | None = None,
+    run_id: str | None = None,
+) -> str:
+    """Derive the runtime prompt, including upgrade fallback and continuation context."""
+    prompt_text = str(prompt or "")
+    if not prompt_text.strip() and entry_id == "vibe-upgrade":
+        resolved_host_id = str(host_id or "").strip() or "current-host"
+        return (
+            f"Upgrade the local Vibe-Skills installation for host {resolved_host_id} "
+            "using the shared vgo-cli upgrade flow against the official default branch. "
+            "Reinstall the supported host surface, verify the result, and report concise before-and-after status."
+        )
+
+    if artifact_root is not None and _should_apply_continuation(entry_id, prompt_text):
+        continuation = _find_continuation_context(artifact_root=artifact_root, entry_id=entry_id, run_id=run_id)
+        if continuation:
+            return _build_continuation_prompt(prompt_text=prompt_text, entry_id=entry_id, continuation=continuation)
+
+    return prompt_text
 
 
 def _new_run_id() -> str:
@@ -502,7 +627,14 @@ def launch_canonical_vibe(
     """Launch canonical vibe, verify its artifacts, and return launch metadata."""
     repo_root_path = Path(repo_root).resolve()
     requested_entry_id = _normalize_requested_entry_id(entry_id)
-    effective_prompt = _resolve_effective_prompt(host_id=host_id, entry_id=requested_entry_id, prompt=prompt)
+    resolved_artifact_root = Path(artifact_root).resolve() if artifact_root is not None else repo_root_path
+    effective_prompt = _resolve_effective_prompt(
+        host_id=host_id,
+        entry_id=requested_entry_id,
+        prompt=prompt,
+        artifact_root=resolved_artifact_root,
+        run_id=run_id,
+    )
     contract = resolve_canonical_vibe_contract(repo_root_path, host_id)
     if str(contract.get("fallback_policy") or "").strip() != "blocked":
         raise RuntimeError("unsupported fallback policy for canonical entry launcher")
@@ -535,7 +667,7 @@ def launch_canonical_vibe(
             requested_stage_stop=requested_stage_stop,
             requested_grade_floor=requested_grade_floor,
             run_id=resolved_run_id,
-            artifact_root=artifact_root,
+            artifact_root=resolved_artifact_root,
             force_runtime_neutral=force_runtime_neutral,
         )
     except Exception:

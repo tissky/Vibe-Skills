@@ -17,12 +17,23 @@ DEEP_DISCOVERY_FIRST_QUESTION = "你希望这次任务最终交付什么形式"
 
 
 def _collect_clarification_questions(route_result: dict[str, Any], max_items: int = 6) -> list[str]:
+    deep_discovery_advice = route_result.get("deep_discovery_advice") or {}
+    llm_acceleration_advice = route_result.get("llm_acceleration_advice") or {}
+    prompt_asset_boost_advice = route_result.get("prompt_asset_boost_advice") or {}
+    clarification_required = bool(
+        deep_discovery_advice.get("confirm_required")
+        or llm_acceleration_advice.get("confirm_required")
+        or prompt_asset_boost_advice.get("confirm_required")
+    )
+    if not clarification_required:
+        return []
+
     cap = min(max_items, 6)
     questions: list[str] = []
     sources = [
-        (route_result.get("deep_discovery_advice") or {}).get("interview_questions", []),
-        (route_result.get("llm_acceleration_advice") or {}).get("confirm_questions", []),
-        (route_result.get("prompt_asset_boost_advice") or {}).get("confirm_questions", []),
+        deep_discovery_advice.get("interview_questions", []),
+        llm_acceleration_advice.get("confirm_questions", []),
+        prompt_asset_boost_advice.get("confirm_questions", []),
     ]
 
     for source in sources:

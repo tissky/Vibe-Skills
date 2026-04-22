@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import shutil
 import sys
 import unittest
 from pathlib import Path
@@ -37,6 +38,40 @@ def run_bridge(prompt: str, grade: str, task_type: str, requested_skill: str | N
     if requested_skill:
         command.extend(["--requested-skill", requested_skill])
     completed = subprocess.run(command, cwd=REPO_ROOT, capture_output=True, text=True, check=True)
+    return json.loads(completed.stdout)
+
+
+def run_powershell_route(prompt: str, grade: str, task_type: str, requested_skill: str | None = None) -> dict:
+    powershell = shutil.which("pwsh") or shutil.which("powershell")
+    if not powershell:
+        raise unittest.SkipTest("PowerShell host not available")
+
+    command = [
+        powershell,
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        str(REPO_ROOT / "scripts" / "router" / "resolve-pack-route.ps1"),
+        "-Prompt",
+        prompt,
+        "-Grade",
+        grade,
+        "-TaskType",
+        task_type,
+    ]
+    if requested_skill:
+        command.extend(["-RequestedSkill", requested_skill])
+
+    completed = subprocess.run(
+        command,
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=True,
+    )
     return json.loads(completed.stdout)
 
 
@@ -85,6 +120,34 @@ class RouterBridgeTests(unittest.TestCase):
         self.assertGreaterEqual(len(result["confirm_ui"]["clarification_questions"]), 6)
         self.assertIn(CONFIRM_UI_BATCH_PROMPT, result["confirm_ui"]["rendered_text"])
         self.assertIn(DEEP_DISCOVERY_FIRST_QUESTION, result["confirm_ui"]["rendered_text"])
+
+    def test_host_selection_confirm_ui_does_not_reopen_generic_clarifiers(self) -> None:
+        result = run_bridge(
+            "create implementation plan and task breakdown",
+            "L",
+            "planning",
+        )
+
+        self.assertEqual("pack_overlay", result["route_mode"])
+        self.assertEqual("host_selection_required", result["route_reason"])
+        self.assertIn("confirm_ui", result)
+        self.assertEqual([], result["confirm_ui"]["clarification_questions"])
+        self.assertNotIn(CONFIRM_UI_BATCH_PROMPT, result["confirm_ui"]["rendered_text"])
+        self.assertNotIn(DEEP_DISCOVERY_FIRST_QUESTION, result["confirm_ui"]["rendered_text"])
+
+    def test_powershell_host_selection_confirm_ui_does_not_reopen_generic_clarifiers(self) -> None:
+        result = run_powershell_route(
+            "create implementation plan and task breakdown",
+            "L",
+            "planning",
+        )
+
+        self.assertEqual("pack_overlay", result["route_mode"])
+        self.assertEqual("host_selection_required", result["route_reason"])
+        self.assertIn("confirm_ui", result)
+        self.assertEqual([], result["confirm_ui"]["clarification_questions"])
+        self.assertNotIn(CONFIRM_UI_BATCH_PROMPT, result["confirm_ui"]["rendered_text"])
+        self.assertNotIn(DEEP_DISCOVERY_FIRST_QUESTION, result["confirm_ui"]["rendered_text"])
 
     def test_ml_critical_discussion_routes_to_lqf_ml_expert(self) -> None:
         result = run_bridge(
@@ -256,10 +319,10 @@ class RouterBridgeTests(unittest.TestCase):
         )
 
         self.assertEqual("pack_overlay", result["route_mode"])
-        self.assertEqual("code-quality", result["selected"]["pack_id"])
-        self.assertEqual("systematic-debugging", result["selected"]["skill"])
+        self.assertEqual("orchestration-core", result["selected"]["pack_id"])
+        self.assertEqual("vibe", result["selected"]["skill"])
         self.assertEqual("vibe", result["alias"]["requested_canonical"])
-        self.assertEqual("vibe", result["ranked"][1]["selected_candidate"])
+        self.assertEqual("vibe", result["ranked"][0]["selected_candidate"])
         self.assertIn("confirm_ui", result)
         self.assertTrue(result["confirm_ui"]["enabled"])
 

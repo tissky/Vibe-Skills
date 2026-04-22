@@ -446,6 +446,29 @@ function Get-ConfirmUiClarificationQuestions {
     )
 
     if (-not $Result) { return @() }
+    $clarificationRequired = $false
+
+    try {
+        if ($Result.deep_discovery_advice -and [bool]$Result.deep_discovery_advice.confirm_required) {
+            $clarificationRequired = $true
+        }
+    } catch { }
+
+    try {
+        if ($Result.llm_acceleration_advice -and [bool]$Result.llm_acceleration_advice.confirm_required) {
+            $clarificationRequired = $true
+        }
+    } catch { }
+
+    try {
+        if ($Result.prompt_asset_boost_advice -and [bool]$Result.prompt_asset_boost_advice.confirm_required) {
+            $clarificationRequired = $true
+        }
+    } catch { }
+
+    if (-not $clarificationRequired) {
+        return @()
+    }
 
     $limit = [Math]::Max(1, [int]$MaxQuestions)
     $sources = @()

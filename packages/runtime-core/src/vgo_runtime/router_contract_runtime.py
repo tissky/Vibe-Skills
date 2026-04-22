@@ -73,7 +73,7 @@ def _build_deep_discovery_advice(repo: RepoContext, prompt_lower: str, grade: st
         matched_keywords = [
             str(keyword).strip()
             for keyword in capability.get("keywords") or []
-            if normalize_text(str(keyword)) and normalize_text(str(keyword)) in prompt_lower
+            if keyword_ratio(prompt_lower, [str(keyword)]) > 0
         ]
         if not matched_keywords:
             continue
@@ -81,6 +81,7 @@ def _build_deep_discovery_advice(repo: RepoContext, prompt_lower: str, grade: st
             {
                 "capability_id": str(capability.get("id") or ""),
                 "display_name": str(capability.get("display_name") or ""),
+                "score": round(keyword_ratio(prompt_lower, capability.get("keywords") or []), 4),
                 "matched_keyword_count": len(matched_keywords),
                 "matched_keywords": matched_keywords,
                 "skills": [str(skill).strip() for skill in capability.get("skills") or [] if str(skill).strip()],
@@ -95,10 +96,40 @@ def _build_deep_discovery_advice(repo: RepoContext, prompt_lower: str, grade: st
     )
 
     trigger_cfg = policy.get("trigger") or {}
-    trigger_keywords = _dedupe_strings(
-        [str(keyword) for key in ("ambiguity_keywords", "composite_keywords", "execution_keywords") for keyword in trigger_cfg.get(key) or []]
+    min_trigger_score = float(trigger_cfg.get("min_trigger_score", 0.2))
+    min_capability_hits = int(trigger_cfg.get("min_capability_hits", 1))
+    ambiguity_score = float(keyword_ratio(prompt_lower, trigger_cfg.get("ambiguity_keywords") or []))
+    composite_score = float(keyword_ratio(prompt_lower, trigger_cfg.get("composite_keywords") or []))
+    execution_score = float(keyword_ratio(prompt_lower, trigger_cfg.get("execution_keywords") or []))
+    capability_hit_count = len(capability_hits)
+    capability_score = min(1.0, capability_hit_count / 3.0)
+    trigger_score = round(
+        min(
+            1.0,
+            max(
+                0.0,
+                (0.25 * ambiguity_score)
+                + (0.45 * composite_score)
+                + (0.20 * execution_score)
+                + (0.10 * capability_score),
+            ),
+        ),
+        4,
     )
-    trigger_active = any(normalize_text(keyword) in prompt_lower for keyword in trigger_keywords if normalize_text(keyword))
+    trigger_reasons: list[str] = []
+    if ambiguity_score > 0:
+        trigger_reasons.append("ambiguity_signal")
+    if composite_score > 0:
+        trigger_reasons.append("composite_signal")
+    if execution_score > 0:
+        trigger_reasons.append("execution_signal")
+    if capability_hit_count >= min_capability_hits:
+        trigger_reasons.append("capability_hits")
+    active_by_score = trigger_score >= min_trigger_score and capability_hit_count >= min_capability_hits
+    active_by_composite = composite_score >= 0.2 and capability_hit_count >= 1
+    trigger_active = active_by_score or active_by_composite
+    if not trigger_active:
+        trigger_reasons.append("below_activation_threshold")
 
     interview_cfg = policy.get("interview") or {}
     max_questions = max(1, int(interview_cfg.get("max_questions", 3)))
@@ -161,7 +192,21 @@ def _build_deep_discovery_advice(repo: RepoContext, prompt_lower: str, grade: st
         "mode": mode,
         "scope_applicable": scope_applicable,
         "scope_reasons": scope_reasons,
+        "preserve_routing_assignment": bool(policy.get("preserve_routing_assignment", True)),
         "trigger_active": trigger_active,
+        "trigger_score": trigger_score,
+        "trigger_details": {
+            "active": trigger_active,
+            "trigger_score": trigger_score,
+            "ambiguity_score": round(ambiguity_score, 4),
+            "composite_score": round(composite_score, 4),
+            "execution_score": round(execution_score, 4),
+            "capability_score": round(capability_score, 4),
+            "capability_hit_count": capability_hit_count,
+            "min_trigger_score": min_trigger_score,
+            "min_capability_hits": min_capability_hits,
+            "reasons": _dedupe_strings(trigger_reasons),
+        },
         "capability_hit_count": len(capability_hits),
         "capability_hits": capability_hits,
         "recommended_capabilities": recommended_capabilities,
@@ -173,8 +218,117 @@ def _build_deep_discovery_advice(repo: RepoContext, prompt_lower: str, grade: st
         "enforcement": enforcement,
         "reason": reason,
         "confirm_required": confirm_required,
-        "should_apply_hook": scope_applicable,
+        "should_apply_hook": interview_required,
     }
+
+
+def _deep_discovery_deliverable_hint(prompt_lower: str) -> str:
+    code_hit = float(keyword_ratio(prompt_lower, ["script", "code", "api", "service", "pipeline", "脚本", "代码", "接口", "服务"]))
+    report_hit = float(keyword_ratio(prompt_lower, ["report", "analysis", "summary", "文档", "报告", "总结", "分析"]))
+    plan_hit = float(keyword_ratio(prompt_lower, ["plan", "design", "architecture", "roadmap", "方案", "规划", "设计", "架构"]))
+
+    if code_hit > 0 and report_hit > 0:
+        return "code_plus_report"
+    if code_hit > 0 and plan_hit > 0:
+        return "plan_plus_code"
+    if report_hit > 0 and plan_hit > 0:
+        return "plan_plus_report"
+    if code_hit > 0:
+        return "code"
+    if report_hit > 0:
+        return "report"
+    if plan_hit > 0:
+        return "plan"
+    return "unknown"
+
+
+def _deep_discovery_constraint_hints(prompt_lower: str) -> list[str]:
+    constraints: list[str] = []
+    if keyword_ratio(prompt_lower, ["must", "必须", "strict", "严格"]) > 0:
+        constraints.append("strict_requirement")
+    if keyword_ratio(prompt_lower, ["today", "asap", "deadline", "今天", "尽快", "截止"]) > 0:
+        constraints.append("timeline_constraint")
+    if keyword_ratio(prompt_lower, ["json", "csv", "xlsx", "markdown", "pdf", "格式"]) > 0:
+        constraints.append("output_format_constraint")
+    if keyword_ratio(prompt_lower, ["test", "verify", "validation", "gate", "测试", "验证", "门禁"]) > 0:
+        constraints.append("verification_constraint")
+    return _dedupe_strings(constraints)
+
+
+def _deep_discovery_execution_mode_hint(prompt_lower: str) -> str:
+    plan_hit = float(keyword_ratio(prompt_lower, ["plan", "design", "brainstorm", "方案", "规划", "设计", "访谈"]))
+    exec_hit = float(keyword_ratio(prompt_lower, ["implement", "execute", "build", "落地", "实现", "执行"]))
+
+    if plan_hit > 0 and exec_hit > 0:
+        return "plan_then_execute"
+    if plan_hit > 0:
+        return "plan_only"
+    if exec_hit > 0:
+        return "execute_only"
+    return "unspecified"
+
+
+def _build_deep_discovery_intent_contract(
+    prompt: str,
+    prompt_lower: str,
+    deep_discovery_advice: dict[str, object] | None,
+    deep_discovery_policy: dict[str, object] | None,
+) -> dict[str, object]:
+    goal_text = prompt.strip()
+    deliverable = _deep_discovery_deliverable_hint(prompt_lower)
+    constraints = _deep_discovery_constraint_hints(prompt_lower)
+    capabilities = _dedupe_strings(
+        [str(item) for item in (deep_discovery_advice or {}).get("recommended_capabilities") or []]
+    )
+    intent_contract_policy = (deep_discovery_policy or {}).get("intent_contract") or {}
+    required_fields = [
+        str(item).strip()
+        for item in intent_contract_policy.get("required_fields") or []
+        if str(item).strip()
+    ]
+    if not required_fields:
+        required_fields = ["goal", "deliverable", "constraints", "capabilities"]
+
+    field_presence = {
+        "goal": bool(goal_text and len(goal_text) >= 8),
+        "deliverable": deliverable != "unknown",
+        "constraints": bool(constraints),
+        "capabilities": bool(capabilities),
+    }
+    missing_fields = [field for field in required_fields if not field_presence.get(field, False)]
+    completeness = round((len(required_fields) - len(missing_fields)) / float(len(required_fields) or 1), 4)
+
+    return {
+        "goal": goal_text,
+        "deliverable": deliverable,
+        "constraints": constraints,
+        "capabilities": capabilities,
+        "execution_mode": _deep_discovery_execution_mode_hint(prompt_lower),
+        "required_fields": required_fields,
+        "missing_fields": missing_fields,
+        "completeness": completeness,
+        "field_presence": field_presence,
+    }
+
+
+def _relax_deep_discovery_confirm(
+    deep_discovery_advice: dict[str, object] | None,
+    intent_contract: dict[str, object] | None,
+) -> bool:
+    if not deep_discovery_advice or not deep_discovery_advice.get("confirm_required"):
+        return False
+
+    completeness = float((intent_contract or {}).get("completeness") or 0.0)
+    min_required = float(deep_discovery_advice.get("min_completeness_for_confirm_required") or 1.0)
+    capability_count = len(deep_discovery_advice.get("recommended_capabilities") or [])
+    if capability_count > 1 or completeness < min_required:
+        return False
+
+    deep_discovery_advice["enforcement"] = "advisory"
+    deep_discovery_advice["reason"] = "intent_contract_sufficient_single_capability"
+    deep_discovery_advice["confirm_required"] = False
+    deep_discovery_advice["interview_required"] = False
+    return True
 
 
 def _get_preferred_host_selection(pack_row: dict[str, object] | None) -> dict[str, object] | None:
@@ -403,13 +557,17 @@ def route_prompt(
         route_mode = "pack_overlay"
         route_reason = "auto_route"
 
+    deep_discovery_policy_path = repo.config_root / "deep-discovery-policy.json"
+    deep_discovery_policy = load_json(deep_discovery_policy_path) if deep_discovery_policy_path.exists() else {}
     deep_discovery_advice = _build_deep_discovery_advice(repo, prompt_lower, grade, task_type)
+    intent_contract = _build_deep_discovery_intent_contract(prompt, prompt_lower, deep_discovery_advice, deep_discovery_policy)
+    deep_discovery_route_filter_applied = False
+    deep_discovery_confirm_relaxed = _relax_deep_discovery_confirm(deep_discovery_advice, intent_contract)
     if (
         route_mode == "pack_overlay"
         and deep_discovery_advice
+        and bool(deep_discovery_advice.get("scope_applicable"))
         and bool(deep_discovery_advice.get("confirm_required"))
-        and top
-        and not bool(top.get("route_authority_eligible", True))
     ):
         route_mode = "confirm_required"
         route_reason = "deep_discovery_confirm_required"
@@ -487,6 +645,11 @@ def route_prompt(
             else None
         ),
         "ranked": ranked[:3],
+        "intent_contract": intent_contract,
+        "deep_discovery_route_filter_applied": deep_discovery_route_filter_applied,
+        "deep_discovery_route_mode_override": bool(
+            route_mode == "confirm_required" and route_reason == "deep_discovery_confirm_required"
+        ),
         "runtime_neutral_bridge": {
             "enabled": True,
             "engine": "python",
@@ -504,6 +667,7 @@ def route_prompt(
     }
     if deep_discovery_advice:
         result["deep_discovery_advice"] = deep_discovery_advice
+        result["deep_discovery_confirm_relaxed"] = deep_discovery_confirm_relaxed
     result.update(build_fallback_truth(result, fallback_policy))
 
     confirm_ui = build_confirm_ui(repo, result, target_root, host_id)

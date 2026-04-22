@@ -208,6 +208,69 @@ def test_canonical_entry_synthesizes_default_prompt_for_empty_vibe_upgrade_reque
     assert receipt["launch_status"] == "verified"
 
 
+def test_resolve_effective_prompt_enriches_short_vibe_do_prompt_with_prior_intent_contract(
+    tmp_path: Path,
+) -> None:
+    previous_run = tmp_path / "outputs" / "runtime" / "vibe-sessions" / "prior-run"
+    intent_contract_path = previous_run / "artifacts" / "intent-contract.json"
+    execution_plan_path = previous_run / "artifacts" / "execution-plan.md"
+    summary_path = previous_run / "runtime-summary.json"
+
+    _write_json(
+        intent_contract_path,
+        {
+            "goal": "facial recognition few-shot dataset research",
+            "deliverable": "report",
+            "execution_mode": "execute",
+            "constraints": ["gpu-aware"],
+            "capabilities": ["dataset-download", "baseline-train"],
+        },
+    )
+    execution_plan_path.parent.mkdir(parents=True, exist_ok=True)
+    execution_plan_path.write_text("# execution plan\n", encoding="utf-8")
+    _write_json(
+        summary_path,
+        {
+            "run_id": "prior-run",
+            "terminal_stage": "execution_plan",
+            "artifacts": {
+                "intent_contract": str(intent_contract_path),
+                "execution_plan": str(execution_plan_path),
+            },
+        },
+    )
+
+    prompt = canonical_entry._resolve_effective_prompt(
+        host_id="codex",
+        entry_id="vibe-do",
+        prompt="execute plan phase-cleanup",
+        artifact_root=tmp_path,
+        run_id="current-run",
+    )
+
+    assert prompt.startswith("continue-vibe-do ")
+    assert "facial recognition few-shot dataset research" in prompt
+    assert "deliverable-report" in prompt
+    assert "mode-execute" in prompt
+    assert "constraint-gpu-aware" in prompt
+    assert "capability-dataset-download" in prompt
+    assert prompt.endswith("execute plan phase-cleanup")
+
+
+def test_resolve_effective_prompt_keeps_prompt_when_no_prior_continuation_context(
+    tmp_path: Path,
+) -> None:
+    prompt = canonical_entry._resolve_effective_prompt(
+        host_id="codex",
+        entry_id="vibe-do",
+        prompt="execute plan phase-cleanup",
+        artifact_root=tmp_path,
+        run_id="current-run",
+    )
+
+    assert prompt == "execute plan phase-cleanup"
+
+
 def test_canonical_entry_marks_receipt_failed_when_runtime_invocation_raises(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

@@ -93,6 +93,24 @@ The fact that the router may internally enter "auto_route" mode does NOT mean th
 router was skipped. The router was called and made that decision. AI must invoke
 it explicitly every time.
 
+### Continuation-Aware Router Input
+
+When entering through a downstream wrapper such as `vibe-how` after `vibe-want`, or
+`vibe-do` after `vibe-how`, do not pretend this is a brand-new task if the same thread
+already has a verified governed requirement or plan.
+
+Continuation rules:
+1. Reuse the latest verified frozen requirement/plan from the same thread or workspace as continuation context when it exists.
+2. Build the router keyword text from the frozen goal, deliverable, constraints, and capability hints plus the current delta, not from a bare summary such as `execute plan`.
+3. Treat previously frozen requirement/plan facts as authoritative context for deliverable, constraints, and capability coverage.
+4. Reopen generic clarification only when the user changed scope, the frozen artifacts are missing, or the prior artifacts are clearly stale or mismatched.
+
+Bad continuation example:
+`execute plan facial-recognition phase-cleanup`
+
+Better continuation example:
+`execute governed-plan facial-recognition dataset-download literature-review few-shot-modeling training evaluation latex-paper gpu-aware constraints-public-dataset deliverable-report-and-paper`
+
 ## Canonical Bootstrap
 
 Bootstrap sequence (run canonical launch before reading repo files, protocol docs, or writing any artifact):

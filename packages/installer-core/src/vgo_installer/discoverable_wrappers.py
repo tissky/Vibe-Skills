@@ -72,6 +72,13 @@ def _body_lines(host_id: str, entry: DiscoverableEntry, *, contract: dict[str, o
         if entry.id == "vibe-upgrade"
         else None
     )
+    continuation_lines = []
+    if entry.id in {"vibe-how", "vibe-do"}:
+        continuation_lines = [
+            "If this wrapper continues a prior canonical run in the same thread or workspace, reuse the latest verified frozen requirement/plan as continuation context.",
+            "When extracting keyword intent for the router, include the frozen goal, deliverable, constraints, and capability hints from the earlier governed artifacts instead of reducing the request to a bare `execute plan` summary.",
+            "Do not reopen generic clarification questions unless the user changed scope or the prior governed artifacts are missing or stale.",
+        ]
     return [
         "Canonical runtime trampoline contract (installer-managed wrapper):",
         "```json",
@@ -86,6 +93,7 @@ def _body_lines(host_id: str, entry: DiscoverableEntry, *, contract: dict[str, o
         "Launch canonical-entry first. Do not preflight-scan the current workspace or repository for canonical proof files before launch.",
         "If canonical-entry returns a session root, validate canonical proof artifacts only inside that launched session root.",
         "If canonical runtime cannot be launched, report blocked instead of silently falling back.",
+        *continuation_lines,
         *([empty_request_line] if empty_request_line else []),
         "",
         "Request:",
