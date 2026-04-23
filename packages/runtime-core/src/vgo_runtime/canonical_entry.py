@@ -319,29 +319,40 @@ def _should_apply_continuation(entry_id: str, prompt_text: str) -> bool:
     return normalized.startswith("execute ") or normalized.startswith("plan ")
 
 
-def _find_continuation_context(*, artifact_root: Path, entry_id: str, run_id: str | None) -> dict[str, Any] | None:
+def _find_continuation_context(
+    *,
+    artifact_root: Path,
+    entry_id: str,
+    run_id: str | None,
+    preferred_run_id: str | None = None,
+) -> dict[str, Any] | None:
     required_artifact = "requirement_doc" if entry_id == "vibe-how" else "execution_plan"
+    preferred = str(preferred_run_id or "").strip()
+    if preferred:
+        preferred_summary = _continuation_sessions_root(artifact_root) / preferred / "runtime-summary.json"
+        if preferred_summary.is_file():
+            continuation = _load_continuation_context_from_summary(
+                preferred_summary,
+                required_artifact=required_artifact,
+            )
+            if continuation:
+                return continuation
+
     for summary_path in _iter_runtime_summaries(artifact_root):
         if run_id and summary_path.parent.name == run_id:
             continue
         summary = _load_json_dict_if_exists(summary_path)
         if not summary:
             continue
-        artifacts = summary.get("artifacts") or {}
-        required_path = artifacts.get(required_artifact)
-        intent_contract_path = artifacts.get("intent_contract")
-        if not required_path or not Path(required_path).exists():
+        if _coerce_bounded_return_control(summary):
+            # Bounded wrapper stops must not be reused implicitly as continuation context.
             continue
-        intent_contract = _load_json_dict_if_exists(Path(intent_contract_path)) if intent_contract_path else None
-        if not intent_contract:
-            continue
-        return {
-            "summary_path": str(summary_path),
-            "run_id": str(summary.get("run_id") or summary_path.parent.name),
-            "terminal_stage": str(summary.get("terminal_stage") or ""),
-            "required_artifact": str(required_path),
-            "intent_contract": intent_contract,
-        }
+        continuation = _load_continuation_context_from_summary(
+            summary_path,
+            required_artifact=required_artifact,
+        )
+        if continuation:
+            return continuation
     return None
 
 
@@ -353,6 +364,36 @@ def _build_continuation_prompt(*, prompt_text: str, entry_id: str, continuation:
     return " ".join(part for part in keywords if part).strip()
 
 
+def _normalize_prompt_for_compare(text: str) -> str:
+    normalized = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", " ", str(text or "").strip().lower())
+    return " ".join(part for part in normalized.split() if part)
+
+
+def _load_continuation_context_from_summary(
+    summary_path: Path,
+    *,
+    required_artifact: str,
+) -> dict[str, Any] | None:
+    summary = _load_json_dict_if_exists(summary_path)
+    if not summary:
+        return None
+    artifacts = summary.get("artifacts") or {}
+    required_path = artifacts.get(required_artifact)
+    intent_contract_path = artifacts.get("intent_contract")
+    if not required_path or not Path(required_path).exists():
+        return None
+    intent_contract = _load_json_dict_if_exists(Path(intent_contract_path)) if intent_contract_path else None
+    if not intent_contract:
+        return None
+    return {
+        "summary_path": str(summary_path),
+        "run_id": str(summary.get("run_id") or summary_path.parent.name),
+        "terminal_stage": str(summary.get("terminal_stage") or ""),
+        "required_artifact": str(required_path),
+        "intent_contract": intent_contract,
+    }
+
+
 def _resolve_effective_prompt(
     *,
     host_id: str,
@@ -360,6 +401,7 @@ def _resolve_effective_prompt(
     prompt: str,
     artifact_root: Path | None = None,
     run_id: str | None = None,
+    continuation_source_run_id: str | None = None,
 ) -> str:
     """Derive the runtime prompt, including upgrade fallback and continuation context."""
     prompt_text = str(prompt or "")
@@ -372,11 +414,170 @@ def _resolve_effective_prompt(
         )
 
     if artifact_root is not None and _should_apply_continuation(entry_id, prompt_text):
-        continuation = _find_continuation_context(artifact_root=artifact_root, entry_id=entry_id, run_id=run_id)
+        continuation = _find_continuation_context(
+            artifact_root=artifact_root,
+            entry_id=entry_id,
+            run_id=run_id,
+            preferred_run_id=continuation_source_run_id,
+        )
         if continuation:
             return _build_continuation_prompt(prompt_text=prompt_text, entry_id=entry_id, continuation=continuation)
 
     return prompt_text
+
+
+def _coerce_bounded_return_control(summary: dict[str, Any]) -> dict[str, Any] | None:
+    raw = summary.get("bounded_return_control")
+    if not isinstance(raw, dict):
+        return None
+    if not bool(raw.get("explicit_user_reentry_required")):
+        return None
+
+    token = str(raw.get("reentry_token") or "").strip()
+    source_run_id = str(raw.get("source_run_id") or summary.get("run_id") or "").strip()
+    terminal_stage = str(raw.get("terminal_stage") or summary.get("terminal_stage") or "").strip()
+    allowed_followup = [
+        str(entry).strip()
+        for entry in (raw.get("allowed_followup_entry_ids") or [])
+        if str(entry).strip()
+    ]
+    if not token or not source_run_id or not terminal_stage or not allowed_followup:
+        return None
+
+    artifacts = summary.get("artifacts") or {}
+    intent_contract = _load_json_dict_if_exists(Path(artifacts["intent_contract"])) if artifacts.get("intent_contract") else None
+    return {
+        "summary_path": str(summary.get("summary_path") or ""),
+        "source_run_id": source_run_id,
+        "terminal_stage": terminal_stage,
+        "allowed_followup_entry_ids": allowed_followup,
+        "reentry_token": token,
+        "task": str(summary.get("task") or ""),
+        "intent_goal": str(intent_contract.get("goal") or "") if intent_contract else "",
+    }
+
+
+def _find_latest_bounded_return_control(
+    *,
+    artifact_root: Path,
+    run_id: str | None,
+    preferred_run_id: str | None = None,
+) -> dict[str, Any] | None:
+    preferred = str(preferred_run_id or "").strip()
+    if preferred:
+        preferred_summary_path = _continuation_sessions_root(artifact_root) / preferred / "runtime-summary.json"
+        preferred_summary = _load_json_dict_if_exists(preferred_summary_path)
+        if preferred_summary:
+            preferred_guard = _coerce_bounded_return_control(preferred_summary)
+            if preferred_guard:
+                preferred_guard["summary_path"] = str(preferred_summary_path)
+                return preferred_guard
+
+    for summary_path in _iter_runtime_summaries(artifact_root):
+        if run_id and summary_path.parent.name == run_id:
+            continue
+        summary = _load_json_dict_if_exists(summary_path)
+        if not summary:
+            continue
+        guard = _coerce_bounded_return_control(summary)
+        if guard:
+            guard["summary_path"] = str(summary_path)
+            return guard
+    return None
+
+
+def _looks_like_generic_reentry_prompt(
+    prompt_text: str,
+    *,
+    entry_id: str,
+    bounded_return_control: dict[str, Any],
+) -> bool:
+    normalized_prompt = _normalize_prompt_for_compare(prompt_text)
+    if not normalized_prompt:
+        return True
+
+    for prior_text in (
+        str(bounded_return_control.get("task") or ""),
+        str(bounded_return_control.get("intent_goal") or ""),
+    ):
+        normalized_prior = _normalize_prompt_for_compare(prior_text)
+        if normalized_prior and normalized_prompt == normalized_prior:
+            return True
+
+    lowered_prompt = str(prompt_text or "").strip().lower()
+    continuation_prefixes = (
+        "continue",
+        "resume",
+        "proceed",
+        "continue-",
+        "execute plan",
+        "execute the plan",
+        "implement plan",
+        "implement the plan",
+        "finish plan",
+        "finish the plan",
+        "resume plan",
+        "continue plan",
+        "继续",
+        "接着",
+        "执行计划",
+        "按计划执行",
+        "继续执行",
+        "继续规划",
+        "继续实现",
+    )
+    for prefix in continuation_prefixes:
+        if lowered_prompt == prefix:
+            return True
+        if prefix.endswith("-"):
+            if lowered_prompt.startswith(prefix):
+                return True
+            continue
+        if lowered_prompt.startswith(prefix + " "):
+            return True
+
+    return False
+
+
+def _validate_bounded_reentry(
+    *,
+    artifact_root: Path | None,
+    entry_id: str,
+    prompt: str,
+    run_id: str | None,
+    continue_from_run_id: str | None,
+    bounded_reentry_token: str | None,
+) -> dict[str, Any] | None:
+    if artifact_root is None:
+        return None
+
+    prior_guard = _find_latest_bounded_return_control(
+        artifact_root=artifact_root,
+        run_id=run_id,
+        preferred_run_id=continue_from_run_id,
+    )
+    if not prior_guard:
+        return None
+    if entry_id not in set(prior_guard["allowed_followup_entry_ids"]):
+        return None
+    if not _looks_like_generic_reentry_prompt(prompt, entry_id=entry_id, bounded_return_control=prior_guard):
+        return None
+
+    provided_run_id = str(continue_from_run_id or "").strip()
+    provided_token = str(bounded_reentry_token or "").strip()
+    if not provided_run_id or not provided_token:
+        raise RuntimeError(
+            "bounded wrapper continuation requires explicit re-entry credentials from the latest bounded run "
+            f"({prior_guard['source_run_id']}); forward --continue-from-run-id and --bounded-reentry-token"
+        )
+    if provided_run_id != prior_guard["source_run_id"]:
+        raise RuntimeError(
+            "bounded wrapper continuation run mismatch; expected "
+            f"{prior_guard['source_run_id']} but received {provided_run_id}"
+        )
+    if provided_token != prior_guard["reentry_token"]:
+        raise RuntimeError("bounded wrapper continuation token mismatch")
+    return prior_guard
 
 
 def _new_run_id() -> str:
@@ -622,18 +823,33 @@ def launch_canonical_vibe(
     requested_grade_floor: str | None = None,
     run_id: str | None = None,
     artifact_root: str | Path | None = None,
+    continue_from_run_id: str | None = None,
+    bounded_reentry_token: str | None = None,
     force_runtime_neutral: bool = False,
 ) -> CanonicalLaunchResult:
     """Launch canonical vibe, verify its artifacts, and return launch metadata."""
     repo_root_path = Path(repo_root).resolve()
     requested_entry_id = _normalize_requested_entry_id(entry_id)
     resolved_artifact_root = Path(artifact_root).resolve() if artifact_root is not None else repo_root_path
+    validated_reentry = _validate_bounded_reentry(
+        artifact_root=resolved_artifact_root,
+        entry_id=requested_entry_id,
+        prompt=prompt,
+        run_id=run_id,
+        continue_from_run_id=continue_from_run_id,
+        bounded_reentry_token=bounded_reentry_token,
+    )
     effective_prompt = _resolve_effective_prompt(
         host_id=host_id,
         entry_id=requested_entry_id,
         prompt=prompt,
         artifact_root=resolved_artifact_root,
         run_id=run_id,
+        continuation_source_run_id=(
+            str(validated_reentry["source_run_id"])
+            if validated_reentry
+            else str(continue_from_run_id or "").strip() or None
+        ),
     )
     contract = resolve_canonical_vibe_contract(repo_root_path, host_id)
     if str(contract.get("fallback_policy") or "").strip() != "blocked":
@@ -726,6 +942,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--requested-grade-floor", choices=("L", "XL"))
     parser.add_argument("--run-id")
     parser.add_argument("--artifact-root")
+    parser.add_argument("--continue-from-run-id")
+    parser.add_argument("--bounded-reentry-token")
     parser.add_argument("--force-runtime-neutral", action="store_true")
     args = parser.parse_args(argv)
 
@@ -738,6 +956,8 @@ def main(argv: list[str] | None = None) -> int:
         requested_grade_floor=args.requested_grade_floor,
         run_id=args.run_id,
         artifact_root=args.artifact_root,
+        continue_from_run_id=args.continue_from_run_id,
+        bounded_reentry_token=args.bounded_reentry_token,
         force_runtime_neutral=bool(args.force_runtime_neutral),
     )
     json.dump(result.to_dict(), sys.stdout, ensure_ascii=False, indent=2)

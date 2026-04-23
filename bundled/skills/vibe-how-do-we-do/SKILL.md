@@ -22,6 +22,7 @@ Execution rules:
 - do not preflight-scan the current workspace or repository for canonical proof files before launch
 - Launch canonical-entry first; validate receipts only after it returns a session root
 - do not continue into `plan_execute` or `phase_cleanup` unless the user explicitly re-enters through canonical `vibe` or another approved wrapper
+- if the latest verified `runtime-summary.json` exposes `bounded_return_control.explicit_user_reentry_required = true`, forward `--continue-from-run-id <source_run_id>` and `--bounded-reentry-token <reentry_token>` before launching this wrapper
 
 When this wrapper is chosen, enter canonical `vibe` with:
 

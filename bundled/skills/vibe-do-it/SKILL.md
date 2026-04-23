@@ -21,6 +21,7 @@ Execution rules:
 - do not create a parallel runtime
 - do not preflight-scan the current workspace or repository for canonical proof files before launch
 - Launch canonical-entry first; validate receipts only after it returns a session root
+- if the latest verified `runtime-summary.json` exposes `bounded_return_control.explicit_user_reentry_required = true`, forward `--continue-from-run-id <source_run_id>` and `--bounded-reentry-token <reentry_token>` before launching this wrapper
 
 When this wrapper is chosen, bias canonical `vibe` toward:
 

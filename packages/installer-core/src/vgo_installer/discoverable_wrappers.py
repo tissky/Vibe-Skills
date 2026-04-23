@@ -66,6 +66,12 @@ def _body_lines(host_id: str, entry: DiscoverableEntry, *, contract: dict[str, o
         "fallback_policy": str(contract.get("fallback_policy") or ""),
         "proof_required": bool(contract.get("proof_required", True)),
     }
+    if entry.id in {"vibe-how", "vibe-do"}:
+        trampoline_payload["bounded_reentry_credentials"] = {
+            "runtime_summary_field": "bounded_return_control",
+            "required": True,
+            "required_cli_flags": ["--continue-from-run-id", "--bounded-reentry-token"],
+        }
     trampoline_json = json.dumps(trampoline_payload, ensure_ascii=False, indent=2)
     empty_request_line = (
         "If the request is empty, default to upgrading the current host installation through shared `vgo-cli upgrade` and verify the result."
@@ -76,6 +82,9 @@ def _body_lines(host_id: str, entry: DiscoverableEntry, *, contract: dict[str, o
     if entry.id in {"vibe-how", "vibe-do"}:
         continuation_lines = [
             "If this wrapper continues a prior canonical run in the same thread or workspace, reuse the latest verified frozen requirement/plan as continuation context.",
+            "If the latest verified runtime summary exposes `bounded_return_control.explicit_user_reentry_required = true`, do not continue on prose alone.",
+            "Forward `--continue-from-run-id <source_run_id>` and `--bounded-reentry-token <reentry_token>` from that latest bounded summary before launching the next wrapper.",
+            "Without those credentials, treat the follow-up as blocked instead of auto-continuing later stages.",
             "When extracting keyword intent for the router, include the frozen goal, deliverable, constraints, and capability hints from the earlier governed artifacts instead of reducing the request to a bare `execute plan` summary.",
             "Do not reopen generic clarification questions unless the user changed scope or the prior governed artifacts are missing or stale.",
         ]

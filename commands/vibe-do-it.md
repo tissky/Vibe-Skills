@@ -10,6 +10,7 @@ Use the canonical `vibe` skill and bias the governed runtime toward approved-pla
 Launch canonical-entry first; do not preflight-scan the current workspace or repository for canonical proof files before launch.
 Validate canonical receipts only after canonical-entry returns a session root.
 Continue through `phase_cleanup`.
+If the latest verified `runtime-summary.json` exposes `bounded_return_control.explicit_user_reentry_required = true`, forward `--continue-from-run-id <source_run_id>` and `--bounded-reentry-token <reentry_token>` before launching this wrapper.
 
 Request:
 $ARGUMENTS

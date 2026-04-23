@@ -133,6 +133,7 @@ def run_runtime(
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
         env={**os.environ, "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "1", **(extra_env or {})},
     )
@@ -218,6 +219,7 @@ def run_write_xl_plan(
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
     )
     stdout = completed.stdout.strip()
@@ -276,6 +278,7 @@ def run_plan_execute(
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
         env={**os.environ, **(extra_env or {})},
     )
@@ -420,6 +423,16 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 ["skeleton_check", "deep_interview", "requirement_doc"],
                 [item["stage_name"] for item in stage_lineage["stages"]],
             )
+            self.assertEqual("requirement_doc", summary["bounded_return_control"]["terminal_stage"])
+            self.assertEqual(payload["run_id"], summary["bounded_return_control"]["source_run_id"])
+            self.assertTrue(bool(summary["bounded_return_control"]["explicit_user_reentry_required"]))
+            self.assertEqual(
+                ["vibe", "vibe-how", "vibe-do"],
+                list(summary["bounded_return_control"]["allowed_followup_entry_ids"]),
+            )
+            self.assertTrue(summary["artifacts"]["host_user_briefing"])
+            self.assertIn("--continue-from-run-id", summary["host_user_briefing"]["rendered_text"])
+            self.assertIn("--bounded-reentry-token", summary["host_user_briefing"]["rendered_text"])
             self.assertTrue(summary["artifacts"]["requirement_doc"])
             self.assertFalse(summary["artifacts"]["execution_plan"])
             self.assertFalse(summary["artifacts"]["execute_receipt"])
@@ -453,6 +466,16 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 ["skeleton_check", "deep_interview", "requirement_doc", "xl_plan"],
                 [item["stage_name"] for item in stage_lineage["stages"]],
             )
+            self.assertEqual("xl_plan", summary["bounded_return_control"]["terminal_stage"])
+            self.assertEqual(payload["run_id"], summary["bounded_return_control"]["source_run_id"])
+            self.assertTrue(bool(summary["bounded_return_control"]["explicit_user_reentry_required"]))
+            self.assertEqual(
+                ["vibe", "vibe-do"],
+                list(summary["bounded_return_control"]["allowed_followup_entry_ids"]),
+            )
+            self.assertTrue(summary["artifacts"]["host_user_briefing"])
+            self.assertIn("--continue-from-run-id", summary["host_user_briefing"]["rendered_text"])
+            self.assertIn("--bounded-reentry-token", summary["host_user_briefing"]["rendered_text"])
             self.assertIn("Entry intent", requirement_doc)
             self.assertIn("Requested stop stage", requirement_doc)
             self.assertIn("Requested grade floor", execution_plan)

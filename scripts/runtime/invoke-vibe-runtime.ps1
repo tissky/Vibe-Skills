@@ -86,6 +86,7 @@ function Complete-VibeGovernedRuntimeStop {
         [AllowEmptyString()] [string]$HostStageDisclosurePath = '',
         [AllowNull()] [object]$HostUserBriefing = $null,
         [AllowEmptyString()] [string]$HostUserBriefingPath = '',
+        [AllowNull()] [object]$BoundedReturnControl = $null,
         [AllowNull()] [object]$MemoryActivationReport = $null,
         [AllowEmptyString()] [string]$MemoryActivationReportPath = '',
         [AllowEmptyString()] [string]$MemoryActivationMarkdownPath = '',
@@ -183,7 +184,8 @@ function Complete-VibeGovernedRuntimeStop {
         -SpecialistConsultation (New-VibeSpecialistConsultationRuntimeProjection -Receipts @($(if ($DiscussionConsultation) { $DiscussionConsultation.receipt } else { $null }), $(if ($PlanningConsultation) { $PlanningConsultation.receipt } else { $null }))) `
         -SpecialistLifecycleDisclosure $SpecialistLifecycleDisclosure `
         -HostStageDisclosure $HostStageDisclosure `
-        -HostUserBriefing $HostUserBriefing
+        -HostUserBriefing $HostUserBriefing `
+        -BoundedReturnControl $BoundedReturnControl
 
     $summaryPath = Join-Path $SessionRoot 'runtime-summary.json'
     Write-VibeJsonArtifact -Path $summaryPath -Value $summary
@@ -360,6 +362,16 @@ if ($requestedStop -eq 'requirement_doc') {
     } else {
         $null
     }
+    $boundedReturnControl = New-VibeBoundedReturnControlProjection `
+        -RunId $RunId `
+        -EntryIntentId $EntryIntentId `
+        -StageLineage $stageLineage
+    $hostUserBriefing = New-VibeHostUserBriefingProjection -BoundedReturnControl $boundedReturnControl
+    $hostUserBriefingPath = ''
+    if ($hostUserBriefing) {
+        $hostUserBriefingPath = Get-VibeHostUserBriefingPath -SessionRoot ([string]$skeleton.session_root)
+        Write-VgoUtf8NoBomText -Path $hostUserBriefingPath -Content (([string]$hostUserBriefing.rendered_text) + [Environment]::NewLine)
+    }
 
     return Complete-VibeGovernedRuntimeStop `
         -RunId $RunId `
@@ -378,6 +390,9 @@ if ($requestedStop -eq 'requirement_doc') {
         -DiscussionConsultation $discussionConsultation `
         -HostStageDisclosure $hostStageDisclosure `
         -HostStageDisclosurePath $hostStageDisclosurePath `
+        -HostUserBriefing $hostUserBriefing `
+        -HostUserBriefingPath $hostUserBriefingPath `
+        -BoundedReturnControl $boundedReturnControl `
         -DelegationValidation $delegationValidation
 }
 $planArgs = @{
@@ -434,6 +449,16 @@ if ($requestedStop -eq 'xl_plan') {
     } else {
         $null
     }
+    $boundedReturnControl = New-VibeBoundedReturnControlProjection `
+        -RunId $RunId `
+        -EntryIntentId $EntryIntentId `
+        -StageLineage $stageLineage
+    $hostUserBriefing = New-VibeHostUserBriefingProjection -BoundedReturnControl $boundedReturnControl
+    $hostUserBriefingPath = ''
+    if ($hostUserBriefing) {
+        $hostUserBriefingPath = Get-VibeHostUserBriefingPath -SessionRoot ([string]$skeleton.session_root)
+        Write-VgoUtf8NoBomText -Path $hostUserBriefingPath -Content (([string]$hostUserBriefing.rendered_text) + [Environment]::NewLine)
+    }
 
     return Complete-VibeGovernedRuntimeStop `
         -RunId $RunId `
@@ -454,6 +479,9 @@ if ($requestedStop -eq 'xl_plan') {
         -PlanningConsultation $planningConsultation `
         -HostStageDisclosure $hostStageDisclosure `
         -HostStageDisclosurePath $hostStageDisclosurePath `
+        -HostUserBriefing $hostUserBriefing `
+        -HostUserBriefingPath $hostUserBriefingPath `
+        -BoundedReturnControl $boundedReturnControl `
         -DelegationValidation $delegationValidation
 }
 $grade = if ($plan.receipt -and $plan.receipt.internal_grade) { [string]$plan.receipt.internal_grade } else { Get-VibeInternalGrade -Task $Task }
@@ -728,7 +756,8 @@ $summary = New-VibeRuntimeSummaryProjection `
     -SpecialistConsultation (New-VibeSpecialistConsultationRuntimeProjection -Receipts @($discussionConsultation.receipt, $planningConsultation.receipt)) `
     -SpecialistLifecycleDisclosure $specialistLifecycleDisclosure `
     -HostStageDisclosure $hostStageDisclosure `
-    -HostUserBriefing $hostUserBriefing
+    -HostUserBriefing $hostUserBriefing `
+    -BoundedReturnControl $null
 
 $summaryPath = Join-Path $skeleton.session_root 'runtime-summary.json'
 Write-VibeJsonArtifact -Path $summaryPath -Value $summary

@@ -1313,6 +1313,56 @@ function Resolve-VibeEntryRequestedStageStop {
     return Resolve-VibeRequestedStageStop -RequestedStageStop ''
 }
 
+function Get-VibeBoundedReturnFollowupEntryIds {
+    param(
+        [AllowEmptyString()] [string]$TerminalStage = ''
+    )
+
+    switch ([string]$TerminalStage) {
+        'requirement_doc' { return @('vibe', 'vibe-how', 'vibe-do') }
+        'xl_plan' { return @('vibe', 'vibe-do') }
+        default { return @() }
+    }
+}
+
+function New-VibeBoundedReturnControlProjection {
+    param(
+        [Parameter(Mandatory)] [string]$RunId,
+        [AllowEmptyString()] [string]$EntryIntentId = '',
+        [AllowNull()] [object]$StageLineage = $null
+    )
+
+    $terminalStage = Get-VibeStageLineageTerminalStage -StageLineage $StageLineage
+    $allowedFollowupEntryIds = @(Get-VibeBoundedReturnFollowupEntryIds -TerminalStage $terminalStage)
+    if (@($allowedFollowupEntryIds).Count -eq 0) {
+        return $null
+    }
+
+    $resolvedEntryIntentId = if ([string]::IsNullOrWhiteSpace($EntryIntentId)) { 'vibe' } else { [string]$EntryIntentId }
+    $token = [guid]::NewGuid().ToString('N')
+    $renderedLines = @(
+        'Bounded governed stop reached. Return control to the user now.',
+        ('- terminal stage: `{0}`' -f [string]$terminalStage),
+        ('- source run id: `{0}`' -f [string]$RunId),
+        ('- explicit user re-entry required before later stages: `true`'),
+        ('- allowed follow-up entries: `{0}`' -f (@($allowedFollowupEntryIds) -join '`, `')),
+        ('- continuation token: `{0}`' -f [string]$token)
+    )
+
+    return [pscustomobject]@{
+        protocol_version = 'v1'
+        enabled = $true
+        explicit_user_reentry_required = $true
+        control_owner = 'user'
+        source_run_id = $RunId
+        source_entry_intent_id = $resolvedEntryIntentId
+        terminal_stage = [string]$terminalStage
+        allowed_followup_entry_ids = @($allowedFollowupEntryIds)
+        reentry_token = $token
+        rendered_text = (@($renderedLines) -join "`n")
+    }
+}
+
 function Get-VibeGovernanceArtifactContract {
     param(
         [AllowNull()] [object]$HierarchyContract = $null
@@ -2611,54 +2661,109 @@ function New-VibeHostUserBriefingProjection {
     param(
         [AllowNull()] [object]$LifecycleDisclosure = $null,
         [AllowNull()] [object]$DiscussionConsultationReceipt = $null,
-        [AllowNull()] [object]$PlanningConsultationReceipt = $null
+        [AllowNull()] [object]$PlanningConsultationReceipt = $null,
+        [AllowNull()] [object]$BoundedReturnControl = $null
     )
 
-    if ($null -eq $LifecycleDisclosure -or -not [bool]$LifecycleDisclosure.enabled) {
-        return $null
-    }
-
-    $consultationReceiptIndex = @{}
-    foreach ($receipt in @($DiscussionConsultationReceipt, $PlanningConsultationReceipt)) {
-        if ($null -eq $receipt) {
-            continue
-        }
-        $windowId = if ((Test-VibeObjectHasProperty -InputObject $receipt -PropertyName 'window_id') -and -not [string]::IsNullOrWhiteSpace([string]$receipt.window_id)) {
-            [string]$receipt.window_id
-        } else {
-            $null
-        }
-        if (-not [string]::IsNullOrWhiteSpace($windowId)) {
-            $consultationReceiptIndex[$windowId] = $receipt
-        }
-    }
-
     $segments = New-Object System.Collections.Generic.List[object]
-    $renderedSections = @('Specialist activity under governed vibe:')
-    foreach ($layer in @($LifecycleDisclosure.layers)) {
-        if ($null -eq $layer) {
-            continue
+    $renderedSections = @()
+
+    if ($null -ne $LifecycleDisclosure -and [bool]$LifecycleDisclosure.enabled) {
+        $consultationReceiptIndex = @{}
+        foreach ($receipt in @($DiscussionConsultationReceipt, $PlanningConsultationReceipt)) {
+            if ($null -eq $receipt) {
+                continue
+            }
+            $windowId = if ((Test-VibeObjectHasProperty -InputObject $receipt -PropertyName 'window_id') -and -not [string]::IsNullOrWhiteSpace([string]$receipt.window_id)) {
+                [string]$receipt.window_id
+            } else {
+                $null
+            }
+            if (-not [string]::IsNullOrWhiteSpace($windowId)) {
+                $consultationReceiptIndex[$windowId] = $receipt
+            }
         }
-        $windowId = $null
-        if ((Test-VibeObjectHasProperty -InputObject $layer -PropertyName 'layer_id') -and [string]$layer.layer_id -match '^(discussion|planning)_consultation$') {
-            $windowId = [string]$Matches[1]
+
+        $renderedSections += 'Specialist activity under governed vibe:'
+        foreach ($layer in @($LifecycleDisclosure.layers)) {
+            if ($null -eq $layer) {
+                continue
+            }
+            $windowId = $null
+            if ((Test-VibeObjectHasProperty -InputObject $layer -PropertyName 'layer_id') -and [string]$layer.layer_id -match '^(discussion|planning)_consultation$') {
+                $windowId = [string]$Matches[1]
+            }
+            $receipt = if (-not [string]::IsNullOrWhiteSpace($windowId) -and $consultationReceiptIndex.ContainsKey($windowId)) { $consultationReceiptIndex[$windowId] } else { $null }
+            $segment = New-VibeHostUserBriefingSegmentProjection -LifecycleLayer $layer -ConsultationReceipt $receipt
+            if ($null -eq $segment) {
+                continue
+            }
+            $segments.Add($segment) | Out-Null
+            $renderedSections += @('', [string]$segment.rendered_text)
         }
-        $receipt = if (-not [string]::IsNullOrWhiteSpace($windowId) -and $consultationReceiptIndex.ContainsKey($windowId)) { $consultationReceiptIndex[$windowId] } else { $null }
-        $segment = New-VibeHostUserBriefingSegmentProjection -LifecycleLayer $layer -ConsultationReceipt $receipt
-        if ($null -eq $segment) {
-            continue
+    }
+
+    if (
+        $null -ne $BoundedReturnControl -and
+        (Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'enabled') -and
+        [bool]$BoundedReturnControl.enabled
+    ) {
+        $allowedFollowupEntryIds = if (
+            (Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'allowed_followup_entry_ids') -and
+            $null -ne $BoundedReturnControl.allowed_followup_entry_ids
+        ) {
+            @($BoundedReturnControl.allowed_followup_entry_ids | ForEach-Object { [string]$_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        } else {
+            @()
         }
-        $segments.Add($segment) | Out-Null
-        $renderedSections += @('', [string]$segment.rendered_text)
+        $boundedLines = @(
+            'Bounded governed stop reached. Return control to the user now.',
+            ('- terminal stage: `{0}`' -f [string]$BoundedReturnControl.terminal_stage),
+            ('- source run id: `{0}`' -f [string]$BoundedReturnControl.source_run_id),
+            ('- allowed follow-up entries: `{0}`' -f (@($allowedFollowupEntryIds) -join '`, `')),
+            '- if you intentionally continue, forward `--continue-from-run-id <source_run_id>` and `--bounded-reentry-token <reentry_token>` from the latest runtime summary'
+        )
+        $boundedSegment = [pscustomobject]@{
+            segment_id = 'bounded_return_control'
+            stage = if ((Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'terminal_stage') -and -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.terminal_stage)) { [string]$BoundedReturnControl.terminal_stage } else { $null }
+            category = 'runtime_control'
+            truth_layer = 'runtime_control'
+            status = 'return_control_required'
+            gate_status = $null
+            skill_count = 0
+            skills = @()
+            rendered_text = (@($boundedLines) -join "`n")
+            control_owner = if ((Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'control_owner') -and -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.control_owner)) { [string]$BoundedReturnControl.control_owner } else { 'user' }
+            source_run_id = if ((Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'source_run_id') -and -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.source_run_id)) { [string]$BoundedReturnControl.source_run_id } else { $null }
+            terminal_stage = if ((Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'terminal_stage') -and -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.terminal_stage)) { [string]$BoundedReturnControl.terminal_stage } else { $null }
+            allowed_followup_entry_ids = @($allowedFollowupEntryIds)
+        }
+        $segments.Add($boundedSegment) | Out-Null
+        if (@($renderedSections).Count -eq 0) {
+            $renderedSections += 'Governed runtime host briefing:'
+        }
+        $renderedSections += @('', [string]$boundedSegment.rendered_text)
     }
 
     $segmentArray = [object[]]$segments.ToArray()
+    if (@($segmentArray).Count -eq 0) {
+        return $null
+    }
+
     $failedConsultationSegments = @($segmentArray | Where-Object { [string]$_.category -eq 'consultation' -and [string]$_.status -eq 'gate_failed' })
     $freezeGatePassed = [bool](@($failedConsultationSegments).Count -eq 0)
 
     return [pscustomobject]@{
         enabled = [bool](@($segmentArray).Count -gt 0)
-        mode = 'progressive_specialist_host_briefing'
+        mode = if ($null -ne $LifecycleDisclosure -and [bool]$LifecycleDisclosure.enabled) {
+            if ($null -ne $BoundedReturnControl -and (Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'enabled') -and [bool]$BoundedReturnControl.enabled) {
+                'progressive_host_user_briefing'
+            } else {
+                'progressive_specialist_host_briefing'
+            }
+        } else {
+            'bounded_return_host_briefing'
+        }
         freeze_gate_passed = $freezeGatePassed
         segment_count = @($segmentArray).Count
         segments = $segmentArray
@@ -2685,7 +2790,8 @@ function New-VibeRuntimeSummaryProjection {
         [AllowNull()] [object]$SpecialistConsultation = $null,
         [AllowNull()] [object]$SpecialistLifecycleDisclosure = $null,
         [AllowNull()] [object]$HostStageDisclosure = $null,
-        [AllowNull()] [object]$HostUserBriefing = $null
+        [AllowNull()] [object]$HostUserBriefing = $null,
+        [AllowNull()] [object]$BoundedReturnControl = $null
     )
 
     return [pscustomobject]@{
@@ -2711,6 +2817,7 @@ function New-VibeRuntimeSummaryProjection {
         specialist_lifecycle_disclosure = $SpecialistLifecycleDisclosure
         host_stage_disclosure = $HostStageDisclosure
         host_user_briefing = $HostUserBriefing
+        bounded_return_control = $BoundedReturnControl
         artifacts_relative = $RelativeArtifacts
     }
 }
