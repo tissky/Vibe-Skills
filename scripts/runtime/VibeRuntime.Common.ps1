@@ -2662,11 +2662,57 @@ function New-VibeHostUserBriefingProjection {
         [AllowNull()] [object]$LifecycleDisclosure = $null,
         [AllowNull()] [object]$DiscussionConsultationReceipt = $null,
         [AllowNull()] [object]$PlanningConsultationReceipt = $null,
-        [AllowNull()] [object]$BoundedReturnControl = $null
+        [AllowNull()] [object]$BoundedReturnControl = $null,
+        [AllowNull()] [object]$DeliveryAcceptanceReport = $null
     )
 
     $segments = New-Object System.Collections.Generic.List[object]
     $renderedSections = @()
+
+    $deliverySummary = Get-VibePropertySafe -InputObject $DeliveryAcceptanceReport -PropertyName 'summary'
+    $deliveryExecutionContext = Get-VibePropertySafe -InputObject $DeliveryAcceptanceReport -PropertyName 'execution_context'
+    $specialistHostContinuationPending = [bool](Get-VibeNestedPropertySafe -InputObject $deliveryExecutionContext -PropertyPath @('specialist_host_continuation_pending') -DefaultValue $false)
+    if ($specialistHostContinuationPending) {
+        $deliveryGateResult = [string](Get-VibeNestedPropertySafe -InputObject $deliverySummary -PropertyPath @('gate_result') -DefaultValue '')
+        $deliveryReadinessState = [string](Get-VibeNestedPropertySafe -InputObject $deliverySummary -PropertyPath @('readiness_state') -DefaultValue '')
+        $deliveryCompletionAllowed = [bool](Get-VibeNestedPropertySafe -InputObject $deliverySummary -PropertyPath @('completion_language_allowed') -DefaultValue $false)
+        $effectiveExecutionStatus = [string](Get-VibeNestedPropertySafe -InputObject $deliveryExecutionContext -PropertyPath @('specialist_effective_execution_status') -DefaultValue '')
+        $incompleteLayers = if (
+            $deliverySummary -and
+            (Test-VibeObjectHasProperty -InputObject $deliverySummary -PropertyName 'incomplete_layers') -and
+            $null -ne $deliverySummary.incomplete_layers
+        ) {
+            @($deliverySummary.incomplete_layers | ForEach-Object { [string]$_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        } else {
+            @()
+        }
+        $continuationLines = @(
+            'Execution handoff is still pending under governed vibe.',
+            ('- gate_result: `{0}`' -f $(if ([string]::IsNullOrWhiteSpace($deliveryGateResult)) { 'unknown' } else { $deliveryGateResult })),
+            ('- readiness_state: `{0}`' -f $(if ([string]::IsNullOrWhiteSpace($deliveryReadinessState)) { 'unknown' } else { $deliveryReadinessState })),
+            ('- completion_language_allowed: `{0}`' -f $deliveryCompletionAllowed),
+            ('- specialist_effective_execution_status: `{0}`' -f $(if ([string]::IsNullOrWhiteSpace($effectiveExecutionStatus)) { 'unknown' } else { $effectiveExecutionStatus })),
+            '- approved specialist execution has not been performed inside the governed runtime yet.',
+            '- next required action: load each disclosed `native_skill_entrypoint` in the current host session, execute the bounded specialist work there, then refresh governed verification before claiming completion.'
+        )
+        if (@($incompleteLayers).Count -gt 0) {
+            $continuationLines += ('- blocking truth layers: `{0}`' -f (@($incompleteLayers) -join '`, `'))
+        }
+        $continuationSegment = [pscustomobject]@{
+            segment_id = 'execution_handoff'
+            stage = 'phase_cleanup'
+            category = 'execution'
+            truth_layer = 'workflow_completion_truth'
+            status = 'current_session_continuation_required'
+            gate_status = $deliveryGateResult
+            skill_count = 0
+            skills = @()
+            rendered_text = (@($continuationLines) -join "`n")
+        }
+        $segments.Add($continuationSegment) | Out-Null
+        $renderedSections += 'Governed runtime handoff status:'
+        $renderedSections += @('', [string]$continuationSegment.rendered_text)
+    }
 
     if ($null -ne $LifecycleDisclosure -and [bool]$LifecycleDisclosure.enabled) {
         $consultationReceiptIndex = @{}

@@ -612,6 +612,11 @@ $executionManifestDocument = if (Test-Path -LiteralPath ([string]$execute.execut
 } else {
     $null
 }
+$deliveryAcceptanceReport = if (Test-Path -LiteralPath $deliveryAcceptanceReportPath) {
+    Get-Content -LiteralPath $deliveryAcceptanceReportPath -Raw -Encoding UTF8 | ConvertFrom-Json
+} else {
+    $null
+}
 $specialistLifecycleDisclosure = New-VibeSpecialistLifecycleDisclosureProjection `
     -RuntimeInputPacket $runtimeInputPacket `
     -DiscussionConsultationReceipt $discussionConsultation.receipt `
@@ -623,7 +628,8 @@ Write-VibeJsonArtifact -Path $specialistLifecycleDisclosurePath -Value $speciali
 $hostUserBriefing = New-VibeHostUserBriefingProjection `
     -LifecycleDisclosure $specialistLifecycleDisclosure `
     -DiscussionConsultationReceipt $discussionConsultation.receipt `
-    -PlanningConsultationReceipt $planningConsultation.receipt
+    -PlanningConsultationReceipt $planningConsultation.receipt `
+    -DeliveryAcceptanceReport $deliveryAcceptanceReport
 $hostStageDisclosurePath = Get-VibeHostStageDisclosurePath -SessionRoot ([string]$skeleton.session_root)
 $hostStageDisclosure = if (Test-Path -LiteralPath $hostStageDisclosurePath) {
     Get-Content -LiteralPath $hostStageDisclosurePath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -731,12 +737,6 @@ $summaryArtifacts = New-VibeRuntimeSummaryArtifactProjection `
     -DelegationEnvelopePath ([string]$hierarchyState.delegation_envelope_path) `
     -DelegationValidationReceiptPath $delegationValidationReceiptPath
 $relativeArtifacts = New-VibeRuntimeSummaryRelativeArtifactProjection -BasePath $artifactBaseRoot -Artifacts $summaryArtifacts
-
-$deliveryAcceptanceReport = if (Test-Path -LiteralPath $deliveryAcceptanceReportPath) {
-    Get-Content -LiteralPath $deliveryAcceptanceReportPath -Raw -Encoding UTF8 | ConvertFrom-Json
-} else {
-    $null
-}
 
 $summary = New-VibeRuntimeSummaryProjection `
     -RunId $RunId `

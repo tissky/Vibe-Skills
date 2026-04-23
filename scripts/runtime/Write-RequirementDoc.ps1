@@ -57,6 +57,27 @@ function Get-VibeTaskSignalText {
     return ('{0} {1}' -f $Task, $Deliverable).ToLowerInvariant()
 }
 
+function Get-VibeDefaultGovernedDeliverableText {
+    return 'Governed implementation artifacts, verification evidence, and cleanup receipts'
+}
+
+function Get-VibeCodeTaskSignalText {
+    param(
+        [Parameter(Mandatory)] [string]$Task,
+        [AllowEmptyString()] [string]$Deliverable = ''
+    )
+
+    $parts = @([string]$Task)
+    if (
+        -not [string]::IsNullOrWhiteSpace($Deliverable) -and
+        [string]$Deliverable -ne (Get-VibeDefaultGovernedDeliverableText)
+    ) {
+        $parts += [string]$Deliverable
+    }
+
+    return (@($parts) -join ' ').ToLowerInvariant()
+}
+
 function Test-VibeTaskHasExplicitNonUiSignals {
     param(
         [Parameter(Mandatory)] [string]$Task,
@@ -134,13 +155,20 @@ function Test-VibeTaskNeedsCodeTaskTddEvidence {
         [AllowEmptyString()] [string]$Deliverable = ''
     )
 
-    $text = ('{0} {1}' -f $Task, $Deliverable).ToLowerInvariant()
+    $text = Get-VibeCodeTaskSignalText -Task $Task -Deliverable $Deliverable
+    $explicitCodeSignals = 'failing test|stack trace|debug|bug|fix|refactor|\bcode\b|script|function|class|endpoint|api|component|module|frontend|backend|dashboard|page|screen|unit test|integration test|parser|exporter|renderer|service|library|cli|pull request|\bpr\b|compile|syntax error|exception'
+    $implementationSignals = '\bimplement\b|\bwire\b|\bintegrate\b|\bpatch\b'
+    $implementationTargetSignals = 'script|function|class|endpoint|api|component|module|frontend|backend|dashboard|page|screen|parser|exporter|renderer|service|library|cli|runtime|router|wrapper|installer|plugin'
 
     if ((Test-VibeTaskNeedsDocumentArtifactBaseline -Task $Task -Deliverable $Deliverable) -or ($text -match 'image|logo|illustration|diagram')) {
         return $false
     }
 
-    return $text -match 'failing test|stack trace|debug|bug|fix|refactor|implement|build|feature|code|script|function|class|endpoint|api|component|module|frontend|backend|dashboard|page|screen|unit test|integration test'
+    if ($text -match $explicitCodeSignals) {
+        return $true
+    }
+
+    return ($text -match $implementationSignals) -and ($text -match $implementationTargetSignals)
 }
 
 function Get-VibeDefaultCodeTaskTddEvidenceRequirements {
@@ -312,18 +340,6 @@ $taskSpecificAcceptanceExtensions = Get-VibeOptionalFrozenItems -IntentContract 
 $researchAugmentationSources = Get-VibeOptionalFrozenItems -IntentContract $intentContract -PropertyNames @('research_augmentation_sources', 'researchAugmentationSources')
 $baselineDocumentQualityDimensions = Get-VibeOptionalFrozenItems -IntentContract $intentContract -PropertyNames @('baseline_document_quality_dimensions', 'baselineDocumentQualityDimensions')
 $baselineUiQualityDimensions = Get-VibeOptionalFrozenItems -IntentContract $intentContract -PropertyNames @('baseline_ui_quality_dimensions', 'baselineUiQualityDimensions')
-if (@($codeTaskTddEvidenceRequirements).Count -eq 0 -and (Test-VibeTaskNeedsCodeTaskTddEvidence -Task $Task -Deliverable ([string]$intentContract.deliverable))) {
-    $codeTaskTddEvidenceRequirements = Get-VibeDefaultCodeTaskTddEvidenceRequirements
-}
-if (@($baselineDocumentQualityDimensions).Count -eq 0 -and (Test-VibeTaskNeedsDocumentArtifactBaseline -Task $Task -Deliverable ([string]$intentContract.deliverable))) {
-    $baselineDocumentQualityDimensions = Get-VibeDefaultBaselineDocumentQualityDimensions
-}
-if (@($artifactReviewRequirements).Count -eq 0 -and @($baselineDocumentQualityDimensions).Count -gt 0) {
-    $artifactReviewRequirements = Get-VibeDefaultDocumentArtifactReviewRequirements
-}
-if (@($baselineUiQualityDimensions).Count -eq 0 -and (Test-VibeTaskNeedsBaselineUiQualityDimensions -Task $Task -Deliverable ([string]$intentContract.deliverable))) {
-    $baselineUiQualityDimensions = Get-VibeDefaultBaselineUiQualityDimensions
-}
 $runtimeInputPath = if (-not [string]::IsNullOrWhiteSpace($RuntimeInputPacketPath)) {
     $RuntimeInputPacketPath
 } else {
@@ -333,6 +349,36 @@ $runtimeInputPacket = if (-not [string]::IsNullOrWhiteSpace($runtimeInputPath) -
     Get-Content -LiteralPath $runtimeInputPath -Raw -Encoding UTF8 | ConvertFrom-Json
 } else {
     $null
+}
+$runtimeTaskType = if (
+    $runtimeInputPacket -and
+    $runtimeInputPacket.PSObject.Properties.Name -contains 'canonical_router' -and
+    $runtimeInputPacket.canonical_router -and
+    $runtimeInputPacket.canonical_router.PSObject.Properties.Name -contains 'task_type' -and
+    -not [string]::IsNullOrWhiteSpace([string]$runtimeInputPacket.canonical_router.task_type)
+) {
+    ([string]$runtimeInputPacket.canonical_router.task_type).Trim().ToLowerInvariant()
+} else {
+    ''
+}
+$needsDocumentArtifactBaseline = Test-VibeTaskNeedsDocumentArtifactBaseline -Task $Task -Deliverable ([string]$intentContract.deliverable)
+$autoFreezeCodeTaskTddEvidence = $false
+if (-not $needsDocumentArtifactBaseline -and $runtimeTaskType -in @('coding', 'debug')) {
+    $autoFreezeCodeTaskTddEvidence = $true
+} elseif (Test-VibeTaskNeedsCodeTaskTddEvidence -Task $Task -Deliverable ([string]$intentContract.deliverable)) {
+    $autoFreezeCodeTaskTddEvidence = $true
+}
+if (@($codeTaskTddEvidenceRequirements).Count -eq 0 -and $autoFreezeCodeTaskTddEvidence) {
+    $codeTaskTddEvidenceRequirements = Get-VibeDefaultCodeTaskTddEvidenceRequirements
+}
+if (@($baselineDocumentQualityDimensions).Count -eq 0 -and $needsDocumentArtifactBaseline) {
+    $baselineDocumentQualityDimensions = Get-VibeDefaultBaselineDocumentQualityDimensions
+}
+if (@($artifactReviewRequirements).Count -eq 0 -and @($baselineDocumentQualityDimensions).Count -gt 0) {
+    $artifactReviewRequirements = Get-VibeDefaultDocumentArtifactReviewRequirements
+}
+if (@($baselineUiQualityDimensions).Count -eq 0 -and (Test-VibeTaskNeedsBaselineUiQualityDimensions -Task $Task -Deliverable ([string]$intentContract.deliverable))) {
+    $baselineUiQualityDimensions = Get-VibeDefaultBaselineUiQualityDimensions
 }
 $memoryContextPack = if (-not [string]::IsNullOrWhiteSpace($MemoryContextPath) -and (Test-Path -LiteralPath $MemoryContextPath)) {
     Get-Content -LiteralPath $MemoryContextPath -Raw -Encoding UTF8 | ConvertFrom-Json

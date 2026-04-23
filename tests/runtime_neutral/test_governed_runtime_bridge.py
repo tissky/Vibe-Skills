@@ -56,6 +56,10 @@ UI_TASK = "Build a responsive dashboard UI with clear interaction feedback, mean
 DOC_TASK = "Reformat the project README headings and spacing without changing application code."
 DOC_CODE_TASK = "Implement the markdown export pipeline for the docs renderer and add targeted verification for the parser."
 DOC_DECK_TASK = "Build the release deck slides and refine presentation spacing without changing application code."
+RESEARCH_EXECUTION_TASK = (
+    "execute governed-plan facial-recognition dataset-download literature-review "
+    "few-shot-modeling baseline-training algorithm-enhancement experiment-run gpu-aware latex-paper"
+)
 
 
 def resolve_python_command_spec_via_powershell(command_spec: str, path_entries: list[Path]) -> dict[str, object]:
@@ -696,6 +700,57 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
             self.assertIn("## Baseline Document Quality Dimensions", requirement_doc)
             self.assertIn("- Structure Integrity", requirement_doc)
             self.assertIn("- Output Fidelity", requirement_doc)
+
+    def test_invoke_vibe_runtime_keeps_research_execution_tasks_off_default_code_tdd_path(self) -> None:
+        script_path = REPO_ROOT / "scripts" / "runtime" / "invoke-vibe-runtime.ps1"
+        run_id = "pytest-governed-runtime-research"
+        shell = resolve_powershell()
+        if shell is None:
+            self.skipTest("PowerShell executable not available in PATH")
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir)
+            command = [
+                shell,
+                "-NoLogo",
+                "-NoProfile",
+                "-Command",
+                (
+                    "& { "
+                    f"$result = & '{script_path}' "
+                    f"-Task '{RESEARCH_EXECUTION_TASK}' "
+                    "-Mode interactive_governed "
+                    f"-RunId '{run_id}' "
+                    f"-ArtifactRoot '{artifact_root}'; "
+                    "$result | ConvertTo-Json -Depth 20 }"
+                ),
+            ]
+            completed = subprocess.run(
+                command,
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                check=True,
+                env={**os.environ, "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "1"},
+            )
+
+            payload = json.loads(completed.stdout)
+            relative_artifacts = payload["summary"].get("artifacts_relative", {})
+            requirement_doc_path = artifact_root / Path(relative_artifacts["requirement_doc"])
+            runtime_input_packet_path = artifact_root / Path(relative_artifacts["runtime_input_packet"])
+            self.assertTrue(requirement_doc_path.exists())
+            self.assertTrue(runtime_input_packet_path.exists())
+
+            requirement_doc = requirement_doc_path.read_text(encoding="utf-8")
+            runtime_input_packet = json.loads(runtime_input_packet_path.read_text(encoding="utf-8"))
+
+            self.assertEqual("research", runtime_input_packet["canonical_router"]["task_type"])
+            self.assertIn("## Code Task TDD Evidence Requirements", requirement_doc)
+            self.assertIn("No code-task TDD evidence requirements were frozen for this run.", requirement_doc)
+            self.assertNotIn(
+                "- Record failing-first evidence for the changed behavior before implementation or defect correction.",
+                requirement_doc,
+            )
 
     def test_write_requirement_doc_preserves_explicit_document_artifact_review_requirements(self) -> None:
         script_path = REPO_ROOT / "scripts" / "runtime" / "Write-RequirementDoc.ps1"

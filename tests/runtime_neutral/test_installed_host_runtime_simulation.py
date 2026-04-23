@@ -414,6 +414,20 @@ class InstalledHostRuntimeSimulationTests(unittest.TestCase):
                     1,
                     host_id,
                 )
+                host_user_briefing_path = Path(debug_state["artifacts"]["host_user_briefing"])
+                self.assertTrue(host_user_briefing_path.exists(), host_id)
+                host_user_briefing = host_user_briefing_path.read_text(encoding="utf-8")
+                self.assertIn("Execution handoff is still pending under governed vibe.", host_user_briefing, host_id)
+                self.assertIn(
+                    "next required action: load each disclosed `native_skill_entrypoint`",
+                    host_user_briefing,
+                    host_id,
+                )
+                self.assertIn(
+                    "approved specialist execution has not been performed inside the governed runtime yet.",
+                    host_user_briefing,
+                    host_id,
+                )
 
                 execution = run_installed_runtime(
                     installed_root,
