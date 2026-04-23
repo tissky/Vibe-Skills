@@ -1,6 +1,6 @@
 {
   "schema_version": "replay.route.contract-gate.v1",
-  "generated_at": "2026-04-02",
+  "generated_at": "2026-04-23",
   "router": {
     "script": "scripts/router/resolve-pack-route.ps1",
     "mode": "golden_contract_baseline",
@@ -14,11 +14,11 @@
       "task_type": "planning",
       "requested_skill": null,
       "expected": {
-        "route_mode": "confirm_required",
-        "route_reason": "legacy_fallback_guard",
+        "route_mode": "pack_overlay",
+        "route_reason": "host_selection_required",
         "selected_pack": "orchestration-core",
         "selected_skill": "vibe",
-        "confidence": 0.45,
+        "confidence": 0.2429,
         "top1_top2_gap": 0.12,
         "candidate_signal": 0.12
       }
@@ -30,11 +30,11 @@
       "task_type": "planning",
       "requested_skill": null,
       "expected": {
-        "route_mode": "confirm_required",
-        "route_reason": "legacy_fallback_guard",
+        "route_mode": "pack_overlay",
+        "route_reason": "host_selection_required",
         "selected_pack": "orchestration-core",
         "selected_skill": "vibe",
-        "confidence": 0.45,
+        "confidence": 0.2429,
         "top1_top2_gap": 0.12,
         "candidate_signal": 0.12
       }
@@ -62,11 +62,11 @@
       "task_type": "review",
       "requested_skill": null,
       "expected": {
-        "route_mode": "confirm_required",
-        "route_reason": "candidate_signal_override",
+        "route_mode": "pack_overlay",
+        "route_reason": "candidate_signal_host_selection",
         "selected_pack": "code-quality",
         "selected_skill": "code-reviewer",
-        "confidence": 0.45,
+        "confidence": 0.4062,
         "top1_top2_gap": 0.425,
         "candidate_signal": 0.515
       }
@@ -94,11 +94,11 @@
       "task_type": "research",
       "requested_skill": null,
       "expected": {
-        "route_mode": "confirm_required",
-        "route_reason": "candidate_signal_override",
+        "route_mode": "pack_overlay",
+        "route_reason": "candidate_signal_host_selection",
         "selected_pack": "ai-llm",
         "selected_skill": "openai-docs",
-        "confidence": 0.45,
+        "confidence": 0.3526,
         "top1_top2_gap": 0.325,
         "candidate_signal": 0.3681
       }
@@ -110,8 +110,8 @@
       "task_type": "research",
       "requested_skill": null,
       "expected": {
-        "route_mode": "confirm_required",
-        "route_reason": "confidence_requires_confirmation",
+        "route_mode": "pack_overlay",
+        "route_reason": "host_selection_required",
         "selected_pack": "data-ml",
         "selected_skill": "scikit-learn",
         "confidence": 0.6306,
@@ -142,13 +142,13 @@
       "task_type": "research",
       "requested_skill": null,
       "expected": {
-        "route_mode": "confirm_required",
-        "route_reason": "legacy_fallback_guard",
-        "selected_pack": "",
-        "selected_skill": "",
-        "confidence": 0.45,
+        "route_mode": "pack_overlay",
+        "route_reason": "host_selection_required",
+        "selected_pack": "scholarly-publishing-workflow",
+        "selected_skill": "scholarly-publishing",
+        "confidence": 0.0619,
         "top1_top2_gap": 0.0,
-        "candidate_signal": 0.0
+        "candidate_signal": 0.09
       }
     },
     {

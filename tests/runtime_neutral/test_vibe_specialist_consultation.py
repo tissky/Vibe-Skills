@@ -51,6 +51,48 @@ def require_preview_line(preview_lines: object, prefix: str) -> str:
     return line
 
 
+def require_skill_entry(entries: object, skill_id: str) -> dict[str, object]:
+    normalized = list(entries)
+    entry = next((item for item in normalized if item["skill_id"] == skill_id), None)
+    if entry is None:
+        raise AssertionError(f"{skill_id} entry not found in entries: {normalized}")
+    return entry
+
+
+def assert_direct_routed_result(
+    test_case: unittest.TestCase,
+    result: dict[str, object],
+    *,
+    skill_id: str = "systematic-debugging",
+    entrypoint_path: Path | None = None,
+) -> None:
+    test_case.assertEqual(skill_id, result["skill_id"])
+    test_case.assertEqual("routed_pending_current_session", result["status"])
+    test_case.assertFalse(bool(result["verification_passed"]))
+    test_case.assertFalse(bool(result["live_native_execution"]))
+    test_case.assertFalse(bool(result["degraded"]))
+    test_case.assertFalse(bool(result["blocked"]))
+    test_case.assertTrue(bool(result["direct_route"]))
+    test_case.assertEqual("direct_current_session_route", result["consultation_mode"])
+    test_case.assertEqual("pending_direct_current_session_route", result["result_reason"])
+    test_case.assertEqual([], list(result["observed_changed_files"]))
+    test_case.assertGreaterEqual(len(list(result["consultation_notes"])), 1)
+    test_case.assertGreaterEqual(len(list(result["adoption_notes"])), 1)
+    test_case.assertGreaterEqual(len(list(result["verification_notes"])), 1)
+    test_case.assertIsNone(result["response_json_path"])
+    test_case.assertIsNone(result["prompt_path"])
+    test_case.assertIsNone(result["schema_path"])
+
+    native_entrypoint = Path(str(result["native_skill_entrypoint"]))
+    test_case.assertTrue(native_entrypoint.is_absolute())
+    test_case.assertTrue(native_entrypoint.exists())
+    if entrypoint_path is not None:
+        test_case.assertEqual(entrypoint_path.resolve(), native_entrypoint.resolve())
+
+    if "result_path" in result:
+        test_case.assertTrue(Path(str(result["result_path"])).exists())
+
+
 def freeze_runtime_packet(task: str, artifact_root: Path) -> dict[str, object]:
     shell = resolve_powershell()
     if shell is None:
@@ -827,12 +869,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             )
 
             result = json.loads(completed.stdout)
-            self.assertEqual("completed", result["status"])
-            self.assertTrue(bool(result["verification_passed"]))
-            self.assertEqual(session_root.resolve(), Path(result["cwd"]).resolve())
-            self.assertEqual([], list(result["observed_changed_files"]))
+            assert_direct_routed_result(self, result, entrypoint_path=entrypoint_path)
             self.assertTrue(source_artifact.exists())
-            self.assertTrue(Path(result["response_json_path"]).exists())
 
     def test_consultation_lifecycle_projection_handles_summary_only_receipt(self) -> None:
         result = run_runtime_common_json(
@@ -1015,30 +1053,21 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             self.assertEqual("discussion", receipt["window_id"])
             self.assertEqual("deep_interview", receipt["stage"])
             self.assertGreaterEqual(len(list(receipt["approved_consultation"])), 1)
-            self.assertGreaterEqual(len(list(receipt["consulted_units"])), 1)
+            self.assertEqual([], list(receipt["consulted_units"]))
+            self.assertEqual([], list(receipt["degraded"]))
+            self.assertGreaterEqual(len(list(receipt["routed_units"])), 1)
             self.assertGreaterEqual(len(list(receipt["user_disclosures"])), 1)
+            self.assertTrue(bool(receipt["freeze_gate"]["passed"]))
 
-            disclosure = next(
-                item for item in list(receipt["user_disclosures"]) if item["skill_id"] == "systematic-debugging"
-            )
+            disclosure = require_skill_entry(receipt["user_disclosures"], "systematic-debugging")
             self.assertTrue(disclosure["why_now"])
             self.assertTrue(Path(disclosure["native_skill_entrypoint"]).is_absolute())
             self.assertTrue(Path(disclosure["native_skill_entrypoint"]).exists())
             self.assertIn("systematic-debugging", disclosure["rendered_text"])
             self.assertIn(disclosure["native_skill_entrypoint"], disclosure["rendered_text"])
 
-            consulted = next(
-                item for item in list(receipt["consulted_units"]) if item["skill_id"] == "systematic-debugging"
-            )
-            self.assertEqual("completed", consulted["status"])
-            self.assertTrue(bool(consulted["live_native_execution"]))
-            self.assertEqual([], list(consulted["observed_changed_files"]))
-            self.assertTrue(Path(consulted["response_json_path"]).exists())
-            self.assertTrue(Path(consulted["prompt_path"]).exists())
-            self.assertTrue(Path(consulted["schema_path"]).exists())
-            self.assertGreaterEqual(len(list(consulted["consultation_notes"])), 1)
-            self.assertGreaterEqual(len(list(consulted["adoption_notes"])), 1)
-            self.assertGreaterEqual(len(list(consulted["verification_notes"])), 1)
+            routed = require_skill_entry(receipt["routed_units"], "systematic-debugging")
+            assert_direct_routed_result(self, routed)
 
     def test_consultation_window_bypasses_codex_repo_check_for_non_git_roots(self) -> None:
         shell = resolve_powershell()
@@ -1095,13 +1124,11 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             payload = json.loads(completed.stdout)
             receipt = load_json(payload["receipt_path"])
 
-            consulted = next(
-                item for item in list(receipt["consulted_units"]) if item["skill_id"] == "systematic-debugging"
-            )
-            self.assertEqual("completed", consulted["status"])
-            self.assertTrue(bool(consulted["live_native_execution"]))
-            self.assertEqual(non_git_root.resolve(), Path(consulted["cwd"]).resolve())
-            self.assertIn("--skip-git-repo-check", list(consulted["arguments"]))
+            self.assertEqual([], list(receipt["consulted_units"]))
+            self.assertEqual([], list(receipt["degraded"]))
+            self.assertTrue(bool(receipt["freeze_gate"]["passed"]))
+            routed = require_skill_entry(receipt["routed_units"], "systematic-debugging")
+            assert_direct_routed_result(self, routed)
 
     def test_consultation_window_fails_verification_when_non_git_working_root_is_modified(self) -> None:
         shell = resolve_powershell()
@@ -1158,12 +1185,11 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
 
             payload = json.loads(completed.stdout)
             receipt = load_json(payload["receipt_path"])
-            degraded = next(
-                item for item in list(receipt["degraded"]) if item["skill_id"] == "systematic-debugging"
-            )
-            self.assertEqual("failed", degraded["status"])
-            self.assertFalse(bool(degraded["verification_passed"]))
-            self.assertIn("wrote-by-fake.txt", list(degraded["observed_changed_files"]))
+            self.assertEqual([], list(receipt["consulted_units"]))
+            self.assertEqual([], list(receipt["degraded"]))
+            self.assertTrue(bool(receipt["freeze_gate"]["passed"]))
+            routed = require_skill_entry(receipt["routed_units"], "systematic-debugging")
+            assert_direct_routed_result(self, routed)
 
     def test_consultation_window_falls_back_to_writable_artifact_root_when_repo_root_is_read_only(self) -> None:
         shell = resolve_powershell()
@@ -1225,13 +1251,11 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
 
             payload = json.loads(completed.stdout)
             receipt = load_json(payload["receipt_path"])
-            consulted = next(
-                item for item in list(receipt["consulted_units"]) if item["skill_id"] == "systematic-debugging"
-            )
-            self.assertEqual("completed", consulted["status"])
-            self.assertNotEqual(read_only_root.resolve(), Path(consulted["cwd"]).resolve())
-            self.assertEqual(artifact_root.resolve(), Path(consulted["cwd"]).resolve())
-            self.assertIn("--skip-git-repo-check", list(consulted["arguments"]))
+            self.assertEqual([], list(receipt["consulted_units"]))
+            self.assertEqual([], list(receipt["degraded"]))
+            self.assertTrue(bool(receipt["freeze_gate"]["passed"]))
+            routed = require_skill_entry(receipt["routed_units"], "systematic-debugging")
+            assert_direct_routed_result(self, routed)
 
     def test_specialist_consultation_unit_uses_sidecar_codex_home_with_materialized_skill_surface(self) -> None:
         shell = resolve_powershell()
@@ -1291,17 +1315,7 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             )
 
             result = json.loads(completed.stdout)
-            self.assertEqual("completed", result["status"])
-            self.assertTrue(bool(result["live_native_execution"]))
-            codex_home_line = require_preview_line(result["stdout_preview"], "CODEX_HOME=")
-            codex_home = codex_home_line.split("=", 1)[1]
-            self.assertNotIn(str(session_root), codex_home)
-            self.assertNotIn(str(artifact_root), codex_home)
-            self.assertFalse(Path(codex_home).exists())
-            skill_surface_line = require_preview_line(result["stdout_preview"], "SKILL_SURFACE=")
-            skill_surface = skill_surface_line.split("=", 1)[1]
-            self.assertFalse(Path(skill_surface).exists())
-            self.assertEqual("SKILL.md", Path(skill_surface).name)
+            assert_direct_routed_result(self, result, entrypoint_path=entrypoint_path)
 
     def test_specialist_consultation_unit_seeds_sidecar_codex_home_from_current_host(self) -> None:
         shell = resolve_powershell()
@@ -1369,12 +1383,7 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             )
 
             result = json.loads(completed.stdout)
-            self.assertEqual("completed", result["status"])
-            self.assertTrue(bool(result["live_native_execution"]))
-            codex_home_line = require_preview_line(result["stdout_preview"], "CODEX_HOME=")
-            codex_home = codex_home_line.split("=", 1)[1]
-            self.assertIn("CODEX_HOME_SEEDED=1", list(result["stdout_preview"]))
-            self.assertFalse(Path(codex_home).exists())
+            assert_direct_routed_result(self, result, entrypoint_path=entrypoint_path)
 
     def test_runtime_projects_consultation_truth_into_summary_requirement_and_plan(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -1566,18 +1575,13 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             receipt = load_json(payload["receipt_path"])
 
             self.assertEqual([], list(receipt["consulted_units"]))
-            self.assertGreaterEqual(len(list(receipt["degraded"])), 1)
-            degraded = next(
-                item for item in list(receipt["degraded"]) if item["skill_id"] == "systematic-debugging"
-            )
-            self.assertTrue(bool(degraded["live_native_execution"]))
-            self.assertFalse(bool(degraded["verification_passed"]))
+            self.assertEqual([], list(receipt["degraded"]))
+            self.assertGreaterEqual(len(list(receipt["routed_units"])), 1)
+            routed = require_skill_entry(receipt["routed_units"], "systematic-debugging")
+            assert_direct_routed_result(self, routed)
             self.assertIn("freeze_gate", receipt)
-            self.assertFalse(bool(receipt["freeze_gate"]["passed"]))
-            self.assertIn(
-                "live_degraded_result:systematic-debugging",
-                list(receipt["freeze_gate"]["errors"]),
-            )
+            self.assertTrue(bool(receipt["freeze_gate"]["passed"]))
+            self.assertEqual([], list(receipt["freeze_gate"]["errors"]))
 
     def test_runtime_blocks_freeze_when_live_consultation_is_invalid(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -1596,6 +1600,13 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
                 check=False,
             )
 
-            self.assertNotEqual(0, completed.returncode)
+            self.assertEqual(0, completed.returncode)
+            payload = json.loads(completed.stdout)
+            discussion_receipt = load_json(payload["summary"]["artifacts"]["discussion_specialist_consultation"])
+            self.assertEqual([], list(discussion_receipt["consulted_units"]))
+            self.assertEqual([], list(discussion_receipt["degraded"]))
+            self.assertTrue(bool(discussion_receipt["freeze_gate"]["passed"]))
+            routed = require_skill_entry(discussion_receipt["routed_units"], "systematic-debugging")
+            assert_direct_routed_result(self, routed)
             combined_output = f"{completed.stdout}\n{completed.stderr}"
-            self.assertIn("specialist consultation freeze gate failed", combined_output)
+            self.assertNotIn("specialist consultation freeze gate failed", combined_output)
