@@ -75,7 +75,7 @@ $cases = @(
 
     [pscustomobject]@{ Name = "docs-media blocked in XL"; Prompt = "xlsx and docx parallel processing"; Grade = "XL"; TaskType = "coding"; RequestedSkill = "xlsx"; ExpectedPack = $null; AllowedModes = @("legacy_fallback", "confirm_required"); BlockedPack = "docs-media" },
 
-    [pscustomobject]@{ Name = "gap-driven confirm"; Prompt = "review code quality and perform security audit"; Grade = "M"; TaskType = "review"; RequestedSkill = $null; ExpectedPack = "code-quality"; AllowedModes = @("confirm_required") }
+    [pscustomobject]@{ Name = "gap-driven confirm"; Prompt = "code review and security audit"; Grade = "M"; TaskType = "review"; RequestedSkill = $null; ExpectedPack = "code-quality"; AllowedModes = @("confirm_required") }
 )
 
 $results = @()
