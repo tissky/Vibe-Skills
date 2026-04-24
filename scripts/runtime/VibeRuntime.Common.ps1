@@ -1319,8 +1319,8 @@ function Get-VibeBoundedReturnFollowupEntryIds {
     )
 
     switch ([string]$TerminalStage) {
-        'requirement_doc' { return @('vibe', 'vibe-how', 'vibe-do') }
-        'xl_plan' { return @('vibe', 'vibe-do') }
+        'requirement_doc' { return @('vibe', 'vibe-how-do-we-do', 'vibe-do-it') }
+        'xl_plan' { return @('vibe', 'vibe-do-it') }
         default { return @() }
     }
 }

@@ -66,7 +66,7 @@ def _body_lines(host_id: str, entry: DiscoverableEntry, *, contract: dict[str, o
         "fallback_policy": str(contract.get("fallback_policy") or ""),
         "proof_required": bool(contract.get("proof_required", True)),
     }
-    if entry.id in {"vibe-how", "vibe-do"}:
+    if entry.id in {"vibe-how-do-we-do", "vibe-do-it"}:
         trampoline_payload["bounded_reentry_credentials"] = {
             "runtime_summary_field": "bounded_return_control",
             "required": True,
@@ -79,7 +79,7 @@ def _body_lines(host_id: str, entry: DiscoverableEntry, *, contract: dict[str, o
         else None
     )
     continuation_lines = []
-    if entry.id in {"vibe-how", "vibe-do"}:
+    if entry.id in {"vibe-how-do-we-do", "vibe-do-it"}:
         continuation_lines = [
             "If this wrapper continues a prior canonical run in the same thread or workspace, reuse the latest verified frozen requirement/plan as continuation context.",
             "If the latest verified runtime summary exposes `bounded_return_control.explicit_user_reentry_required = true`, do not continue on prose alone.",

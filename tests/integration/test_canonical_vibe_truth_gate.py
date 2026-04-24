@@ -225,7 +225,7 @@ def test_truth_gate_accepts_presentational_entry_intent_with_canonical_authority
     session_root = tmp_path / "session"
     _write_valid_canonical_entry_artifacts(
         session_root,
-        entry_intent_id="vibe-how",
+        entry_intent_id="vibe-how-do-we-do",
         requested_stage_stop="xl_plan",
     )
 

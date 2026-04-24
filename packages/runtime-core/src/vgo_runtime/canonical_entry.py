@@ -339,7 +339,7 @@ def _extract_continuation_keywords(intent_contract: dict[str, Any]) -> list[str]
 
 
 def _should_apply_continuation(entry_id: str, prompt_text: str) -> bool:
-    if entry_id not in {"vibe-how", "vibe-do"}:
+    if entry_id not in {"vibe-how-do-we-do", "vibe-do-it"}:
         return False
     normalized = prompt_text.strip().lower()
     if not normalized:
@@ -357,7 +357,7 @@ def _find_continuation_context(
     preferred_run_id: str | None = None,
     allow_bounded_preferred: bool = False,
 ) -> dict[str, Any] | None:
-    required_artifact = "requirement_doc" if entry_id == "vibe-how" else "execution_plan"
+    required_artifact = "requirement_doc" if entry_id == "vibe-how-do-we-do" else "execution_plan"
     preferred_summary = _runtime_summary_path_for_run_id(artifact_root, preferred_run_id)
     if preferred_summary and preferred_summary.is_file():
         preferred_summary_payload = _load_json_dict_if_exists(preferred_summary)

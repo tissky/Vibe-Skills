@@ -10,7 +10,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SUPPORTED_HOSTS = ("codex", "claude-code", "opencode")
-EXPECTED_DISCOVERABLE_ENTRIES = {"vibe", "vibe-do", "vibe-how", "vibe-upgrade", "vibe-want"}
+EXPECTED_DISCOVERABLE_ENTRIES = {"vibe", "vibe-do-it", "vibe-how-do-we-do", "vibe-upgrade", "vibe-what-do-i-want"}
 
 
 def _install_host(target_root: Path, host_id: str) -> None:

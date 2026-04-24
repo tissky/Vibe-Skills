@@ -431,7 +431,7 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         self.install_shell_runtime("codex")
 
         commands_root = self.target_root / "commands"
-        for discoverable_name in ("vibe-want.md", "vibe-how.md", "vibe-do.md"):
+        for discoverable_name in ("vibe-what-do-i-want.md", "vibe-how-do-we-do.md", "vibe-do-it.md"):
             discoverable_path = commands_root / discoverable_name
             if discoverable_path.exists():
                 discoverable_path.unlink()

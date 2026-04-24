@@ -114,9 +114,9 @@
         "discoverable_entry_surface": "config/vibe-entry-surfaces.json",
         "projected_skill_names": [
           "vibe",
-          "vibe-want",
-          "vibe-how",
-          "vibe-do",
+          "vibe-what-do-i-want",
+          "vibe-how-do-we-do",
+          "vibe-do-it",
           "vibe-upgrade"
         ]
       },
@@ -218,9 +218,9 @@
         "discoverable_entry_surface": "config/vibe-entry-surfaces.json",
         "projected_skill_names": [
           "vibe",
-          "vibe-want",
-          "vibe-how",
-          "vibe-do",
+          "vibe-what-do-i-want",
+          "vibe-how-do-we-do",
+          "vibe-do-it",
           "vibe-upgrade"
         ]
       },

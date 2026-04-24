@@ -84,6 +84,8 @@ ledger_state = {
     "legacy_cleanup_candidates": set(),
 }
 
+LEGACY_VIBE_WRAPPER_IDS = ("vibe-want", "vibe-how", "vibe-do")
+
 
 def build_closed_ready_failure_message(adapter: dict[str, object], closure: dict[str, object]) -> str:
     """Describe why a host closure failed the closed_ready requirement."""
@@ -324,6 +326,117 @@ def prune_legacy_public_skill_dirs(
             shutil.rmtree(skill_root)
 
 
+def _resolve_ledger_path_within_target(target_root: Path, raw_path: str | Path) -> Path | None:
+    candidate = Path(raw_path)
+    if not candidate.is_absolute():
+        candidate = (target_root / candidate).resolve(strict=False)
+    else:
+        candidate = candidate.resolve(strict=False)
+    try:
+        candidate.relative_to(target_root.resolve(strict=False))
+    except ValueError:
+        return None
+    return candidate
+
+
+def _remove_path_and_empty_parents(
+    candidate: Path,
+    *,
+    target_root: Path,
+    protected_roots: set[Path],
+) -> None:
+    if not candidate.exists():
+        return
+    if candidate.is_dir():
+        shutil.rmtree(candidate)
+    else:
+        candidate.unlink()
+    parent = candidate.parent.resolve(strict=False)
+    target_root_resolved = target_root.resolve(strict=False)
+    while parent not in protected_roots and parent != target_root_resolved:
+        try:
+            next(parent.iterdir())
+            break
+        except StopIteration:
+            parent.rmdir()
+            parent = parent.parent.resolve(strict=False)
+
+
+def _legacy_wrapper_cleanup_paths(target_root: Path, host_id: str) -> list[Path]:
+    normalized = str(host_id or "").strip().lower()
+    candidates: list[Path] = []
+    for entry_id in LEGACY_VIBE_WRAPPER_IDS:
+        candidates.append(target_root / "skills" / entry_id)
+        candidates.append(target_root / "commands" / f"{entry_id}.md")
+        if normalized == "opencode":
+            candidates.append(target_root / "command" / f"{entry_id}.md")
+
+    unique_candidates: list[Path] = []
+    seen: set[Path] = set()
+    for candidate in candidates:
+        resolved = candidate.resolve(strict=False)
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        unique_candidates.append(candidate)
+    return unique_candidates
+
+
+def prune_known_legacy_wrapper_paths(
+    target_root: Path,
+    host_id: str,
+    current_wrapper_paths: list[Path],
+) -> None:
+    current_paths = {
+        path.resolve(strict=False)
+        for path in current_wrapper_paths
+    }
+    protected_roots = {
+        (target_root / "commands").resolve(strict=False),
+        (target_root / "command").resolve(strict=False),
+        (target_root / "skills").resolve(strict=False),
+    }
+    for candidate in _legacy_wrapper_cleanup_paths(target_root, host_id):
+        resolved = candidate.resolve(strict=False)
+        if resolved in current_paths or not resolved.exists():
+            continue
+        record_legacy_cleanup_candidate(resolved)
+        _remove_path_and_empty_parents(
+            resolved,
+            target_root=target_root,
+            protected_roots=protected_roots,
+        )
+
+
+def prune_previously_managed_wrapper_paths(
+    target_root: Path,
+    previous_install_ledger: dict | None,
+    current_wrapper_paths: list[Path],
+) -> None:
+    if not isinstance(previous_install_ledger, dict):
+        return
+
+    current_paths = {
+        path.resolve(strict=False)
+        for path in current_wrapper_paths
+    }
+    protected_roots = {
+        (target_root / "commands").resolve(strict=False),
+        (target_root / "command").resolve(strict=False),
+        (target_root / "skills").resolve(strict=False),
+    }
+
+    for raw_path in previous_install_ledger.get("specialist_wrapper_paths") or []:
+        candidate = _resolve_ledger_path_within_target(target_root, raw_path)
+        if candidate is None or candidate in current_paths or not candidate.exists():
+            continue
+        _remove_path_and_empty_parents(
+            candidate,
+            target_root=target_root,
+            protected_roots=protected_roots,
+        )
+
+
 def install_runtime_core(repo_root: Path, target_root: Path, profile: str, allow_fallback: bool, adapter: dict):
     packaging = attach_local_catalog_descriptor(repo_root, resolve_runtime_core_packaging(repo_root, profile))
     excluded_skill_names = excluded_bundled_skill_names(packaging)
@@ -542,6 +655,7 @@ def main(argv: list[str] | None = None):
     target_root.mkdir(parents=True, exist_ok=True)
     track_created_path(target_root)
     adapter = resolve_adapter(repo_root, args.host)
+    previous_install_ledger = load_existing_install_ledger(target_root)
     packaging, external_used, managed_skill_names = install_runtime_core(
         repo_root, target_root, args.profile, args.allow_external_skill_fallback, adapter
     )
@@ -605,6 +719,8 @@ def main(argv: list[str] | None = None):
         host_id=adapter["id"],
         surface=dict(packaging.get("public_skill_surface") or {}),
     )
+    prune_previously_managed_wrapper_paths(target_root, previous_install_ledger, wrapper_paths)
+    prune_known_legacy_wrapper_paths(target_root, adapter["id"], wrapper_paths)
     discoverable_entry_surface = str((packaging.get("public_skill_surface") or {}).get("discoverable_entry_surface") or "").strip()
     if discoverable_entry_surface and adapter.get("discoverable_entries") and not wrapper_paths:
         raise SystemExit(

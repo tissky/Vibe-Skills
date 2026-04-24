@@ -1,0 +1,85 @@
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+INSTALLER_SRC = REPO_ROOT / "packages" / "installer-core" / "src"
+CONTRACTS_SRC = REPO_ROOT / "packages" / "contracts" / "src"
+for src in (INSTALLER_SRC, CONTRACTS_SRC):
+    if str(src) not in sys.path:
+        sys.path.insert(0, str(src))
+
+import vgo_installer.install_runtime as install_runtime
+
+
+def test_prune_previously_managed_wrapper_paths_removes_stale_wrapper_files(tmp_path: Path) -> None:
+    target_root = tmp_path / "target"
+    commands_root = target_root / "commands"
+    commands_root.mkdir(parents=True, exist_ok=True)
+
+    stale = commands_root / "vibe-how.md"
+    current = commands_root / "vibe-how-do-we-do.md"
+    stale.write_text("legacy\n", encoding="utf-8")
+    current.write_text("current\n", encoding="utf-8")
+
+    previous_ledger = {
+        "specialist_wrapper_paths": [
+            str(stale),
+            str(current),
+        ]
+    }
+
+    install_runtime.prune_previously_managed_wrapper_paths(target_root, previous_ledger, [current])
+
+    assert not stale.exists()
+    assert current.exists()
+
+
+def test_prune_previously_managed_wrapper_paths_ignores_outside_target_root(tmp_path: Path) -> None:
+    target_root = tmp_path / "target"
+    target_root.mkdir(parents=True, exist_ok=True)
+
+    outside = tmp_path / "outside-vibe-how.md"
+    outside.write_text("legacy\n", encoding="utf-8")
+
+    previous_ledger = {
+        "specialist_wrapper_paths": [str(outside)]
+    }
+
+    install_runtime.prune_previously_managed_wrapper_paths(target_root, previous_ledger, [])
+
+    assert outside.exists()
+
+
+def test_prune_known_legacy_wrapper_paths_removes_untracked_codex_command_aliases(tmp_path: Path) -> None:
+    target_root = tmp_path / "target"
+    commands_root = target_root / "commands"
+    commands_root.mkdir(parents=True, exist_ok=True)
+
+    legacy = commands_root / "vibe-do.md"
+    current = commands_root / "vibe-do-it.md"
+    legacy.write_text("legacy\n", encoding="utf-8")
+    current.write_text("current\n", encoding="utf-8")
+
+    install_runtime.prune_known_legacy_wrapper_paths(target_root, "codex", [current])
+
+    assert not legacy.exists()
+    assert current.exists()
+
+
+def test_prune_known_legacy_wrapper_paths_removes_untracked_skill_aliases(tmp_path: Path) -> None:
+    target_root = tmp_path / "target"
+    legacy_root = target_root / "skills" / "vibe-how"
+    current_root = target_root / "skills" / "vibe-how-do-we-do"
+    legacy_root.mkdir(parents=True, exist_ok=True)
+    current_root.mkdir(parents=True, exist_ok=True)
+    (legacy_root / "SKILL.md").write_text("legacy\n", encoding="utf-8")
+    current = current_root / "SKILL.md"
+    current.write_text("current\n", encoding="utf-8")
+
+    install_runtime.prune_known_legacy_wrapper_paths(target_root, "claude-code", [current])
+
+    assert not legacy_root.exists()
+    assert current.exists()
