@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import re
 import shutil
 import sys
@@ -258,6 +258,9 @@ def _iter_runtime_summaries(artifact_root: Path) -> list[Path]:
 def _runtime_summary_path_for_run_id(artifact_root: Path, run_id: str | None) -> Path | None:
     candidate = str(run_id or "").strip()
     if not candidate or candidate in {".", ".."} or "/" in candidate or "\\" in candidate:
+        return None
+    windows_candidate = PureWindowsPath(candidate)
+    if windows_candidate.drive or windows_candidate.anchor or windows_candidate.is_absolute():
         return None
     return _continuation_sessions_root(artifact_root) / candidate / "runtime-summary.json"
 
@@ -604,7 +607,15 @@ def _validate_bounded_reentry(
     continue_from_run_id: str | None,
     bounded_reentry_token: str | None,
 ) -> dict[str, Any] | None:
+    provided_run_id = str(continue_from_run_id or "").strip()
+    provided_token = str(bounded_reentry_token or "").strip()
+    explicit_reentry_credentials_supplied = bool(provided_run_id or provided_token)
     if artifact_root is None:
+        if explicit_reentry_credentials_supplied:
+            raise RuntimeError(
+                "bounded wrapper continuation credentials were provided but no matching bounded run could be found; "
+                "verify --continue-from-run-id, --bounded-reentry-token, and artifact root"
+            )
         return None
 
     prior_guard = _find_latest_bounded_return_control(
@@ -613,6 +624,11 @@ def _validate_bounded_reentry(
         preferred_run_id=continue_from_run_id,
     )
     if not prior_guard:
+        if explicit_reentry_credentials_supplied:
+            raise RuntimeError(
+                "bounded wrapper continuation credentials were provided but no matching bounded run could be found; "
+                "verify --continue-from-run-id, --bounded-reentry-token, and artifact root"
+            )
         return None
     looks_like_reentry = _looks_like_generic_reentry_prompt(prompt, entry_id=entry_id, bounded_return_control=prior_guard)
     if bool(prior_guard.get("malformed")):
@@ -626,8 +642,6 @@ def _validate_bounded_reentry(
     if not looks_like_reentry:
         return None
 
-    provided_run_id = str(continue_from_run_id or "").strip()
-    provided_token = str(bounded_reentry_token or "").strip()
     if not provided_run_id or not provided_token:
         raise RuntimeError(
             "bounded wrapper continuation requires explicit re-entry credentials from the latest bounded run "

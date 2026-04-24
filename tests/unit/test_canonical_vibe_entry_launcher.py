@@ -350,6 +350,7 @@ def test_runtime_summary_path_for_run_id_rejects_invalid_path_segments(tmp_path:
     assert canonical_entry._runtime_summary_path_for_run_id(tmp_path, r"..\escape") is None
     assert canonical_entry._runtime_summary_path_for_run_id(tmp_path, "nested/run") is None
     assert canonical_entry._runtime_summary_path_for_run_id(tmp_path, r"nested\run") is None
+    assert canonical_entry._runtime_summary_path_for_run_id(tmp_path, "C:evil") is None
 
 
 def test_load_continuation_context_from_summary_ignores_non_string_artifact_paths(tmp_path: Path) -> None:
@@ -567,6 +568,18 @@ def test_canonical_entry_rejects_malformed_bounded_wrapper_reentry_metadata(tmp_
             prompt="execute plan",
             run_id="current-run",
             continue_from_run_id="prior-bounded-run",
+            bounded_reentry_token="token-123",  # noqa: S106 - non-secret fixture token
+        )
+
+
+def test_validate_bounded_reentry_requires_matching_prior_guard_for_explicit_credentials(tmp_path: Path) -> None:
+    with pytest.raises(RuntimeError, match="no matching bounded run could be found"):
+        canonical_entry._validate_bounded_reentry(
+            artifact_root=tmp_path,
+            entry_id="vibe-do",
+            prompt="execute plan",
+            run_id="current-run",
+            continue_from_run_id="missing-prior-run",
             bounded_reentry_token="token-123",  # noqa: S106 - non-secret fixture token
         )
 
