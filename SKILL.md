@@ -135,10 +135,9 @@ If `py -3` is unavailable, try `python` instead.
 
 If you must invoke PowerShell through a Bash-like tool surface, do not place `$env:PYTHONPATH=...` inside a double-quoted `-Command` string. The outer shell can expand `$env` first and corrupt it to `:PYTHONPATH`, leaving `PYTHONPATH` unset and causing `ModuleNotFoundError: No module named 'vgo_cli'`. In that situation, either set `PYTHONPATH=...` in the outer shell before invoking `py -3 -m ...`, or single-quote / escape the PowerShell payload so `$env:` reaches PowerShell literally.
 
-Discoverable wrapper ids still enter canonical `vibe`; only the bounded stop changes:
-- `vibe-want` -> `--requested-stage-stop requirement_doc`
-- `vibe-how` -> `--requested-stage-stop xl_plan --requested-grade-floor XL`
-- `vibe` and `vibe-do-it` -> `--requested-stage-stop phase_cleanup`
+Discoverable wrapper ids still enter canonical `vibe`; only the bounded stop contract changes:
+- `vibe` uses progressive governed stops: first `requirement_doc`, then `xl_plan`, then `phase_cleanup` after explicit re-entry approval at each boundary
+- legacy bounded wrappers remain compatibility aliases: `vibe-want` -> `requirement_doc`, `vibe-how` -> `xl_plan --requested-grade-floor XL`, `vibe-do-it` -> `phase_cleanup`
 
 Hard rules:
 - Do not inspect the repo, protocol docs, or prior run outputs before canonical launch returns, except to resolve `skill_root` and current host id.
@@ -167,10 +166,13 @@ These stages are mandatory. They may become lighter for simple work, but they ar
 
 Runtime mode: only `interactive_governed` is supported. The system asks high-value questions, confirms frozen requirements, and pauses at plan approval boundaries.
 
+If a canonical run returns `bounded_return_control.explicit_user_reentry_required = true`, stop in the current assistant turn and hand control back to the user. Do not consume the returned re-entry credentials until a later user message explicitly approves or revises the frozen requirement/plan boundary.
+
 Discoverable wrapper labels may request an earlier terminal stage (that changes where the run stops, not which runtime owns authority):
 - `Vibe: What Do I Want?` -> `requirement_doc`
 - `Vibe: How Do We Do It?` -> `xl_plan`
-- `Vibe` and `Vibe: Do It` -> `phase_cleanup`
+- `Vibe` progresses through `requirement_doc -> xl_plan -> phase_cleanup`
+- `Vibe: Do It` -> `phase_cleanup`
 
 Official governed entry records lineage:
 - root or child entry writes `governance-capsule.json`

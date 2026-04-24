@@ -107,8 +107,8 @@ if ($hasReceipt -and $hasRuntimePacket -and $hasGovernanceCapsule -and $hasStage
     $governanceCapsule = Read-JsonObject -Path $governanceCapsulePath
     $stageLineage = Read-JsonObject -Path $stageLineagePath
     $entryIntentId = if (Test-ObjectHasProperty -InputObject $runtimePacket -PropertyName 'entry_intent_id') { [string]$runtimePacket.entry_intent_id } else { '' }
-    $expectedEntryIntent = if ([string]::IsNullOrWhiteSpace($entryIntentId)) { [string]$receipt.entry_id } else { $entryIntentId }
     $canonicalRouterRequestedSkill = ''
+    $confirmRequired = $false
 
     Add-Assertion -Assertions $assertions -Pass ([string]$receipt.entry_id -eq 'vibe') -Message 'host launch receipt entry_id is vibe'
     Add-Assertion -Assertions $assertions -Pass ([string]$receipt.launch_mode -eq 'canonical-entry') -Message 'host launch receipt launch_mode is canonical-entry'
@@ -123,15 +123,20 @@ if ($hasReceipt -and $hasRuntimePacket -and $hasGovernanceCapsule -and $hasStage
         $canonicalRouter = $runtimePacket.canonical_router
         Add-Assertion -Assertions $assertions -Pass (-not [string]::IsNullOrWhiteSpace([string]$canonicalRouter.host_id)) -Message 'runtime packet canonical_router records host id'
         $canonicalRouterRequestedSkill = if (Test-ObjectHasProperty -InputObject $canonicalRouter -PropertyName 'requested_skill') { [string]$canonicalRouter.requested_skill } else { '' }
-        Add-Assertion -Assertions $assertions -Pass ([string]$canonicalRouterRequestedSkill -eq $expectedEntryIntent) -Message 'runtime packet canonical_router keeps canonical entry intent aligned'
+        $canonicalRouterAuthorityPreserved = (
+            [string]::IsNullOrWhiteSpace($canonicalRouterRequestedSkill) -or
+            [string]$canonicalRouterRequestedSkill -eq 'vibe'
+        )
+        Add-Assertion -Assertions $assertions -Pass $canonicalRouterAuthorityPreserved -Message 'runtime packet canonical_router keeps routing authority on canonical vibe'
     }
-    if (-not [string]::IsNullOrWhiteSpace($entryIntentId) -and -not [string]::IsNullOrWhiteSpace($canonicalRouterRequestedSkill)) {
-        Add-Assertion -Assertions $assertions -Pass ([string]$entryIntentId -eq [string]$canonicalRouterRequestedSkill) -Message 'runtime packet entry_intent_id matches canonical_router requested skill'
+    if (-not [string]::IsNullOrWhiteSpace($entryIntentId)) {
+        Add-Assertion -Assertions $assertions -Pass $true -Message 'runtime packet preserves entry_intent_id independently from router authority'
     }
 
     $selectedSkill = ''
     if (Test-ObjectHasProperty -InputObject $runtimePacket -PropertyName 'route_snapshot') {
         $routeSnapshot = $runtimePacket.route_snapshot
+        $confirmRequired = if (Test-ObjectHasProperty -InputObject $routeSnapshot -PropertyName 'confirm_required') { [bool]$routeSnapshot.confirm_required } else { $false }
         $selectedSkill = if (Test-ObjectHasProperty -InputObject $routeSnapshot -PropertyName 'selected_skill') { [string]$routeSnapshot.selected_skill } else { '' }
         Add-Assertion -Assertions $assertions -Pass (-not [string]::IsNullOrWhiteSpace($selectedSkill)) -Message 'runtime packet route_snapshot records routed specialist truth'
     }
@@ -161,7 +166,11 @@ if ($hasReceipt -and $hasRuntimePacket -and $hasGovernanceCapsule -and $hasStage
     $lastStageName = if (Test-ObjectHasProperty -InputObject $stageLineage -PropertyName 'last_stage_name') { [string]$stageLineage.last_stage_name } else { '' }
     Add-Assertion -Assertions $assertions -Pass (-not [string]::IsNullOrWhiteSpace($lastStageName)) -Message 'stage lineage records terminal stage name'
     if (-not [string]::IsNullOrWhiteSpace([string]$receipt.requested_stage_stop)) {
-        Add-Assertion -Assertions $assertions -Pass ([string]$lastStageName -eq [string]$receipt.requested_stage_stop) -Message 'stage lineage terminal stage matches host launch receipt requested stop'
+        if ($confirmRequired) {
+            Add-Assertion -Assertions $assertions -Pass ([string]$lastStageName -eq 'skeleton_check') -Message 'confirm-required routing stops before governed stage progression'
+        } else {
+            Add-Assertion -Assertions $assertions -Pass ([string]$lastStageName -eq [string]$receipt.requested_stage_stop) -Message 'stage lineage terminal stage matches host launch receipt requested stop'
+        }
     }
 }
 

@@ -46,6 +46,7 @@ def _write_valid_canonical_entry_artifacts(
     session_root: Path,
     *,
     entry_intent_id: str = "vibe",
+    canonical_router_requested_skill: str | None = None,
     router_selected_skill: str = "systematic-debugging",
     requested_stage_stop: str = "phase_cleanup",
 ) -> None:
@@ -72,7 +73,7 @@ def _write_valid_canonical_entry_artifacts(
             "canonical_router": {
                 "host_id": "codex",
                 "prompt": "validate proof",
-                "requested_skill": entry_intent_id,
+                "requested_skill": canonical_router_requested_skill,
                 "route_script_path": "scripts/router/resolve-pack-route.ps1",
                 "target_root": "/tmp/target",
                 "task_type": "debug",
@@ -232,5 +233,6 @@ def test_truth_gate_accepts_presentational_entry_intent_with_canonical_authority
     result = _run_truth_gate(session_root)
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "[PASS] runtime packet entry_intent_id matches canonical_router requested skill" in result.stdout
+    assert "[PASS] runtime packet canonical_router keeps routing authority on canonical vibe" in result.stdout
+    assert "[PASS] runtime packet preserves entry_intent_id independently from router authority" in result.stdout
     assert "[PASS] runtime packet route_snapshot records routed specialist truth" in result.stdout

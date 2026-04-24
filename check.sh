@@ -527,6 +527,37 @@ json_query_scalar_from_file() {
   json_query_lines_from_file "$json_path" "$expr" | head -n 1
 }
 
+profile_packaging_manifest_path() {
+  printf '%s/config/runtime-core-packaging.%s.json\n' "${TARGET_ROOT}" "${PROFILE}"
+}
+
+projected_skill_names_for_check() {
+  local projection_name="$1"
+  local manifest_path=""
+  manifest_path="$(profile_packaging_manifest_path)"
+  [[ -f "${manifest_path}" ]] || return 0
+
+  if [[ "${projection_name}" == "compatibility_skill_projections" ]]; then
+    local allowlist=()
+    mapfile -t allowlist < <(json_query_lines_from_file "${manifest_path}" "${projection_name}.host_allowlist" 2>/dev/null || true)
+    if [[ ${#allowlist[@]} -gt 0 ]]; then
+      local allowed="false"
+      local lowered_host=""
+      lowered_host="$(printf '%s' "${HOST_ID}" | tr '[:upper:]' '[:lower:]')"
+      local candidate=""
+      for candidate in "${allowlist[@]}"; do
+        if [[ "$(printf '%s' "${candidate}" | tr '[:upper:]' '[:lower:]')" == "${lowered_host}" ]]; then
+          allowed="true"
+          break
+        fi
+      done
+      [[ "${allowed}" == "true" ]] || return 0
+    fi
+  fi
+
+  json_query_lines_from_file "${manifest_path}" "${projection_name}.projected_skill_names" 2>/dev/null || true
+}
+
 pick_python() {
   pick_supported_python
 }
@@ -970,12 +1001,13 @@ if [[ "${PROFILE}" == "full" ]]; then
   done
 fi
 if [[ "${HOST_ID}" == "codex" && "${ADAPTER_CHECK_MODE}" == "governed" && "${PROFILE}" == "full" ]]; then
-  for n in vibe-what-do-i-want vibe-how-do-we-do vibe-do-it; do
+  mapfile -t projected_wrapper_skill_names < <(projected_skill_names_for_check "compatibility_skill_projections")
+  for n in "${projected_wrapper_skill_names[@]}"; do
     check_path "skill/${n}" "$(resolve_skill_descriptor_path "${n}")"
   done
 fi
 if [[ "${HOST_ID}" == "codex" && "${ADAPTER_CHECK_MODE}" == "governed" ]]; then
-  codex_command_names=(vibe vibe-what-do-i-want vibe-how-do-we-do vibe-do-it)
+  mapfile -t codex_command_names < <(projected_skill_names_for_check "public_skill_surface")
   for n in "${codex_command_names[@]}"; do
     check_path "codex command/${n}" "${TARGET_ROOT}/commands/${n}.md" false
   done

@@ -12,6 +12,7 @@ from ._io import load_json, write_json, write_json_file
 ensure_contracts_src_on_path()
 
 from vgo_contracts.canonical_vibe_contract import uses_skill_only_activation
+from vgo_contracts.discoverable_entry_surface import load_discoverable_entry_surface
 
 from .adapter_registry import resolve_adapter
 from .host_closure import (
@@ -382,6 +383,24 @@ def _legacy_wrapper_cleanup_paths(target_root: Path, host_id: str) -> list[Path]
     return unique_candidates
 
 
+def _retired_discoverable_wrapper_cleanup_paths(target_root: Path, entry_ids: list[str]) -> list[Path]:
+    candidates: list[Path] = []
+    for entry_id in entry_ids:
+        candidates.append(target_root / "skills" / entry_id)
+        candidates.append(target_root / "commands" / f"{entry_id}.md")
+        candidates.append(target_root / "command" / f"{entry_id}.md")
+
+    unique_candidates: list[Path] = []
+    seen: set[Path] = set()
+    for candidate in candidates:
+        resolved = candidate.resolve(strict=False)
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        unique_candidates.append(candidate)
+    return unique_candidates
+
+
 def prune_known_legacy_wrapper_paths(
     target_root: Path,
     host_id: str,
@@ -397,6 +416,40 @@ def prune_known_legacy_wrapper_paths(
         (target_root / "skills").resolve(strict=False),
     }
     for candidate in _legacy_wrapper_cleanup_paths(target_root, host_id):
+        resolved = candidate.resolve(strict=False)
+        if resolved in current_paths or not resolved.exists():
+            continue
+        record_legacy_cleanup_candidate(resolved)
+        _remove_path_and_empty_parents(
+            resolved,
+            target_root=target_root,
+            protected_roots=protected_roots,
+        )
+
+
+def prune_retired_discoverable_wrapper_paths(
+    target_root: Path,
+    entry_surface,
+    current_wrapper_paths: list[Path],
+) -> None:
+    retired_entry_ids = [
+        str(entry.id).strip()
+        for entry in getattr(entry_surface, "entries", ())
+        if entry is not None and not bool(getattr(entry, "publicly_exposed", False))
+    ]
+    if not retired_entry_ids:
+        return
+
+    current_paths = {
+        path.resolve(strict=False)
+        for path in current_wrapper_paths
+    }
+    protected_roots = {
+        (target_root / "commands").resolve(strict=False),
+        (target_root / "command").resolve(strict=False),
+        (target_root / "skills").resolve(strict=False),
+    }
+    for candidate in _retired_discoverable_wrapper_cleanup_paths(target_root, retired_entry_ids):
         resolved = candidate.resolve(strict=False)
         if resolved in current_paths or not resolved.exists():
             continue
@@ -713,6 +766,11 @@ def main(argv: list[str] | None = None):
     else:
         raise SystemExit(f"Unsupported adapter install mode: {mode}")
 
+    entry_surface = None
+    discoverable_entry_surface = str((packaging.get("public_skill_surface") or {}).get("discoverable_entry_surface") or "").strip()
+    if discoverable_entry_surface:
+        entry_surface = load_discoverable_entry_surface(repo_root)
+
     wrapper_paths = materialize_host_visible_wrappers(
         repo_root=repo_root,
         target_root=target_root,
@@ -721,7 +779,8 @@ def main(argv: list[str] | None = None):
     )
     prune_previously_managed_wrapper_paths(target_root, previous_install_ledger, wrapper_paths)
     prune_known_legacy_wrapper_paths(target_root, adapter["id"], wrapper_paths)
-    discoverable_entry_surface = str((packaging.get("public_skill_surface") or {}).get("discoverable_entry_surface") or "").strip()
+    if entry_surface is not None:
+        prune_retired_discoverable_wrapper_paths(target_root, entry_surface, wrapper_paths)
     if discoverable_entry_surface and adapter.get("discoverable_entries") and not wrapper_paths:
         raise SystemExit(
             "Discoverable wrapper projection for "

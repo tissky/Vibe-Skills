@@ -134,6 +134,14 @@ def load_allowed_vibe_entry_ids() -> frozenset[str]:
     return allowed
 
 
+@lru_cache(maxsize=1)
+def load_canonical_vibe_entry_id() -> str:
+    repo_root = resolve_repo_root(Path(__file__))
+    payload = load_json(repo_root / 'config' / 'vibe-entry-surfaces.json')
+    canonical = str(payload.get('canonical_runtime_skill') or 'vibe').strip() or 'vibe'
+    return canonical
+
+
 def infer_task_type(task: str) -> str:
     task_lower = str(task).lower()
     review_markers = _TASK_TYPE_RULES[0][1]
@@ -160,12 +168,13 @@ def infer_task_type(task: str) -> str:
 
 
 def route_runtime_task(task: str, requested_skill: str | None = None) -> RuntimeRoute:
-    selected_skill = str(requested_skill or 'vibe').strip() or 'vibe'
-    if selected_skill not in load_allowed_vibe_entry_ids():
+    requested_entry = str(requested_skill or '').strip() or None
+    if requested_entry and requested_entry not in load_allowed_vibe_entry_ids():
         raise ValueError(f'unsupported vibe entry id: {requested_skill}')
+    selected_skill = load_canonical_vibe_entry_id()
     return RuntimeRoute(
-        requested_skill=requested_skill,
+        requested_skill=requested_entry,
         router_selected_skill=selected_skill,
-        runtime_selected_skill='vibe',
+        runtime_selected_skill=selected_skill,
         task_type=infer_task_type(task),
     )

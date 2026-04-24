@@ -15,6 +15,7 @@ from vgo_runtime.router_contract_presentation import (
     CONFIRM_UI_BATCH_PROMPT,
     DEEP_DISCOVERY_FIRST_QUESTION,
 )
+from vgo_runtime.router_contract_runtime import route_prompt
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -23,7 +24,13 @@ ROUTE_FIXTURE = REPO_ROOT / "tests" / "replay" / "route" / "recovery-wave-curate
 PLATFORM_FIXTURE = REPO_ROOT / "tests" / "replay" / "platform" / "linux-without-pwsh.json"
 
 
-def run_bridge(prompt: str, grade: str, task_type: str, requested_skill: str | None = None) -> dict:
+def run_bridge(
+    prompt: str,
+    grade: str,
+    task_type: str,
+    requested_skill: str | None = None,
+    entry_intent_id: str | None = None,
+) -> dict:
     command = [
         sys.executable,
         str(BRIDGE_SCRIPT),
@@ -37,6 +44,8 @@ def run_bridge(prompt: str, grade: str, task_type: str, requested_skill: str | N
     ]
     if requested_skill:
         command.extend(["--requested-skill", requested_skill])
+    if entry_intent_id:
+        command.extend(["--entry-intent-id", entry_intent_id])
     completed = subprocess.run(command, cwd=REPO_ROOT, capture_output=True, text=True, check=True)
     return json.loads(completed.stdout)
 
@@ -172,6 +181,31 @@ class RouterBridgeTests(unittest.TestCase):
         self.assertEqual("pack_overlay", result["route_mode"])
         self.assertEqual("data-ml", result["selected"]["pack_id"])
         self.assertEqual("LQF_Machine_Learning_Expert_Guide", result["selected"]["skill"])
+
+    def test_wrapper_entry_intent_does_not_override_runtime_neutral_router_selection(self) -> None:
+        prompt = (
+            "Please use scikit-learn to prototype a tabular classification baseline, "
+            "run feature selection, and compare cross-validation metrics."
+        )
+        baseline = route_prompt(
+            prompt=prompt,
+            grade="L",
+            task_type="coding",
+            repo_root=REPO_ROOT,
+        )
+        wrapped = route_prompt(
+            prompt=prompt,
+            grade="L",
+            task_type="coding",
+            entry_intent_id="vibe-what-do-i-want",
+            repo_root=REPO_ROOT,
+        )
+
+        self.assertEqual(baseline["route_mode"], wrapped["route_mode"])
+        self.assertEqual(baseline["selected"]["pack_id"], wrapped["selected"]["pack_id"])
+        self.assertEqual(baseline["selected"]["skill"], wrapped["selected"]["skill"])
+        self.assertEqual("vibe-what-do-i-want", wrapped["alias"]["entry_intent_id"])
+        self.assertIsNone(wrapped["alias"]["requested_input"])
 
     def test_vibe_keeps_route_authority_while_plan_helpers_move_to_stage_assistants(self) -> None:
         result = run_bridge(

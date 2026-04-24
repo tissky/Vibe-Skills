@@ -1266,6 +1266,49 @@ function Read-VibeEntrySurfaceConfig {
     return Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
 }
 
+function Get-VibeEntryProgressiveStageStops {
+    param(
+        [Parameter(Mandatory)] [string]$RepoRoot,
+        [AllowEmptyString()] [string]$EntryIntentId = ''
+    )
+
+    if ([string]::IsNullOrWhiteSpace($EntryIntentId)) {
+        return @()
+    }
+
+    $surfaceConfig = Read-VibeEntrySurfaceConfig -RepoRoot $RepoRoot
+    foreach ($entry in @($surfaceConfig.entries)) {
+        if ($null -eq $entry) {
+            continue
+        }
+        $entryId = if (
+            $entry.PSObject.Properties.Name -contains 'id' -and
+            -not [string]::IsNullOrWhiteSpace([string]$entry.id)
+        ) {
+            [string]$entry.id
+        } else {
+            ''
+        }
+        if ($entryId -ne [string]$EntryIntentId) {
+            continue
+        }
+
+        if (
+            $entry.PSObject.Properties.Name -contains 'progressive_stage_stops' -and
+            $null -ne $entry.progressive_stage_stops
+        ) {
+            return @(
+                @($entry.progressive_stage_stops) |
+                    ForEach-Object { Resolve-VibeRequestedStageStop -RequestedStageStop ([string]$_) } |
+                    Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) }
+            )
+        }
+        break
+    }
+
+    return @()
+}
+
 function Resolve-VibeEntryRequestedStageStop {
     param(
         [Parameter(Mandatory)] [string]$RepoRoot,
@@ -1295,6 +1338,11 @@ function Resolve-VibeEntryRequestedStageStop {
                 continue
             }
 
+            $entryProgressiveStops = @(Get-VibeEntryProgressiveStageStops -RepoRoot $RepoRoot -EntryIntentId $entryId)
+            if (@($entryProgressiveStops).Count -gt 0) {
+                return [string]$entryProgressiveStops[0]
+            }
+
             $entryRequestedStop = if (
                 $entry.PSObject.Properties.Name -contains 'requested_stage_stop' -and
                 -not [string]::IsNullOrWhiteSpace([string]$entry.requested_stage_stop)
@@ -1313,10 +1361,45 @@ function Resolve-VibeEntryRequestedStageStop {
     return Resolve-VibeRequestedStageStop -RequestedStageStop ''
 }
 
-function Get-VibeBoundedReturnFollowupEntryIds {
+function Get-VibeNextProgressiveStageStop {
     param(
+        [Parameter(Mandatory)] [string]$RepoRoot,
+        [AllowEmptyString()] [string]$EntryIntentId = '',
         [AllowEmptyString()] [string]$TerminalStage = ''
     )
+
+    $progressiveStops = @(Get-VibeEntryProgressiveStageStops -RepoRoot $RepoRoot -EntryIntentId $EntryIntentId)
+    if (@($progressiveStops).Count -eq 0) {
+        return ''
+    }
+
+    $normalizedTerminalStage = Resolve-VibeRequestedStageStop -RequestedStageStop $TerminalStage
+    for ($index = 0; $index -lt $progressiveStops.Count; $index++) {
+        if ([string]$progressiveStops[$index] -ne [string]$normalizedTerminalStage) {
+            continue
+        }
+        if (($index + 1) -lt $progressiveStops.Count) {
+            return [string]$progressiveStops[$index + 1]
+        }
+        break
+    }
+
+    return ''
+}
+
+function Get-VibeBoundedReturnFollowupEntryIds {
+    param(
+        [AllowEmptyString()] [string]$EntryIntentId = '',
+        [AllowEmptyString()] [string]$TerminalStage = ''
+    )
+
+    if ([string]$EntryIntentId -eq 'vibe') {
+        switch ([string]$TerminalStage) {
+            'requirement_doc' { return @('vibe') }
+            'xl_plan' { return @('vibe') }
+            default { return @() }
+        }
+    }
 
     switch ([string]$TerminalStage) {
         'requirement_doc' { return @('vibe', 'vibe-how-do-we-do', 'vibe-do-it') }
@@ -1327,18 +1410,36 @@ function Get-VibeBoundedReturnFollowupEntryIds {
 
 function New-VibeBoundedReturnControlProjection {
     param(
+        [Parameter(Mandatory)] [string]$RepoRoot,
         [Parameter(Mandatory)] [string]$RunId,
         [AllowEmptyString()] [string]$EntryIntentId = '',
         [AllowNull()] [object]$StageLineage = $null
     )
 
+    $resolvedEntryIntentId = if ([string]::IsNullOrWhiteSpace($EntryIntentId)) { 'vibe' } else { [string]$EntryIntentId }
     $terminalStage = Get-VibeStageLineageTerminalStage -StageLineage $StageLineage
-    $allowedFollowupEntryIds = @(Get-VibeBoundedReturnFollowupEntryIds -TerminalStage $terminalStage)
+    $allowedFollowupEntryIds = @(Get-VibeBoundedReturnFollowupEntryIds -EntryIntentId $resolvedEntryIntentId -TerminalStage $terminalStage)
     if (@($allowedFollowupEntryIds).Count -eq 0) {
         return $null
     }
 
-    $resolvedEntryIntentId = if ([string]::IsNullOrWhiteSpace($EntryIntentId)) { 'vibe' } else { [string]$EntryIntentId }
+    $nextStage = Get-VibeNextProgressiveStageStop -RepoRoot $RepoRoot -EntryIntentId $resolvedEntryIntentId -TerminalStage $terminalStage
+    $approvalKind = switch ([string]$terminalStage) {
+        'requirement_doc' { 'requirement_confirmation' }
+        'xl_plan' { 'plan_confirmation' }
+        default { 'user_reentry_confirmation' }
+    }
+    $approvalPrompt = switch ([string]$terminalStage) {
+        'requirement_doc' {
+            'Review the frozen requirement document with the user and wait for an explicit approve/revise reply before planning. Do not auto-continue into `xl_plan` in the same assistant turn.'
+        }
+        'xl_plan' {
+            'Review the frozen execution plan with the user and wait for an explicit approve/revise reply before execution. Do not auto-continue into `plan_execute` or `phase_cleanup` in the same assistant turn.'
+        }
+        default {
+            'Return control to the user and wait for an explicit follow-up before continuing.'
+        }
+    }
     $token = [guid]::NewGuid().ToString('N')
     $renderedLines = @(
         'Bounded governed stop reached. Return control to the user now.',
@@ -1346,6 +1447,9 @@ function New-VibeBoundedReturnControlProjection {
         ('- source run id: `{0}`' -f [string]$RunId),
         ('- explicit user re-entry required before later stages: `true`'),
         ('- allowed follow-up entries: `{0}`' -f (@($allowedFollowupEntryIds) -join '`, `')),
+        ('- next governed stage after approval: `{0}`' -f $(if ([string]::IsNullOrWhiteSpace($nextStage)) { 'none' } else { [string]$nextStage })),
+        ('- approval kind: `{0}`' -f [string]$approvalKind),
+        ('- approval instruction: {0}' -f [string]$approvalPrompt),
         ('- continuation token: `{0}`' -f [string]$token)
     )
 
@@ -1353,10 +1457,14 @@ function New-VibeBoundedReturnControlProjection {
         protocol_version = 'v1'
         enabled = $true
         explicit_user_reentry_required = $true
+        explicit_new_user_message_required = $true
         control_owner = 'user'
         source_run_id = $RunId
         source_entry_intent_id = $resolvedEntryIntentId
         terminal_stage = [string]$terminalStage
+        next_stage = if ([string]::IsNullOrWhiteSpace($nextStage)) { $null } else { [string]$nextStage }
+        approval_kind = [string]$approvalKind
+        approval_prompt = [string]$approvalPrompt
         allowed_followup_entry_ids = @($allowedFollowupEntryIds)
         reentry_token = $token
         rendered_text = (@($renderedLines) -join "`n")
@@ -2762,11 +2870,39 @@ function New-VibeHostUserBriefingProjection {
         } else {
             @()
         }
+        $nextStage = if (
+            (Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'next_stage') -and
+            -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.next_stage)
+        ) {
+            [string]$BoundedReturnControl.next_stage
+        } else {
+            $null
+        }
+        $approvalKind = if (
+            (Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'approval_kind') -and
+            -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.approval_kind)
+        ) {
+            [string]$BoundedReturnControl.approval_kind
+        } else {
+            'user_reentry_confirmation'
+        }
+        $approvalPrompt = if (
+            (Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'approval_prompt') -and
+            -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.approval_prompt)
+        ) {
+            [string]$BoundedReturnControl.approval_prompt
+        } else {
+            'Return control to the user and wait for an explicit follow-up before continuing.'
+        }
         $boundedLines = @(
             'Bounded governed stop reached. Return control to the user now.',
             ('- terminal stage: `{0}`' -f [string]$BoundedReturnControl.terminal_stage),
             ('- source run id: `{0}`' -f [string]$BoundedReturnControl.source_run_id),
             ('- allowed follow-up entries: `{0}`' -f (@($allowedFollowupEntryIds) -join '`, `')),
+            ('- next governed stage after approval: `{0}`' -f $(if ($nextStage) { $nextStage } else { 'none' })),
+            ('- approval kind: `{0}`' -f [string]$approvalKind),
+            ('- approval instruction: {0}' -f [string]$approvalPrompt),
+            '- do not continue in the same assistant turn; wait for a new user message before consuming re-entry credentials',
             '- if you intentionally continue, forward `--continue-from-run-id <source_run_id>` and `--bounded-reentry-token <reentry_token>` from the latest runtime summary'
         )
         $boundedSegment = [pscustomobject]@{
@@ -2782,6 +2918,9 @@ function New-VibeHostUserBriefingProjection {
             control_owner = if ((Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'control_owner') -and -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.control_owner)) { [string]$BoundedReturnControl.control_owner } else { 'user' }
             source_run_id = if ((Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'source_run_id') -and -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.source_run_id)) { [string]$BoundedReturnControl.source_run_id } else { $null }
             terminal_stage = if ((Test-VibeObjectHasProperty -InputObject $BoundedReturnControl -PropertyName 'terminal_stage') -and -not [string]::IsNullOrWhiteSpace([string]$BoundedReturnControl.terminal_stage)) { [string]$BoundedReturnControl.terminal_stage } else { $null }
+            next_stage = $nextStage
+            approval_kind = $approvalKind
+            approval_prompt = $approvalPrompt
             allowed_followup_entry_ids = @($allowedFollowupEntryIds)
         }
         $segments.Add($boundedSegment) | Out-Null

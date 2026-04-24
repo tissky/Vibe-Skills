@@ -125,7 +125,7 @@ def test_runtime_packet_execution_uses_entry_intent_when_requested_skill_is_omit
     )
 
     assert result.route['requested_skill'] == 'vibe-how-do-we-do'
-    assert result.route['router_selected_skill'] == 'vibe-how-do-we-do'
+    assert result.route['router_selected_skill'] == 'vibe'
     assert result.route['runtime_selected_skill'] == 'vibe'
 
 

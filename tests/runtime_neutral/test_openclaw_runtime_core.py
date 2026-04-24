@@ -52,7 +52,7 @@ def run_package_install(*, host: str, target_root: Path, profile: str = "full") 
 
 
 class OpenClawRuntimeCoreTests(unittest.TestCase):
-    EXPECTED_WRAPPER_SKILLS = ("vibe", "vibe-what-do-i-want", "vibe-how-do-we-do", "vibe-do-it", "vibe-upgrade")
+    EXPECTED_WRAPPER_SKILLS = ("vibe",)
 
     def test_adapter_registry_exposes_openclaw_preview_runtime_core_lane(self) -> None:
         registry = _load_module("installer_adapter_registry_openclaw", ADAPTER_REGISTRY_MODULE)

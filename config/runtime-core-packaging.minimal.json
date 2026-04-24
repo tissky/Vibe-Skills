@@ -143,11 +143,7 @@
     "canonical_vibe_target_relpath": "skills/vibe",
     "discoverable_entry_surface": "config/vibe-entry-surfaces.json",
     "projected_skill_names": [
-      "vibe",
-      "vibe-what-do-i-want",
-      "vibe-how-do-we-do",
-      "vibe-do-it",
-      "vibe-upgrade"
+      "vibe"
     ]
   },
   "internal_skill_corpus": {

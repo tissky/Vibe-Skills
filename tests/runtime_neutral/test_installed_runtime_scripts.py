@@ -28,22 +28,53 @@ MINIMAL_REQUIRED_SKILLS = set(
 )
 CODEX_COMPATIBILITY_COMMAND_FILES = {
     "vibe.md",
-    "vibe-what-do-i-want.md",
-    "vibe-how-do-we-do.md",
-    "vibe-do-it.md",
-    "vibe-upgrade.md",
 }
 CODEX_WRAPPER_SKILL_NAMES = {
     "vibe",
-    "vibe-what-do-i-want",
-    "vibe-how-do-we-do",
-    "vibe-do-it",
-    "vibe-upgrade",
 }
 CANONICAL_ENTRY_RUNTIME_SURFACES = (
     "scripts/runtime/Invoke-VibeCanonicalEntry.ps1",
     "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
 )
+
+_RAW_SUBPROCESS_RUN = subprocess.run
+
+
+def _utf8_text_subprocess_run(*args, **kwargs):
+    if kwargs.get("text") or kwargs.get("universal_newlines"):
+        kwargs.setdefault("encoding", "utf-8")
+        kwargs.setdefault("errors", "replace")
+    return _RAW_SUBPROCESS_RUN(*args, **kwargs)
+
+
+# Normalize text-mode decoding across Windows shell tests so bash/pwsh output
+# is evaluated against the installed runtime contract rather than the host locale.
+subprocess.run = _utf8_text_subprocess_run
+
+
+def _native_shell_frontend_unavailable_reason() -> str | None:
+    if os.name != "nt":
+        return None
+    bash_path = shutil.which("bash") or shutil.which("bash.exe")
+    if not bash_path:
+        return "bash is not available for native shell frontend tests"
+    normalized = str(Path(bash_path)).lower().replace("/", "\\")
+    if normalized.endswith("\\windows\\system32\\bash.exe"):
+        return (
+            "native shell frontend tests require a POSIX shell surface; "
+            "system32\\\\bash.exe is WSL-backed and is covered separately from Windows PowerShell flows"
+        )
+    return None
+
+
+def _is_native_shell_frontend_test(method_name: str) -> bool:
+    markers = (
+        "shell_",
+        "check_sh",
+        "codex_check",
+        "bootstrap_supports_openclaw_without_self_deleting_source",
+    )
+    return any(marker in method_name for marker in markers)
 
 def resolve_powershell() -> str | None:
     candidates = [
@@ -62,6 +93,9 @@ def resolve_powershell() -> str | None:
 
 class InstalledRuntimeScriptsTests(unittest.TestCase):
     def setUp(self) -> None:
+        reason = _native_shell_frontend_unavailable_reason()
+        if reason and _is_native_shell_frontend_test(self._testMethodName):
+            self.skipTest(reason)
         self.tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tempdir.name)
         self.target_root = self.root / "target-a"
@@ -431,10 +465,14 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
         self.install_shell_runtime("codex")
 
         commands_root = self.target_root / "commands"
-        for discoverable_name in ("vibe-what-do-i-want.md", "vibe-how-do-we-do.md", "vibe-do-it.md"):
-            discoverable_path = commands_root / discoverable_name
-            if discoverable_path.exists():
-                discoverable_path.unlink()
+        hidden_wrapper_commands = (
+            "vibe-what-do-i-want.md",
+            "vibe-how-do-we-do.md",
+            "vibe-do-it.md",
+            "vibe-upgrade.md",
+        )
+        for discoverable_name in hidden_wrapper_commands:
+            self.assertFalse((commands_root / discoverable_name).exists(), discoverable_name)
 
         installed_root = self.target_root / "skills" / "vibe"
         check_cmd = [

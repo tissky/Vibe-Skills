@@ -12,6 +12,7 @@ for src in (INSTALLER_SRC, CONTRACTS_SRC):
         sys.path.insert(0, str(src))
 
 import vgo_installer.install_runtime as install_runtime
+from vgo_contracts.discoverable_entry_surface import load_discoverable_entry_surface
 
 
 def test_prune_previously_managed_wrapper_paths_removes_stale_wrapper_files(tmp_path: Path) -> None:
@@ -83,3 +84,27 @@ def test_prune_known_legacy_wrapper_paths_removes_untracked_skill_aliases(tmp_pa
 
     assert not legacy_root.exists()
     assert current.exists()
+
+
+def test_prune_retired_discoverable_wrapper_paths_removes_nonpublic_wrapper_files_and_dirs(tmp_path: Path) -> None:
+    target_root = tmp_path / "target"
+    command_wrapper = target_root / "commands" / "vibe-how-do-we-do.md"
+    skill_wrapper_root = target_root / "skills" / "vibe-do-it"
+    command_wrapper.parent.mkdir(parents=True, exist_ok=True)
+    skill_wrapper_root.mkdir(parents=True, exist_ok=True)
+    command_wrapper.write_text("legacy discoverable wrapper\n", encoding="utf-8")
+    (skill_wrapper_root / "SKILL.md").write_text("legacy discoverable skill wrapper\n", encoding="utf-8")
+
+    entry_surface = load_discoverable_entry_surface(REPO_ROOT)
+    current_wrapper = target_root / "commands" / "vibe.md"
+    current_wrapper.write_text("current public wrapper\n", encoding="utf-8")
+
+    install_runtime.prune_retired_discoverable_wrapper_paths(
+        target_root,
+        entry_surface,
+        [current_wrapper],
+    )
+
+    assert current_wrapper.exists()
+    assert not command_wrapper.exists()
+    assert not skill_wrapper_root.exists()

@@ -425,7 +425,7 @@ def route_prompt(
     routing_rules = router_config["routing_rules"]
 
     requested_canonical = resolve_requested_canonical(
-        requested_skill or entry_intent_id,
+        requested_skill,
         alias_map,
         repo_root=repo.repo_root,
     )

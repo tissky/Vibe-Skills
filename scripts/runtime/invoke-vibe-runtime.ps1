@@ -75,8 +75,8 @@ function Complete-VibeGovernedRuntimeStop {
         [Parameter(Mandatory)] [object]$RuntimeInput,
         [Parameter(Mandatory)] [object]$GovernanceCapsule,
         [Parameter(Mandatory)] [object]$StageLineage,
-        [Parameter(Mandatory)] [object]$Interview,
-        [Parameter(Mandatory)] [object]$Requirement,
+        [AllowNull()] [object]$Interview = $null,
+        [AllowNull()] [object]$Requirement = $null,
         [AllowNull()] [object]$Plan = $null,
         [AllowNull()] [object]$Execute = $null,
         [AllowNull()] [object]$Cleanup = $null,
@@ -99,14 +99,42 @@ function Complete-VibeGovernedRuntimeStop {
         [AllowNull()] [object]$DelegationValidation = $null
     )
 
+    $interviewReceiptPath = if (
+        $Interview -and
+        $Interview.PSObject.Properties.Name -contains 'receipt_path' -and
+        -not [string]::IsNullOrWhiteSpace([string]$Interview.receipt_path)
+    ) {
+        [string]$Interview.receipt_path
+    } else {
+        ''
+    }
+    $requirementDocPath = if (
+        $Requirement -and
+        $Requirement.PSObject.Properties.Name -contains 'requirement_doc_path' -and
+        -not [string]::IsNullOrWhiteSpace([string]$Requirement.requirement_doc_path)
+    ) {
+        [string]$Requirement.requirement_doc_path
+    } else {
+        ''
+    }
+    $requirementReceiptPath = if (
+        $Requirement -and
+        $Requirement.PSObject.Properties.Name -contains 'receipt_path' -and
+        -not [string]::IsNullOrWhiteSpace([string]$Requirement.receipt_path)
+    ) {
+        [string]$Requirement.receipt_path
+    } else {
+        ''
+    }
+
     $criticalArtifactPaths = @(
         [string]$Skeleton.receipt_path,
         [string]$RuntimeInput.packet_path,
         [string]$GovernanceCapsule.path,
         [string]$StageLineage.path,
-        [string]$Interview.receipt_path,
-        [string]$Requirement.requirement_doc_path,
-        [string]$Requirement.receipt_path,
+        $interviewReceiptPath,
+        $requirementDocPath,
+        $requirementReceiptPath,
         $(if ($Plan) { [string]$Plan.execution_plan_path } else { '' }),
         $(if ($Plan) { [string]$Plan.receipt_path } else { '' }),
         $(if ($Execute) { [string]$Execute.receipt_path } else { '' }),
@@ -143,9 +171,9 @@ function Complete-VibeGovernedRuntimeStop {
         -RuntimeInputPacketPath ([string]$RuntimeInput.packet_path) `
         -GovernanceCapsulePath ([string]$GovernanceCapsule.path) `
         -StageLineagePath ([string]$StageLineage.path) `
-        -IntentContractPath ([string]$Interview.receipt_path) `
-        -RequirementDocPath ([string]$Requirement.requirement_doc_path) `
-        -RequirementReceiptPath ([string]$Requirement.receipt_path) `
+        -IntentContractPath $interviewReceiptPath `
+        -RequirementDocPath $requirementDocPath `
+        -RequirementReceiptPath $requirementReceiptPath `
         -ExecutionPlanPath $(if ($Plan) { [string]$Plan.execution_plan_path } else { '' }) `
         -ExecutionPlanReceiptPath $(if ($Plan) { [string]$Plan.receipt_path } else { '' }) `
         -ExecuteReceiptPath $(if ($Execute) { [string]$Execute.receipt_path } else { '' }) `
@@ -294,12 +322,105 @@ $runtimeInputPacket = if ($runtimeInput -and $runtimeInput.PSObject.Properties.N
 } else {
     $null
 }
+$routeResult = if ($runtimeInput -and $runtimeInput.PSObject.Properties.Name -contains 'route_result' -and $null -ne $runtimeInput.route_result) {
+    $runtimeInput.route_result
+} else {
+    $null
+}
 $requestedStop = Resolve-VibeRequestedStageStop -RequestedStageStop $(if ($runtimeInputPacket) { [string]$runtimeInputPacket.requested_stage_stop } else { '' })
 $discussionRoutingLayer = New-VibeSpecialistRoutingLifecycleLayerProjection -RuntimeInputPacket $runtimeInputPacket
 if ($discussionRoutingLayer) {
     $discussionRoutingSegment = New-VibeHostUserBriefingSegmentProjection -LifecycleLayer $discussionRoutingLayer
     $discussionRoutingEvent = New-VibeHostStageDisclosureEventProjection -Segment $discussionRoutingSegment
     Add-VibeHostStageDisclosureEvent -SessionRoot ([string]$skeleton.session_root) -DisclosureEvent $discussionRoutingEvent | Out-Null
+}
+$confirmRequired = [bool](Get-VibeNestedPropertySafe -InputObject $runtimeInputPacket -PropertyPath @('route_snapshot', 'confirm_required') -DefaultValue $false)
+if ($confirmRequired) {
+    $confirmUi = if ($routeResult -and $routeResult.PSObject.Properties.Name -contains 'confirm_ui' -and $null -ne $routeResult.confirm_ui) {
+        $routeResult.confirm_ui
+    } else {
+        $null
+    }
+    $confirmRenderedText = if (
+        $confirmUi -and
+        $confirmUi.PSObject.Properties.Name -contains 'rendered_text' -and
+        -not [string]::IsNullOrWhiteSpace([string]$confirmUi.rendered_text)
+    ) {
+        [string]$confirmUi.rendered_text
+    } else {
+        @(
+            'Routing requires confirmation before governed execution can continue.',
+            ('- route_mode: `{0}`' -f $(Get-VibeNestedPropertySafe -InputObject $runtimeInputPacket -PropertyPath @('route_snapshot', 'route_mode') -DefaultValue 'confirm_required')),
+            ('- selected_skill: `{0}`' -f $(Get-VibeNestedPropertySafe -InputObject $runtimeInputPacket -PropertyPath @('route_snapshot', 'selected_skill') -DefaultValue 'unknown')),
+            'Reply with the missing clarifications or confirm the routed skill choice, then re-enter canonical `vibe` through the same host surface.'
+        ) -join "`n"
+    }
+    $confirmSkills = if ($confirmUi -and $confirmUi.PSObject.Properties.Name -contains 'options' -and $null -ne $confirmUi.options) {
+        @($confirmUi.options | ForEach-Object {
+            [pscustomobject]@{
+                skill_id = if ($_.PSObject.Properties.Name -contains 'skill') { [string]$_.skill } else { $null }
+                description = if ($_.PSObject.Properties.Name -contains 'description') { [string]$_.description } else { $null }
+                score = if ($_.PSObject.Properties.Name -contains 'score') { $_.score } else { $null }
+                source = 'confirm_ui'
+            }
+        })
+    } else {
+        @($runtimeInputPacket.specialist_recommendations | ForEach-Object {
+            [pscustomobject]@{
+                skill_id = if ($_.PSObject.Properties.Name -contains 'skill_id') { [string]$_.skill_id } else { $null }
+                description = if ($_.PSObject.Properties.Name -contains 'rationale') { [string]$_.rationale } else { $null }
+                score = $null
+                source = 'specialist_recommendation'
+            }
+        })
+    }
+    $confirmDisclosureEvent = [pscustomobject]@{
+        event_id = 'routing_confirmation_required'
+        segment_id = 'routing_confirmation'
+        stage = 'skeleton_check'
+        category = 'routing'
+        truth_layer = 'route_selection'
+        status = 'confirm_required'
+        gate_status = 'confirm_required'
+        skill_count = @($confirmSkills).Count
+        skills = @($confirmSkills)
+        rendered_text = $confirmRenderedText
+    }
+    Add-VibeHostStageDisclosureEvent -SessionRoot ([string]$skeleton.session_root) -DisclosureEvent $confirmDisclosureEvent | Out-Null
+    $hostStageDisclosurePath = Get-VibeHostStageDisclosurePath -SessionRoot ([string]$skeleton.session_root)
+    $hostStageDisclosure = if (Test-Path -LiteralPath $hostStageDisclosurePath) {
+        Get-Content -LiteralPath $hostStageDisclosurePath -Raw -Encoding UTF8 | ConvertFrom-Json
+    } else {
+        $null
+    }
+    $hostUserBriefing = [pscustomobject]@{
+        stage = 'skeleton_check'
+        route_mode = 'confirm_required'
+        selected_skill = Get-VibeNestedPropertySafe -InputObject $runtimeInputPacket -PropertyPath @('route_snapshot', 'selected_skill') -DefaultValue $null
+        clarification_questions = if ($confirmUi -and $confirmUi.PSObject.Properties.Name -contains 'clarification_questions') { @($confirmUi.clarification_questions) } else { @() }
+        options = if ($confirmUi -and $confirmUi.PSObject.Properties.Name -contains 'options') { @($confirmUi.options) } else { @() }
+        rendered_text = $confirmRenderedText
+    }
+    $hostUserBriefingPath = Get-VibeHostUserBriefingPath -SessionRoot ([string]$skeleton.session_root)
+    Write-VgoUtf8NoBomText -Path $hostUserBriefingPath -Content ($confirmRenderedText + [Environment]::NewLine)
+
+    return Complete-VibeGovernedRuntimeStop `
+        -RunId $RunId `
+        -Mode $Mode `
+        -Task $Task `
+        -ArtifactBaseRoot $artifactBaseRoot `
+        -SessionRoot ([string]$skeleton.session_root) `
+        -HierarchyState $hierarchyState `
+        -StorageProjection $storageProjection `
+        -Skeleton $skeleton `
+        -RuntimeInput $runtimeInput `
+        -GovernanceCapsule $governanceCapsule `
+        -StageLineage $stageLineage `
+        -HostStageDisclosure $hostStageDisclosure `
+        -HostStageDisclosurePath $hostStageDisclosurePath `
+        -HostUserBriefing $hostUserBriefing `
+        -HostUserBriefingPath $hostUserBriefingPath `
+        -DelegationValidation $delegationValidation
 }
 $interview = & (Join-Path $PSScriptRoot 'Invoke-DeepInterview.ps1') -Task $Task -Mode $Mode -RunId $RunId -ArtifactRoot $ArtifactRoot
 $stageLineage = Add-VibeStageLineageEntry `
@@ -363,6 +484,7 @@ if ($requestedStop -eq 'requirement_doc') {
         $null
     }
     $boundedReturnControl = New-VibeBoundedReturnControlProjection `
+        -RepoRoot ([string]$runtime.repo_root) `
         -RunId $RunId `
         -EntryIntentId $EntryIntentId `
         -StageLineage $stageLineage
@@ -450,6 +572,7 @@ if ($requestedStop -eq 'xl_plan') {
         $null
     }
     $boundedReturnControl = New-VibeBoundedReturnControlProjection `
+        -RepoRoot ([string]$runtime.repo_root) `
         -RunId $RunId `
         -EntryIntentId $EntryIntentId `
         -StageLineage $stageLineage

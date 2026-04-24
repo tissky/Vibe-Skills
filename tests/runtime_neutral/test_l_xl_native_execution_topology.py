@@ -13,6 +13,15 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+IMPLEMENTATION_EXECUTION_TASK = (
+    "Implement a bounded migration with explicit code changes, tests, and verification."
+)
+DEBUG_EXECUTION_TASK = (
+    "I have a failing test and a stack trace. Help me debug systematically before proposing fixes."
+)
+DEBUG_SPECIALIST_TASK = (
+    "I have a failing test and stack trace. Debug systematically and execute specialist workflow."
+)
 
 
 def resolve_powershell() -> str | None:
@@ -399,6 +408,40 @@ def create_fake_codex_command(directory: Path, *, required_prompt_markers: list[
 
 
 class NativeExecutionTopologyTests(unittest.TestCase):
+    def test_public_vibe_defaults_to_requirement_confirmation_boundary(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            payload = run_runtime(
+                task="Implement the runtime hardening after confirming scope and plan.",
+                artifact_root=Path(tempdir),
+                governance_scope="root",
+                entry_intent_id="vibe",
+            )
+            summary = payload["summary"]
+            runtime_input = load_json(summary["artifacts"]["runtime_input_packet"])
+            stage_lineage = load_json(summary["artifacts"]["stage_lineage"])
+
+            self.assertEqual("vibe", runtime_input["entry_intent_id"])
+            self.assertEqual("requirement_doc", runtime_input["requested_stage_stop"])
+            self.assertEqual("requirement_doc", summary["terminal_stage"])
+            self.assertEqual(
+                ["skeleton_check", "deep_interview", "requirement_doc"],
+                list(summary["executed_stage_order"]),
+            )
+            self.assertEqual(
+                ["skeleton_check", "deep_interview", "requirement_doc"],
+                [item["stage_name"] for item in stage_lineage["stages"]],
+            )
+            self.assertEqual("requirement_doc", summary["bounded_return_control"]["terminal_stage"])
+            self.assertEqual("xl_plan", summary["bounded_return_control"]["next_stage"])
+            self.assertEqual("requirement_confirmation", summary["bounded_return_control"]["approval_kind"])
+            self.assertEqual(["vibe"], list(summary["bounded_return_control"]["allowed_followup_entry_ids"]))
+            self.assertTrue(bool(summary["bounded_return_control"]["explicit_new_user_message_required"]))
+            self.assertIn("Do not auto-continue into `xl_plan`", summary["bounded_return_control"]["approval_prompt"])
+            self.assertIn("wait for a new user message", summary["host_user_briefing"]["rendered_text"])
+            self.assertFalse(summary["artifacts"]["execution_plan"])
+            self.assertFalse(summary["artifacts"]["execute_receipt"])
+            self.assertFalse(summary["artifacts"]["cleanup_receipt"])
+
     def test_vibe_what_do_i_want_shortcut_stops_after_requirement_freeze(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = run_runtime(
@@ -412,6 +455,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             stage_lineage = load_json(summary["artifacts"]["stage_lineage"])
 
             self.assertEqual("vibe-what-do-i-want", runtime_input["entry_intent_id"])
+            self.assertIsNone(runtime_input["canonical_router"]["requested_skill"])
             self.assertEqual("requirement_doc", runtime_input["requested_stage_stop"])
             self.assertIsNone(runtime_input["requested_grade_floor"])
             self.assertEqual("requirement_doc", summary["terminal_stage"])
@@ -455,6 +499,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             plan_receipt = load_json(summary["artifacts"]["execution_plan_receipt"])
 
             self.assertEqual("vibe-how-do-we-do", runtime_input["entry_intent_id"])
+            self.assertIsNone(runtime_input["canonical_router"]["requested_skill"])
             self.assertEqual("xl_plan", runtime_input["requested_stage_stop"])
             self.assertEqual("XL", runtime_input["requested_grade_floor"])
             self.assertEqual("xl_plan", summary["terminal_stage"])
@@ -487,7 +532,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
     def test_requested_xl_grade_floor_clamps_governed_runtime_execution_grade(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = run_runtime(
-                task="Design architecture migration with staged review and planning gates.",
+                task="Implement the migration with explicit code changes, tests, and verification.",
                 artifact_root=Path(tempdir),
                 governance_scope="root",
                 entry_intent_id="vibe-do-it",
@@ -499,20 +544,40 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             execution_manifest = load_json(summary["artifacts"]["execution_manifest"])
 
             self.assertEqual("vibe-do-it", runtime_input["entry_intent_id"])
+            self.assertIsNone(runtime_input["canonical_router"]["requested_skill"])
             self.assertEqual("phase_cleanup", runtime_input["requested_stage_stop"])
             self.assertEqual("XL", runtime_input["requested_grade_floor"])
             self.assertEqual("XL", runtime_input["internal_grade"])
             self.assertEqual("XL", plan_receipt["internal_grade"])
             self.assertEqual("XL", execution_manifest["internal_grade"])
 
+    def test_confirm_required_stops_at_skeleton_before_wrapper_stage_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            payload = run_runtime(
+                task="Design architecture migration with staged review and planning gates.",
+                artifact_root=Path(tempdir),
+                governance_scope="root",
+                entry_intent_id="vibe-what-do-i-want",
+            )
+            summary = payload["summary"]
+            runtime_input = load_json(summary["artifacts"]["runtime_input_packet"])
+            stage_lineage = load_json(summary["artifacts"]["stage_lineage"])
+
+            self.assertTrue(bool(runtime_input["route_snapshot"]["confirm_required"]))
+            self.assertEqual("skeleton_check", summary["terminal_stage"])
+            self.assertEqual(["skeleton_check"], list(summary["executed_stage_order"]))
+            self.assertEqual(["skeleton_check"], [item["stage_name"] for item in stage_lineage["stages"]])
+            self.assertFalse(summary["artifacts"]["requirement_doc"])
+            self.assertTrue(summary["artifacts"]["host_user_briefing"])
+
     def test_direct_plan_and_execute_scripts_do_not_let_stale_packet_grade_undercut_floor(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             artifact_root = Path(tempdir)
             initial_payload = run_runtime(
-                task="Design architecture migration with staged review and planning gates.",
+                task=IMPLEMENTATION_EXECUTION_TASK,
                 artifact_root=artifact_root,
                 governance_scope="root",
-                entry_intent_id="vibe-do-it",
+                entry_intent_id="vibe",
                 requested_grade_floor="XL",
             )
             initial_summary = initial_payload["summary"]
@@ -526,14 +591,14 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             )
 
             plan_payload = run_write_xl_plan(
-                task="Design architecture migration with staged review and planning gates.",
+                task=IMPLEMENTATION_EXECUTION_TASK,
                 artifact_root=artifact_root,
                 requirement_doc_path=requirement_doc_path,
                 runtime_input_packet_path=runtime_input_packet_path,
             )
             plan_receipt = load_json(plan_payload["receipt_path"])
             execution_payload = run_plan_execute(
-                task="Design architecture migration with staged review and planning gates.",
+                task=IMPLEMENTATION_EXECUTION_TASK,
                 artifact_root=artifact_root,
                 requirement_doc_path=requirement_doc_path,
                 execution_plan_path=Path(plan_payload["execution_plan_path"]),
@@ -580,7 +645,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             artifact_root = Path(tempdir)
             initial_payload = run_runtime(
-                task="I have a failing test and a stack trace. Help me debug systematically before proposing fixes.",
+                task=DEBUG_EXECUTION_TASK,
                 artifact_root=artifact_root,
                 governance_scope="root",
             )
@@ -601,7 +666,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             )
 
             execution_payload = run_plan_execute(
-                task="I have a failing test and a stack trace. Help me debug systematically before proposing fixes.",
+                task=DEBUG_EXECUTION_TASK,
                 artifact_root=artifact_root,
                 requirement_doc_path=requirement_doc_path,
                 execution_plan_path=execution_plan_path,
@@ -632,7 +697,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 ],
             )
             initial_payload = run_runtime(
-                task="I have a failing test and a stack trace. Help me debug systematically before proposing fixes.",
+                task=DEBUG_EXECUTION_TASK,
                 artifact_root=artifact_root,
                 governance_scope="root",
             )
@@ -653,7 +718,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             )
 
             execution_payload = run_plan_execute(
-                task="I have a failing test and a stack trace. Help me debug systematically before proposing fixes.",
+                task=DEBUG_EXECUTION_TASK,
                 artifact_root=artifact_root,
                 requirement_doc_path=requirement_doc_path,
                 execution_plan_path=execution_plan_path,
@@ -668,24 +733,29 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             execution_receipt = load_json(execution_payload["receipt_path"])
             execution_manifest = load_json(execution_receipt["execution_manifest_path"])
 
-            self.assertGreaterEqual(int(execution_manifest["specialist_accounting"]["executed_specialist_unit_count"]), 1)
-            executed_units = list(execution_manifest["specialist_accounting"]["executed_specialist_units"])
-            legacy_units = [unit for unit in executed_units if str(unit.get("skill_id")) == legacy_skill_id]
+            specialist_accounting = execution_manifest["specialist_accounting"]
+            self.assertEqual("direct_current_session_routed", specialist_accounting["effective_execution_status"])
+            self.assertGreaterEqual(int(specialist_accounting["direct_routed_specialist_unit_count"]), 1)
+            self.assertEqual(0, int(specialist_accounting["executed_specialist_unit_count"]))
+            legacy_units = [
+                unit
+                for unit in list(specialist_accounting["specialist_dispatch_outcomes"])
+                if str(unit.get("skill_id")) == legacy_skill_id
+            ]
             self.assertGreaterEqual(len(legacy_units), 1)
 
             result = load_json(legacy_units[0]["result_path"])
-            self.assertTrue(bool(result["live_native_execution"]))
+            self.assertFalse(bool(result["live_native_execution"]))
             self.assertTrue(bool(result["verification_passed"]))
             self.assertTrue(bool(result["native_usage_required"]))
             self.assertTrue(bool(result["usage_required"]))
+            self.assertTrue(bool(result["direct_route"]))
+            self.assertEqual("direct_current_session_route", result["execution_driver"])
 
     def test_specialist_binding_metadata_is_frozen_into_runtime_requirement_and_plan(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = run_runtime(
-                task=(
-                    "Plan and coordinate a multi-step workflow for assay data processing, "
-                    "bioinformatics sequence interpretation, and scientific writing with staged verification."
-                ),
+                task=DEBUG_EXECUTION_TASK,
                 artifact_root=Path(tempdir),
                 governance_scope="root",
             )
@@ -800,7 +870,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
     def test_l_grade_requires_native_serial_child_lane_execution(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = run_runtime(
-                task="Design architecture migration with staged review and planning gates.",
+                task=IMPLEMENTATION_EXECUTION_TASK,
                 artifact_root=Path(tempdir),
                 governance_scope="root",
             )
@@ -855,12 +925,10 @@ class NativeExecutionTopologyTests(unittest.TestCase):
     def test_xl_grade_requires_selective_parallel_execution(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = run_runtime(
-                task=(
-                    "Run an XL multi-agent wave with parallelizable independent units, "
-                    "then reconcile in sequence."
-                ),
+                task=IMPLEMENTATION_EXECUTION_TASK,
                 artifact_root=Path(tempdir),
                 governance_scope="root",
+                requested_grade_floor="XL",
             )
             summary = payload["summary"]
             execution_manifest = load_json(summary["artifacts"]["execution_manifest"])
@@ -898,6 +966,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 if not window_unit_ids:
                     continue
                 spans: list[tuple[datetime, datetime]] = []
+                window_results: list[dict[str, object]] = []
                 for unit_id in window_unit_ids:
                     with self.subTest(window_unit_id=unit_id):
                         self.assertIn(unit_id, executed_by_id)
@@ -907,13 +976,16 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                         self.assertTrue(bool(result["verification_passed"]))
                         self.assertTrue(Path(result["stdout_path"]).exists())
                         self.assertTrue(Path(result["stderr_path"]).exists())
+                        window_results.append(result)
                         spans.append(
                             (
                                 parse_utc_timestamp(str(result["started_at"])),
                                 parse_utc_timestamp(str(result["finished_at"])),
                             )
                         )
-                if len(spans) >= 2:
+                # Direct current-session specialist routes are grouped as bounded-parallel
+                # windows for topology accounting, but they do not claim wall-clock overlap.
+                if len(spans) >= 2 and not all(bool(result.get("direct_route")) for result in window_results):
                     latest_start = max(start for start, _ in spans)
                     earliest_finish = min(finish for _, finish in spans)
                     self.assertLess(latest_start, earliest_finish)
@@ -921,7 +993,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
     def test_approved_specialist_dispatch_requires_executable_native_units(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = run_runtime(
-                task="I have a failing test and stack trace. Debug systematically and execute specialist workflow.",
+                task=DEBUG_SPECIALIST_TASK,
                 artifact_root=Path(tempdir),
                 governance_scope="root",
                 extra_env={
@@ -940,29 +1012,31 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             self.assertIn("specialist_accounting", execution_manifest)
             specialist_accounting = execution_manifest["specialist_accounting"]
             self.assertEqual("native_bounded_units", specialist_accounting["execution_mode"])
-            self.assertEqual("explicitly_degraded", specialist_accounting["effective_execution_status"])
+            self.assertEqual("direct_current_session_routed", specialist_accounting["effective_execution_status"])
             self.assertEqual(0, int(specialist_accounting["executed_specialist_unit_count"]))
-            self.assertGreaterEqual(int(specialist_accounting["degraded_specialist_unit_count"]), 1)
+            self.assertGreaterEqual(int(specialist_accounting["direct_routed_specialist_unit_count"]), 1)
+            self.assertEqual(0, int(specialist_accounting["degraded_specialist_unit_count"]))
             self.assertEqual("completed", execution_manifest["status"])
             self.assertEqual(0, int(execution_manifest["failed_unit_count"]))
 
-            degraded_units = list(specialist_accounting["degraded_specialist_units"])
-            self.assertGreaterEqual(len(degraded_units), 1)
-            for unit in degraded_units:
+            routed_units = list(specialist_accounting["direct_routed_specialist_units"])
+            self.assertGreaterEqual(len(routed_units), 1)
+            for unit in routed_units:
                 with self.subTest(unit_id=unit.get("unit_id", "")):
-                    self.assertFalse(bool(unit["verification_passed"]))
-                    self.assertTrue(bool(unit["degraded"]))
+                    self.assertTrue(bool(unit["verification_passed"]))
+                    self.assertFalse(bool(unit["degraded"]))
                     self.assertFalse(bool(unit["live_native_execution"]))
                     self.assertTrue(Path(unit["result_path"]).exists())
                     self.assertIn("skill_id", unit)
                     self.assertNotEqual("", str(unit["skill_id"]).strip())
                     result = load_json(unit["result_path"])
-                    self.assertEqual("degraded_non_authoritative", result["status"])
+                    self.assertEqual("completed", result["status"])
                     self.assertEqual(0, int(result["exit_code"]))
-                    self.assertFalse(bool(result["verification_passed"]))
-                    self.assertEqual("degraded_specialist_contract_receipt", result["execution_driver"])
-                    self.assertTrue(bool(result["degraded"]))
+                    self.assertTrue(bool(result["verification_passed"]))
+                    self.assertEqual("direct_current_session_route", result["execution_driver"])
+                    self.assertFalse(bool(result["degraded"]))
                     self.assertFalse(bool(result["live_native_execution"]))
+                    self.assertTrue(bool(result["direct_route"]))
                     self.assertTrue(Path(result["stdout_path"]).exists())
                     self.assertTrue(Path(result["stderr_path"]).exists())
 
@@ -970,7 +1044,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             temp_path = Path(tempdir)
             payload = run_runtime(
-                task="I have a failing test and stack trace. Debug systematically and execute specialist workflow.",
+                task=DEBUG_SPECIALIST_TASK,
                 artifact_root=temp_path,
                 governance_scope="root",
                 extra_env={
@@ -1023,7 +1097,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 ],
             )
             payload = run_runtime(
-                task="I have a failing test and stack trace. Debug systematically and execute specialist workflow.",
+                task=DEBUG_SPECIALIST_TASK,
                 artifact_root=temp_path,
                 governance_scope="root",
                 extra_env={
@@ -1038,40 +1112,36 @@ class NativeExecutionTopologyTests(unittest.TestCase):
 
             specialist_accounting = execution_manifest["specialist_accounting"]
             self.assertEqual("native_bounded_units", specialist_accounting["execution_mode"])
-            self.assertEqual("live_native_executed", specialist_accounting["effective_execution_status"])
-            self.assertGreaterEqual(int(specialist_accounting["executed_specialist_unit_count"]), 1)
+            self.assertEqual("direct_current_session_routed", specialist_accounting["effective_execution_status"])
+            self.assertEqual(0, int(specialist_accounting["executed_specialist_unit_count"]))
+            self.assertGreaterEqual(int(specialist_accounting["direct_routed_specialist_unit_count"]), 1)
             self.assertEqual(0, int(specialist_accounting["degraded_specialist_unit_count"]))
             self.assertEqual("completed", execution_manifest["status"])
 
-            executed_units = list(specialist_accounting["executed_specialist_units"])
-            self.assertGreaterEqual(len(executed_units), 1)
-            for unit in executed_units:
+            routed_units = list(specialist_accounting["direct_routed_specialist_units"])
+            self.assertGreaterEqual(len(routed_units), 1)
+            for unit in routed_units:
                 with self.subTest(unit_id=unit.get("unit_id", "")):
                     self.assertTrue(bool(unit["verification_passed"]))
                     self.assertFalse(bool(unit["degraded"]))
-                    self.assertTrue(bool(unit["live_native_execution"]))
-                    self.assertEqual("codex_exec_native_specialist", unit["execution_driver"])
+                    self.assertFalse(bool(unit["live_native_execution"]))
+                    self.assertEqual("direct_current_session_route", unit["execution_driver"])
                     self.assertTrue(Path(unit["result_path"]).exists())
                     result = load_json(unit["result_path"])
                     self.assertEqual("completed", result["status"])
                     self.assertEqual(0, int(result["exit_code"]))
                     self.assertTrue(bool(result["verification_passed"]))
-                    self.assertTrue(bool(result["live_native_execution"]))
+                    self.assertFalse(bool(result["live_native_execution"]))
                     self.assertFalse(bool(result["degraded"]))
-                    self.assertEqual("codex_exec_native_specialist", result["execution_driver"])
-                    self.assertEqual("codex", result["host_adapter_id"])
-                    self.assertTrue(Path(result["response_json_path"]).exists())
-                    self.assertTrue(Path(result["prompt_path"]).exists())
-                    self.assertTrue(Path(result["schema_path"]).exists())
-                    self.assertTrue(Path(result["git_status_before_path"]).exists())
-                    self.assertTrue(Path(result["git_status_after_path"]).exists())
+                    self.assertEqual("direct_current_session_route", result["execution_driver"])
+                    self.assertTrue(bool(result["direct_route"]))
+                    self.assertFalse(bool(result.get("host_adapter_id")))
+                    self.assertFalse(bool(result.get("prompt_path")))
                     self.assertTrue(Path(result["stdout_path"]).exists())
                     self.assertTrue(Path(result["stderr_path"]).exists())
-                    prompt = Path(result["prompt_path"]).read_text(encoding="utf-8")
-                    self.assertIn("native_skill_entrypoint:", prompt)
-                    self.assertIn("skill_root:", prompt)
-                    self.assertIn("usage_required: true", prompt)
-                    self.assertIn("must_preserve_workflow: true", prompt)
+                    self.assertTrue(bool(result["native_skill_entrypoint"]))
+                    self.assertTrue(bool(result["skill_root"]))
+                    self.assertEqual(result["native_skill_entrypoint"], result["direct_route_entrypoint"])
 
     def test_path_resolved_specialist_prompt_uses_entrypoint_and_root_as_source_of_truth(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -1099,12 +1169,8 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             path_resolved_prompt_verified = False
             for unit in specialist_outcomes:
                 result = load_json(unit["result_path"])
-                prompt_path = str(result.get("prompt_path") or "").strip()
-                if not prompt_path:
-                    continue
                 if bool(result.get("blocked")) or bool(result.get("degraded")):
                     continue
-                prompt = Path(prompt_path).read_text(encoding="utf-8")
                 dispatch = next(
                     (
                         entry
@@ -1120,9 +1186,14 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                     continue
                 skill_root = str((dispatch or {}).get("skill_root") or "").strip()
                 self.assertTrue(skill_root)
-                self.assertIn(f"native_skill_entrypoint: {native_entrypoint}", prompt)
-                self.assertIn(f"skill_root: {skill_root}", prompt)
-                self.assertIn("usage_required: true", prompt)
+                self.assertEqual(native_entrypoint, str(result.get("native_skill_entrypoint") or "").strip())
+                self.assertEqual(skill_root, str(result.get("skill_root") or "").strip())
+                self.assertEqual(native_entrypoint, str(result.get("direct_route_entrypoint") or "").strip())
+                self.assertFalse(bool(result.get("prompt_path")))
+                self.assertIn(
+                    f"native_skill_entrypoint:{native_entrypoint}",
+                    "".join(str(note) for note in list(result.get("verification_notes") or [])),
+                )
                 path_resolved_prompt_verified = True
 
             self.assertTrue(path_resolved_prompt_verified)
@@ -1334,9 +1405,10 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             child_execution_manifest = load_json(child_summary["artifacts"]["execution_manifest"])
 
             specialist_accounting = child_execution_manifest["specialist_accounting"]
-            self.assertEqual("live_native_executed", specialist_accounting["effective_execution_status"])
+            self.assertEqual("direct_current_session_routed", specialist_accounting["effective_execution_status"])
             self.assertGreaterEqual(int(specialist_accounting["auto_approved_dispatch_count"]), 1)
-            self.assertGreaterEqual(int(specialist_accounting["executed_specialist_unit_count"]), 1)
+            self.assertEqual(0, int(specialist_accounting["executed_specialist_unit_count"]))
+            self.assertGreaterEqual(int(specialist_accounting["direct_routed_specialist_unit_count"]), 1)
             self.assertEqual(0, int(specialist_accounting["degraded_specialist_unit_count"]))
             self.assertFalse(bool(child_execution_manifest["authority"]["completion_claim_allowed"]))
             self.assertIn(
@@ -1348,17 +1420,19 @@ class NativeExecutionTopologyTests(unittest.TestCase):
         cases = [
             (
                 "L",
-                "Design architecture migration with staged review and planning gates.",
+                IMPLEMENTATION_EXECUTION_TASK,
                 "serial_child_lanes",
+                "",
             ),
             (
                 "XL",
-                "Run an XL multi-agent wave with parallelizable independent units, then reconcile in sequence.",
+                IMPLEMENTATION_EXECUTION_TASK,
                 "selective_parallel_child_lanes",
+                "XL",
             ),
         ]
 
-        for expected_grade, root_task, expected_delegation_mode in cases:
+        for expected_grade, root_task, expected_delegation_mode, requested_grade_floor in cases:
             with self.subTest(expected_grade=expected_grade):
                 with tempfile.TemporaryDirectory() as tempdir:
                     artifact_root = Path(tempdir)
@@ -1366,6 +1440,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                         task=root_task,
                         artifact_root=artifact_root,
                         governance_scope="root",
+                        requested_grade_floor=requested_grade_floor,
                     )
                     root_summary = root_payload["summary"]
                     parent_unit_id = f"pytest-{expected_grade.lower()}-divergent-child-unit"
@@ -1381,6 +1456,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                         inherited_requirement_doc_path=Path(root_summary["artifacts"]["requirement_doc"]),
                         inherited_execution_plan_path=Path(root_summary["artifacts"]["execution_plan"]),
                         approved_specialist_skill_ids=["totally-non-overlap-skill-id"],
+                        requested_grade_floor=requested_grade_floor,
                     )
 
                     child_summary = child_payload["summary"]

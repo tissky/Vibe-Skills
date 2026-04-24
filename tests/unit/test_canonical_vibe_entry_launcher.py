@@ -27,6 +27,7 @@ def _write_valid_truth_artifacts(
     *,
     host_id: str = "codex",
     entry_intent_id: str = "vibe",
+    canonical_router_requested_skill: str | None = None,
     router_selected_skill: str = "systematic-debugging",
     requested_stage_stop: str = "phase_cleanup",
     requested_grade_floor: str | None = None,
@@ -46,11 +47,12 @@ def _write_valid_truth_artifacts(
             "requested_grade_floor": requested_grade_floor,
             "canonical_router": {
                 "host_id": host_id if canonical_router_host_id is None else canonical_router_host_id,
-                "requested_skill": entry_intent_id,
+                "requested_skill": canonical_router_requested_skill,
             },
             "route_snapshot": {
                 "selected_skill": router_selected_skill,
                 "route_mode": "governed",
+                "confirm_required": False,
             },
             "specialist_recommendations": [
                 {
@@ -145,8 +147,8 @@ def test_canonical_entry_writes_host_launch_receipt(
 
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
         assert kwargs["prompt"] == "plan runtime entry hardening"
-        assert kwargs["requested_stage_stop"] == "phase_cleanup"
-        _write_valid_truth_artifacts(session_root)
+        assert kwargs["requested_stage_stop"] == "requirement_doc"
+        _write_valid_truth_artifacts(session_root, requested_stage_stop="requirement_doc")
         return {
             "run_id": run_id,
             "session_root": str(session_root),
@@ -192,7 +194,7 @@ def test_canonical_entry_prewrites_launched_receipt_before_runtime_invocation(
         receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
         assert receipt["launch_status"] == "launched"
         assert receipt["run_id"] == run_id
-        _write_valid_truth_artifacts(session_root)
+        _write_valid_truth_artifacts(session_root, requested_stage_stop="requirement_doc")
         return {
             "run_id": run_id,
             "session_root": str(session_root),
@@ -258,6 +260,46 @@ def test_canonical_entry_synthesizes_default_prompt_for_empty_vibe_upgrade_reque
     assert receipt["launch_status"] == "verified"
 
 
+def test_canonical_entry_progresses_public_vibe_to_requirement_boundary_on_first_entry(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_id = "pytest-canonical-entry-vibe-requirement-boundary"
+    session_root = tmp_path / "outputs" / "runtime" / "vibe-sessions" / run_id
+
+    monkeypatch.setattr(
+        canonical_entry,
+        "resolve_canonical_vibe_contract",
+        lambda repo_root, host_id: {"fallback_policy": "blocked", "allow_skill_doc_fallback": False},
+    )
+
+    def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
+        assert kwargs["requested_stage_stop"] == "requirement_doc"
+        _write_valid_truth_artifacts(session_root, requested_stage_stop="requirement_doc")
+        return {
+            "run_id": run_id,
+            "session_root": str(session_root),
+            "summary_path": str(session_root / "runtime-summary.json"),
+            "summary": {"run_id": run_id},
+        }
+
+    monkeypatch.setattr(canonical_entry, "invoke_vibe_runtime_entrypoint", fake_invoke_runtime)
+
+    result = canonical_entry.launch_canonical_vibe(
+        repo_root=tmp_path,
+        host_id="codex",
+        entry_id="vibe",
+        prompt="implement governed runtime hardening",
+        requested_stage_stop="phase_cleanup",
+        run_id=run_id,
+        artifact_root=tmp_path,
+    )
+
+    receipt = json.loads(result.host_launch_receipt_path.read_text(encoding="utf-8"))
+    assert receipt["requested_stage_stop"] == "requirement_doc"
+    assert receipt["launch_status"] == "verified"
+
+
 def test_resolve_effective_prompt_enriches_short_vibe_do_prompt_with_prior_intent_contract(
     tmp_path: Path,
 ) -> None:
@@ -305,6 +347,41 @@ def test_resolve_effective_prompt_enriches_short_vibe_do_prompt_with_prior_inten
     assert "constraint-gpu-aware" in prompt
     assert "capability-dataset-download" in prompt
     assert prompt.endswith("execute plan phase-cleanup")
+
+
+def test_resolve_effective_prompt_enriches_vibe_reentry_with_requirement_context(
+    tmp_path: Path,
+) -> None:
+    _write_bounded_return_summary(
+        tmp_path,
+        run_id="prior-bounded-run",
+        terminal_stage="requirement_doc",
+        allowed_followup_entry_ids=["vibe"],
+        reentry_token="token-123",  # noqa: S106 - non-secret fixture token
+        task="plan runtime entry hardening",
+        intent_goal="governed runtime hardening requirement freeze",
+    )
+
+    prompt = canonical_entry._resolve_effective_prompt(
+        host_id="codex",
+        entry_id="vibe",
+        prompt="继续规划",
+        artifact_root=tmp_path,
+        run_id="current-run",
+        bounded_reentry={
+            "source_run_id": "prior-bounded-run",
+            "terminal_stage": "requirement_doc",
+            "allowed_followup_entry_ids": ["vibe"],
+            "reentry_token": "token-123",
+        },
+        continuation_source_run_id="prior-bounded-run",
+        allow_bounded_preferred_source=True,
+    )
+
+    assert prompt.startswith("continue-vibe ")
+    assert "governed runtime hardening requirement freeze" in prompt
+    assert "deliverable-report" in prompt
+    assert prompt.endswith("继续规划")
 
 
 def test_resolve_effective_prompt_keeps_prompt_when_no_prior_continuation_context(
@@ -450,7 +527,7 @@ def test_canonical_entry_resolves_artifact_root_via_helper(
 
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
         assert Path(str(kwargs["artifact_root"])).resolve() == expected_artifact_root
-        _write_valid_truth_artifacts(session_root)
+        _write_valid_truth_artifacts(session_root, requested_stage_stop="requirement_doc")
         return {
             "run_id": run_id,
             "session_root": str(session_root),
@@ -545,6 +622,60 @@ def test_canonical_entry_allows_bounded_wrapper_reentry_with_valid_credentials(
     )
 
     receipt = json.loads(result.host_launch_receipt_path.read_text(encoding="utf-8"))
+    assert receipt["launch_status"] == "verified"
+
+
+def test_canonical_entry_advances_public_vibe_to_plan_boundary_after_requirement_approval(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_id = "pytest-canonical-entry-vibe-plan-boundary"
+    session_root = tmp_path / "outputs" / "runtime" / "vibe-sessions" / run_id
+    _write_bounded_return_summary(
+        tmp_path,
+        run_id="prior-bounded-run",
+        terminal_stage="requirement_doc",
+        allowed_followup_entry_ids=["vibe"],
+        reentry_token="token-123",  # noqa: S106 - non-secret fixture token
+        task="plan runtime entry hardening",
+        intent_goal="governed runtime hardening requirement freeze",
+    )
+
+    monkeypatch.setattr(
+        canonical_entry,
+        "resolve_canonical_vibe_contract",
+        lambda repo_root, host_id: {"fallback_policy": "blocked", "allow_skill_doc_fallback": False},
+    )
+
+    def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
+        prompt = str(kwargs["prompt"])
+        assert kwargs["requested_stage_stop"] == "xl_plan"
+        assert prompt.startswith("continue-vibe ")
+        assert "governed runtime hardening requirement freeze" in prompt
+        _write_valid_truth_artifacts(session_root, requested_stage_stop="xl_plan")
+        return {
+            "run_id": run_id,
+            "session_root": str(session_root),
+            "summary_path": str(session_root / "runtime-summary.json"),
+            "summary": {"run_id": run_id},
+        }
+
+    monkeypatch.setattr(canonical_entry, "invoke_vibe_runtime_entrypoint", fake_invoke_runtime)
+
+    result = canonical_entry.launch_canonical_vibe(
+        repo_root=tmp_path,
+        host_id="codex",
+        entry_id="vibe",
+        prompt="继续规划",
+        requested_stage_stop="phase_cleanup",
+        run_id=run_id,
+        artifact_root=tmp_path,
+        continue_from_run_id="prior-bounded-run",
+        bounded_reentry_token="token-123",  # noqa: S106 - non-secret fixture token
+    )
+
+    receipt = json.loads(result.host_launch_receipt_path.read_text(encoding="utf-8"))
+    assert receipt["requested_stage_stop"] == "xl_plan"
     assert receipt["launch_status"] == "verified"
 
 
@@ -685,7 +816,7 @@ def test_canonical_entry_fails_when_runtime_packet_disagrees_with_receipt(
     )
 
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
-        _write_valid_truth_artifacts(session_root, host_id="claude-code")
+        _write_valid_truth_artifacts(session_root, host_id="claude-code", requested_stage_stop="requirement_doc")
         return {
             "run_id": run_id,
             "session_root": str(session_root),
@@ -776,12 +907,12 @@ def test_canonical_entry_rejects_incomplete_truth_packets_before_verifying(
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
         _write_json(
             session_root / "runtime-input-packet.json",
-            {"host_id": "codex", "requested_stage_stop": "phase_cleanup"},
+            {"host_id": "codex", "requested_stage_stop": "requirement_doc"},
         )
         _write_json(session_root / "governance-capsule.json", {"runtime_selected_skill": "vibe"})
         _write_json(
             session_root / "stage-lineage.json",
-            {"last_stage_name": "phase_cleanup", "stages": [{"stage_name": "phase_cleanup"}]},
+            {"last_stage_name": "requirement_doc", "stages": [{"stage_name": "requirement_doc"}]},
         )
         return {
             "run_id": run_id,
@@ -941,7 +1072,7 @@ def test_canonical_entry_rejects_empty_canonical_router_host_id(
     )
 
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
-        _write_valid_truth_artifacts(session_root, canonical_router_host_id="")
+        _write_valid_truth_artifacts(session_root, canonical_router_host_id="", requested_stage_stop="requirement_doc")
         return {
             "run_id": run_id,
             "session_root": str(session_root),
@@ -976,7 +1107,11 @@ def test_canonical_entry_rejects_empty_governance_capsule_runtime_authority(
     )
 
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
-        _write_valid_truth_artifacts(session_root, governance_runtime_selected_skill="")
+        _write_valid_truth_artifacts(
+            session_root,
+            governance_runtime_selected_skill="",
+            requested_stage_stop="requirement_doc",
+        )
         return {
             "run_id": run_id,
             "session_root": str(session_root),
@@ -1011,7 +1146,11 @@ def test_canonical_entry_rejects_empty_divergence_runtime_authority(
     )
 
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
-        _write_valid_truth_artifacts(session_root, divergence_runtime_selected_skill="")
+        _write_valid_truth_artifacts(
+            session_root,
+            divergence_runtime_selected_skill="",
+            requested_stage_stop="requirement_doc",
+        )
         return {
             "run_id": run_id,
             "session_root": str(session_root),
@@ -1046,7 +1185,11 @@ def test_canonical_entry_rejects_empty_divergence_router_skill(
     )
 
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
-        _write_valid_truth_artifacts(session_root, divergence_router_selected_skill="")
+        _write_valid_truth_artifacts(
+            session_root,
+            divergence_router_selected_skill="",
+            requested_stage_stop="requirement_doc",
+        )
         return {
             "run_id": run_id,
             "session_root": str(session_root),
@@ -1083,6 +1226,7 @@ def test_canonical_entry_rejects_stage_lineage_without_terminal_stage(
     def fake_invoke_runtime(**kwargs: object) -> dict[str, object]:
         _write_valid_truth_artifacts(
             session_root,
+            requested_stage_stop="requirement_doc",
             stage_lineage_last_stage_name="",
             stage_lineage_stages=[],
         )

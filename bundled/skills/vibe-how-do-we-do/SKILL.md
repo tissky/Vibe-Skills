@@ -16,6 +16,7 @@ Execution rules:
 
 - delegate to canonical `vibe`
 - keep `vibe` as the only runtime authority
+- let canonical `vibe` keep router selection and `confirm_required` ownership
 - do not create a second requirement surface
 - do not create a second plan surface
 - do not create a parallel runtime

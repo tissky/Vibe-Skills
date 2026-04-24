@@ -728,13 +728,7 @@ $storageProjection = New-VibeWorkspaceArtifactProjection `
     -Runtime $runtime `
     -ArtifactRoot $ArtifactRoot `
     -RouterTargetRoot $routerTargetRoot
-$requestedSkill = if (-not [string]::IsNullOrWhiteSpace($EntryIntentId)) {
-    [string]$EntryIntentId
-} elseif ($policy.default_requested_skill) {
-    [string]$policy.default_requested_skill
-} else {
-    'vibe'
-}
+$requestedSkill = $null
 $unattended = $false
 $hierarchyState = Get-VibeHierarchyState `
     -GovernanceScope $GovernanceScope `
@@ -751,10 +745,12 @@ $routeArgs = @(
     '-Prompt', $Task,
     '-Grade', $grade,
     '-TaskType', $taskType,
-    '-RequestedSkill', $requestedSkill,
     '-HostId', $routerHostId,
     '-TargetRoot', $routerTargetRoot
 )
+if (-not [string]::IsNullOrWhiteSpace([string]$requestedSkill)) {
+    $routeArgs += @('-RequestedSkill', [string]$requestedSkill)
+}
 if ($unattended) {
     $routeArgs += '-Unattended'
 }
@@ -845,4 +841,5 @@ Write-VibeJsonArtifact -Path $packetPath -Value $packet
     session_root = $sessionRoot
     packet_path = $packetPath
     packet = $packet
+    route_result = $routeResult
 }
