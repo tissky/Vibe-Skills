@@ -91,11 +91,13 @@ def _write_bounded_return_summary(
     reentry_token: str,
     task: str,
     intent_goal: str = "plan runtime entry hardening",
+    prior_task_type: str | None = None,
 ) -> Path:
     session_root = artifact_root / "outputs" / "runtime" / "vibe-sessions" / run_id
     intent_contract_path = session_root / "artifacts" / "intent-contract.json"
     execution_plan_path = session_root / "artifacts" / "execution-plan.md"
     requirement_doc_path = session_root / "artifacts" / "requirement-doc.md"
+    runtime_input_packet_path = session_root / "artifacts" / "runtime-input-packet.json"
     execution_plan_path.parent.mkdir(parents=True, exist_ok=True)
     execution_plan_path.write_text("# execution plan\n", encoding="utf-8")
     requirement_doc_path.write_text("# requirement doc\n", encoding="utf-8")
@@ -109,18 +111,30 @@ def _write_bounded_return_summary(
             "capabilities": ["planning"],
         },
     )
+    if prior_task_type:
+        _write_json(
+            runtime_input_packet_path,
+            {
+                "canonical_router": {
+                    "task_type": prior_task_type,
+                }
+            },
+        )
     summary_path = session_root / "runtime-summary.json"
+    artifacts = {
+        "intent_contract": str(intent_contract_path),
+        "execution_plan": str(execution_plan_path),
+        "requirement_doc": str(requirement_doc_path),
+    }
+    if prior_task_type:
+        artifacts["runtime_input_packet"] = str(runtime_input_packet_path)
     _write_json(
         summary_path,
         {
             "run_id": run_id,
             "task": task,
             "terminal_stage": terminal_stage,
-            "artifacts": {
-                "intent_contract": str(intent_contract_path),
-                "execution_plan": str(execution_plan_path),
-                "requirement_doc": str(requirement_doc_path),
-            },
+            "artifacts": artifacts,
             "bounded_return_control": {
                 "explicit_user_reentry_required": True,
                 "source_run_id": run_id,
@@ -382,6 +396,62 @@ def test_resolve_effective_prompt_enriches_vibe_reentry_with_requirement_context
     assert "governed runtime hardening requirement freeze" in prompt
     assert "deliverable-report" in prompt
     assert prompt.endswith("继续规划")
+
+
+def test_resolve_effective_prompt_uses_structured_bounded_reentry_context_for_approval(
+    tmp_path: Path,
+) -> None:
+    _write_bounded_return_summary(
+        tmp_path,
+        run_id="prior-bounded-run",
+        terminal_stage="requirement_doc",
+        allowed_followup_entry_ids=["vibe"],
+        reentry_token="token-123",  # noqa: S106 - non-secret fixture token
+        task="continue-vibe generic deliverable-governed-implementation-artifacts risk-review",
+        intent_goal="research ECG public datasets for diagnosis tasks",
+        prior_task_type="research",
+    )
+    host_decision = canonical_entry._attach_bounded_continuation_context_to_host_decision(
+        host_decision={
+            "decision_kind": "approval_response",
+            "decision_action": "approve_requirement",
+        },
+        bounded_reentry={
+            "source_run_id": "prior-bounded-run",
+            "terminal_stage": "requirement_doc",
+            "allowed_followup_entry_ids": ["vibe"],
+            "reentry_token": "token-123",
+            "task": "continue-vibe generic deliverable-governed-implementation-artifacts risk-review",
+            "intent_goal": "research ECG public datasets for diagnosis tasks",
+            "intent_deliverable": "Chinese report and dataset table",
+            "intent_constraints": ["public-only", "official-source-only"],
+            "prior_task_type": "research",
+        },
+        prompt_text="批准",
+    )
+
+    prompt = canonical_entry._resolve_effective_prompt(
+        host_id="codex",
+        entry_id="vibe",
+        prompt="批准",
+        host_decision=host_decision,
+        artifact_root=tmp_path,
+        run_id="current-run",
+        bounded_reentry={
+            "source_run_id": "prior-bounded-run",
+            "terminal_stage": "requirement_doc",
+            "allowed_followup_entry_ids": ["vibe"],
+            "reentry_token": "token-123",
+        },
+        continuation_source_run_id="prior-bounded-run",
+        allow_bounded_preferred_source=True,
+    )
+
+    assert prompt == (
+        "research ECG public datasets for diagnosis tasks "
+        "Deliverable: report. "
+        "Constraints: bounded."
+    )
 
 
 def test_resolve_effective_prompt_keeps_prompt_when_no_prior_continuation_context(

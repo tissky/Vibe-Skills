@@ -203,6 +203,41 @@ function ConvertFrom-VibeHostDecisionJson {
     }
 }
 
+function Get-VibeHostContinuationContext {
+    param(
+        [AllowNull()] [object]$HostDecision = $null
+    )
+
+    if (
+        $null -eq $HostDecision -or
+        -not (Test-VibeObjectHasProperty -InputObject $HostDecision -PropertyName 'continuation_context')
+    ) {
+        return $null
+    }
+
+    $context = $HostDecision.continuation_context
+    if ($null -eq $context -or -not $context.PSObject) {
+        return $null
+    }
+
+    return $context
+}
+
+function Test-VibeStructuredBoundedReentryContext {
+    param(
+        [AllowNull()] [object]$ContinuationContext = $null
+    )
+
+    if (
+        $null -eq $ContinuationContext -or
+        -not (Test-VibeObjectHasProperty -InputObject $ContinuationContext -PropertyName 'structured_bounded_reentry')
+    ) {
+        return $false
+    }
+
+    return [bool]$ContinuationContext.structured_bounded_reentry
+}
+
 function Copy-VibeRecordObject {
     param(
         [Parameter(Mandatory)] [object]$InputObject
@@ -1591,6 +1626,7 @@ function New-VibeRuntimeInputPacketProjection {
         [AllowEmptyString()] [string]$RuntimeSelectedSkill = 'vibe',
         [AllowNull()] [object]$ExecutionPhaseDecomposition = $null,
         [AllowNull()] [object]$HostSpecialistDispatchDecision = $null,
+        [AllowNull()] [object]$HostDecision = $null,
         [AllowNull()] [object[]]$SpecialistRecommendations = @(),
         [Parameter(Mandatory)] [object]$SpecialistDispatch,
         [AllowNull()] [object[]]$OverlayDecisions = @(),
@@ -1618,6 +1654,7 @@ function New-VibeRuntimeInputPacketProjection {
     } else {
         $null
     }
+    $continuationContext = Get-VibeHostContinuationContext -HostDecision $HostDecision
 
     $packetSpecialistDecision = New-VibeSpecialistDecisionProjection `
         -ApprovedDispatch @($SpecialistDispatch.approved_dispatch) `
@@ -1672,6 +1709,7 @@ function New-VibeRuntimeInputPacketProjection {
             custom_admission_status = if ($RouteResult.PSObject.Properties.Name -contains 'custom_admission' -and $RouteResult.custom_admission) { [string]$RouteResult.custom_admission.status } else { $null }
         }
         custom_admission = $customAdmission
+        continuation_context = if ($null -ne $continuationContext) { $continuationContext } else { $null }
         execution_phase_decomposition = $ExecutionPhaseDecomposition
         host_specialist_dispatch_decision = $HostSpecialistDispatchDecision
         specialist_recommendations = @($SpecialistRecommendations)

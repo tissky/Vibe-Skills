@@ -734,6 +734,11 @@ class BridgeFailureLayeringTests(unittest.TestCase):
         self.assertIsInstance(captured.get("host_decision"), dict)
         self.assertEqual("approval_response", captured["host_decision"]["decision_kind"])
         self.assertEqual("approve_requirement", captured["host_decision"]["decision_action"])
+        self.assertIn("continuation_context", captured["host_decision"])
+        self.assertTrue(captured["host_decision"]["continuation_context"]["structured_bounded_reentry"])
+        self.assertEqual("run-req", captured["host_decision"]["continuation_context"]["source_run_id"])
+        self.assertEqual("requirement_doc", captured["host_decision"]["continuation_context"]["terminal_stage"])
+        self.assertTrue(captured["host_decision"]["continuation_context"]["control_only_prompt"])
         self.assertIn("phase_decomposition", captured["host_decision"])
         self.assertEqual(
             "phase-1",

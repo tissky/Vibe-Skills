@@ -878,6 +878,7 @@ if ([string]::IsNullOrWhiteSpace($RunId)) {
 $sessionRoot = Ensure-VibeSessionRoot -RepoRoot $runtime.repo_root -RunId $RunId -Runtime $runtime -ArtifactRoot $ArtifactRoot
 $policy = $runtime.runtime_input_packet_policy
 $hostDecision = ConvertFrom-VibeHostDecisionJson -HostDecisionJson $HostDecisionJson
+$continuationContext = Get-VibeHostContinuationContext -HostDecision $hostDecision
 $executionPhaseDecomposition = Resolve-VibeHostPhaseDecomposition -HostDecision $hostDecision -Task $Task -Policy $policy
 $effectiveRequestedStageStop = Resolve-VibeEntryRequestedStageStop `
     -RepoRoot $runtime.repo_root `
@@ -885,6 +886,15 @@ $effectiveRequestedStageStop = Resolve-VibeEntryRequestedStageStop `
     -RequestedStageStop $RequestedStageStop
 $grade = Get-VibeInternalGrade -Task $Task -RequestedGradeFloor $RequestedGradeFloor
 $taskType = Get-VibeRouterTaskType -Task $Task
+if (
+    (Test-VibeStructuredBoundedReentryContext -ContinuationContext $continuationContext) -and
+    (Test-VibeObjectHasProperty -InputObject $continuationContext -PropertyName 'control_only_prompt') -and
+    [bool]$continuationContext.control_only_prompt -and
+    (Test-VibeObjectHasProperty -InputObject $continuationContext -PropertyName 'prior_task_type') -and
+    -not [string]::IsNullOrWhiteSpace([string]$continuationContext.prior_task_type)
+) {
+    $taskType = [string]$continuationContext.prior_task_type
+}
 $routerScriptPath = Join-Path $runtime.repo_root ([string]$policy.router_script_path)
 $routerHostId = Resolve-VgoHostId -HostId $env:VCO_HOST_ID
 $routerTargetRoot = Resolve-VgoTargetRoot -HostId $routerHostId
@@ -1010,6 +1020,7 @@ $packet = New-VibeRuntimeInputPacketProjection `
     -RuntimeSelectedSkill $runtimeSelectedSkill `
     -ExecutionPhaseDecomposition $executionPhaseDecomposition `
     -HostSpecialistDispatchDecision $hostSpecialistDispatchDecision `
+    -HostDecision $hostDecision `
     -SpecialistRecommendations @($specialistRecommendations) `
     -SpecialistDispatch $specialistDispatch `
     -OverlayDecisions @($overlayDecisions) `

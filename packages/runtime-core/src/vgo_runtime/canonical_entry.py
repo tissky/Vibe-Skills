@@ -65,6 +65,38 @@ STRUCTURED_REENTRY_APPROVAL_ACTIONS: dict[str, frozenset[str]] = {
         }
     ),
 }
+STRUCTURED_REENTRY_CONTROL_TOKENS = frozenset(
+    {
+        "approve",
+        "approved",
+        "approval",
+        "approve requirement",
+        "approve plan",
+        "approve requirement doc",
+        "approve execution plan",
+        "request execute",
+        "continue",
+        "resume",
+        "proceed",
+        "continue plan",
+        "continue execute",
+        "继续",
+        "继续执行",
+        "继续规划",
+        "继续计划",
+        "继续实现",
+        "批准",
+        "批准继续",
+        "批准继续计划",
+        "批准继续执行",
+        "同意",
+        "按默认继续",
+        "默认继续",
+        "ok",
+        "okay",
+        "yes",
+    }
+)
 
 
 @dataclass(slots=True)
@@ -456,6 +488,110 @@ def _extract_continuation_keywords(intent_contract: dict[str, Any]) -> list[str]
     return deduped
 
 
+def _normalize_text_list(values: Any) -> list[str]:
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for value in values or []:
+        text = str(value or "").strip()
+        if not text or text in seen:
+            continue
+        normalized.append(text)
+        seen.add(text)
+    return normalized
+
+
+def _is_control_only_structured_reentry_prompt(prompt_text: str) -> bool:
+    normalized = _normalize_prompt_for_compare(prompt_text)
+    if not normalized:
+        return True
+    if normalized in STRUCTURED_REENTRY_CONTROL_TOKENS:
+        return True
+
+    tokens = [token for token in normalized.split() if token]
+    if tokens and len(tokens) <= 6 and all(token in STRUCTURED_REENTRY_CONTROL_TOKENS for token in tokens):
+        return True
+
+    compact = re.sub(r"\s+", "", normalized)
+    if compact in {"批准", "继续", "同意", "批准继续", "批准继续计划", "批准继续执行"}:
+        return True
+    return False
+
+
+def _build_structured_continuation_prompt(
+    *,
+    prompt_text: str,
+    continuation: dict[str, Any],
+) -> str:
+    segments: list[str] = []
+
+    goal = str(continuation.get("intent_goal") or "").strip()
+    if goal:
+        segments.append(goal)
+    else:
+        prior_task = str(continuation.get("task") or "").strip()
+        if prior_task:
+            segments.append(prior_task)
+
+    deliverable = str(continuation.get("intent_deliverable") or "").strip()
+    if deliverable and deliverable.lower() != "unknown":
+        segments.append(f"Deliverable: {deliverable}.")
+
+    constraints = _normalize_text_list(continuation.get("intent_constraints"))
+    if constraints:
+        segments.append(f"Constraints: {'; '.join(constraints)}.")
+
+    delta = str(prompt_text or "").strip()
+    if delta and not _is_control_only_structured_reentry_prompt(delta):
+        segments.append(f"Update: {delta}")
+
+    return " ".join(segment for segment in segments if segment).strip() or delta
+
+
+def _bounded_reentry_context_from_host_decision(
+    host_decision: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    decision = _normalize_host_decision(host_decision)
+    if not decision:
+        return None
+    raw_context = decision.get("continuation_context")
+    if not isinstance(raw_context, dict):
+        return None
+    if not bool(raw_context.get("structured_bounded_reentry")):
+        return None
+    return raw_context
+
+
+def _attach_bounded_continuation_context_to_host_decision(
+    *,
+    host_decision: dict[str, Any] | None,
+    bounded_reentry: dict[str, Any] | None,
+    prompt_text: str,
+) -> dict[str, Any] | None:
+    decision = _normalize_host_decision(host_decision)
+    if not decision or not bounded_reentry:
+        return decision
+    if not _structured_host_decision_allows_bounded_reentry(
+        decision,
+        bounded_return_control=bounded_reentry,
+    ):
+        return decision
+
+    enriched = copy.deepcopy(decision)
+    enriched["continuation_context"] = {
+        "structured_bounded_reentry": True,
+        "source_run_id": str(bounded_reentry.get("source_run_id") or "").strip() or None,
+        "terminal_stage": str(bounded_reentry.get("terminal_stage") or "").strip() or None,
+        "next_stage": str(bounded_reentry.get("next_stage") or "").strip() or None,
+        "prior_task": str(bounded_reentry.get("task") or "").strip() or None,
+        "prior_task_type": str(bounded_reentry.get("prior_task_type") or "").strip() or None,
+        "prior_goal": str(bounded_reentry.get("intent_goal") or "").strip() or None,
+        "prior_deliverable": str(bounded_reentry.get("intent_deliverable") or "").strip() or None,
+        "prior_constraints": _normalize_text_list(bounded_reentry.get("intent_constraints")),
+        "control_only_prompt": _is_control_only_structured_reentry_prompt(prompt_text),
+    }
+    return enriched
+
+
 def _progressive_stage_stops(repo_root: Path, entry_id: str) -> tuple[str, ...]:
     candidates: list[Path] = [repo_root]
     resolved_repo_root = repo_root.resolve()
@@ -601,12 +737,23 @@ def _load_continuation_context_from_summary(
     intent_contract = _load_intent_contract_from_artifacts(artifacts)
     if not intent_contract:
         return None
+    runtime_packet = _load_runtime_input_packet_from_summary(summary_path)
+    prior_task_type = ""
+    if isinstance(runtime_packet, dict):
+        canonical_router = runtime_packet.get("canonical_router")
+        if isinstance(canonical_router, dict):
+            prior_task_type = str(canonical_router.get("task_type") or "").strip()
     return {
         "summary_path": str(summary_path),
         "run_id": str(summary.get("run_id") or summary_path.parent.name),
         "terminal_stage": str(summary.get("terminal_stage") or ""),
         "required_artifact": str(required_path),
+        "task": str(summary.get("task") or ""),
+        "prior_task_type": prior_task_type,
         "intent_contract": intent_contract,
+        "intent_goal": str(intent_contract.get("goal") or "").strip(),
+        "intent_deliverable": str(intent_contract.get("deliverable") or "").strip(),
+        "intent_constraints": _normalize_text_list(intent_contract.get("constraints")),
     }
 
 
@@ -615,6 +762,7 @@ def _resolve_effective_prompt(
     host_id: str,
     entry_id: str,
     prompt: str,
+    host_decision: dict[str, Any] | None = None,
     artifact_root: Path | None = None,
     run_id: str | None = None,
     bounded_reentry: dict[str, Any] | None = None,
@@ -645,6 +793,12 @@ def _resolve_effective_prompt(
             allow_bounded_preferred=allow_bounded_preferred_source,
         )
         if continuation:
+            structured_context = _bounded_reentry_context_from_host_decision(host_decision)
+            if structured_context:
+                return _build_structured_continuation_prompt(
+                    prompt_text=prompt_text,
+                    continuation=continuation,
+                )
             return _build_continuation_prompt(prompt_text=prompt_text, entry_id=entry_id, continuation=continuation)
 
     return prompt_text
@@ -671,14 +825,25 @@ def _coerce_bounded_return_control(summary: dict[str, Any]) -> dict[str, Any] | 
 
     artifacts = _artifact_paths(summary)
     intent_contract = _load_intent_contract_from_artifacts(artifacts)
+    runtime_packet_path = _artifact_path_value(artifacts, "runtime_input_packet")
+    runtime_packet = _load_json_dict_if_exists(Path(runtime_packet_path)) if runtime_packet_path else {}
+    prior_task_type = ""
+    if isinstance(runtime_packet, dict):
+        canonical_router = runtime_packet.get("canonical_router")
+        if isinstance(canonical_router, dict):
+            prior_task_type = str(canonical_router.get("task_type") or "").strip()
     return {
         "summary_path": str(summary.get("summary_path") or ""),
         "source_run_id": source_run_id,
         "terminal_stage": terminal_stage,
+        "next_stage": str(raw.get("next_stage") or "").strip(),
         "allowed_followup_entry_ids": allowed_followup,
         "reentry_token": token,
         "task": str(summary.get("task") or ""),
         "intent_goal": str(intent_contract.get("goal") or "") if intent_contract else "",
+        "intent_deliverable": str(intent_contract.get("deliverable") or "") if intent_contract else "",
+        "intent_constraints": _normalize_text_list(intent_contract.get("constraints")) if intent_contract else [],
+        "prior_task_type": prior_task_type,
     }
 
 
@@ -690,14 +855,25 @@ def _has_explicit_bounded_return_control(summary: dict[str, Any]) -> bool:
 def _build_malformed_bounded_return_control(summary: dict[str, Any], summary_path: Path) -> dict[str, Any]:
     artifacts = _artifact_paths(summary)
     intent_contract = _load_intent_contract_from_artifacts(artifacts)
+    runtime_packet_path = _artifact_path_value(artifacts, "runtime_input_packet")
+    runtime_packet = _load_json_dict_if_exists(Path(runtime_packet_path)) if runtime_packet_path else {}
+    prior_task_type = ""
+    if isinstance(runtime_packet, dict):
+        canonical_router = runtime_packet.get("canonical_router")
+        if isinstance(canonical_router, dict):
+            prior_task_type = str(canonical_router.get("task_type") or "").strip()
     return {
         "summary_path": str(summary_path),
         "source_run_id": str(summary.get("run_id") or summary_path.parent.name),
         "terminal_stage": str(summary.get("terminal_stage") or ""),
+        "next_stage": "",
         "allowed_followup_entry_ids": [],
         "reentry_token": "",
         "task": str(summary.get("task") or ""),
         "intent_goal": str(intent_contract.get("goal") or "") if intent_contract else "",
+        "intent_deliverable": str(intent_contract.get("deliverable") or "") if intent_contract else "",
+        "intent_constraints": _normalize_text_list(intent_contract.get("constraints")) if intent_contract else [],
+        "prior_task_type": prior_task_type,
         "malformed": True,
     }
 
@@ -1166,6 +1342,11 @@ def launch_canonical_vibe(
         host_decision=normalized_host_decision,
         bounded_reentry=validated_reentry,
     )
+    effective_host_decision = _attach_bounded_continuation_context_to_host_decision(
+        host_decision=effective_host_decision,
+        bounded_reentry=validated_reentry,
+        prompt_text=prompt,
+    )
     effective_requested_stage_stop = _resolve_progressive_requested_stage_stop(
         repo_root=repo_root_path,
         entry_id=requested_entry_id,
@@ -1176,6 +1357,7 @@ def launch_canonical_vibe(
         host_id=host_id,
         entry_id=requested_entry_id,
         prompt=prompt,
+        host_decision=effective_host_decision,
         artifact_root=resolved_artifact_root,
         run_id=run_id,
         bounded_reentry=validated_reentry,

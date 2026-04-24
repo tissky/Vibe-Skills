@@ -237,6 +237,9 @@ $Mode = Resolve-VibeRuntimeMode -Mode $Mode -DefaultMode ([string]$runtime.runti
 if ([string]::IsNullOrWhiteSpace($RunId)) {
     $RunId = New-VibeRunId
 }
+$hostDecision = ConvertFrom-VibeHostDecisionJson -HostDecisionJson $HostDecisionJson
+$hostContinuationContext = Get-VibeHostContinuationContext -HostDecision $hostDecision
+$structuredBoundedReentry = Test-VibeStructuredBoundedReentryContext -ContinuationContext $hostContinuationContext
 $artifactBaseRoot = Get-VibeArtifactRoot -RepoRoot $runtime.repo_root -Runtime $runtime -ArtifactRoot $ArtifactRoot
 $storageProjection = New-VibeWorkspaceArtifactProjection `
     -RepoRoot $runtime.repo_root `
@@ -302,8 +305,12 @@ if ([string]$hierarchyState.governance_scope -eq 'child') {
         -HierarchyContract $runtime.runtime_input_packet_policy.hierarchy_contract
 }
 $memorySkeletonDigest = New-VibeSkeletonMemoryDigest -Runtime $runtime -Skeleton $skeleton -Task $Task -SessionRoot ([string]$skeleton.session_root)
-$memorySkeletonCognee = Get-VibeCogneeReadAction -Runtime $runtime -Stage 'skeleton_check' -Task $Task -SessionRoot ([string]$skeleton.session_root)
-$skeletonMemoryReads = @($memorySkeletonDigest, $memorySkeletonCognee)
+$memorySkeletonCognee = $null
+$skeletonMemoryReads = @($memorySkeletonDigest)
+if (-not $structuredBoundedReentry) {
+    $memorySkeletonCognee = Get-VibeCogneeReadAction -Runtime $runtime -Stage 'skeleton_check' -Task $Task -SessionRoot ([string]$skeleton.session_root)
+    $skeletonMemoryReads = @($memorySkeletonDigest, $memorySkeletonCognee)
+}
 $freezeArgs = @{
     Task = $Task
     Mode = $Mode
@@ -435,8 +442,14 @@ $stageLineage = Add-VibeStageLineageEntry `
     -PreviousStageReceiptPath ([string]$skeleton.receipt_path) `
     -CurrentReceiptPath ([string]$interview.receipt_path) `
     -HierarchyContract $runtime.runtime_input_packet_policy.hierarchy_contract
-$memoryDeepInterviewRead = Get-VibeDeepInterviewMemoryReadAction -Runtime $runtime -Task $Task -SessionRoot ([string]$skeleton.session_root)
-$requirementContextReads = @($memoryDeepInterviewRead, $memorySkeletonCognee, $memorySkeletonDigest)
+$memoryDeepInterviewRead = $null
+$deepInterviewMemoryReads = @()
+$requirementContextReads = @($memorySkeletonDigest)
+if (-not $structuredBoundedReentry) {
+    $memoryDeepInterviewRead = Get-VibeDeepInterviewMemoryReadAction -Runtime $runtime -Task $Task -SessionRoot ([string]$skeleton.session_root)
+    $deepInterviewMemoryReads = @($memoryDeepInterviewRead)
+    $requirementContextReads = @($memoryDeepInterviewRead, $memorySkeletonCognee, $memorySkeletonDigest)
+}
 $requirementMemoryContext = New-VibeRequirementContextPack -Runtime $runtime -ReadActions $requirementContextReads -SessionRoot ([string]$skeleton.session_root)
 $discussionConsultation = Invoke-VibeSpecialistConsultationWindow `
     -Task $Task `
@@ -532,9 +545,14 @@ foreach ($key in @($hierarchyArgs.Keys)) {
     $planArgs[$key] = $hierarchyArgs[$key]
 }
 $planArgs.InheritedRequirementDocPath = $requirement.requirement_doc_path
-$memoryPlanSerena = Get-VibeSerenaReadAction -Runtime $runtime -Stage 'xl_plan' -Task $Task -SessionRoot ([string]$skeleton.session_root)
-$memoryPlanCognee = Get-VibeCogneeReadAction -Runtime $runtime -Stage 'xl_plan' -Task $Task -SessionRoot ([string]$skeleton.session_root)
-$xlPlanReadActions = @($memoryPlanSerena, $memoryPlanCognee)
+$memoryPlanSerena = $null
+$memoryPlanCognee = $null
+$xlPlanReadActions = @()
+if (-not $structuredBoundedReentry) {
+    $memoryPlanSerena = Get-VibeSerenaReadAction -Runtime $runtime -Stage 'xl_plan' -Task $Task -SessionRoot ([string]$skeleton.session_root)
+    $memoryPlanCognee = Get-VibeCogneeReadAction -Runtime $runtime -Stage 'xl_plan' -Task $Task -SessionRoot ([string]$skeleton.session_root)
+    $xlPlanReadActions = @($memoryPlanSerena, $memoryPlanCognee)
+}
 $planMemoryContext = New-VibePlanMemoryContextPack -Runtime $runtime -ReadActions $xlPlanReadActions -SessionRoot ([string]$skeleton.session_root) -Stage 'xl_plan' -ArtifactName 'plan-context-pack.json'
 $planningConsultation = Invoke-VibeSpecialistConsultationWindow `
     -Task $Task `
@@ -724,7 +742,7 @@ $memoryActivation = New-VibeMemoryActivationReport `
     -RunId $RunId `
     -SessionRoot ([string]$skeleton.session_root) `
     -SkeletonReadActions $skeletonMemoryReads `
-    -DeepInterviewReadActions @($memoryDeepInterviewRead) `
+    -DeepInterviewReadActions $deepInterviewMemoryReads `
     -RequirementContextPack $requirementMemoryContext `
     -XlPlanReadActions $xlPlanReadActions `
     -PlanContextPack $planMemoryContext `

@@ -1,0 +1,170 @@
+from __future__ import annotations
+
+import json
+import os
+import shutil
+import subprocess
+import tempfile
+import unittest
+import uuid
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+FREEZE_SCRIPT = REPO_ROOT / "scripts" / "runtime" / "Freeze-RuntimeInputPacket.ps1"
+RUNTIME_SCRIPT = REPO_ROOT / "scripts" / "runtime" / "invoke-vibe-runtime.ps1"
+
+
+def resolve_powershell() -> str | None:
+    candidates = [
+        shutil.which("pwsh"),
+        shutil.which("pwsh.exe"),
+        r"C:\Program Files\PowerShell\7\pwsh.exe",
+        r"C:\Program Files\PowerShell\7-preview\pwsh.exe",
+        shutil.which("powershell"),
+        shutil.which("powershell.exe"),
+    ]
+    for candidate in candidates:
+        if candidate and Path(candidate).exists():
+            return str(Path(candidate))
+    return None
+
+
+def ps_quote(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def build_host_decision_json() -> str:
+    return json.dumps(
+        {
+            "decision_kind": "approval_response",
+            "decision_action": "approve_requirement",
+            "continuation_context": {
+                "structured_bounded_reentry": True,
+                "source_run_id": "prior-run",
+                "terminal_stage": "requirement_doc",
+                "next_stage": "xl_plan",
+                "prior_task": "research ECG public datasets for diagnosis tasks",
+                "prior_task_type": "research",
+                "prior_goal": "research ECG public datasets for diagnosis tasks",
+                "prior_deliverable": "Chinese report and dataset table",
+                "prior_constraints": ["public-only", "official-source-only"],
+                "control_only_prompt": True,
+            },
+        },
+        ensure_ascii=False,
+    )
+
+
+def run_freeze(*, artifact_root: Path, host_decision_json: str) -> dict[str, object]:
+    shell = resolve_powershell()
+    if shell is None:
+        raise unittest.SkipTest("PowerShell executable not available in PATH")
+
+    run_id = "pytest-structured-reentry-freeze-" + uuid.uuid4().hex[:10]
+    command = [
+        shell,
+        "-NoLogo",
+        "-NoProfile",
+        "-Command",
+        (
+            "& { "
+            "$env:VCO_HOST_ID = 'codex'; "
+            f"$result = & {ps_quote(str(FREEZE_SCRIPT))} "
+            "-Task '批准' "
+            "-Mode interactive_governed "
+            f"-RunId {ps_quote(run_id)} "
+            f"-ArtifactRoot {ps_quote(str(artifact_root))} "
+            f"-HostDecisionJson {ps_quote(host_decision_json)}; "
+            "$result | ConvertTo-Json -Depth 20 }"
+        ),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=True,
+        env={**os.environ, "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "1"},
+    )
+    return json.loads(completed.stdout)
+
+
+def run_runtime(
+    *,
+    artifact_root: Path,
+    host_decision_json: str,
+    requested_stage_stop: str | None = None,
+) -> dict[str, object]:
+    shell = resolve_powershell()
+    if shell is None:
+        raise unittest.SkipTest("PowerShell executable not available in PATH")
+
+    run_id = "pytest-structured-reentry-runtime-" + uuid.uuid4().hex[:10]
+    command = [
+        shell,
+        "-NoLogo",
+        "-NoProfile",
+        "-Command",
+        (
+            "& { "
+            "$env:VCO_HOST_ID = 'codex'; "
+            f"$result = & {ps_quote(str(RUNTIME_SCRIPT))} "
+            "-Task '批准' "
+            "-Mode interactive_governed "
+            f"-RunId {ps_quote(run_id)} "
+            f"{'-RequestedStageStop ' + ps_quote(requested_stage_stop) + ' ' if requested_stage_stop else ''}"
+            f"-ArtifactRoot {ps_quote(str(artifact_root))} "
+            f"-HostDecisionJson {ps_quote(host_decision_json)}; "
+            "$result | ConvertTo-Json -Depth 20 }"
+        ),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=True,
+        env={**os.environ, "VGO_DISABLE_NATIVE_SPECIALIST_EXECUTION": "1"},
+    )
+    return json.loads(completed.stdout)
+
+
+class StructuredBoundedReentryContinuationTests(unittest.TestCase):
+    def test_freeze_reuses_prior_task_type_for_control_only_structured_reentry(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir) / "artifacts"
+            payload = run_freeze(
+                artifact_root=artifact_root,
+                host_decision_json=build_host_decision_json(),
+            )
+            packet = payload["packet"]
+
+            self.assertEqual("research", packet["canonical_router"]["task_type"])
+            self.assertIn("continuation_context", packet)
+            self.assertTrue(packet["continuation_context"]["structured_bounded_reentry"])
+            self.assertTrue(packet["continuation_context"]["control_only_prompt"])
+
+    def test_runtime_skips_global_memory_reads_for_structured_bounded_reentry(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir) / "artifacts"
+            payload = run_runtime(
+                artifact_root=artifact_root,
+                host_decision_json=build_host_decision_json(),
+                requested_stage_stop=None,
+            )
+            summary = payload["summary"]
+            report_path = Path(summary["artifacts"]["memory_activation_report"])
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            stages = {stage["stage"]: stage for stage in report["stages"]}
+
+            self.assertEqual(1, len(stages["skeleton_check"]["read_actions"]))
+            self.assertEqual("state_store", stages["skeleton_check"]["read_actions"][0]["owner"])
+            self.assertEqual([], stages["deep_interview"]["read_actions"])
+            self.assertEqual([], stages["xl_plan"]["read_actions"])
+
+
+if __name__ == "__main__":
+    unittest.main()
