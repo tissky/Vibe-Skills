@@ -32,7 +32,7 @@ def test_vibe_discoverable_entries_are_shared_and_non_explosive() -> None:
     assert entries["vibe-what-do-i-want"]["publicly_exposed"] is False
     assert entries["vibe-how-do-we-do"]["publicly_exposed"] is False
     assert entries["vibe-do-it"]["publicly_exposed"] is False
-    assert entries["vibe-upgrade"]["publicly_exposed"] is False
+    assert entries["vibe-upgrade"]["publicly_exposed"] is True
     assert payload["grade_flags"] == ["--l", "--xl"]
     assert payload["grade_flag_map"] == {"--l": "L", "--xl": "XL"}
     assert payload["canonical_runtime_skill"] == "vibe"

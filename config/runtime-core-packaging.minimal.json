@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "package_id": "runtime-core-minimal",
-  "summary": "Governed runtime foundation payload with only the canonical vibe runtime publicly exposed and the required workflow support skills hidden inside the vibe internal corpus.",
+  "summary": "Governed runtime foundation payload with the canonical vibe runtime and host upgrade entry publicly exposed while the required workflow support skills stay hidden inside the vibe internal corpus.",
   "profile_manifests": {
     "minimal": "config/runtime-core-packaging.minimal.json",
     "full": "config/runtime-core-packaging.full.json"
@@ -143,7 +143,8 @@
     "canonical_vibe_target_relpath": "skills/vibe",
     "discoverable_entry_surface": "config/vibe-entry-surfaces.json",
     "projected_skill_names": [
-      "vibe"
+      "vibe",
+      "vibe-upgrade"
     ]
   },
   "internal_skill_corpus": {

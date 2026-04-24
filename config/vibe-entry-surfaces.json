@@ -40,7 +40,7 @@
       "display_name": "Vibe: Upgrade",
       "requested_stage_stop": "phase_cleanup",
       "allow_grade_flags": false,
-      "publicly_exposed": false
+      "publicly_exposed": true
     }
   ],
   "grade_flags": [

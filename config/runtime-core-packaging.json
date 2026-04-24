@@ -86,7 +86,7 @@
     "minimal": {
       "package_id": "runtime-core-minimal",
       "profile": "minimal",
-      "summary": "Governed runtime foundation payload with only the canonical vibe runtime publicly exposed and the required workflow support skills hidden inside the vibe internal corpus.",
+      "summary": "Governed runtime foundation payload with the canonical vibe runtime and host upgrade entry publicly exposed while the required workflow support skills stay hidden inside the vibe internal corpus.",
       "copy_directories": [
         {
           "source": "commands",
@@ -113,7 +113,8 @@
         "canonical_vibe_target_relpath": "skills/vibe",
         "discoverable_entry_surface": "config/vibe-entry-surfaces.json",
         "projected_skill_names": [
-          "vibe"
+          "vibe",
+          "vibe-upgrade"
         ]
       },
       "internal_skill_corpus": {
@@ -199,7 +200,7 @@
     "full": {
       "package_id": "runtime-core-full",
       "profile": "full",
-      "summary": "Governed runtime payload with only the canonical vibe skill publicly exposed while the full bundled corpus is internalized under the canonical vibe root.",
+      "summary": "Governed runtime payload with canonical vibe and the host upgrade entry publicly exposed while the full bundled corpus is internalized under the canonical vibe root.",
       "copy_directories": [
         {
           "source": "commands",
@@ -213,7 +214,8 @@
           "canonical_vibe_target_relpath": "skills/vibe",
           "discoverable_entry_surface": "config/vibe-entry-surfaces.json",
           "projected_skill_names": [
-            "vibe"
+            "vibe",
+            "vibe-upgrade"
           ]
         },
       "internal_skill_corpus": {

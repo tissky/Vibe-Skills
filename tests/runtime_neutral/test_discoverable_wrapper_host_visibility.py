@@ -10,7 +10,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SUPPORTED_HOSTS = ("codex", "claude-code", "opencode")
-EXPECTED_DISCOVERABLE_ENTRIES = {"vibe"}
+EXPECTED_DISCOVERABLE_ENTRIES = {"vibe", "vibe-upgrade"}
 RETIRED_DISCOVERABLE_ENTRIES = ("vibe-what-do-i-want", "vibe-how-do-we-do", "vibe-do-it")
 
 

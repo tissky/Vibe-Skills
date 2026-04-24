@@ -33,7 +33,7 @@ def build_update_reminder(repo_root: Path, target_root: Path, host_id: str) -> s
         '[INFO] Vibe-Skills update available: '
         f'local={local_version}@{local_commit} '
         f'latest={remote_version}@{remote_commit}. '
-        f'Run vibe-upgrade --host {host_id}.'
+        'Run vibe-upgrade.'
     )
 
 

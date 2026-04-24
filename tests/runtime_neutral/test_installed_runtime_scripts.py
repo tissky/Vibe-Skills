@@ -469,10 +469,10 @@ class InstalledRuntimeScriptsTests(unittest.TestCase):
             "vibe-what-do-i-want.md",
             "vibe-how-do-we-do.md",
             "vibe-do-it.md",
-            "vibe-upgrade.md",
         )
         for discoverable_name in hidden_wrapper_commands:
             self.assertFalse((commands_root / discoverable_name).exists(), discoverable_name)
+        self.assertTrue((commands_root / "vibe-upgrade.md").exists(), "vibe-upgrade.md")
 
         installed_root = self.target_root / "skills" / "vibe"
         check_cmd = [
