@@ -16,12 +16,12 @@
 
 <br/><br/>
 
-### A Super Skill harness for skills-capable AI agents
+### Give your AI agent a real working rhythm
 
-Install the Skills package, call `vibe`, and let the harness do the heavy lifting. VibeSkills reads the task, breaks it into stages, automatically brings in the right expert Skills, checks the work, and keeps useful context for the next session. It is built to grow: future domain Skills can plug into the same harness instead of forcing every field to reinvent its own workflow.
+Install VibeSkills, type `vibe`, and let the harness handle the busy work: understand the task, split it into stages, call the right expert Skills, check the result, and keep the context for next time. It is built to grow, so future domain Skills can plug into the same workflow instead of making every field start from scratch.
 
 &nbsp;
-*This is not just more tools. It is a new kind of Super Skill: the harness becomes the skill manager, so you do not have to memorize a catalog, babysit every step, or keep reminding the agent how work should move.*
+*You bring the goal. VibeSkills helps the agent move from idea to plan, from plan to work, and from work to verified delivery. That is the Super Skill idea: not more buttons, but a better way for AI to get things done.*
 
 <br/>
 
@@ -110,12 +110,12 @@ Install the Skills package, call `vibe`, and let the harness do the heavy liftin
 
 | Term | Plain-English Meaning |
 |:---|:---|
-| **Harness** | The workflow layer around your AI agent. It figures out the next stage, calls the right Skills, checks the work, and saves useful context. |
+| **Harness** | The workflow layer around your AI agent. It decides the next step, calls the right Skills, checks the work, and saves useful context. |
 | **Skill** | A focused expert capability, such as `tdd-guide`, `code-review`, data analysis, writing, or research support. |
 | **Vibe / VCO** | The canonical runtime that runs the harness. Public entrypoints are `vibe` and `vibe-upgrade`. |
-| **Automatic orchestration** | Different Skills are selected and used at different moments: requirements, planning, implementation, review, verification, and cleanup. |
-| **Open Skill plane** | New domain Skills can plug into the same harness, so the workflow can grow from software work into research, design, education, finance, law, and more. |
-| **TDD / proof-first delivery** | Work should be backed by tests, checks, artifacts, or explicit manual-review notes before completion is claimed. |
+| **Automatic orchestration** | The harness calls different Skills at different steps: requirements, planning, implementation, review, verification, and cleanup. |
+| **Open Skill plane** | New domain Skills can plug into the same workflow, so VibeSkills can grow into research, design, education, finance, law, and more. |
+| **TDD / verified delivery** | Work should be backed by tests, checks, artifacts, or explicit manual-review notes before completion is claimed. |
 | **Workspace memory** | Structured project information, decisions, and evidence are stored so later sessions can continue without starting over. |
 
 </details>
@@ -123,14 +123,14 @@ Install the Skills package, call `vibe`, and let the harness do the heavy liftin
 > [!IMPORTANT]
 > ### 🎯 Core Vision
 >
-> VibeSkills starts from a simple idea: Skills become much more useful when an intelligent harness knows how to orchestrate them.
+> VibeSkills starts from a simple idea: Skills are powerful, but a long tool list is not enough.
 >
-> It packages a governed harness, expert Skills, TDD-oriented execution, verification rules, and workspace memory into one plug-in Skills bundle. You should not have to remember every tool, choose every Skill by hand, prompt every phase, police every test, or rebuild context in every new session.
+> A useful AI agent should know when to ask, when to plan, when to call an expert Skill, and when to prove the work is ready. You should not have to act as the full-time dispatcher.
 >
-> It is also not limited to the Skills it ships with today. VibeSkills is an extensible harness: as new domain Skills appear, the same `vibe` entry can route them, stage them, verify their work, and preserve context across sessions.
+> VibeSkills packages that rhythm into one plug-in Skills bundle. It gives the agent a clear path to follow, pushes work toward tests and evidence, and keeps useful context for the next session.
 >
-> **Plug it in, invoke `vibe`, and the agent gets a clearer way to work.**
-> Because VibeSkills is delivered as a Skills package, it is easy to install, easy to move across hosts, and useful for many kinds of work out of the box.
+> **Install it, call `vibe`, and your agent gets a better way to move.**
+> Today it can organize the bundled Skills. Tomorrow, new Skills from any domain can join the same harness.
 
 <br/>
 
@@ -142,7 +142,7 @@ Install the Skills package, call `vibe`, and let the harness do the heavy liftin
 
 ## 🛰️ Runtime at a Glance
 
-VibeSkills feels different because the harness owns the sequence. The user brings intent; `vibe` turns that intent into staged work, routes expert Skills where they belong, and keeps the proof trail alive for the next session.
+VibeSkills is simple to use because `vibe` owns the flow. You bring the intent; the harness turns it into staged work, calls expert Skills where they fit, checks the result, and keeps the context for the next session.
 
 ```mermaid
 flowchart LR
@@ -179,9 +179,9 @@ flowchart LR
 | Signal | What it means |
 |:---|:---|
 | `one entry` | Start with `vibe`; keep `vibe-upgrade` for updates. |
-| `stage router` | Different moments get different Skills. |
-| `open skill plane` | New domain Skills can plug into the same harness instead of creating a new workflow every time. |
-| `proof trail` | Tests, checks, artifacts, or manual-review state back delivery claims. |
+| `stage router` | The right Skills are called at the right step. |
+| `open skill plane` | New domain Skills can join the same workflow instead of creating a new one each time. |
+| `proof trail` | Tests, checks, artifacts, or manual-review state support delivery claims. |
 | `memory plane` | Requirements, plans, decisions, and evidence survive the chat window. |
 
 </div>
@@ -190,9 +190,9 @@ flowchart LR
 
 ## 🧬 A New Kind of Super Skill
 
-The agent-skills world is moving past "give the model a bigger toolbox."
+The agent-skills world is moving past "give the model more tools."
 
-Projects like **[Superpowers](https://github.com/obra/superpowers)** show that Skills can become a serious software-development methodology: clarify before coding, design before implementation, test before claiming success. **[GSD / Get Shit Done](https://github.com/gsd-build/get-shit-done)** shows another important truth: agents need context engineering, specs, milestones, and a way to keep projects moving instead of drifting in chat history.
+Projects like **[Superpowers](https://github.com/obra/superpowers)** show that Skills can give coding agents real discipline: clarify before coding, design before implementation, test before claiming success. **[GSD / Get Shit Done](https://github.com/gsd-build/get-shit-done)** shows another useful truth: agents need specs, milestones, context, and a way to keep work moving instead of drifting in chat history.
 
 VibeSkills builds on that same direction, but pushes the package shape further:
 
@@ -200,20 +200,20 @@ VibeSkills builds on that same direction, but pushes the package shape further:
 >
 > **A Super Skill says:** "Here is how the work should run."
 
-VibeSkills is the second kind. It wraps the harness, the expert Skills, the stage orchestration, the verification discipline, and the workspace memory into one portable Skills package. More importantly, it gives future Skills a place to plug in: the harness can keep the same entry, stages, proof trail, and memory model as the skill plane expands.
+VibeSkills is the second kind. It wraps the workflow, expert Skills, verification, and workspace memory into one portable Skills package. More importantly, it gives future Skills a place to plug in: the same `vibe` entry can keep the work staged, checked, and easy to continue as the Skill set grows.
 
 <div align="center">
 
 | Project style | What it is great at | Where VibeSkills goes further |
 |:---|:---|:---|
-| **Traditional skill collections** | Give the agent more capabilities | Turns those capabilities into a staged, verified, context-aware working system |
-| **Superpowers-style methodology** | Gives coding agents stronger development discipline | Generalizes the idea into a broader Super Skill harness with automatic expert-Skill orchestration |
-| **GSD-style project flow** | Keeps projects moving through specs, context, milestones, and execution | Makes stage-aware Skill dispatch and cross-session memory first-class runtime behavior |
-| **VibeSkills** | One portable Super Skill package for Skills-capable agents | Simple entry, intelligent orchestration, lower user cognitive load, TDD/verification, multi-host adaptation, and an extensible plane for future domain Skills |
+| **Traditional skill collections** | Give the agent more tools | Turns those tools into a staged, checked workflow |
+| **Superpowers-style methodology** | Gives coding agents stronger habits | Brings the same idea into a broader harness that can call expert Skills by stage |
+| **GSD-style project flow** | Keeps projects moving with specs, context, and milestones | Adds Skill dispatch, verification, and workspace memory as part of the runtime |
+| **VibeSkills** | One portable Super Skill package for Skills-capable agents | One entry, less micromanagement, verified delivery, cross-session memory, and room for future domain Skills |
 
 </div>
 
-The innovation is not simply "more Skills." The innovation is turning Skills from a fixed library into an open, working system that can absorb new expert capabilities over time.
+The point is not simply "more Skills." The point is that Skills should not sit in a list; they should help the agent move the work.
 
 ---
 
@@ -221,21 +221,22 @@ The innovation is not simply "more Skills." The innovation is turning Skills fro
 ## ✨ What makes it different?
 
 > Most skill repos answer: _"What tools can my AI use?"_
-> **VibeSkills answers the more practical question: _"How can my AI use those Skills automatically, at the right time, without making me manage the whole process?"_**
+> **VibeSkills asks the question users actually feel every day: _"Can my AI pick the right Skill, use it at the right time, and prove the work is ready without making me manage every step?"_**
 
 The operating model is intentionally simple:
 
 <div align="center">
 
-| Layer | What it does for the user |
+| Feature | What you get |
 |:---|:---|
-| **Easy start** | Start with `vibe`; use `vibe-upgrade` to keep the package current. No long command menu to learn first. |
-| **Intelligent harness** | The agent follows a structured path: clarify → plan → execute → test → verify → preserve context. |
-| **Automatic Skill orchestration** | The harness picks expert Skills by task, phase, and constraints, then keeps them in bounded roles. |
-| **Extensible Skill plane** | New Skills for any domain can join the same orchestration model instead of forcing users to learn a separate workflow for each field. |
-| **TDD and verification discipline** | Work is pushed toward tests, checks, evidence, and explicit acceptance instead of unsupported completion claims. |
-| **Structured context storage** | Requirements, plans, decisions, handoff notes, and evidence are stored in predictable places for future sessions. |
-| **Portable Skills package** | The core is a plug-in bundle, so any Skills-capable AI agent can get the same workflow upgrade across supported hosts. |
+| **One entry** | Start with `vibe`; use `vibe-upgrade` to update. No long command menu to learn first. |
+| **A clear work rhythm** | The agent moves through ask → plan → work → check → remember. |
+| **Automatic Skill calls** | The harness picks expert Skills by task, stage, and constraints. |
+| **Less micromanagement** | You do not need to keep saying "plan first", "test it", or "save the context". |
+| **Verified delivery** | Work is pushed toward tests, checks, evidence, and explicit acceptance. |
+| **Cross-session context** | Requirements, plans, decisions, handoff notes, and evidence are stored in predictable places. |
+| **Future Skills can join** | New Skills from any domain can plug into the same workflow. |
+| **Portable package** | The core is a Skills bundle, so Skills-capable agents can get the same workflow upgrade across supported hosts. |
 
 </div>
 
@@ -245,12 +246,12 @@ The operating model is intentionally simple:
 
 | Without a harness | With VibeSkills |
 |:---|:---|
-| You keep deciding the next prompt, tool, and quality check. | The harness guides the workflow and asks for confirmation where it matters. |
-| Skills are a long list the agent may forget. | Skills become expert workers dispatched automatically by phase and task type. |
-| Each new domain tends to create another workflow for the user to learn. | New domain Skills can plug into the same `vibe` harness and inherit the same staged rhythm. |
-| "Done" can mean the model stopped talking. | Delivery is tied to tests, checks, artifacts, or explicit manual-review state. |
+| You keep deciding the next prompt, tool, and quality check. | `vibe` gives the agent a path and asks for confirmation where it matters. |
+| Skills are a long list the agent may forget. | Skills become expert helpers called by stage and task type. |
+| Each new domain tends to create another workflow for the user to learn. | New domain Skills can plug into the same `vibe` workflow. |
+| "Done" can mean the model stopped talking. | Delivery is tied to tests, checks, artifacts, or explicit review state. |
 | Long projects lose context across sessions. | Requirements, plans, decisions, and evidence are stored for continuation. |
-| Every host needs a different workflow story. | The core stays a general Skills package, with host adapters around it. |
+| Every host needs a different workflow story. | The core stays a portable Skills package, with host adapters around it. |
 
 </div>
 
