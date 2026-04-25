@@ -18,7 +18,7 @@
 
 ### 面向 Skills AI Agent 的 Super Skill harness
 
-#### 安装这个 Skills 包，调用 `vibe`，剩下的重活交给 harness：理解任务、拆分阶段、自动拉起合适的专家 Skills、检查结果，并把关键上下文留给下一次会话。
+#### 安装这个 Skills 包，调用 `vibe`，剩下的重活交给 harness：理解任务、拆分阶段、自动拉起合适的专家 Skills、检查结果，并把关键上下文留给下一次会话。它也为未来扩展而生：新的领域 Skills 可以接入同一个 harness，而不是每个领域重新发明一套 workflow。
 
 &nbsp;
 *它不只是“更多工具”，而是一种新的 Super Skill：让 harness 成为 Skill 管理者。你不需要背技能表，不需要一步步盯着 AI，也不需要反复提醒它工作应该怎么推进。*
@@ -68,6 +68,8 @@
 <img src="https://img.shields.io/badge/Harness-Automatic_Orchestration-32CD32?style=for-the-badge" alt="Automatic Orchestration">
 &nbsp;
 <img src="https://img.shields.io/badge/Package-Portable_Skills_Bundle-45a1ff?style=for-the-badge" alt="Portable Skills Bundle">
+&nbsp;
+<img src="https://img.shields.io/badge/Extensible-Any_Domain_Skills-ff5f87?style=for-the-badge" alt="Any Domain Skills">
 
 <br/><br/>
 
@@ -122,6 +124,7 @@
 | **Skill** | 一个聚焦的专家能力，例如 `tdd-guide`、`code-review`、数据分析、文档处理、科研写作等。 |
 | **Vibe / VCO** | 运行这套 harness 的 canonical runtime。公开入口是 `vibe` 和 `vibe-upgrade`。 |
 | **自动编排** | 不同阶段自动选择并调用不同 Skills：需求、规划、实现、评审、验证、清理，各司其职。 |
+| **开放 Skill 平面** | 新领域 Skills 可以接入同一个 harness，让这套工作流从软件工程扩展到科研、设计、教育、金融、法律和更多方向。 |
 | **TDD / 证据优先交付** | 完成不能只靠模型一句“做好了”，而要有测试、检查、产物证据，或明确的人工复核状态。 |
 | **工作区记忆** | 结构化保存需求、计划、决策和证据，让后续会话不用从零开始。 |
 
@@ -133,6 +136,8 @@
 > VibeSkills 的出发点很简单：Skills 只有被智能 harness 自动编排起来，才真正好用。
 >
 > 它把受管 harness、专家 Skills、TDD 导向执行、验证规则和工作区记忆封装进一个即插即用的 Skills 包。用户不应该手动记住每个工具、手动选择每个 Skill、手动催促每个阶段、手动盯住每个测试，也不应该在每次新会话里重新搭一遍上下文。
+>
+> 它也不被今天内置的 Skills 限死。VibeSkills 是一个可扩展的 harness：未来无论是科研、工程、设计、金融、法律、教育，还是更多垂直领域，只要有新的 Skills 接入，`vibe` 都可以把它们纳入阶段化编排、验证和上下文管理。
 >
 > **安装后调用 `vibe`，AI Agent 就获得一套更清晰的工作方式。**
 > 因为 VibeSkills 本质上是 Skills 包，所以它易安装、易迁移、能适配多种宿主，也适合很多不同类型的任务。
@@ -159,11 +164,13 @@ flowchart LR
     plan["Plan<br/>Stages"]
     route["Route<br/>Expert Skills"]
     skills["340+ Skills<br/>bounded by phase"]
+    future["Future Domain Skills<br/>research / finance / law / education / more"]
     verify["Verify<br/>Tests + Evidence"]
     memory["Remember<br/>Workspace Context"]
 
     user --> vibe --> freeze --> plan --> route --> verify --> memory
     route --> skills --> verify
+    route --> future --> verify
 
     classDef core fill:#ede9fe,stroke:#7B61FF,stroke-width:2px,color:#1f1147
     classDef stage fill:#e0f2fe,stroke:#0284c7,stroke-width:1.5px,color:#0c4a6e
@@ -171,7 +178,7 @@ flowchart LR
     classDef user fill:#fff7ed,stroke:#f97316,stroke-width:1.5px,color:#7c2d12
 
     class vibe core
-    class freeze,plan,route,skills stage
+    class freeze,plan,route,skills,future stage
     class verify,memory proof
     class user user
 ```
@@ -182,6 +189,7 @@ flowchart LR
 |:---|:---|
 | `one entry` | 从 `vibe` 开始，用 `vibe-upgrade` 更新。 |
 | `stage router` | 不同阶段自动调用不同 Skills。 |
+| `open skill plane` | 新领域 Skills 可以接入同一个 harness，不需要每个领域重新发明一套 workflow。 |
 | `proof trail` | 测试、检查、产物证据或人工复核状态支撑交付声明。 |
 | `memory plane` | 需求、计划、决策和证据不会随着聊天窗口消失。 |
 
@@ -201,7 +209,7 @@ VibeSkills 站在同一个方向上，但进一步改变了封装形态：
 >
 > **Super Skill 说：**“我知道这件事应该怎么推进。”
 
-VibeSkills 属于第二种。它把 harness、专家 Skills、阶段编排、验证纪律和工作区记忆，封装成一个可迁移的通用 Skills 包。
+VibeSkills 属于第二种。它把 harness、专家 Skills、阶段编排、验证纪律和工作区记忆，封装成一个可迁移的通用 Skills 包。更重要的是，它给未来 Skills 留出了接入位置：当 Skill 平面继续扩展时，入口、阶段、证据链和记忆模型仍然可以保持一致。
 
 <div align="center">
 
@@ -210,11 +218,11 @@ VibeSkills 属于第二种。它把 harness、专家 Skills、阶段编排、验
 | **传统 Skills 集合** | 给 Agent 增加更多能力 | 把这些能力组织成有阶段、有验证、有上下文延续的工作系统 |
 | **Superpowers 式方法论** | 让 coding agent 更有开发纪律 | 泛化成更大的 Super Skill harness，并把专家 Skill 自动编排作为核心能力 |
 | **GSD 式项目流** | 通过规格、上下文、里程碑和执行节奏推进项目 | 把阶段化 Skill 调度和跨会话记忆提升为 runtime 的一等能力 |
-| **VibeSkills** | 面向 Skills Agent 的通用 Super Skill 包 | 简单入口、智能编排、降低认知负担、TDD/验证导向，并适配多种宿主 |
+| **VibeSkills** | 面向 Skills Agent 的通用 Super Skill 包 | 简单入口、智能编排、降低认知负担、TDD/验证导向、适配多种宿主，并为未来领域 Skills 保留可扩展平面 |
 
 </div>
 
-创新点不是“Skills 更多”。创新点是把 Skills 从一个能力库，变成一个会自动运转的工作系统。
+创新点不是“Skills 更多”。创新点是把 Skills 从固定能力库，变成一个能持续吸收新专家能力、自动运转的开放工作系统。
 
 ---
 
@@ -235,6 +243,7 @@ VibeSkills 属于第二种。它把 harness、专家 Skills、阶段编排、验
 | **简单入口** | 从 `vibe` 开始，用 `vibe-upgrade` 更新，先不用学一长串 workflow 命令。 |
 | **智能 harness** | AI 按「澄清 → 规划 → 执行 → 测试 → 验证 → 保存上下文」推进，而不是直接乱跑。 |
 | **自动 Skill 编排** | harness 按任务、阶段和约束选择专家 Skills，并让它们在有边界的职责里工作。 |
+| **可扩展 Skill 平面** | 任意领域的新 Skills 可以加入同一套编排模型，而不是让用户为每个领域学习一套新 workflow。 |
 | **TDD 与验证纪律** | 任务结果落到测试、检查、证据或明确人工复核状态上，而不是一句“完成了”。 |
 | **结构化上下文存储** | 需求、计划、决策、交接信息和证据存到可预期的位置，方便后续会话接上。 |
 | **通用 Skills 包** | 核心是即插即用的 Skills bundle，能给支持 Skills 的 AI Agent 带来同一套工作流升级。 |
@@ -249,6 +258,7 @@ VibeSkills 属于第二种。它把 harness、专家 Skills、阶段编排、验
 |:---|:---|
 | 用户自己决定下一句提示词、下一个工具、下一步质量检查。 | harness 引导流程，并在关键位置要求确认。 |
 | Skills 只是一长串能力列表，AI 可能根本想不起来用。 | Skills 变成按阶段自动调度的专家工人。 |
+| 每个新领域都容易变成一套新的使用方式。 | 新领域 Skills 可以接入同一个 `vibe` harness，并继承同一套阶段节奏。 |
 | “完成”可能只是模型停止输出。 | 交付要绑定测试、检查、产物证据，或明确人工复核状态。 |
 | 长任务跨会话后上下文丢失。 | 需求、计划、决策和证据被保存，方便继续。 |
 | 每个宿主都要重新设计一套使用方式。 | 核心保持为通用 Skills 包，宿主适配围绕它展开。 |
