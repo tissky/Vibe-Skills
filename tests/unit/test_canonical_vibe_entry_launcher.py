@@ -1075,6 +1075,36 @@ def test_progressive_stage_stops_use_canonical_vibe_safe_default_for_external_ro
     )
 
 
+def test_progressive_stage_stops_surfaces_malformed_local_entry_surface(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / "vibe-entry-surfaces.json").write_text("{not json", encoding="utf-8")
+    monkeypatch.setattr(
+        canonical_entry,
+        "load_discoverable_entry_surface",
+        lambda repo_root: (_ for _ in ()).throw(RuntimeError("malformed entry surface")),
+    )
+
+    with pytest.raises(RuntimeError, match="malformed entry surface"):
+        canonical_entry._progressive_stage_stops(tmp_path, "vibe")
+
+
+def test_progressive_stage_stops_rejects_surface_without_canonical_vibe() -> None:
+    class Surface:
+        entry_by_id: dict[str, object] = {}
+
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        monkeypatch.setattr(canonical_entry, "load_discoverable_entry_surface", lambda repo_root: Surface())
+        with pytest.raises(RuntimeError, match="canonical vibe entry is missing"):
+            canonical_entry._progressive_stage_stops(REPO_ROOT, "vibe")
+
+
+def test_normalize_text_list_treats_string_as_single_item() -> None:
+    assert canonical_entry._normalize_text_list("GPU only") == ["GPU only"]
+
+
 def test_structured_revise_decision_does_not_authorize_bounded_reentry() -> None:
     assert not canonical_entry._structured_host_decision_allows_bounded_reentry(
         {

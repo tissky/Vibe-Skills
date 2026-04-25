@@ -85,6 +85,10 @@ function Test-VibeObjectHasProperty {
         return $false
     }
 
+    if ($InputObject -is [System.Collections.IDictionary]) {
+        return $InputObject.Contains($PropertyName)
+    }
+
     $propertyNames = @($InputObject.PSObject.Properties | ForEach-Object { [string]$_.Name })
     return ($propertyNames -contains $PropertyName)
 }
@@ -118,6 +122,13 @@ function Get-VibePropertySafe {
     )
 
     if ($null -eq $InputObject) {
+        return $DefaultValue
+    }
+
+    if ($InputObject -is [System.Collections.IDictionary]) {
+        if ($InputObject.Contains($PropertyName)) {
+            return $InputObject[$PropertyName]
+        }
         return $DefaultValue
     }
 
@@ -242,7 +253,7 @@ function Get-VibeHostContinuationContext {
         return $null
     }
 
-    $context = $HostDecision.continuation_context
+    $context = Get-VibePropertySafe -InputObject $HostDecision -PropertyName 'continuation_context'
     if (-not (Test-VibeStructuredObject -InputObject $context)) {
         return $null
     }
@@ -395,7 +406,7 @@ function Resolve-VibeHostPhaseDecomposition {
         return $null
     }
 
-    $phaseDecomposition = $HostDecision.phase_decomposition
+    $phaseDecomposition = Get-VibePropertySafe -InputObject $HostDecision -PropertyName 'phase_decomposition'
     if ($null -eq $phaseDecomposition) {
         return $null
     }
@@ -406,7 +417,7 @@ function Resolve-VibeHostPhaseDecomposition {
         throw 'structured host phase decomposition must include phases'
     }
 
-    $rawPhases = @($phaseDecomposition.phases)
+    $rawPhases = @(Get-VibePropertySafe -InputObject $phaseDecomposition -PropertyName 'phases')
     if (@($rawPhases).Count -eq 0) {
         throw 'structured host phase decomposition must include at least one phase'
     }
@@ -543,7 +554,7 @@ function Resolve-VibeHostSpecialistDispatchDecision {
         return $null
     }
 
-    $decision = $HostDecision.specialist_dispatch_decision
+    $decision = Get-VibePropertySafe -InputObject $HostDecision -PropertyName 'specialist_dispatch_decision'
     if ($null -eq $decision) {
         return $null
     }
@@ -556,9 +567,9 @@ function Resolve-VibeHostSpecialistDispatchDecision {
 
     $selectionMode = if (
         (Test-VibeObjectHasProperty -InputObject $decision -PropertyName 'selection_mode') -and
-        -not [string]::IsNullOrWhiteSpace([string]$decision.selection_mode)
+        -not [string]::IsNullOrWhiteSpace([string](Get-VibePropertySafe -InputObject $decision -PropertyName 'selection_mode'))
     ) {
-        [string]$decision.selection_mode
+        [string](Get-VibePropertySafe -InputObject $decision -PropertyName 'selection_mode')
     } else {
         [string]$contract.default_selection_mode
     }
@@ -649,13 +660,13 @@ function Get-VibeCodeTaskTddDecisionFromHostDecision {
     $rawDecision = $null
     foreach ($propertyName in @('code_task_tdd_decision', 'code_task_tdd', 'tdd_decision')) {
         if (Test-VibeObjectHasProperty -InputObject $HostDecision -PropertyName $propertyName) {
-            $rawDecision = $HostDecision.$propertyName
+            $rawDecision = Get-VibePropertySafe -InputObject $HostDecision -PropertyName $propertyName
             break
         }
     }
     if ($null -eq $rawDecision -and (Test-VibeObjectHasProperty -InputObject $HostDecision -PropertyName 'code_task_tdd_mode')) {
         $rawDecision = [pscustomobject]@{
-            mode = [string]$HostDecision.code_task_tdd_mode
+            mode = [string](Get-VibePropertySafe -InputObject $HostDecision -PropertyName 'code_task_tdd_mode')
         }
     }
     if ($null -eq $rawDecision) {
@@ -668,7 +679,7 @@ function Get-VibeCodeTaskTddDecisionFromHostDecision {
         }
     }
 
-    $mode = Normalize-VibeCodeTaskTddMode -Value $(if (Test-VibeObjectHasProperty -InputObject $rawDecision -PropertyName 'mode') { $rawDecision.mode } elseif (Test-VibeObjectHasProperty -InputObject $rawDecision -PropertyName 'tdd_mode') { $rawDecision.tdd_mode } else { '' })
+    $mode = Normalize-VibeCodeTaskTddMode -Value $(if (Test-VibeObjectHasProperty -InputObject $rawDecision -PropertyName 'mode') { Get-VibePropertySafe -InputObject $rawDecision -PropertyName 'mode' } elseif (Test-VibeObjectHasProperty -InputObject $rawDecision -PropertyName 'tdd_mode') { Get-VibePropertySafe -InputObject $rawDecision -PropertyName 'tdd_mode' } else { '' })
     if ([string]::IsNullOrWhiteSpace($mode)) {
         throw 'structured host code_task_tdd_decision must declare mode as required, not_applicable, or exception_approved'
     }
@@ -676,8 +687,8 @@ function Get-VibeCodeTaskTddDecisionFromHostDecision {
     return [pscustomobject]@{
         mode = [string]$mode
         source = 'host_decision'
-        reason = if ((Test-VibeObjectHasProperty -InputObject $rawDecision -PropertyName 'reason') -and -not [string]::IsNullOrWhiteSpace([string]$rawDecision.reason)) { [string]$rawDecision.reason } else { 'Host supplied an explicit structured code-task TDD decision.' }
-        exception = if ((Test-VibeObjectHasProperty -InputObject $rawDecision -PropertyName 'exception') -and -not [string]::IsNullOrWhiteSpace([string]$rawDecision.exception)) { [string]$rawDecision.exception } else { $null }
+        reason = if ((Test-VibeObjectHasProperty -InputObject $rawDecision -PropertyName 'reason') -and -not [string]::IsNullOrWhiteSpace([string](Get-VibePropertySafe -InputObject $rawDecision -PropertyName 'reason'))) { [string](Get-VibePropertySafe -InputObject $rawDecision -PropertyName 'reason') } else { 'Host supplied an explicit structured code-task TDD decision.' }
+        exception = if ((Test-VibeObjectHasProperty -InputObject $rawDecision -PropertyName 'exception') -and -not [string]::IsNullOrWhiteSpace([string](Get-VibePropertySafe -InputObject $rawDecision -PropertyName 'exception'))) { [string](Get-VibePropertySafe -InputObject $rawDecision -PropertyName 'exception') } else { $null }
     }
 }
 
@@ -4049,6 +4060,30 @@ function Test-VibeTaskSignalHit {
         return $TaskLower.Contains($needle)
     }
 
+    $looksLikeSimpleStemPattern = $needle.Contains('*') -and [Regex]::IsMatch($needle, '^[a-z0-9]+\*?([-_\s/]+[a-z0-9]+\*?)*$')
+    if ($looksLikeSimpleStemPattern) {
+        $tokens = @([Regex]::Split($needle, '[-_\s/]+') | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        $tokenPatterns = @()
+        foreach ($token in $tokens) {
+            $isStem = $token.EndsWith('*')
+            $stem = if ($isStem) { $token.TrimEnd('*') } else { $token }
+            if ([string]::IsNullOrWhiteSpace($stem)) {
+                return $false
+            }
+            if ($isStem -and $stem.Length -lt 4) {
+                return $false
+            }
+            $escapedStem = [Regex]::Escape($stem)
+            if ($isStem) {
+                $tokenPatterns += ($escapedStem + '[a-z0-9]*')
+            } else {
+                $tokenPatterns += $escapedStem
+            }
+        }
+        $boundaryPattern = '(?<![a-z0-9])' + ($tokenPatterns -join '[-_\s/]*') + '(?![a-z0-9])'
+        return [Regex]::IsMatch($TaskLower, $boundaryPattern)
+    }
+
     $looksLikeRegex = [Regex]::IsMatch($needle, '[\[\]\(\)\.\*\+\?\|\\]')
     if ($looksLikeRegex) {
         return ($TaskLower -match $needle)
@@ -4108,7 +4143,7 @@ function Get-VibeInferredTaskType {
         'failing',
         'regression',
         'root cause',
-        'diagnos',
+        'diagnos*',
         'triage',
         'mismatch',
         'misroute',

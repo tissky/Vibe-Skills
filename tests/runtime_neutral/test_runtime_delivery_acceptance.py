@@ -767,7 +767,7 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
         approved_dispatch = [
             {
                 "skill_id": "systematic-debugging",
-                "native_skill_entrypoint": r"C:\skills\systematic-debugging\SKILL.md",
+                "native_skill_entrypoint": r"C:\Skills\systematic-debugging\SKILL.md",
             }
         ]
         session_root = self._build_session(
@@ -780,7 +780,7 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 "routed_skills": [
                     {
                         "skill_id": "systematic-debugging",
-                        "native_skill_entrypoint": r"C:\skills\systematic-debugging\SKILL.md",
+                        "native_skill_entrypoint": r"C:\Skills\systematic-debugging\SKILL.md",
                         "entrypoint_requirement_satisfied": True,
                     }
                 ],
@@ -808,6 +808,64 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                         "native_skill_entrypoint": "C:/skills/systematic-debugging/SKILL.md",
                         "resolution_state": "executed",
                         "evidence_paths": ["/tmp/pytest-specialist-systematic-debugging-normalized.txt"],
+                    }
+                ],
+            },
+        )
+        report = evaluate(REPO_ROOT, session_root)
+
+        self.assertEqual("PASS", report["summary"]["gate_result"])
+        self.assertFalse(report["execution_context"]["specialist_host_continuation_pending"])
+        self.assertNotIn(
+            "Specialist execution sidecar unit `unit-1` changed native_skill_entrypoint away from the disclosed value.",
+            report["execution_context"]["specialist_execution_notes"],
+        )
+
+    def test_runtime_delivery_acceptance_casefolds_posix_drive_entrypoint_paths(self) -> None:
+        approved_dispatch = [
+            {
+                "skill_id": "systematic-debugging",
+                "native_skill_entrypoint": "/C/Skills/systematic-debugging/SKILL.md",
+            }
+        ]
+        session_root = self._build_session(
+            run_id="pytest-host-specialist-posix-drive-entrypoint-normalized",
+            approved_dispatch=approved_dispatch,
+            phase_execute_specialist_user_disclosure={
+                "scope": "approved_dispatch_only",
+                "timing": "before_execution",
+                "path_source": "native_skill_entrypoint",
+                "routed_skills": [
+                    {
+                        "skill_id": "systematic-debugging",
+                        "native_skill_entrypoint": "/C/Skills/systematic-debugging/SKILL.md",
+                        "entrypoint_requirement_satisfied": True,
+                    }
+                ],
+            },
+            specialist_accounting={
+                "approved_dispatch": approved_dispatch,
+                "approved_dispatch_count": 1,
+                "effective_execution_status": "direct_current_session_routed",
+                "direct_routed_specialist_units": [
+                    {
+                        "unit_id": "unit-1",
+                        "skill_id": "systematic-debugging",
+                        "result_path": "specialist-results/systematic-debugging.json",
+                    }
+                ],
+            },
+            sidecar_specialist_execution={
+                "protocol_version": "v1",
+                "source_run_id": "pytest-host-specialist-posix-drive-entrypoint-normalized",
+                "resolution_mode": "current_session_host_execution",
+                "units": [
+                    {
+                        "unit_id": "unit-1",
+                        "skill_id": "systematic-debugging",
+                        "native_skill_entrypoint": "/c/skills/systematic-debugging/SKILL.md",
+                        "resolution_state": "executed",
+                        "evidence_paths": ["/tmp/pytest-specialist-systematic-debugging-posix-drive.txt"],
                     }
                 ],
             },
@@ -942,6 +1000,71 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
         self.assertEqual("host_current_session_degraded", report["execution_context"]["specialist_effective_execution_status"])
         self.assertIn(
             "Approved execution finished current-session continuation with degraded specialist outcomes.",
+            report["residual_risks"],
+        )
+
+    def test_runtime_delivery_acceptance_reports_fail_when_current_session_specialist_execution_failed(self) -> None:
+        approved_dispatch = [
+            {
+                "skill_id": "systematic-debugging",
+                "native_skill_entrypoint": "/tmp/systematic-debugging/SKILL.md",
+            }
+        ]
+        session_root = self._build_session(
+            run_id="pytest-host-specialist-failed",
+            approved_dispatch=approved_dispatch,
+            phase_execute_specialist_user_disclosure={
+                "scope": "approved_dispatch_only",
+                "timing": "before_execution",
+                "path_source": "native_skill_entrypoint",
+                "routed_skills": [
+                    {
+                        "skill_id": "systematic-debugging",
+                        "native_skill_entrypoint": "/tmp/systematic-debugging/SKILL.md",
+                        "entrypoint_requirement_satisfied": True,
+                    }
+                ],
+            },
+            specialist_accounting={
+                "approved_dispatch": approved_dispatch,
+                "approved_dispatch_count": 1,
+                "effective_execution_status": "direct_current_session_routed",
+                "direct_routed_specialist_units": [
+                    {
+                        "unit_id": "unit-1",
+                        "skill_id": "systematic-debugging",
+                        "result_path": "specialist-results/systematic-debugging.json",
+                    }
+                ],
+            },
+            sidecar_specialist_execution={
+                "protocol_version": "v1",
+                "source_run_id": "pytest-host-specialist-failed",
+                "resolution_mode": "current_session_host_execution",
+                "units": [
+                    {
+                        "unit_id": "unit-1",
+                        "skill_id": "systematic-debugging",
+                        "resolution_state": "failed",
+                        "evidence_paths": [
+                            "/tmp/pytest-specialist-systematic-debugging-failed.txt"
+                        ],
+                    }
+                ],
+            },
+        )
+        report = evaluate(REPO_ROOT, session_root)
+
+        self.assertEqual("FAIL", report["summary"]["gate_result"])
+        self.assertFalse(report["summary"]["completion_language_allowed"])
+        self.assertEqual("partial", report["truth_results"]["workflow_completion_truth"]["state"])
+        self.assertFalse(report["execution_context"]["specialist_host_continuation_pending"])
+        self.assertEqual("failed", report["execution_context"]["specialist_host_resolution_state"])
+        self.assertEqual(1, report["execution_context"]["specialist_host_failed_unit_count"])
+        self.assertEqual(0, report["execution_context"]["specialist_host_blocked_unit_count"])
+        self.assertEqual("host_current_session_failed", report["execution_context"]["specialist_effective_execution_status"])
+        self.assertIn(
+            "Approved execution finished current-session continuation with failed specialist outcomes.",
             report["residual_risks"],
         )
 

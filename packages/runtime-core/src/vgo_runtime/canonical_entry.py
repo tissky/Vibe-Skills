@@ -445,7 +445,7 @@ def _inherit_frozen_host_decision_fields_from_bounded_reentry(
                 prior_specialist_dispatch_decision
             )
 
-    return effective_decision or None
+    return effective_decision
 
 
 def _normalize_prompt_token(text: str) -> str:
@@ -518,6 +518,8 @@ def _extract_continuation_keywords(intent_contract: dict[str, Any]) -> list[str]
 
 
 def _normalize_text_list(values: Any) -> list[str]:
+    if isinstance(values, str):
+        values = [values]
     normalized: list[str] = []
     seen: set[str] = set()
     for value in values or []:
@@ -621,10 +623,25 @@ def _attach_bounded_continuation_context_to_host_decision(
     return enriched
 
 
+def _has_discoverable_entry_surface_candidate(start_path: Path) -> bool:
+    current = start_path.resolve()
+    if current.is_file():
+        current = current.parent
+
+    while True:
+        if (current / "config" / "vibe-entry-surfaces.json").exists():
+            return True
+        if current.parent == current:
+            return False
+        current = current.parent
+
+
 def _progressive_stage_stops(repo_root: Path, entry_id: str) -> tuple[str, ...]:
     try:
         surface = load_discoverable_entry_surface(repo_root)
     except RuntimeError:
+        if _has_discoverable_entry_surface_candidate(repo_root):
+            raise
         if entry_id == CANONICAL_RUNTIME_ENTRY_ID:
             return CANONICAL_VIBE_PROGRESSIVE_STAGE_STOPS
         return ()
@@ -632,7 +649,7 @@ def _progressive_stage_stops(repo_root: Path, entry_id: str) -> tuple[str, ...]:
     if entry is not None:
         return tuple(entry.progressive_stage_stops)
     if entry_id == CANONICAL_RUNTIME_ENTRY_ID:
-        return CANONICAL_VIBE_PROGRESSIVE_STAGE_STOPS
+        raise RuntimeError("canonical vibe entry is missing from discoverable entry surface")
     return ()
 
 
@@ -874,7 +891,7 @@ def _coerce_bounded_return_control(summary: dict[str, Any], summary_path: Path |
         if isinstance(canonical_router, dict):
             prior_task_type = str(canonical_router.get("task_type") or "").strip()
     return {
-        "summary_path": str(summary.get("summary_path") or ""),
+        "summary_path": str(summary_path or summary.get("summary_path") or ""),
         "source_run_id": source_run_id,
         "terminal_stage": terminal_stage,
         "next_stage": str(raw.get("next_stage") or "").strip(),

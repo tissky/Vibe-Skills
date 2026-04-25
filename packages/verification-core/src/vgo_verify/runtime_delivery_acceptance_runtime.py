@@ -29,7 +29,16 @@ def _normalize_entrypoint_path_for_compare(value: object) -> str:
     if not raw:
         return ""
     normalized = raw.replace("\\", "/").rstrip("/")
-    if len(normalized) >= 3 and normalized[1:3] == ":/":
+    lower_normalized = normalized.lower()
+    is_drive_path = len(normalized) >= 3 and normalized[1:3] == ":/"
+    is_posix_drive_path = len(normalized) >= 3 and normalized[0] == "/" and normalized[1].isalpha() and normalized[2] == "/"
+    is_wsl_drive_path = (
+        len(normalized) >= 7
+        and lower_normalized.startswith("/mnt/")
+        and normalized[5].isalpha()
+        and normalized[6] == "/"
+    )
+    if is_drive_path or is_posix_drive_path or is_wsl_drive_path:
         return normalized.casefold()
     if "\\" in raw:
         return normalized.casefold()
@@ -284,6 +293,7 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
     specialist_host_executed_unit_count = 0
     specialist_host_degraded_unit_count = 0
     specialist_host_blocked_unit_count = 0
+    specialist_host_failed_unit_count = 0
     specialist_host_resolved_units: list[dict[str, Any]] = []
     seen_specialist_execution_unit_ids: set[str] = set()
     specialist_execution_state_aliases = {
@@ -293,8 +303,8 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
         "pass": "executed",
         "degraded": "degraded",
         "blocked": "blocked",
-        "failed": "blocked",
-        "failing": "blocked",
+        "failed": "failed",
+        "failing": "failed",
     }
 
     expected_source_run_id = str(execute_receipt.get("run_id") or execution_manifest.get("run_id") or "").strip()
@@ -390,6 +400,8 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
             specialist_host_degraded_unit_count += 1
         elif resolution_state == "blocked":
             specialist_host_blocked_unit_count += 1
+        elif resolution_state == "failed":
+            specialist_host_failed_unit_count += 1
 
     missing_direct_routed_unit_ids = [
         unit_id for unit_id in direct_routed_unit_ids if unit_id not in seen_specialist_execution_unit_ids
@@ -416,6 +428,16 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
             specialist_execution_notes.append(
                 "Specialist execution sidecar did not resolve all direct-routed specialist units."
             )
+        elif specialist_host_failed_unit_count > 0 and (
+            specialist_host_executed_unit_count > 0
+            or specialist_host_degraded_unit_count > 0
+            or specialist_host_blocked_unit_count > 0
+        ):
+            specialist_host_resolution_state = "partial_failed"
+            effective_specialist_execution_status = "host_current_session_failed"
+        elif specialist_host_failed_unit_count > 0:
+            specialist_host_resolution_state = "failed"
+            effective_specialist_execution_status = "host_current_session_failed"
         elif specialist_host_blocked_unit_count > 0 and (
             specialist_host_executed_unit_count > 0 or specialist_host_degraded_unit_count > 0
         ):
@@ -459,6 +481,16 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
         workflow_truth_state = "partial"
         workflow_truth_notes.append(
             "Current-session specialist execution resolved the handoff, but one or more approved specialists ended in a blocked non-green state."
+        )
+    elif specialist_host_resolution_state == "partial_failed":
+        workflow_truth_state = "partial"
+        workflow_truth_notes.append(
+            "Current-session specialist execution resolved the handoff, but one or more approved specialists failed."
+        )
+    elif specialist_host_resolution_state == "failed":
+        workflow_truth_state = "partial"
+        workflow_truth_notes.append(
+            "Current-session specialist execution resolved the handoff, but approved specialist execution failed."
         )
     elif specialist_host_resolution_state == "blocked":
         workflow_truth_state = "partial"
@@ -922,6 +954,8 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
         residual_risks.append("Current-session specialist execution evidence was recorded, but the specialist-execution sidecar did not validate cleanly.")
     elif specialist_host_resolution_state == "degraded":
         residual_risks.append("Approved execution finished current-session continuation with degraded specialist outcomes.")
+    elif specialist_host_resolution_state in {"failed", "partial_failed"}:
+        residual_risks.append("Approved execution finished current-session continuation with failed specialist outcomes.")
     elif specialist_host_resolution_state in {"blocked", "partial_non_green"}:
         residual_risks.append("Approved execution finished current-session continuation with blocked specialist outcomes.")
 
@@ -1025,6 +1059,7 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
             "specialist_host_executed_unit_count": specialist_host_executed_unit_count,
             "specialist_host_degraded_unit_count": specialist_host_degraded_unit_count,
             "specialist_host_blocked_unit_count": specialist_host_blocked_unit_count,
+            "specialist_host_failed_unit_count": specialist_host_failed_unit_count,
             "specialist_host_resolved_units": specialist_host_resolved_units,
             "specialist_host_missing_unit_ids": missing_direct_routed_unit_ids,
             "runtime_specialist_execution_status": runtime_specialist_execution_status,
