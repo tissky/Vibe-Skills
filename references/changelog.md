@@ -1,5 +1,14 @@
 # VCO Changelog
 
+## v3.1.0 (2026-04-25)
+
+- Rebuilt the public Vibe surface around one canonical `vibe` entry plus public `vibe-upgrade`, while demoting legacy want/how/do wrapper names to compatibility metadata only.
+- Tightened bounded stage governance so requirement and plan boundaries return control to the user, preserve structured continuation context, and avoid accidental full-pipeline execution.
+- Added host-led structured routing, phase decomposition, no-specialist execution, and bounded specialist curation so irrelevant router hits no longer have to pollute the plan.
+- Hardened specialist execution truth, TDD applicability, install/runtime path checks, Windows diagnostics, and package metadata alignment for the `3.1.0` release line.
+- Detailed release notes: `docs/releases/v3.1.0.md`.
+
+
 ## v3.0.4 (2026-04-19)
 
 - Refreshed `v3.0.4` from the later maintained source at `eeb09f3` so the public release surface now includes the Windows PowerShell verification-gate Python resolver hardening that landed after the original `2026-04-18` cut.

@@ -10,7 +10,7 @@ This directory stores governed VCO release notes and the minimum runtime-facing 
 
 ### Current Release Surface
 
-- [`v3.0.4.md`](v3.0.4.md): Windows verification gate Python resolution / direct in-session specialist routing / canonical entry truth hardening / release-train telemetry seeding / upgrade truth and empty-upgrade repair
+- [`v3.1.0.md`](v3.1.0.md): Phoenix release for unified `vibe` / `vibe-upgrade` public surfaces, structured host routing, bounded continuation, specialist truth gates, TDD applicability, install/runtime path hardening, and package metadata alignment
 
 ### Release Runtime / Proof Handoff
 
@@ -24,6 +24,7 @@ This directory stores governed VCO release notes and the minimum runtime-facing 
 
 ## Recent Governed Releases
 
+- [`v3.1.0.md`](v3.1.0.md) - 2026-04-25 - unified public vibe surfaces / structured host routing / bounded continuation / specialist truth gates / TDD applicability / install-runtime path hardening / package metadata alignment
 - [`v3.0.4.md`](v3.0.4.md) - 2026-04-19 - Windows verification gate Python resolution / direct in-session specialist routing / canonical entry truth hardening / release-train telemetry seeding / upgrade truth and empty-upgrade repair
 - [`v3.0.3.md`](v3.0.3.md) - 2026-04-15 - host-global bootstrap lifecycle / specialist decision truth / upgrade metadata hardening / installed runtime payload coverage repair
 - [`v3.0.2.md`](v3.0.2.md) - 2026-04-13 - mainline upgrade flow / workspace memory plane / document artifact governance / specialist lifecycle disclosure / release truth refresh
