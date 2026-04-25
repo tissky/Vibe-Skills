@@ -282,8 +282,14 @@ function Copy-VibeRecordObject {
     )
 
     $copy = [pscustomobject]@{}
-    foreach ($property in @($InputObject.PSObject.Properties)) {
-        $copy | Add-Member -NotePropertyName $property.Name -NotePropertyValue $property.Value -Force
+    if ($InputObject -is [System.Collections.IDictionary]) {
+        foreach ($key in @($InputObject.Keys)) {
+            $copy | Add-Member -NotePropertyName ([string]$key) -NotePropertyValue $InputObject[$key] -Force
+        }
+    } else {
+        foreach ($property in @($InputObject.PSObject.Properties)) {
+            $copy | Add-Member -NotePropertyName $property.Name -NotePropertyValue $property.Value -Force
+        }
     }
     return $copy
 }

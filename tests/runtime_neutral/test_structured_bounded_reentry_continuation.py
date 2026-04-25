@@ -264,6 +264,33 @@ class StructuredBoundedReentryContinuationTests(unittest.TestCase):
         self.assertEqual("host_decision", payload["source"])
         self.assertEqual("Document artifact only.", payload["reason"])
 
+    def test_execution_phase_metadata_preserves_hashtable_record_fields(self) -> None:
+        payload = run_common_script(
+            "$phaseDecomposition = [pscustomobject]@{ "
+            "  phases = @([pscustomobject]@{ "
+            "    phase_id = 'phase-discovery'; "
+            "    stage_order = 10; "
+            "    stage_type = 'discovery'; "
+            "    stage_label = 'Discovery'; "
+            "    dispatch_phase = 'pre_execution' "
+            "  }) "
+            "}; "
+            "$records = @(@{ "
+            "  skill_id = 'research-lookup'; "
+            "  native_skill_entrypoint = '/tmp/research-lookup/SKILL.md'; "
+            "  dispatch_phase = 'pre_execution'; "
+            "  rationale = 'domain lookup needed' "
+            "}); "
+            "$result = Add-VibeExecutionPhaseMetadataToRecords -Records $records -PhaseDecomposition $phaseDecomposition; "
+            "$result[0] | ConvertTo-Json -Depth 20 -Compress"
+        )
+
+        self.assertEqual("research-lookup", payload["skill_id"])
+        self.assertEqual("/tmp/research-lookup/SKILL.md", payload["native_skill_entrypoint"])
+        self.assertEqual("domain lookup needed", payload["rationale"])
+        self.assertEqual("phase-discovery", payload["phase_id"])
+        self.assertEqual("discovery", payload["stage_type"])
+
     def test_task_signal_matching_uses_explicit_stems_without_substring_false_positives(self) -> None:
         payload = run_common_script(
             "$result = [ordered]@{ "
