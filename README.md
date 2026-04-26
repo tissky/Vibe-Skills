@@ -191,32 +191,32 @@ flowchart LR
 
 ## 🎬 Practice Demos: Real Work You Can See
 
-_The VibeSkills 3.1.0 community discussion asked for more practical examples. This README section should answer that need in a scan-friendly way: what the user asked for, how `vibe` coordinated the work, and what visible artifact proved the result._
+_People asked what VibeSkills looks like in real work. These examples are easier to judge than a feature list: each one starts with a plain goal, goes through a governed `vibe` run, and ends with something you can open, inspect, or rerun._
 
 <div align="center">
 
-| Demo | User Goal | What `vibe` Coordinates | What Readers Should See |
+| Demo | Starting Point | How `vibe` Moves It Forward | Visible Result |
 |:---|:---|:---|:---|
-| **Image Workbench** | Build a GPT-image workspace with chat, prompt iteration, reference-image upload, and real generation calls. | Freeze product requirements, plan UI/API work, route design and implementation skills, test the image workflow, and inspect screenshots. | A runnable workbench screenshot, generated-image history, and the command or setup path. |
-| **Video Editing Pipeline** | Turn a rocket moon-landing history clip into a short-video edit with pacing, captions, and music. | Route media skills, keep an edit ledger, render the video, visually review the result, and record rough edges honestly. | Before/after media, edit process evidence, render output, and known limitations. |
-| **ML Experiment + Paper** | Create a face-recognition machine-learning demo and turn the experiment into a detailed LaTeX paper. | Choose a dataset and model path, run training and evaluation, generate figures, compile the paper, and preserve metrics. | Metrics, plots, `paper.pdf`, run commands, and verification notes. |
+| **Image Workbench** | Build a GPT-image workspace for prompt chat, reference uploads, and real image generation. | Turns the idea into a product scope, UI/API tasks, workflow checks, and screenshot review. | A local workbench, generation history, and a setup path readers can follow. |
+| **Video Editing Pipeline** | Recut a rocket moon-landing history clip into a short-video style edit. | Breaks the media work into caption, music, pacing, render, and review passes, with rough edges recorded plainly. | Before/after clips, a rendered output, and an edit log. |
+| **ML Experiment + Paper** | Build a face-recognition ML demo and turn the run into a paper. | Guides dataset and model choice, training, evaluation, figure generation, and LaTeX compilation. | Metrics, plots, `paper.pdf`, commands, and verification notes. |
 
 </div>
 
-The strongest demos make the harness itself visible:
+The useful pattern is not just the final screenshot. A good demo also shows how the work moved:
 
 ```mermaid
 flowchart LR
     accTitle: VibeSkills Practice Demo Flow
-    accDescr: A user goal moves through requirement freeze, staged planning, skill routing, execution, verification, and a visible artifact.
+    accDescr: A user goal moves through scope confirmation, planning, skill handoff, execution checks, and an openable result.
 
-    goal["User Goal"]
-    freeze["Requirement Freeze"]
-    plan["Staged Plan"]
-    route["Skill Routing"]
+    goal["Plain Request"]
+    freeze["Confirmed Scope"]
+    plan["Work Plan"]
+    route["Skill Handoff"]
     work["Build / Analyze / Render"]
-    proof["Tests + Artifact Evidence"]
-    show["Screenshot / Video / Paper"]
+    proof["Checks + Evidence"]
+    show["Openable Result"]
 
     goal --> freeze --> plan --> route --> work --> proof --> show
 
@@ -229,7 +229,7 @@ flowchart LR
     class proof,show proof
 ```
 
-> Inspired by the [VibeSkills 3.1.0 community practice cases](https://linux.do/t/topic/2061161): a GPT-image workbench, a video-editing run, and an ML experiment that produced a paper. Demo claims should stay tied to artifacts, not only screenshots of chat.
+> Inspired by the [VibeSkills 3.1.0 community practice cases](https://linux.do/t/topic/2061161): a GPT-image workbench, a video-editing run, and an ML experiment that produced a paper. The best examples link to concrete outputs: a running app, a rendered clip, a compiled paper, or the commands and evidence used to produce them.
 
 ---
 
