@@ -19,24 +19,29 @@ ML_KEYWORDS = {
     "classification",
     "regression",
     "clustering",
-    "feature",
-    "training",
+    "feature engineering",
+    "feature importance",
+    "model training",
     "model evaluation",
     "cross validation",
     "deep learning",
     "transformers",
+    "fine tune",
+    "fine-tune",
     "time series",
     "forecast",
     "anomaly",
+    "data leakage",
     "机器学习",
-    "模型",
     "分类",
     "回归",
     "聚类",
-    "特征",
-    "训练",
-    "预测",
-    "评估",
+    "特征工程",
+    "特征重要性",
+    "模型训练",
+    "模型评估",
+    "预测模型",
+    "数据泄漏",
 }
 
 SPECIALIST_DEFER_SKILLS = {
@@ -173,13 +178,46 @@ def _contains_keyword(text: str, keyword: str) -> bool:
     return keyword_lower in text_lower
 
 
-def _is_ml_related(skill_id: str, pack_ids: set[str], metadata_text: str) -> bool:
+def _skill_id_has_ml_signal(skill_id: str) -> bool:
+    normalized = skill_id.lower().replace("_", "-")
+    explicit_fragments = (
+        "machine-learning",
+        "ml-",
+        "-ml",
+        "scikit-learn",
+        "sklearn",
+        "feature-importance",
+        "data-leakage",
+        "data-scientist",
+        "ml-engineer",
+        "transformer",
+        "datasets",
+    )
+    if any(fragment in normalized for fragment in explicit_fragments):
+        return True
+    return any(
+        re.search(pattern, normalized) is not None
+        for pattern in (
+            r"(^|-)regression($|-)",
+            r"(^|-)clustering($|-)",
+            r"(^|-)anomaly($|-)",
+        )
+    )
+
+
+def _pack_has_ml_signal(pack_ids: set[str]) -> bool:
+    return any(pack_id.startswith("ml-") or pack_id.endswith("-ml") for pack_id in pack_ids)
+
+
+def _is_ml_related(skill_id: str, pack_ids: set[str], route_metadata_text: str) -> bool:
+    del route_metadata_text
     if "data-ml" in pack_ids:
         return True
     if skill_id in SPECIALIST_DEFER_SKILLS:
         return True
-    haystack = f"{skill_id} {metadata_text}"
-    return any(_contains_keyword(haystack, keyword) for keyword in ML_KEYWORDS)
+    if _pack_has_ml_signal(pack_ids):
+        return True
+    return _skill_id_has_ml_signal(skill_id)
 
 
 def _has_files(directory: Path) -> bool:
@@ -361,10 +399,10 @@ def _all_candidate_skill_ids(repo_root: Path, pack_index: dict[str, dict[str, se
     return {str(skill_id).strip() for skill_id in skill_ids if str(skill_id).strip()}
 
 
-def _metadata_text(skill_id: str, keyword_index: dict[str, Any], routing_rules: dict[str, Any], skill_text: str) -> str:
+def _route_metadata_text(skill_id: str, keyword_index: dict[str, Any], routing_rules: dict[str, Any]) -> str:
     keyword_payload = (keyword_index.get("skills") or {}).get(skill_id, {})
     route_payload = (routing_rules.get("skills") or {}).get(skill_id, {})
-    return " ".join([skill_id, _flatten_text(keyword_payload), _flatten_text(route_payload), skill_text])
+    return " ".join([skill_id, _flatten_text(keyword_payload), _flatten_text(route_payload)])
 
 
 def _make_row(
@@ -378,9 +416,10 @@ def _make_row(
     skill_dir = repo_root / "bundled" / "skills" / skill_id
     skill_md = skill_dir / "SKILL.md"
     skill_text = skill_md.read_text(encoding="utf-8-sig") if skill_md.exists() else ""
-    metadata_text = _metadata_text(skill_id, keyword_index, routing_rules, skill_text)
-    if not _is_ml_related(skill_id, record["packs"], metadata_text):
+    route_metadata_text = _route_metadata_text(skill_id, keyword_index, routing_rules)
+    if not _is_ml_related(skill_id, record["packs"], route_metadata_text):
         return None
+    metadata_text = " ".join([route_metadata_text, skill_text])
 
     line_count = len(skill_text.splitlines())
     has_scripts = _has_files(skill_dir / "scripts")

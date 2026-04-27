@@ -223,6 +223,12 @@ class MlSkillsPruningAuditTests(unittest.TestCase):
         self.assertIn("## 删除候选", markdown_text)
         self.assertIn("anomaly-detector", markdown_text)
 
+    def test_runtime_neutral_wrapper_exposes_main(self) -> None:
+        wrapper = REPO_ROOT / "scripts" / "verify" / "runtime_neutral" / "ml_skills_pruning_audit.py"
+        text = wrapper.read_text(encoding="utf-8")
+        self.assertIn("from vgo_verify.ml_skills_pruning_audit import", text)
+        self.assertIn("raise SystemExit(main())", text)
+
 
 if __name__ == "__main__":
     unittest.main()
