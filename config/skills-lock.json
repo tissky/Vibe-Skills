@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "generated_at": "2026-04-09T19:29:51+08:00",
+  "generated_at": "2026-04-27T10:27:45+08:00",
   "source": "bundled/skills",
   "skill_count": 343,
-  "total_bytes": 21177958.0,
+  "total_bytes": 21310340.0,
   "skills": [
     {
       "name": ".system",
       "relative_path": "bundled/skills/.system",
-      "file_count": 17,
-      "bytes": 90509,
+      "file_count": 18,
+      "bytes": 91686,
       "skill_md_hash": null,
-      "dir_hash": "8e1f0073822756e124f4289d4099b173af9a84f946fd51d420389dadaab69ffa"
+      "dir_hash": "03b12a876fbdec4b9d9502facc0b36f30e5bf217ca249014cffd286b90c4aed1"
     },
     {
       "name": "adaptyv",
@@ -129,7 +129,7 @@
       "name": "algorithmic-art",
       "relative_path": "bundled/skills/algorithmic-art",
       "file_count": 4,
-      "bytes": 59796,
+      "bytes": 60616,
       "skill_md_hash": "3bc4092c09804853186524c826bc0621b940bb6122c05b84496dff95388e6eef",
       "dir_hash": "3be3312fd9eb4dd781293cc6126d150519c79e08fdbfa883bc7fb3ec34810ceb"
     },
@@ -161,15 +161,15 @@
       "name": "anomaly-detector",
       "relative_path": "bundled/skills/anomaly-detector",
       "file_count": 1,
-      "bytes": 1219,
-      "skill_md_hash": "952ff3fce8f8785d47ef5dbcf8d2026e7e0b30d489a454547826bfa36f75251d",
-      "dir_hash": "5452cc60b0b2ce75ce717c58a84034b870af2be4fbdb0360249083a93b9e4294"
+      "bytes": 1404,
+      "skill_md_hash": "a28656dd514e824c1550f754632aa30eda1f806e2fbfdb95bedf9899f3f988d0",
+      "dir_hash": "e474ca5c6622c1cf8d8be79127c127a9eeef1d65f2144dac007f0a0e0cb20941"
     },
     {
       "name": "arboreto",
       "relative_path": "bundled/skills/arboreto",
       "file_count": 5,
-      "bytes": 24803,
+      "bytes": 24900,
       "skill_md_hash": "c87ae24970584c9ef8627a9a9f2bdcd2c79d3ade2d5033a4e3e14e01590cdd9a",
       "dir_hash": "cd6d095f122c46b3ebfd6843bb1cd34bb9fcea632a502b00f2a14a69ccd2fafd"
     },
@@ -193,9 +193,9 @@
       "name": "autonomous-builder",
       "relative_path": "bundled/skills/autonomous-builder",
       "file_count": 25,
-      "bytes": 248867,
-      "skill_md_hash": "01f1ec1c22e71bd713265997cf3f874dce6afcbfb3902f40a248e4d68699b0a1",
-      "dir_hash": "b26f7a326fc0e134a2a6571efa5bd699b88f9814a4ff93e740cdd26fb3723e63"
+      "bytes": 249382,
+      "skill_md_hash": "37adcc0486afdaca2c699b7dcc1d8bd5eec90fc46ca75ae80adb038190e95aad",
+      "dir_hash": "5421d8bfb0cd6ebef30f11fb42eeaf5c0f542e265700ba42fc3b2e3e65c95630"
     },
     {
       "name": "benchling-integration",
@@ -225,7 +225,7 @@
       "name": "biorxiv-database",
       "relative_path": "bundled/skills/biorxiv-database",
       "file_count": 3,
-      "bytes": 33819,
+      "bytes": 34264,
       "skill_md_hash": "807105bfd42a7633965700f045c8d4f21d404a9f1355deab5a869a6b53513045",
       "dir_hash": "94333a28c268dad48e830dc877646fa459a81cc312c29a749710c8f43c27e51f"
     },
@@ -233,7 +233,7 @@
       "name": "bioservices",
       "relative_path": "bundled/skills/bioservices",
       "file_count": 8,
-      "bytes": 104272,
+      "bytes": 105714,
       "skill_md_hash": "b0692ca5755e4dfa31107781699a2194fa6e096ad13fbea9f2f281df6be3e0a4",
       "dir_hash": "befac24680c9c4abbfc75b8681a32ec353a85b270edb6601975f91f4d13b38b6"
     },
@@ -249,7 +249,7 @@
       "name": "brenda-database",
       "relative_path": "bundled/skills/brenda-database",
       "file_count": 5,
-      "bytes": 143118,
+      "bytes": 145784,
       "skill_md_hash": "c39195731ece684749246802aaa8a8c2b36a6ba71892366da029c388d3cb7da8",
       "dir_hash": "802cf7df16ab723efd9121d7267c02a8d88b68d1b66494c9aba212e18decdee4"
     },
@@ -281,7 +281,7 @@
       "name": "chembl-database",
       "relative_path": "bundled/skills/chembl-database",
       "file_count": 3,
-      "bytes": 24288,
+      "bytes": 24566,
       "skill_md_hash": "06f5e91f9d7ce14bcd6b46a784b51ce04bc4ab27b92718f4ecaadb033bfed103",
       "dir_hash": "8224040d71b872028c21c9166cbc58c13801873928138e5fc29a9d337eb7abb0"
     },
@@ -297,7 +297,7 @@
       "name": "citation-management",
       "relative_path": "bundled/skills/citation-management",
       "file_count": 14,
-      "bytes": 219300,
+      "bytes": 221863,
       "skill_md_hash": "3f5d395175c985a7014c9e98d61b650221b3bc4677d3dc39e34755f4fe78b890",
       "dir_hash": "2231682014cbd853e05105fd0a5f52eb5aef459d73cec6d86c68df22ed9d652a"
     },
@@ -305,15 +305,15 @@
       "name": "claude-skills",
       "relative_path": "bundled/skills/claude-skills",
       "file_count": 11,
-      "bytes": 40366,
+      "bytes": 41803,
       "skill_md_hash": "f660d6a166c5231e5ec6bedb8797752ddcdb0ffe14137773ebe6ec92bdc3f6de",
-      "dir_hash": "9df5ac1d4acc529c1d9e182ac9a92e23133419cb214192a1ebaf244595f170ee"
+      "dir_hash": "5c8f962b46fb31ca4453f9138399517f6511340d04351b3f2b6ed2bb507689e5"
     },
     {
       "name": "clinical-decision-support",
       "relative_path": "bundled/skills/clinical-decision-support",
       "file_count": 20,
-      "bytes": 332041,
+      "bytes": 335792,
       "skill_md_hash": "5cc0d9cc9952900625bbd1710f7afa7040f30c47149cf91aee9fb84e64b74fe4",
       "dir_hash": "1ba1f2120764a515abc20d90a47810a98cb2d7d114c9fa28f79118d2b5ede78c"
     },
@@ -321,7 +321,7 @@
       "name": "clinical-reports",
       "relative_path": "bundled/skills/clinical-reports",
       "file_count": 30,
-      "bytes": 348805,
+      "bytes": 350153,
       "skill_md_hash": "ac9112ed8db0fac6c430daf52cc03afd942fab5958a861b060e21a0af20fb0aa",
       "dir_hash": "91c40fff641edc07c5b55e9b5c359f6dbf77f55423c5486f6f11ed21827ec820"
     },
@@ -329,7 +329,7 @@
       "name": "clinicaltrials-database",
       "relative_path": "bundled/skills/clinicaltrials-database",
       "file_count": 3,
-      "bytes": 32673,
+      "bytes": 32888,
       "skill_md_hash": "20b826eebcd9fae6cb28a570312036932359ca48d0251c74b39cb13f751dc11c",
       "dir_hash": "66c132a9517eefd00802d788086848b37bc1d23da4691fc7951449caa364c6f5"
     },
@@ -337,7 +337,7 @@
       "name": "clinpgx-database",
       "relative_path": "bundled/skills/clinpgx-database",
       "file_count": 3,
-      "bytes": 52602,
+      "bytes": 53120,
       "skill_md_hash": "e83e7d3141b6342c1005b70a93d908da9be187fb0fc99755d0d6021d4e0ca9b4",
       "dir_hash": "93395a3acb0adbfb8bdf56859087ab23aac1d2e8fe5a1ebbcaa81053e2a94f82"
     },
@@ -361,7 +361,7 @@
       "name": "code-review",
       "relative_path": "bundled/skills/code-review",
       "file_count": 3,
-      "bytes": 5834,
+      "bytes": 5906,
       "skill_md_hash": "b344bb9d09e940aa1340fec3b7c314b32901bec3a5fd5a4b96dceae443229c0b",
       "dir_hash": "2a79356bbfb614cafc1fe513fb8c7377c0d04b916065a3787b3d407d4f852827"
     },
@@ -377,7 +377,7 @@
       "name": "code-reviewer",
       "relative_path": "bundled/skills/code-reviewer",
       "file_count": 7,
-      "bytes": 18635,
+      "bytes": 18977,
       "skill_md_hash": "777841d763d199f85c64e3fd38189443505db6e1443e0a7e8a52a5f228c43ab1",
       "dir_hash": "637170ae84118f8eb96f5a49bd01e00b79b7f35d6d63b1569787f20e8349f695"
     },
@@ -385,7 +385,7 @@
       "name": "coding-tutor",
       "relative_path": "bundled/skills/coding-tutor",
       "file_count": 5,
-      "bytes": 34003,
+      "bytes": 34711,
       "skill_md_hash": "c2fcbf34c3b5085f5ceb08796734f656bc73d5aacad268bad508a033549990ec",
       "dir_hash": "3825c1336d7065282c36768a3dea755e8b113191ac000416c5018b3435b69a4f"
     },
@@ -393,9 +393,9 @@
       "name": "commit-with-reflection",
       "relative_path": "bundled/skills/commit-with-reflection",
       "file_count": 8,
-      "bytes": 93927,
-      "skill_md_hash": "8d570d3a8385a8caaa706806c7bc8d727a5e466436d3f4a1fc5b3c79a93ec007",
-      "dir_hash": "c06c55c9fd4cb73ee511f0713836588d6538bb13d71ea67f13ede50aaeb76c1e"
+      "bytes": 94384,
+      "skill_md_hash": "08f45f5f1c65db489ec1266b85541b7e88e12ebe2576e1a188193f24b8d6f392",
+      "dir_hash": "92d43a0ed085246f897487eddb50875e16af67ef432dfd217ca9d366c195d05f"
     },
     {
       "name": "comprehensive-research-agent",
@@ -409,9 +409,9 @@
       "name": "confusion-matrix-generator",
       "relative_path": "bundled/skills/confusion-matrix-generator",
       "file_count": 1,
-      "bytes": 1352,
-      "skill_md_hash": "bb2e8378f03cd3ed4ab11eb7644e9ccff9ea2e988c07ccd454e59537b86f92d8",
-      "dir_hash": "977e9d9a3915025d84f26c407c19ab506987de219f075f4fa4f0a37611f8f2fb"
+      "bytes": 1374,
+      "skill_md_hash": "37ad5578256aa22441e624d8eae521a13bbff5db731f541bb35e3a3db3a61071",
+      "dir_hash": "e71d161b4346cef99e9f0aef55e4b41e3765b4579f606a3cb1094c5911a2a4a6"
     },
     {
       "name": "content-research-writer",
@@ -425,7 +425,7 @@
       "name": "context-fundamentals",
       "relative_path": "bundled/skills/context-fundamentals",
       "file_count": 3,
-      "bytes": 31515,
+      "bytes": 31885,
       "skill_md_hash": "4f6b700280f6396661d8f94a764a9e8153dbfa81a037b7cbd0bf9d8b98de8168",
       "dir_hash": "a8e5a7857660370ad8684b74d769fa2c7c9056a529139ac17cf282f640ceaff0"
     },
@@ -441,15 +441,15 @@
       "name": "correlation-analyzer",
       "relative_path": "bundled/skills/correlation-analyzer",
       "file_count": 1,
-      "bytes": 1267,
-      "skill_md_hash": "c259e2c2c6ff933f7817bf89c33d2b56d5526280467cd0bed22a0c02e889962e",
-      "dir_hash": "d4879dda2eef101a649cd5b1f04d6c395883a5705d77c54914e8db338e8ae564"
+      "bytes": 1236,
+      "skill_md_hash": "03d26fda4c963c19021e8d8298d61fc0723021f0995fa2424fff6a4deb78acf1",
+      "dir_hash": "6b9ebef4ed2a50c4d54bd986d003204f6c43e9391311afda2bbe8bb83c7d85c7"
     },
     {
       "name": "cosmic-database",
       "relative_path": "bundled/skills/cosmic-database",
       "file_count": 3,
-      "bytes": 24240,
+      "bytes": 24471,
       "skill_md_hash": "adc99d02391f87e0ee4e80b88a22e6f4df821fc4babae9f6fc2042f798e9940a",
       "dir_hash": "faea3ddd254479133997a86186ab2778b6a3729ed5aeec754ff62986f096f8ef"
     },
@@ -465,15 +465,15 @@
       "name": "creating-data-visualizations",
       "relative_path": "bundled/skills/creating-data-visualizations",
       "file_count": 7,
-      "bytes": 15620,
-      "skill_md_hash": "992428dbddc5aba7344d6caefe4d8af6efb68fef56db40f5499c5eaf8cce7f5e",
-      "dir_hash": "1ec28efa4f98562b8f71d73532dad520005bac31365b194c2f5fbeaf8489a089"
+      "bytes": 14415,
+      "skill_md_hash": "e6f739729ed5988a2fbc51be9013cb1f50507b2dbbadbbfddc24f60646710661",
+      "dir_hash": "bfead1a23ab310c92e39d307df742bfb91a285933ed0f18d27c194998a31ff15"
     },
     {
       "name": "cs-foundations",
       "relative_path": "bundled/skills/cs-foundations",
       "file_count": 5,
-      "bytes": 15648,
+      "bytes": 15885,
       "skill_md_hash": "17fff8488873331698e0a6282852473f7ce4ac909b3fb91463124128f9346a09",
       "dir_hash": "60c0271be2b7b3748881b586f5b7cb6ab5aaa2143e178664b93359fc019f1e0e"
     },
@@ -497,7 +497,7 @@
       "name": "data-exploration-visualization",
       "relative_path": "bundled/skills/data-exploration-visualization",
       "file_count": 11,
-      "bytes": 244526,
+      "bytes": 250863,
       "skill_md_hash": "f7c74a056cceddeacd70256865db59b1af7decffbc08423eef896c1d87d2b965",
       "dir_hash": "1940eb253b6ed23d9ee1729e4cda2f157be51bb3af94742e7fa2305f615c66ef"
     },
@@ -505,17 +505,17 @@
       "name": "data-normalization-tool",
       "relative_path": "bundled/skills/data-normalization-tool",
       "file_count": 1,
-      "bytes": 1316,
-      "skill_md_hash": "966ee0084a799a978651d99cba360e6542200ae227e7b091627e6322ed16a6f3",
-      "dir_hash": "81a409f02ec561859d77337d6dbd7c643b56aa54558aca606e9043fb896f127c"
+      "bytes": 1405,
+      "skill_md_hash": "672c31feae5ac541a57c30c1cd1589a43e09188062f9f3b03db6ca9db287b97e",
+      "dir_hash": "bc42fca88e8c5765abc2e0e93346e0871fcc2a7f2de06a163bb971f03a2e50aa"
     },
     {
       "name": "data-quality-checker",
       "relative_path": "bundled/skills/data-quality-checker",
       "file_count": 1,
-      "bytes": 1268,
-      "skill_md_hash": "e3e3ac82bb7348a3daf7e721c7e2ca006392b03b1cf2811114597c0a7ce10b84",
-      "dir_hash": "cdd85559053609665476e857f50e51a1323f1bd0e005bab0c06892650bd873c6"
+      "bytes": 1277,
+      "skill_md_hash": "b28f022b3454327e87b2b165f645cf302665e7335ba173fef1828a6059c4169f",
+      "dir_hash": "199c4817b21a50c554066474ef406170c0451b0a6864169741e92bb35e2363d1"
     },
     {
       "name": "data-quality-frameworks",
@@ -553,7 +553,7 @@
       "name": "datavis",
       "relative_path": "bundled/skills/datavis",
       "file_count": 4,
-      "bytes": 54613,
+      "bytes": 56340,
       "skill_md_hash": "d6f3a480f28997d230c1c7d2c014970daf5637399feba34968c6c63fe9a45ddd",
       "dir_hash": "99619be63ae48907e3b7952cde794f877930cc1aa03380cf467b92e8d537baef"
     },
@@ -585,7 +585,7 @@
       "name": "deepchem",
       "relative_path": "bundled/skills/deepchem",
       "file_count": 6,
-      "bytes": 68820,
+      "bytes": 69757,
       "skill_md_hash": "b752f9ae0fb9ee561f86ea76222c7d857a47fd427bbb953954d248f93d115189",
       "dir_hash": "872d9ab61dc54a8a0147d1d23857a668adf2a2295f2b5d721a072eff6e2e47c8"
     },
@@ -593,7 +593,7 @@
       "name": "deeptools",
       "relative_path": "bundled/skills/deeptools",
       "file_count": 8,
-      "bytes": 84226,
+      "bytes": 84875,
       "skill_md_hash": "506aaa6c54113e3a759cb0a1ba9a9ea94f1e5e4faddd886fa0ebf4ae3669260f",
       "dir_hash": "e46c8fb91733f2121e7e03d12aab2e9c11d7a21f9fb612345c9cc1680fbe0fde"
     },
@@ -625,17 +625,17 @@
       "name": "detecting-data-anomalies",
       "relative_path": "bundled/skills/detecting-data-anomalies",
       "file_count": 11,
-      "bytes": 18648,
-      "skill_md_hash": "a732b0a727c08ac8645fd232ccd2be624f35aecb0b999931d3c350b50aa501b2",
-      "dir_hash": "03e8877a52593d30800bf3dd72b55776076c5556c5df0705fba95e9d662d1389"
+      "bytes": 18251,
+      "skill_md_hash": "245c5a0090db11f23a8d3f1c83265cd374cd0b24ce0ba9ad6438160b2d62ba3a",
+      "dir_hash": "dbc39ab4f066e48634e236d360dabfd48a3e37ae56e105545f1f4b080789da5c"
     },
     {
       "name": "detecting-performance-regressions",
       "relative_path": "bundled/skills/detecting-performance-regressions",
       "file_count": 7,
-      "bytes": 18505,
-      "skill_md_hash": "b274a5f41da529747ab81d2adf9c89ed92cdc04c0711bc8c7017de80535b9247",
-      "dir_hash": "a2b448bfcab9557c783a64ed7fc040a7d0ea5a6f3b8a5021a19d46c59856590f"
+      "bytes": 16116,
+      "skill_md_hash": "46617fbc1b76f529d2741186531b036f8b68fee5eb714634ea52b5c6bba13e1d",
+      "dir_hash": "b3c2aba3e131c55169a6c5cb2a41813e3961803e7cbe6c65f6188e8423f94e8c"
     },
     {
       "name": "dialectic",
@@ -649,17 +649,17 @@
       "name": "diffdock",
       "relative_path": "bundled/skills/diffdock",
       "file_count": 9,
-      "bytes": 68956,
+      "bytes": 69826,
       "skill_md_hash": "0a256757c23fa28ce65b447778342587090e6a72b4f00f9992e701d4a7567fab",
       "dir_hash": "259087e5e3b4bd00bd49286ba23c7ff4cd21cd5b1ba3d9f1740032ec7f649077"
     },
     {
       "name": "digital-brain",
       "relative_path": "bundled/skills/digital-brain",
-      "file_count": 46,
-      "bytes": 128530,
+      "file_count": 47,
+      "bytes": 129671,
       "skill_md_hash": "39ed6cd20dd787b6c71397aa0f75619887ed774c0fd390439d8e535f54bb3544",
-      "dir_hash": "959b58cf65bbc8aa317a637f041ec746927874c3aaa8c9aed42fcf642cb872fa"
+      "dir_hash": "6cedd7304deaa242ef0a83215f73c493e19ee10c69d283119adf381207b30bcb"
     },
     {
       "name": "dnanexus-integration",
@@ -673,7 +673,7 @@
       "name": "doc",
       "relative_path": "bundled/skills/doc",
       "file_count": 6,
-      "bytes": 26624,
+      "bytes": 26920,
       "skill_md_hash": "0a635585817d1ac96e8e512114d08258b70f9e54ce0052078a258291ac13a8ed",
       "dir_hash": "f8aa1d110c6fb838374db3f1b4740bf5675634ca269e8d2ba19189e052510ce8"
     },
@@ -697,7 +697,7 @@
       "name": "document-skills",
       "relative_path": "bundled/skills/document-skills",
       "file_count": 84,
-      "bytes": 1428830,
+      "bytes": 1456187,
       "skill_md_hash": "cf8d095fd6f106a7121655098f22c9ea9678c8105728f9187f461836e4875861",
       "dir_hash": "391537bbed6a01050e0286b2cc739e92013426e2444092bd4df365a4a88cdb65"
     },
@@ -713,7 +713,7 @@
       "name": "docx",
       "relative_path": "bundled/skills/docx",
       "file_count": 59,
-      "bytes": 1185916,
+      "bytes": 1209398,
       "skill_md_hash": "0bd90681fcab2e282025ee14acf508b60bbd6c41ac6c3bf83c0dc14d52c37933",
       "dir_hash": "a055c638e638fd48f8f3bc9af3278f722739d5149ca5a2c04882ec03235ef57e"
     },
@@ -721,7 +721,7 @@
       "name": "docx-comment-reply",
       "relative_path": "bundled/skills/docx-comment-reply",
       "file_count": 5,
-      "bytes": 23016,
+      "bytes": 23575,
       "skill_md_hash": "4a50d5b1ed8f54287656510302140d82b7d06d29e9d380d3dcf28f51367f9a77",
       "dir_hash": "f5d8258ee4598257e6da8327eb363ed1e4f52fc22def6accb23ec875e4bba63a"
     },
@@ -729,7 +729,7 @@
       "name": "drugbank-database",
       "relative_path": "bundled/skills/drugbank-database",
       "file_count": 7,
-      "bytes": 90513,
+      "bytes": 90863,
       "skill_md_hash": "926ebfbb686a1b2cdd60981226c002cd24b617220ca9ee02dfaa21e7b005240b",
       "dir_hash": "4b15483bebf370c54883165215d206a39143b9e38d292a9fcac9d3996ca1c85e"
     },
@@ -761,15 +761,15 @@
       "name": "engineering-features-for-machine-learning",
       "relative_path": "bundled/skills/engineering-features-for-machine-learning",
       "file_count": 11,
-      "bytes": 34760,
-      "skill_md_hash": "009ee35a6f530b9bfd58971fd87493e9b6715652f9e1988b57ea635031f7a611",
-      "dir_hash": "7bce1c7c1f427d01512302183a52a568368dbaa9304609d8896ffad21cc75505"
+      "bytes": 32751,
+      "skill_md_hash": "46ae67a119f65cdd9ca1085c72a37c3b899a647fad6c748bf31fee15713c6064",
+      "dir_hash": "982b13e3ebc89842e3a7eaa414d1a8acaf7a9930c492b5a52e09ba494a3f713c"
     },
     {
       "name": "ensembl-database",
       "relative_path": "bundled/skills/ensembl-database",
       "file_count": 3,
-      "bytes": 31843,
+      "bytes": 32270,
       "skill_md_hash": "68ba4e39c9a7380eefd67324b30603bfd47bdf840475d00db719df86ebc19d57",
       "dir_hash": "7cc4e7bc6140a301681e84a4b9b1d5fa4efdf82542480349dfea93f74f6c4de0"
     },
@@ -793,7 +793,7 @@
       "name": "etetoolkit",
       "relative_path": "bundled/skills/etetoolkit",
       "file_count": 6,
-      "bytes": 84408,
+      "bytes": 84851,
       "skill_md_hash": "31fe1b501aeeb56743bb421596801e163ea0821f62f4e8bc0d8d654e32bdbd50",
       "dir_hash": "09322cad4655e32283d9856e482f1209924a2d785ffdab312bf6b8a7d9e37c82"
     },
@@ -825,9 +825,9 @@
       "name": "evaluating-machine-learning-models",
       "relative_path": "bundled/skills/evaluating-machine-learning-models",
       "file_count": 8,
-      "bytes": 18961,
-      "skill_md_hash": "5370ac700454e2d8caffd40a964c2364e5774c7ca793f8bae1f7d38afb023db4",
-      "dir_hash": "8cce612240bf17835887f802a04e1c2e4044a2a78ecd077135c543e1d08c4392"
+      "bytes": 17421,
+      "skill_md_hash": "1417f044c0c7d095ae9f95049dd95607e5387466453a4c5fb85469b8320b641e",
+      "dir_hash": "615a31b18018b23887098c169c81475d181c5c4616d4da2be98a63024dbdb0bd"
     },
     {
       "name": "excel-analysis",
@@ -849,15 +849,15 @@
       "name": "explaining-machine-learning-models",
       "relative_path": "bundled/skills/explaining-machine-learning-models",
       "file_count": 10,
-      "bytes": 24109,
-      "skill_md_hash": "a7d6544e52aef609ad7c9fb65478336c4c3ec5e588618968dd19dca0dbca966e",
-      "dir_hash": "1dfbd26db1c5b446defbbeaa4aeef604121a884bff085d81ba5fe51a691ac498"
+      "bytes": 22195,
+      "skill_md_hash": "ecf1f5697b72c249ef678be7aec9de88becc95fe7a43ce886dcb72019cfa4efb",
+      "dir_hash": "ec2d6a6723400cb7a081ffb13ee102f367561f4377e3ef0ce7e660826d4a8b2c"
     },
     {
       "name": "exploratory-data-analysis",
       "relative_path": "bundled/skills/exploratory-data-analysis",
       "file_count": 9,
-      "bytes": 149703,
+      "bytes": 150250,
       "skill_md_hash": "6f4d0e9bd4ab498122acc87e4dd08b73a30dec83697fa010ca99f37e81b48065",
       "dir_hash": "562b3b2b1b93af183ee5639885fbd439538a216a331dd01efe8a0353c1853cdb"
     },
@@ -865,7 +865,7 @@
       "name": "fda-database",
       "relative_path": "bundled/skills/fda-database",
       "file_count": 9,
-      "bytes": 125726,
+      "bytes": 126501,
       "skill_md_hash": "5022fc49a23ed1aa1a37414fa899e1c2ed781b98d7dd4e4d33aac913c1424fc6",
       "dir_hash": "86621eb6354144a8e50ebc3c824df9c7fe58515fddde5ccdceb5b3c071bf1e12"
     },
@@ -873,9 +873,9 @@
       "name": "feature-importance-analyzer",
       "relative_path": "bundled/skills/feature-importance-analyzer",
       "file_count": 1,
-      "bytes": 1364,
-      "skill_md_hash": "4525c0c9304dace11f28c1c6a6cae8da603b16cfcfc63cc8c2146f1a85fd2190",
-      "dir_hash": "3b796844474eadb6a0401d4cb0530f443914c3aefcd8a67021f58db7531b2c21"
+      "bytes": 1369,
+      "skill_md_hash": "0233048a7777309b1899c0febb13657590c458ae1b7ac78415765db751b30bd2",
+      "dir_hash": "698f78b799b0a34a18bbdea7de0f9fdf2bf24abb317285932f84ab71b55af015"
     },
     {
       "name": "figma",
@@ -905,7 +905,7 @@
       "name": "flashrag-evidence",
       "relative_path": "bundled/skills/flashrag-evidence",
       "file_count": 2,
-      "bytes": 15435,
+      "bytes": 15846,
       "skill_md_hash": "7b8c0728def055b4e943f10f52f2a79cc48cf742dfae7d2b309fa73d8e095be8",
       "dir_hash": "6605f34e551088b25cb736c68a62fd82416ee7c9f170483d2b279362c862ceeb"
     },
@@ -929,7 +929,7 @@
       "name": "fred-economic-data",
       "relative_path": "bundled/skills/fred-economic-data",
       "file_count": 10,
-      "bytes": 122275,
+      "bytes": 123219,
       "skill_md_hash": "d40b660dc8a22656c52bbadfea91e24d4b02d0158b391cbeeb89dafbbfe26ca4",
       "dir_hash": "bb60b9184632a24ce5f42e2571fd49773a967f4e367f349eb8355942dca89ddf"
     },
@@ -945,7 +945,7 @@
       "name": "gene-database",
       "relative_path": "bundled/skills/gene-database",
       "file_count": 6,
-      "bytes": 50975,
+      "bytes": 51801,
       "skill_md_hash": "3a1c1cbac86961ee4cf539e6c7eb62328e90a4133084ba016a312c691e65b9cd",
       "dir_hash": "1eaefcae81cd662429c0588544f90ed81fb3bc4429026ab0ea33889113979787"
     },
@@ -953,7 +953,7 @@
       "name": "generate-image",
       "relative_path": "bundled/skills/generate-image",
       "file_count": 2,
-      "bytes": 15862,
+      "bytes": 16143,
       "skill_md_hash": "bb22bdd7dee90bdc03db8fd25e11c179854b09c5dd9429a969d65ab95e429d47",
       "dir_hash": "b620adf87be54acc9464e82bc5ccab19a5307bd8108db0b7f864aecffbc51de7"
     },
@@ -961,9 +961,9 @@
       "name": "generating-test-reports",
       "relative_path": "bundled/skills/generating-test-reports",
       "file_count": 10,
-      "bytes": 26423,
-      "skill_md_hash": "e997e081580279f7442f292e467acf4ee41f77dfe893c7f659ac78bbedb99e56",
-      "dir_hash": "57a24356a4099e54a527a61c9a1fd3c5257c6b938a797c77c920c3ccc2c62e8f"
+      "bytes": 24731,
+      "skill_md_hash": "4ac57d99cfa9ef310a1d754a8431a19b6765ca96761722d068208cb0f89d8b52",
+      "dir_hash": "f3496e9773d0225115c07839f808deaaefd421ab28b7b21b3b431c0a86723fbf"
     },
     {
       "name": "geniml",
@@ -1001,7 +1001,7 @@
       "name": "get-available-resources",
       "relative_path": "bundled/skills/get-available-resources",
       "file_count": 2,
-      "bytes": 23917,
+      "bytes": 24318,
       "skill_md_hash": "72c40866793511e527df65c6ca1ff37d9bdb014f05ea44dfe14fe064417567d3",
       "dir_hash": "ef8829ea164b00fc9fc91db8c3b6dd15fac34645817bc00a734cd42d9a723018"
     },
@@ -1009,7 +1009,7 @@
       "name": "gget",
       "relative_path": "bundled/skills/gget",
       "file_count": 7,
-      "bytes": 97505,
+      "bytes": 98092,
       "skill_md_hash": "aa1541e6449ac31691767bd935d9a0f11b2e17f6b8435d0af5bd37e6607a19e7",
       "dir_hash": "5cce54f64f17a3c876e5c74e46aea3366d07ebc87b6f3c60004bfbb8c10beca7"
     },
@@ -1017,7 +1017,7 @@
       "name": "gh-address-comments",
       "relative_path": "bundled/skills/gh-address-comments",
       "file_count": 6,
-      "bytes": 22166,
+      "bytes": 22403,
       "skill_md_hash": "77389eefd3fb6584210668ca8e43f4b8de87e7722ddd953474bc9e24cdfaaedd",
       "dir_hash": "f073284a4cdea766643f85e609095d1aff5ffbddf0e62866dbcabc8f8e203e29"
     },
@@ -1025,7 +1025,7 @@
       "name": "gh-fix-ci",
       "relative_path": "bundled/skills/gh-fix-ci",
       "file_count": 6,
-      "bytes": 32642,
+      "bytes": 33151,
       "skill_md_hash": "7b326b4a2f0f5f85122144628ec02077e48841e0e0e82efce88b3415bcfb7c26",
       "dir_hash": "0236ac399e18ed8258c7960ee7402e2200277d66374a17448f2f8f72b8bd2a33"
     },
@@ -1105,7 +1105,7 @@
       "name": "hypothesis-generation",
       "relative_path": "bundled/skills/hypothesis-generation",
       "file_count": 7,
-      "bytes": 103459,
+      "bytes": 104338,
       "skill_md_hash": "6e15fe44f5a4103f15091e32c976f6b1fcb825bafa28ed5464870c3625f66d4f",
       "dir_hash": "a52c109b4dd34d0c88b1f2f9f45f46f68ce273f0553dfe7bbc0bdc342e1ecf1b"
     },
@@ -1121,7 +1121,7 @@
       "name": "imagegen",
       "relative_path": "bundled/skills/imagegen",
       "file_count": 11,
-      "bytes": 84399,
+      "bytes": 85275,
       "skill_md_hash": "4da06e7a1fbfaa94154dda2699e449a1f6d79e6e4299fcfeb785aad7c87f59dc",
       "dir_hash": "185b49ae8536e1d38fba518ce7e1084bcc6a917808bbda430debd7798492d514"
     },
@@ -1137,7 +1137,7 @@
       "name": "infographics",
       "relative_path": "bundled/skills/infographics",
       "file_count": 6,
-      "bytes": 140180,
+      "bytes": 141704,
       "skill_md_hash": "f178bf7856b08f98a2349bc955ae4b964a64b472bc484340b9bf0f15aed85e72",
       "dir_hash": "142f560170ffe26bd0a68121ed7c2522ea97d7624cccdc62cf99c541b25f24b2"
     },
@@ -1145,7 +1145,7 @@
       "name": "iso-13485-certification",
       "relative_path": "bundled/skills/iso-13485-certification",
       "file_count": 9,
-      "bytes": 193420,
+      "bytes": 193860,
       "skill_md_hash": "5e1265308acae8f4f612a64c31000679a9e775fc59961cfae79bafc22680b5f8",
       "dir_hash": "5cbdc2417962d877bb8617e31a504d708723528a3ddfb9b8fc1e4dc69473d328"
     },
@@ -1153,7 +1153,7 @@
       "name": "jupyter-notebook",
       "relative_path": "bundled/skills/jupyter-notebook",
       "file_count": 12,
-      "bytes": 30864,
+      "bytes": 31211,
       "skill_md_hash": "62f102e8554b25716dccef0ffab4572d4e3eaf05ccc76562d33a065bc9c521fb",
       "dir_hash": "c96c789546839fcea65f64b06d0830573eee484700921bf7e0553d5647f15ebd"
     },
@@ -1161,23 +1161,23 @@
       "name": "kegg-database",
       "relative_path": "bundled/skills/kegg-database",
       "file_count": 3,
-      "bytes": 30110,
+      "bytes": 30361,
       "skill_md_hash": "5bcd3bb5f4e84367483a3a128bb1ccd822eee9711dbfafc04b7e6873ee5fa986",
       "dir_hash": "532de268a9cf3e57422faa5540df98048f463731d053be04f615edfee3a13b8c"
     },
     {
       "name": "knowledge-steward",
       "relative_path": "bundled/skills/knowledge-steward",
-      "file_count": 14,
-      "bytes": 94124,
-      "skill_md_hash": "dc500334bd4b58f74a7d48fca4eb7145879355e9915701c1b88b2e87f7a5f002",
-      "dir_hash": "3d520f7d3257b8eebcf28701a41850c6e0f17c4b2a26bee740a31282ba9f3bb5"
+      "file_count": 15,
+      "bytes": 96245,
+      "skill_md_hash": "3af4332f30a45b65410ad7dd61b6e4fe1e3ab1de0e69c8bfbb64d4adb10274c7",
+      "dir_hash": "103b38f72dd2dfd522cde05a81b0a88e3910263d01f4847c3921064a37a9a7fb"
     },
     {
       "name": "labarchive-integration",
       "relative_path": "bundled/skills/labarchive-integration",
       "file_count": 7,
-      "bytes": 67473,
+      "bytes": 68281,
       "skill_md_hash": "6c68dca6355d46e2ff55c313b3166ceef6b5c6c9fbfa57e0ae03c0405b4ccc05",
       "dir_hash": "f27876a6888565c8a2d94d7128a0ed3dce6e43b3b064a487dd5797b03dcac031"
     },
@@ -1201,7 +1201,7 @@
       "name": "latex-posters",
       "relative_path": "bundled/skills/latex-posters",
       "file_count": 11,
-      "bytes": 167469,
+      "bytes": 168221,
       "skill_md_hash": "8a01567022ae51d4cb26a4d36c359b5f1c278055ada8dc1e3568899c2636fdee",
       "dir_hash": "541cef7042b7dbe95425f3e5fcf8adffade0eba73ef61214d7630bc4e9e641dc"
     },
@@ -1209,7 +1209,7 @@
       "name": "latex-submission-pipeline",
       "relative_path": "bundled/skills/latex-submission-pipeline",
       "file_count": 3,
-      "bytes": 2629,
+      "bytes": 2635,
       "skill_md_hash": "9205d96656a535c8c6fa65664edb344d1a209babb7d16745e513c21ae2aff5c6",
       "dir_hash": "aa34e21b71260c1bdd98496e54b95dfc0b73482a03bd21bac35fb779cca343fc"
     },
@@ -1225,7 +1225,7 @@
       "name": "literature-review",
       "relative_path": "bundled/skills/literature-review",
       "file_count": 7,
-      "bytes": 79869,
+      "bytes": 80570,
       "skill_md_hash": "d0ce8d57aaa82e99ba610b38930530cd43a810ab3e9c113c71d0acf61fcf4aed",
       "dir_hash": "2d4b023350af9681213f3d9c8dd680404a08209b81479484008f745003049f13"
     },
@@ -1241,9 +1241,9 @@
       "name": "LQF_Machine_Learning_Expert_Guide",
       "relative_path": "bundled/skills/LQF_Machine_Learning_Expert_Guide",
       "file_count": 4,
-      "bytes": 63297,
-      "skill_md_hash": "ecfa45a63c3504987dc767d6a4db20114f4defce86eea4b8bd316c0b284d5602",
-      "dir_hash": "649813e230726c6a70d4499f9aa61c78c93abba1bc34f58bae51fef68c4ab197"
+      "bytes": 63288,
+      "skill_md_hash": "c37676f68c2e9358c11299f6d1f1d60d55d07978a68a60159f0cb8e80423f66a",
+      "dir_hash": "3161f53c4d9e90ca56409fdd3481867767d790a4abcfee5ed9b2c6be2d50f98a"
     },
     {
       "name": "manuscript-as-code",
@@ -1265,7 +1265,7 @@
       "name": "market-research-reports",
       "relative_path": "bundled/skills/market-research-reports",
       "file_count": 8,
-      "bytes": 203653,
+      "bytes": 206126,
       "skill_md_hash": "ddeec472dca7b086eabd2bb389b9402566ddc2276699646559c04c0942af7567",
       "dir_hash": "cf3333f82a9ff5148531c8ae30f9fb727bfd86003d0ca3524e218748cfbf733f"
     },
@@ -1273,7 +1273,7 @@
       "name": "markitdown",
       "relative_path": "bundled/skills/markitdown",
       "file_count": 7,
-      "bytes": 63871,
+      "bytes": 64622,
       "skill_md_hash": "c91c4c76c626e27f5fda3416f54cb4417dc671845cf48e806e17af302145a487",
       "dir_hash": "8283ddf3563e4650e054b476c1220f3b17d4de14c749c0d35f1c7e18ba6f1555"
     },
@@ -1305,7 +1305,7 @@
       "name": "math-tools",
       "relative_path": "bundled/skills/math-tools",
       "file_count": 3,
-      "bytes": 30593,
+      "bytes": 31219,
       "skill_md_hash": "09eaacb9c98b5c73f61060c6e2e2ccf47d4b3f488b05f9732dae157aa913a915",
       "dir_hash": "8a01885cff2925c8c067b23b0b86944abf27afde0541bf862fa272f539d643f9"
     },
@@ -1329,7 +1329,7 @@
       "name": "matplotlib",
       "relative_path": "bundled/skills/matplotlib",
       "file_count": 7,
-      "bytes": 85882,
+      "bytes": 86692,
       "skill_md_hash": "7b998235e0e9cf6101a6292e19cc0b42b85f7cdc9494fcc21dfa23ebf3abdde9",
       "dir_hash": "38b12909eb99b1f80af0f34493eee0600b5e9371d7f0810560c2aee61cc6d7dd"
     },
@@ -1345,7 +1345,7 @@
       "name": "medchem",
       "relative_path": "bundled/skills/medchem",
       "file_count": 4,
-      "bytes": 50704,
+      "bytes": 51122,
       "skill_md_hash": "9790fdc386800ce060ef3c7783f076fa0d64b2cf632dace16a97e1c997d27210",
       "dir_hash": "bfceb4cb59ac0c43e501aceff86df5d1f751f743e118f59a46af2a1056b2ab93"
     },
@@ -1361,17 +1361,17 @@
       "name": "metric-calculator",
       "relative_path": "bundled/skills/metric-calculator",
       "file_count": 1,
-      "bytes": 1231,
-      "skill_md_hash": "c9ba9211f2164dec935d073abe59bf3cd86c57191e882137cbea29e370df73a4",
-      "dir_hash": "9964a1941b467c5b562b43b97b8f8e4111eb1996825e6fc48492e10229ce35bf"
+      "bytes": 1349,
+      "skill_md_hash": "bdaa22cbd9e8515079658b82b3ec7b1b651ae886903e16307e9aa16aeeb236b1",
+      "dir_hash": "817c0941f59979d306d26e2ddeb829c2ee551e4279f6c06b5984dee80f7b4c13"
     },
     {
       "name": "ml-data-leakage-guard",
       "relative_path": "bundled/skills/ml-data-leakage-guard",
       "file_count": 5,
-      "bytes": 60158,
-      "skill_md_hash": "d41369c93b849ab6a9fb050a3328c35077832c56acb6fc40b0738a0c3afa2f0a",
-      "dir_hash": "200976a1bbc6733ed7db00ab4fad4f61d4c1da1bf5642d689b623e628edb446c"
+      "bytes": 60132,
+      "skill_md_hash": "cfc29c2fc1e94e507ef198601826c91858d18810dd89ad612ce0c45689dc424b",
+      "dir_hash": "3f19192d5bea01f29608cf116f1d36f8ea627b33ef7026bcfb1ca8d07d93b062"
     },
     {
       "name": "ml-pipeline-workflow",
@@ -1433,7 +1433,7 @@
       "name": "neuropixels-analysis",
       "relative_path": "bundled/skills/neuropixels-analysis",
       "file_count": 18,
-      "bytes": 142801,
+      "bytes": 144149,
       "skill_md_hash": "ca82a34bb4cb03ebd8ffe7cf3b2b56c2081cf559a5352398c5c3cd72a93019dd",
       "dir_hash": "1e3023b06e481bf7bf12b0d0c4eb6a2e919d0c831eaec5b6470d24db5021cfc1"
     },
@@ -1449,7 +1449,7 @@
       "name": "nowait-reasoning-optimizer",
       "relative_path": "bundled/skills/nowait-reasoning-optimizer",
       "file_count": 3,
-      "bytes": 19189,
+      "bytes": 19497,
       "skill_md_hash": "fd71e79f36014d423e296fa7e71e48aa5ec437c15a8d096033766a898afc8a25",
       "dir_hash": "5668fcda79efe82dc801baee5d7e7cbb4ecb632426a912ac791f4ff161121f16"
     },
@@ -1465,7 +1465,7 @@
       "name": "open-notebook",
       "relative_path": "bundled/skills/open-notebook",
       "file_count": 9,
-      "bytes": 72232,
+      "bytes": 73139,
       "skill_md_hash": "acca2204da2faf1bdac8a85f86148087702a080db86617d9c47c2e45967aed6e",
       "dir_hash": "336f96b4c791cef924ebadcf7616973b75c37567d4fb125eef060ad132f41555"
     },
@@ -1489,7 +1489,7 @@
       "name": "openalex-database",
       "relative_path": "bundled/skills/openalex-database",
       "file_count": 5,
-      "bytes": 50434,
+      "bytes": 51077,
       "skill_md_hash": "2e65510083f17b7ccc28efc4e3e295685acc636e857b6080eb78cd63e91593c0",
       "dir_hash": "e759bb9c1b32cc001500d412a3fb0c7a03e52adc497e036ad9d18c22c3d64229"
     },
@@ -1497,7 +1497,7 @@
       "name": "opentargets-database",
       "relative_path": "bundled/skills/opentargets-database",
       "file_count": 5,
-      "bytes": 50050,
+      "bytes": 50453,
       "skill_md_hash": "e4f3f73057c0e9e30a1e1f5f85074bae70da168836e710c4964f8a3f83789c57",
       "dir_hash": "84d94f3ad4a359a46da987cb9fe72ff5b9659e6072e4f3b2c5f10df44533f66a"
     },
@@ -1505,7 +1505,7 @@
       "name": "opentrons-integration",
       "relative_path": "bundled/skills/opentrons-integration",
       "file_count": 5,
-      "bytes": 37083,
+      "bytes": 37400,
       "skill_md_hash": "27c87a247fa230f82c994bfd5e6bdb4cad6d07ec8a22314218e0b9ac9d615c0e",
       "dir_hash": "d9b7f780a7d8153b995cf7d6c2ffb3af13c4fddc94955740b42b012e36ba111b"
     },
@@ -1537,7 +1537,7 @@
       "name": "pdf",
       "relative_path": "bundled/skills/pdf",
       "file_count": 14,
-      "bytes": 70585,
+      "bytes": 71342,
       "skill_md_hash": "d108cf2b36355ab37eb5962933f4d09785ec002f3105c506129320209306b9d2",
       "dir_hash": "31f18f86a658e3f5f1d3c04e080b2d14e6884b525dc27c4061a5424772693fb4"
     },
@@ -1577,15 +1577,15 @@
       "name": "performing-regression-analysis",
       "relative_path": "bundled/skills/performing-regression-analysis",
       "file_count": 9,
-      "bytes": 51464,
-      "skill_md_hash": "c5bd5cb1e6d11995e087ee82867c847310970b295e084bfed89afc2e703c3392",
-      "dir_hash": "b633e8da0a2d70c3209fcbc11afe95bfb159438cc54d75cae661e45cc9cb78c8"
+      "bytes": 51001,
+      "skill_md_hash": "51d1a4ac2fafc5febedf174da8084bb201fcb2c580a4b9bb1003212488ffb6aa",
+      "dir_hash": "fef5c98aaa2b644a9f62cbf1f55dac035c9d05ed4ba3e45f9be2c7ef6520c1cf"
     },
     {
       "name": "perplexity-search",
       "relative_path": "bundled/skills/perplexity-search",
       "file_count": 6,
-      "bytes": 58729,
+      "bytes": 59177,
       "skill_md_hash": "6f42d1777cfded3be6f0785d774347f05f0f7bf1933482cd86ac220a03dc964b",
       "dir_hash": "5ab7230c8ddc30d533331bdd5b7de79da687949732f05eb87501604d32aabf70"
     },
@@ -1593,9 +1593,9 @@
       "name": "planning-with-files",
       "relative_path": "bundled/skills/planning-with-files",
       "file_count": 8,
-      "bytes": 34710,
-      "skill_md_hash": "33533aac264cf31d22ac7a1a50b85cb9760a821a49401ad1bac8cbae9b1d369f",
-      "dir_hash": "c1b780545f502e8729255c6686c8ed16412300f28ca7add5d0fbd130f8ce13ec"
+      "bytes": 34707,
+      "skill_md_hash": "67a8557a5bc89bff8936d3d589caccd7ff7a45779c6adb5c381b6084f0c278d0",
+      "dir_hash": "0e20554c7cdb2bbf1bf33d00dfc84f16fe41527fcc9f31428b5f348a29b8c094"
     },
     {
       "name": "playwright",
@@ -1625,7 +1625,7 @@
       "name": "pptx-posters",
       "relative_path": "bundled/skills/pptx-posters",
       "file_count": 6,
-      "bytes": 96565,
+      "bytes": 96822,
       "skill_md_hash": "e3b348f69ff8dc37cb93577f495d76bf5cba52f2bb15c7b3d1e9629f9689d53a",
       "dir_hash": "aa80e56e7b0e9f8ee8f88bcf62ca3bbac78d7d31e8931e88341d274fc63eb0ed"
     },
@@ -1633,9 +1633,9 @@
       "name": "preprocessing-data-with-automated-pipelines",
       "relative_path": "bundled/skills/preprocessing-data-with-automated-pipelines",
       "file_count": 9,
-      "bytes": 49773,
-      "skill_md_hash": "fdc0639fbf975c94d90e45de06f45575ba95d7f72518ed7f6dd2609e4f74d550",
-      "dir_hash": "16ea029b5acd81d77d1c41c176b4100983732c0ae3812c88af3f40da7cd5ca36"
+      "bytes": 48777,
+      "skill_md_hash": "2291acf79e5a0ccaec19679fa6532cf5380e3be58af04c2843c0b37e80b0195e",
+      "dir_hash": "7081b4b04e5e02226538a6746fc94132a798019e1ed50155ee1bceb86ef75939"
     },
     {
       "name": "prompt-lookup",
@@ -1673,9 +1673,9 @@
       "name": "providing-performance-optimization-advice",
       "relative_path": "bundled/skills/providing-performance-optimization-advice",
       "file_count": 7,
-      "bytes": 15338,
-      "skill_md_hash": "16233656c6cf35a7b85cdd33f0d05bcfaff7609d61c32b26bfa8201e592408d2",
-      "dir_hash": "ec05b2e1d5a835ebeea0159564d96dccc089a872fa698541a2b9c35d61e7689e"
+      "bytes": 12523,
+      "skill_md_hash": "8f8cf24369154b33afbe234400bbc0bfaec237c6b4c97290cda5650e186dbe23",
+      "dir_hash": "112dee2699414a34c17b153434726c211b25eb391abd91a9d0244207fcb80b0d"
     },
     {
       "name": "prowler-docs",
@@ -1689,7 +1689,7 @@
       "name": "pubchem-database",
       "relative_path": "bundled/skills/pubchem-database",
       "file_count": 4,
-      "bytes": 45190,
+      "bytes": 45854,
       "skill_md_hash": "3fff7908271124eea7f3bfc20b05e632d1a6691ab6aa9f7c21db89b836c5790a",
       "dir_hash": "73e20e8ec8268e98f49e192e01288f885cb328481285f3d76c62a2f986b34d3a"
     },
@@ -1705,7 +1705,7 @@
       "name": "pufferlib",
       "relative_path": "bundled/skills/pufferlib",
       "file_count": 8,
-      "bytes": 99574,
+      "bytes": 100153,
       "skill_md_hash": "2614a6808c5a1024ee77f5bf26aa0f788f90ddd5b7399234e59e57781e77d8dd",
       "dir_hash": "a292334434619b1958411c185919e16ead5c75ce20de27627a04a84acf089fd8"
     },
@@ -1713,7 +1713,7 @@
       "name": "pydeseq2",
       "relative_path": "bundled/skills/pydeseq2",
       "file_count": 4,
-      "bytes": 48180,
+      "bytes": 48533,
       "skill_md_hash": "055b202f5a8cb8671f26652d37b16440ef02332790902a89e7ffc42da0642c15",
       "dir_hash": "a6102b5ce85fe2710c358e73fb621e187cbb4e9bc978f47083b84c46d6469650"
     },
@@ -1721,7 +1721,7 @@
       "name": "pydicom",
       "relative_path": "bundled/skills/pydicom",
       "file_count": 6,
-      "bytes": 50102,
+      "bytes": 50584,
       "skill_md_hash": "4ff0bc8b41d1211db80f1dfa26bc2994742890fa4dfb735e7f9e42998c06881f",
       "dir_hash": "e65108ca362e99f09f0d3ec1ca0aeb9fe09a49ee3eb457978698279a90c17cf5"
     },
@@ -1745,7 +1745,7 @@
       "name": "pymatgen",
       "relative_path": "bundled/skills/pymatgen",
       "file_count": 9,
-      "bytes": 103497,
+      "bytes": 104165,
       "skill_md_hash": "57ff1b1bf0f8600da72b1b1e987f111eaa416335933551d1b95081a7ad83c5ce",
       "dir_hash": "97c537c86327a2565fb543114f2fcb5ca2fb29e8fa708be4079411b079a28b65"
     },
@@ -1753,7 +1753,7 @@
       "name": "pymc",
       "relative_path": "bundled/skills/pymc",
       "file_count": 8,
-      "bytes": 94621,
+      "bytes": 95932,
       "skill_md_hash": "6d346f2c73ec8f512f50f5c519fab8ec8cfc59b01a0e8b5809a3c3b94c85ae52",
       "dir_hash": "bd8faa905ccfea026cbf0726db8d5503bfe92bf6588710081c3d3f4c80afc3f6"
     },
@@ -1769,7 +1769,7 @@
       "name": "pymoo",
       "relative_path": "bundled/skills/pymoo",
       "file_count": 11,
-      "bytes": 73700,
+      "bytes": 74236,
       "skill_md_hash": "37571351035e221176fe20a73d3f27c5b61750b6783f2c8730aa39814ddae3ab",
       "dir_hash": "089f54020c2764c0f4a601ce81d6f423e4fe7c5237a883a6af51906c23e68608"
     },
@@ -1793,7 +1793,7 @@
       "name": "pytdc",
       "relative_path": "bundled/skills/pytdc",
       "file_count": 7,
-      "bytes": 74450,
+      "bytes": 75395,
       "skill_md_hash": "9bc0bd03250443607dda74638d8e1c71a41a675d33b6b71f9d4f07d2cf806ca2",
       "dir_hash": "7580753c30fe9ec4ba1553d2953aa7d6ce199a34a2602d97334421274d2ba769"
     },
@@ -1801,7 +1801,7 @@
       "name": "pytorch-lightning",
       "relative_path": "bundled/skills/pytorch-lightning",
       "file_count": 11,
-      "bytes": 137924,
+      "bytes": 138925,
       "skill_md_hash": "eee01eae6c25e53154a67175887beacea130556ded04c42da5e39c4e2c4bacd0",
       "dir_hash": "204c5b4e8c03bbb15dd350ef746e25559f8b3932e5564c52725410dc0cef285d"
     },
@@ -1841,7 +1841,7 @@
       "name": "rdkit",
       "relative_path": "bundled/skills/rdkit",
       "file_count": 7,
-      "bytes": 85766,
+      "bytes": 86690,
       "skill_md_hash": "cf451fd778f2baaf2e7afe9415a08ce4ea2293e1bc7d6c196a8b985fcfaeef22",
       "dir_hash": "95093b88172c506e5f3b8563712d59fac011dedbb8bb0e64e32399ff72940173"
     },
@@ -1849,7 +1849,7 @@
       "name": "reactome-database",
       "relative_path": "bundled/skills/reactome-database",
       "file_count": 3,
-      "bytes": 27540,
+      "bytes": 27826,
       "skill_md_hash": "b2ca7137cc4df80ee49d5a2d6a85d9ef69588a42057b087f433b3f819a8c294e",
       "dir_hash": "be6991581c30dbcc17af3c77c3f5e5ea2830a31960032309645d06e2f6e32809"
     },
@@ -1865,17 +1865,17 @@
       "name": "regression-analysis-helper",
       "relative_path": "bundled/skills/regression-analysis-helper",
       "file_count": 1,
-      "bytes": 1339,
-      "skill_md_hash": "0b99594c06a74b4bc6a852a56aa268f63552e7887c59cdd31ec5c091d4a2b538",
-      "dir_hash": "87eda6b3800dbdf16d2ad5c62012db2bea630f3ada291be4c4345bb195eb69b2"
+      "bytes": 1610,
+      "skill_md_hash": "e6f8e267e0c07cad5eb8f5cd0382e8724592626b159a4a5fea1f02b84066f0a8",
+      "dir_hash": "68b68302dbdfcb7f85a27913413b0620aa2c75cdba29f4724b8f0087742ffcac"
     },
     {
       "name": "report-generator",
       "relative_path": "bundled/skills/report-generator",
       "file_count": 3,
       "bytes": 55463,
-      "skill_md_hash": "84de10fb05e5192f43acef446970e7623f44e3b5f6cd5124b1ea0d20139def3c",
-      "dir_hash": "958e579c60ea7007e751a424caa0d98ec1d2244ee4d922c0c927834f98d7b469"
+      "skill_md_hash": "31d7517caa9c44fc89374bce64a7a3f1e5f415ffd3c7b75994e94cc702b50291",
+      "dir_hash": "7330a7346576a6affee20ca9b193149ac135b3fcb156001fd0b78eec911aedfc"
     },
     {
       "name": "requesting-code-review",
@@ -1897,7 +1897,7 @@
       "name": "research-lookup",
       "relative_path": "bundled/skills/research-lookup",
       "file_count": 6,
-      "bytes": 65275,
+      "bytes": 66354,
       "skill_md_hash": "0ddc7e623dcb440913c142aeed9347a3544844473952f845ef6d3fe64c290ab0",
       "dir_hash": "d3681e69f7ad8a1aa529e17974006e89332da2fbf60b35ecc29e87ff07c2d664"
     },
@@ -1921,15 +1921,15 @@
       "name": "running-clustering-algorithms",
       "relative_path": "bundled/skills/running-clustering-algorithms",
       "file_count": 12,
-      "bytes": 27341,
-      "skill_md_hash": "7e73b44c97345fd7deecf383a840f3c17a7c12db5ffc900c96e707011f7c3200",
-      "dir_hash": "6f0c6475feefd41200c0d3c95e894497aaffbe258a3b4cf8d0ab9957977a920c"
+      "bytes": 25504,
+      "skill_md_hash": "a87db0e78175e5220d4b22bb26bfc873cd0cb564892b044a53fec9b061607499",
+      "dir_hash": "7ac4711fbae762841a8b6fc036fa5f1959b80681506f4516781aac826c914240"
     },
     {
       "name": "scanpy",
       "relative_path": "bundled/skills/scanpy",
       "file_count": 6,
-      "bytes": 49969,
+      "bytes": 50464,
       "skill_md_hash": "0f2f608e20cfab170dd1faac85b4719abd3fc05c9e7bf48940df5ab066e526b5",
       "dir_hash": "b3076ed1b98185e80f7f3a25df1f1e0ad88a1eda916349ba59f9fdbdc80cea00"
     },
@@ -1937,7 +1937,7 @@
       "name": "scholar-evaluation",
       "relative_path": "bundled/skills/scholar-evaluation",
       "file_count": 3,
-      "bytes": 43758,
+      "bytes": 44136,
       "skill_md_hash": "4157069eee2e221c54690f0b545f93f4aadfc94c0f93941fc2550a1328ada7b6",
       "dir_hash": "b5db45c526864663279e4348d218cb7bdc9e8c2d83d1bacb2710247a93900032"
     },
@@ -1985,7 +1985,7 @@
       "name": "scientific-schematics",
       "relative_path": "bundled/skills/scientific-schematics",
       "file_count": 7,
-      "bytes": 94403,
+      "bytes": 95380,
       "skill_md_hash": "1b1229a58ab27bc6e371b20e368bd7ff8d1475e37d939f96ca7f60362d619168",
       "dir_hash": "e6f689adc843504b4c2f608b6fa9471975d1eaed4596ce473eef41a070c054b4"
     },
@@ -1993,7 +1993,7 @@
       "name": "scientific-slides",
       "relative_path": "bundled/skills/scientific-slides",
       "file_count": 17,
-      "bytes": 325884,
+      "bytes": 329829,
       "skill_md_hash": "27db363932fd87b45dcd4765388814ba77c05464913b696a6ae93ebcd3864df7",
       "dir_hash": "e2676842a686c38d13e2e1d153a10088035c8daf743bc2b598ff8f6267651e08"
     },
@@ -2001,7 +2001,7 @@
       "name": "scientific-visualization",
       "relative_path": "bundled/skills/scientific-visualization",
       "file_count": 11,
-      "bytes": 104440,
+      "bytes": 105588,
       "skill_md_hash": "a78ffcddca5c0d2a674f0557e94df2ab6befc66280baaf6df1fdcc8db93e95f6",
       "dir_hash": "1b3d9ec998ade25c3ab6083ca1d824993b80f12bfc1a7524675143aa36ec1191"
     },
@@ -2025,7 +2025,7 @@
       "name": "scikit-learn",
       "relative_path": "bundled/skills/scikit-learn",
       "file_count": 9,
-      "bytes": 117687,
+      "bytes": 118330,
       "skill_md_hash": "d3a430a730af3b366cbec1b4d3a4dcb3beb486b23696a21ed8c20f0ea0aa051e",
       "dir_hash": "e16689741893e1f623987ff25afec82904dd010b7f8063edc8a3706ffee0d660"
     },
@@ -2049,7 +2049,7 @@
       "name": "screenshot",
       "relative_path": "bundled/skills/screenshot",
       "file_count": 11,
-      "bytes": 51996,
+      "bytes": 52769,
       "skill_md_hash": "081935a6a163277537d46365f49d6b4a3cb40b4748347e7e88759c5927fa8cf5",
       "dir_hash": "4108f207cacbf361b72209423c55d4ab105001aabfeba8a44807fef737e9ffb0"
     },
@@ -2081,7 +2081,7 @@
       "name": "security-ownership-map",
       "relative_path": "bundled/skills/security-ownership-map",
       "file_count": 8,
-      "bytes": 98526,
+      "bytes": 100709,
       "skill_md_hash": "f06c1a59247569326702c945f397af163ea96cf2ecfdf2dde280605bf89a3ec8",
       "dir_hash": "9177955606962517f885ea94fdd6b0ec132f13c5f63e28a528480b79f71fd0fe"
     },
@@ -2105,7 +2105,7 @@
       "name": "senior-computer-vision",
       "relative_path": "bundled/skills/senior-computer-vision",
       "file_count": 7,
-      "bytes": 18334,
+      "bytes": 18634,
       "skill_md_hash": "d09567decd928b5d70650a5ef8102fdb94083c68f436bef3b3221a4421fc5ee7",
       "dir_hash": "e14f9340033a4f6405a3f40adc71bcd6817a7599d2ccfe62893a679f51ecf995"
     },
@@ -2113,7 +2113,7 @@
       "name": "senior-data-scientist",
       "relative_path": "bundled/skills/senior-data-scientist",
       "file_count": 7,
-      "bytes": 18343,
+      "bytes": 18643,
       "skill_md_hash": "1e6974ea60451055b3b11ff8b12d6bbb8ef90ab2bf973830718271c8ed53de06",
       "dir_hash": "730e0442f0878f0c2aa2c8bd270f9ad367a9d47b566fc62ae1c4246d460ec16c"
     },
@@ -2121,7 +2121,7 @@
       "name": "senior-ml-engineer",
       "relative_path": "bundled/skills/senior-ml-engineer",
       "file_count": 7,
-      "bytes": 18152,
+      "bytes": 18452,
       "skill_md_hash": "bed820ec0af0ab3f89e204c3236174bbe7c97aec7568b2f7e04455061637864b",
       "dir_hash": "288fe4679e434a07a535c7bf89ec9f253b067d7011f1d2dc61670c0920d9db15"
     },
@@ -2129,7 +2129,7 @@
       "name": "senior-prompt-engineer",
       "relative_path": "bundled/skills/senior-prompt-engineer",
       "file_count": 7,
-      "bytes": 18135,
+      "bytes": 18435,
       "skill_md_hash": "504c1ee82323d26fc07ba9ef5c954e08ba18f77340dd1c77c4bae97a23aa98c6",
       "dir_hash": "be07e9b2b1da4f903250560fece5973abdd3306a9083880eff6b96808191d661"
     },
@@ -2137,7 +2137,7 @@
       "name": "sentry",
       "relative_path": "bundled/skills/sentry",
       "file_count": 6,
-      "bytes": 24838,
+      "bytes": 25076,
       "skill_md_hash": "b598ea447ad6bec923f5c3879ace25e4a7f1368a7eac019b5c0e2f79a36322c6",
       "dir_hash": "eec4b383cddc300f670ba1f5d96bd06e50d51a113d2b693bb79e2e91097c1638"
     },
@@ -2169,7 +2169,7 @@
       "name": "simpy",
       "relative_path": "bundled/skills/simpy",
       "file_count": 8,
-      "bytes": 80484,
+      "bytes": 81022,
       "skill_md_hash": "73be2e0f1ce521d0538014346838d9e5723d723cbb78dd1e9d0d1bbb0f5cf51a",
       "dir_hash": "0dee9c230f391fc55bfbcb92a68d73a7e531ad46ca7e24f5c4b85da4349a0b13"
     },
@@ -2177,7 +2177,7 @@
       "name": "skill-creator",
       "relative_path": "bundled/skills/skill-creator",
       "file_count": 6,
-      "bytes": 38085,
+      "bytes": 38592,
       "skill_md_hash": "84166b26a80caca5a75a876bd0e7898c95763477e7a7a0ca576da87549e0d8c1",
       "dir_hash": "3dcc38b329c5f33eef266263ca307c7319c47cb73c529979649bb872b4c50453"
     },
@@ -2209,9 +2209,9 @@
       "name": "smart-file-writer",
       "relative_path": "bundled/skills/smart-file-writer",
       "file_count": 8,
-      "bytes": 53944,
-      "skill_md_hash": "4102c6cb2c70054158d520cf7545fe4cac1848431d56b55cbae49799f71dc876",
-      "dir_hash": "02332803f7618c9b4261e37d9d2757438e82bbce81b780b672fbb8c1f801bdd5"
+      "bytes": 54169,
+      "skill_md_hash": "ac3b589e82119c9b64d35265d535fddb7f7a765ad51ca2273052cb8776dbab3c",
+      "dir_hash": "2fef3aceb4204fb0e12fa6db20ee91352270a1ba13555f35bba3332e67cdd92c"
     },
     {
       "name": "sparse-autoencoder-training",
@@ -2305,7 +2305,7 @@
       "name": "speech",
       "relative_path": "bundled/skills/speech",
       "file_count": 16,
-      "bytes": 48773,
+      "bytes": 49301,
       "skill_md_hash": "d6120efc03ea0e80204f687801cfaec8efc4519a3430b68e13e4ebd8e1c69b52",
       "dir_hash": "2577f07e91925207e9652844b041144f19f667461332c0adf13375696b26c4ce"
     },
@@ -2313,15 +2313,15 @@
       "name": "splitting-datasets",
       "relative_path": "bundled/skills/splitting-datasets",
       "file_count": 8,
-      "bytes": 12649,
-      "skill_md_hash": "96f550657d74bea011a74fe7f551887a8d5e0fc12f0710d2f747ddb936d2698d",
-      "dir_hash": "3a7436e16109485dfd0e892dc8d94226418cbdd38a2ecd210d5035b3f90beba4"
+      "bytes": 10951,
+      "skill_md_hash": "c14e7438b6923a128e219502ea83dd6d808ae4b6fc7c4fe6e12ff4dc21103754",
+      "dir_hash": "06cf1c45c96f7f5f3e108c24e74af505991ff9e8387fa4a7ca617a4c58fe8321"
     },
     {
       "name": "spreadsheet",
       "relative_path": "bundled/skills/spreadsheet",
       "file_count": 9,
-      "bytes": 29021,
+      "bytes": 29306,
       "skill_md_hash": "a9c3e61acb5e33b92760e9a1ea75b0031328095b0bb0118cacd055d749d1b73f",
       "dir_hash": "9e8e2914bdfdc5173335ab24301bfe2b5a5dd54720a908e6ac27c0f3e9021181"
     },
@@ -2329,7 +2329,7 @@
       "name": "stable-baselines3",
       "relative_path": "bundled/skills/stable-baselines3",
       "file_count": 8,
-      "bytes": 85501,
+      "bytes": 86225,
       "skill_md_hash": "3a3b3f98ff230ee76779162f9b4d74388e615070e6d5969c9052a6920f7227a2",
       "dir_hash": "4f362607bbd67697326a9ed5dd26b22057ad7dd4c63e793c755ad309f2ebfda2"
     },
@@ -2337,7 +2337,7 @@
       "name": "statistical-analysis",
       "relative_path": "bundled/skills/statistical-analysis",
       "file_count": 7,
-      "bytes": 103674,
+      "bytes": 104213,
       "skill_md_hash": "d285531413cef3fafcf3025fe6cdb1d6e8fe54a62468c7f7f29522e869d5157f",
       "dir_hash": "4cabbe4bf8f5c9832c8ef661902b0ae940da9c25d9a9138a966374ba75911a0d"
     },
@@ -2345,7 +2345,7 @@
       "name": "statistics-math",
       "relative_path": "bundled/skills/statistics-math",
       "file_count": 6,
-      "bytes": 17178,
+      "bytes": 17309,
       "skill_md_hash": "00dda0bf0a798b7c49b9e3d8d610edbb25a70d2d047af9a22dc61b49d088178c",
       "dir_hash": "40c7596f1d930fc6935c6f7ee99a7a7b7c0de09238c3414146f6e504511d2729"
     },
@@ -2361,7 +2361,7 @@
       "name": "string-database",
       "relative_path": "bundled/skills/string-database",
       "file_count": 3,
-      "bytes": 43792,
+      "bytes": 44161,
       "skill_md_hash": "50a18df74c4947d90709b1ce46b1c5f0b020682b62cb57663f523a5ef7decb26",
       "dir_hash": "02c6488f2856830dded697a6df30b14e94430d67bba011b0cfc1270b04fb1e09"
     },
@@ -2369,9 +2369,9 @@
       "name": "structured-content-storage",
       "relative_path": "bundled/skills/structured-content-storage",
       "file_count": 10,
-      "bytes": 69175,
-      "skill_md_hash": "d2ca3f7dd6b7326b2a4805f9abbb3d25022fd2d758e4bf3b0aa34bd8c8defe3e",
-      "dir_hash": "d3105806c619dfcdfbb913518f671f602948cfae76951314c4be174c6bd98900"
+      "bytes": 69082,
+      "skill_md_hash": "d17fe1402b6c39070117a4854c583747702e6dc7c1c0156bac2e944812cb583e",
+      "dir_hash": "9cb353ce8b6414feca46463694f3e6f7cdd162efcc5abb4a6a3a0b72fcb0f207"
     },
     {
       "name": "subagent-driven-development",
@@ -2409,7 +2409,7 @@
       "name": "systematic-debugging",
       "relative_path": "bundled/skills/systematic-debugging",
       "file_count": 11,
-      "bytes": 40755,
+      "bytes": 40913,
       "skill_md_hash": "4999cb851360485eca5074e727bbdd62ef20549c5d5b01216fcbf5831badb473",
       "dir_hash": "f5739cb15ee65457f7463b994858ee1dc929c5e37cccebc84978126d3bbfde3f"
     },
@@ -2457,7 +2457,7 @@
       "name": "timesfm-forecasting",
       "relative_path": "bundled/skills/timesfm-forecasting",
       "file_count": 22,
-      "bytes": 320472,
+      "bytes": 323741,
       "skill_md_hash": "c6425f6c5ad3e56b2ced68d437202fe2c3d4c2552361c8f7b15b9a00b198de80",
       "dir_hash": "597004a8f975a080799c952a20467a8c922b6323d297661a32b98ce22e42b556"
     },
@@ -2473,7 +2473,7 @@
       "name": "torch-geometric",
       "relative_path": "bundled/skills/torch-geometric",
       "file_count": 7,
-      "bytes": 106969,
+      "bytes": 108120,
       "skill_md_hash": "af419f919c00587854dade6f8ed6fc818aa83f13979440ad640072b38ae6d8d9",
       "dir_hash": "f0743cd1870801cc018496a499f1f203d230a49f7c65b82d4cea3d11214072f9"
     },
@@ -2489,15 +2489,15 @@
       "name": "training-machine-learning-models",
       "relative_path": "bundled/skills/training-machine-learning-models",
       "file_count": 12,
-      "bytes": 30687,
-      "skill_md_hash": "979713b690462958e9a72c0f1a19329ef2a618f34aae85a7aa76676d0ce92622",
-      "dir_hash": "724e6dce0404f61c8e82de13a9d0f9c132c1777fed538cd57f6a9622c614c5bd"
+      "bytes": 28781,
+      "skill_md_hash": "e9a6589b8d348210a41e1028a0da25a500ab8f18bc5e61530a27fc11ce533917",
+      "dir_hash": "7d0538b1582f8f1e969e1456275518d89b58757f18c8945499b3fbd98964c157"
     },
     {
       "name": "transcribe",
       "relative_path": "bundled/skills/transcribe",
       "file_count": 7,
-      "bytes": 25203,
+      "bytes": 25479,
       "skill_md_hash": "f530021da9f377362ee4214e0bc689cbb5404640d2eb88ee272d51d61f530a09",
       "dir_hash": "dfd5503651a3f2ae52018bd0f85f56f57b5ac2c439b8ec167d3c7b651aae99ce"
     },
@@ -2521,7 +2521,7 @@
       "name": "treatment-plans",
       "relative_path": "bundled/skills/treatment-plans",
       "file_count": 21,
-      "bytes": 419294,
+      "bytes": 425301,
       "skill_md_hash": "46b3f23181d0d271267f38579c27ce019e4c1e5eb7d8cc5168183954b9a04dfc",
       "dir_hash": "80e30693f7e0f4b5621f6a430a4387347001cdf4c35a4709c45caa7a628ad031"
     },
@@ -2537,7 +2537,7 @@
       "name": "uniprot-database",
       "relative_path": "bundled/skills/uniprot-database",
       "file_count": 6,
-      "bytes": 48305,
+      "bytes": 48646,
       "skill_md_hash": "813eea4b47a6c80bd6801d6b340dd62bfeb2d12bbc7949e53351d2c2b7150ae9",
       "dir_hash": "e32dbb7b176e338ed2286b03ad2e55979b837f02454d00547b9790c3c35d3781"
     },
@@ -2561,7 +2561,7 @@
       "name": "uspto-database",
       "relative_path": "bundled/skills/uspto-database",
       "file_count": 8,
-      "bytes": 81415,
+      "bytes": 82301,
       "skill_md_hash": "cd6eff1bf9fa60c9edeacffe3ab9aaff636d3baf998e89bc44d4c28d9ea7bcf1",
       "dir_hash": "6cd49b91eb748801ba64ccdfa02183737f4142fa1784d6c462ef592ea4b5ac56"
     },
@@ -2569,7 +2569,7 @@
       "name": "ux-researcher-designer",
       "relative_path": "bundled/skills/ux-researcher-designer",
       "file_count": 2,
-      "bytes": 21799,
+      "bytes": 22307,
       "skill_md_hash": "91e8bcdfd205e3bd954632b7095f8b75ba4f96eef9191771c7e9f7ebaee15c07",
       "dir_hash": "d63940ff20441e54a953bfc949d02911b110812b7e2595673cd759b8676b7ad2"
     },
@@ -2585,7 +2585,7 @@
       "name": "venue-templates",
       "relative_path": "bundled/skills/venue-templates",
       "file_count": 14,
-      "bytes": 177237,
+      "bytes": 179650,
       "skill_md_hash": "f83e321ef05177b40a086c88d90390be14f67d3eac8039661d0d79a2c38069dc",
       "dir_hash": "d7dab8c7aaf9ba58f093490a3fd39802cdde15234df3468db6ab796a54e4e03d"
     },
@@ -2617,39 +2617,39 @@
       "name": "vibe-do-it",
       "relative_path": "bundled/skills/vibe-do-it",
       "file_count": 1,
-      "bytes": 732,
-      "skill_md_hash": "43d439278addb4c7753a01de87ae66b01978c9895ef71b4f43540ba9b0764eee",
-      "dir_hash": "46de9d3a1baf8c63e1a3ac8a662f663ede069695da2778353c6ccc60d26cf42c"
+      "bytes": 1364,
+      "skill_md_hash": "834ae307081650e12aa8d51ff9d2b69746014fcb1dd555be21a5682de7a4c959",
+      "dir_hash": "ac72d4cb33791501136284e169aacea9fc1217be9bcf5ff9bedfcd096ba377ec"
     },
     {
       "name": "vibe-how-do-we-do",
       "relative_path": "bundled/skills/vibe-how-do-we-do",
       "file_count": 1,
-      "bytes": 708,
-      "skill_md_hash": "03167f9b514c07a9494d0e02114d7030dbe0447189f9aae6d60ac915ccdbf6ae",
-      "dir_hash": "a4040c4db1d1328e555e551ff63e25d370a3375586255960913f9a0c9edea071"
+      "bytes": 1437,
+      "skill_md_hash": "cf18c103b77238b22f6ed96b3c096389c80130c6b4ed61e73588ed3d352362bd",
+      "dir_hash": "1796087cb74039afd46fbd20031430aac6f661adb3740dfa2db9cbbd04d2530f"
     },
     {
       "name": "vibe-upgrade",
       "relative_path": "bundled/skills/vibe-upgrade",
       "file_count": 1,
-      "bytes": 983,
-      "skill_md_hash": "0ded1670f72081378ebf51b71c7860344a213a6a74017c3e7f3a418949c5136b",
-      "dir_hash": "b98fbce0059d57d91715e73d02a831cb115af70e6feb6432b277c802201fbb72"
+      "bytes": 1795,
+      "skill_md_hash": "26e8134c4d9984b4b1031619a14972318f4dfa512b873d52eb45a0af846a73b3",
+      "dir_hash": "4c83e8351fa4a8c02c482bc49c187fe06162fe96cad0ba79dbad83d29820b3b1"
     },
     {
       "name": "vibe-what-do-i-want",
       "relative_path": "bundled/skills/vibe-what-do-i-want",
       "file_count": 1,
-      "bytes": 735,
-      "skill_md_hash": "4b9dd2247b06c32197f03328481893b804af0126d1158293a9a13ad54386002b",
-      "dir_hash": "b0b06bda8fbb927e7b1ca8b09a63641a780c34e3f9b984c7e169e06692e7dd93"
+      "bytes": 1491,
+      "skill_md_hash": "30c1249bfed7afdd363a1441baaf67ae89ff0b6d58021e6183da1b4b32ff6258",
+      "dir_hash": "07ee8f82040251664659f2122ca4f71fb7da312ed13a9610758ab907e47ed4b0"
     },
     {
       "name": "video-studio",
       "relative_path": "bundled/skills/video-studio",
       "file_count": 3,
-      "bytes": 34295,
+      "bytes": 35173,
       "skill_md_hash": "c0afc1d387f42c7badd5f44c36a704f83e04464f43912fa5b781914c02d04726",
       "dir_hash": "b4802ae041fb7a3c9db33f5fe7fbcb3d566da5a72ba4f648bf8f8570b8b2c2da"
     },
@@ -2657,9 +2657,9 @@
       "name": "visualization-best-practices",
       "relative_path": "bundled/skills/visualization-best-practices",
       "file_count": 1,
-      "bytes": 1363,
-      "skill_md_hash": "e2ee46bf3e82bb5920a173ec334cb2fee803c0dff81e3f8b13e4d87b24b4e1d7",
-      "dir_hash": "c50ec65efd4beb0fd46125cb74dada886905ceb804aa1e9a1167e7693390a387"
+      "bytes": 1374,
+      "skill_md_hash": "8205206736424d835b0c7779e3813f9da3bb9cdf813910bfaa99ef3b0fd80af8",
+      "dir_hash": "e2717eca570d09acba7a5f243325631ba8828f6c4f7068e64532df4007133f3e"
     },
     {
       "name": "vscode-release-notes-writer",
@@ -2673,7 +2673,7 @@
       "name": "webthinker-deep-research",
       "relative_path": "bundled/skills/webthinker-deep-research",
       "file_count": 2,
-      "bytes": 6352,
+      "bytes": 6447,
       "skill_md_hash": "639db2de69469ffb870ee7fdd0c42ade1a43ef7b800574d6af9d986b39fb4cda",
       "dir_hash": "c69afc5775efa53acb18dd3c68598d0bd74f14de11386d78599f220778d265e1"
     },
@@ -2721,7 +2721,7 @@
       "name": "xlsx",
       "relative_path": "bundled/skills/xlsx",
       "file_count": 3,
-      "bytes": 19712,
+      "bytes": 19889,
       "skill_md_hash": "58c931b0a8578633acc4b1a07cd8980eb7fec3c26dc36420cef58fd2d2ec11bb",
       "dir_hash": "1bd325551487537b695668d3ceebdefd65ef13df0865a600ea705d2abfe57e13"
     },
