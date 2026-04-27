@@ -33,8 +33,8 @@ function Invoke-Route {
 
 $cases = @(
     [pscustomobject]@{ Name = "xlsx formula retention"; Prompt = "请帮我修改xlsx工作簿并保留公式"; Grade = "M"; TaskType = "coding"; ExpectedPack = "docs-media"; ExpectedSkill = "xlsx" },
-    [pscustomobject]@{ Name = "speech synthesis"; Prompt = "把这段文本做语音合成并输出mp3"; Grade = "M"; TaskType = "research"; ExpectedPack = "docs-media"; ExpectedSkill = "speech" },
-    [pscustomobject]@{ Name = "meeting transcription"; Prompt = "请把会议录音转文字并区分说话人"; Grade = "M"; TaskType = "research"; ExpectedPack = "docs-media"; ExpectedSkill = "transcribe" },
+    [pscustomobject]@{ Name = "speech synthesis"; Prompt = "把这段文本做语音合成并输出mp3"; Grade = "M"; TaskType = "research"; ExpectedPack = "media-video"; ExpectedSkill = "speech" },
+    [pscustomobject]@{ Name = "meeting transcription"; Prompt = "请把会议录音转文字并区分说话人"; Grade = "M"; TaskType = "research"; ExpectedPack = "media-video"; ExpectedSkill = "transcribe" },
     [pscustomobject]@{ Name = "pdf extraction"; Prompt = "读取pdf并提取章节正文"; Grade = "M"; TaskType = "coding"; ExpectedPack = "docs-media"; ExpectedSkill = "pdf" },
     [pscustomobject]@{ Name = "screenshot capture"; Prompt = "给我截一张当前桌面截图"; Grade = "M"; TaskType = "coding"; ExpectedPack = "docs-media"; ExpectedSkill = "screenshot" },
 
@@ -114,4 +114,3 @@ if ($failCount -gt 0) {
 
 Write-Host "Skill-index routing audit passed."
 exit 0
-

@@ -855,24 +855,16 @@
                                       ],
                        "trigger_keywords":  [
                                                 "document",
-                                                "docx",
+                                               "docx",
                                                "pdf",
                                                "spreadsheet",
                                                "excel",
-                                               "speech",
-                                               "transcribe",
                                                "文档",
                                                "说明文档",
                                                "表格",
                                                "电子表格",
                                                "xlsx",
-                                               "语音",
-                                               "转录",
                                                "截图",
-                                               "录音",
-                                                "会议录音",
-                                                "说话人",
-                                                "文字转录",
                                                 "批注",
                                                 "回复批注",
                                                  "word批注",
@@ -881,29 +873,38 @@
                                                  "commentsextended.xml"
                                              ],
                         "skill_candidates":  [
-                                                 "content-research-writer",
+                                                 "docs-write",
+                                                 "docs-review",
+                                                 "docx",
+                                                 "docx-comment-reply",
+                                                 "pdf",
+                                                 "spreadsheet",
+                                                 "xlsx",
+                                                 "xan",
+                                                 "screenshot",
                                                  "doc",
-                                                "docs-review",
-                                                "docs-write",
-                                                "docx",
-                                                "docx-comment-reply",
-                                                "excel-analysis",
-                                                "imagegen",
-                                                "jupyter-notebook",
-                                               "pdf",
-                                               "screenshot",
-                                               "speech",
-                                               "spreadsheet",
-                                               "transcribe",
-                                               "writing-docs",
-                                               "xlsx",
-                                               "xan"
+                                                 "excel-analysis"
                                            ],
+                        "route_authority_candidates":  [
+                                                           "docs-write",
+                                                           "docs-review",
+                                                           "docx",
+                                                           "docx-comment-reply",
+                                                           "pdf",
+                                                           "spreadsheet",
+                                                           "xlsx",
+                                                           "xan",
+                                                           "screenshot"
+                                                       ],
+                        "stage_assistant_candidates":  [
+                                                          "doc",
+                                                          "excel-analysis"
+                                                      ],
                        "defaults_by_task":  {
                                                 "planning":  "docs-write",
                                                 "coding":  "spreadsheet",
                                                 "review":  "docs-review",
-                                                "research":  "content-research-writer"
+                                                "research":  "pdf"
                                             }
                   },
                   {
@@ -969,10 +970,32 @@
                                                "burn subtitles",
                                                "去停顿",
                                                "剪掉停顿",
-                                               "口播剪辑"
+                                               "口播剪辑",
+                                               "audio",
+                                               "speech",
+                                               "transcribe",
+                                               "text to speech",
+                                               "tts",
+                                               "voiceover",
+                                               "meeting transcript",
+                                               "语音",
+                                               "转录",
+                                               "录音",
+                                               "会议录音",
+                                               "说话人",
+                                               "文字转录",
+                                               "语音合成",
+                                               "文本转语音"
                                            ],
                       "skill_candidates":  [
-                                               "video-studio"
+                                               "video-studio",
+                                               "transcribe",
+                                               "speech"
+                                           ],
+                      "route_authority_candidates":  [
+                                                         "video-studio",
+                                                         "transcribe",
+                                                         "speech"
                                            ],
                       "defaults_by_task":  {
                                                "planning":  "video-studio",

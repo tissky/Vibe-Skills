@@ -1492,7 +1492,12 @@
                                                                  "tsv",
                                                                  "表格处理",
                                                                  "tabular transform",
-                                                                 "data table cleanup"
+                                                                 "data table cleanup",
+                                                                 "excel analysis",
+                                                                 "pivot table",
+                                                                 "数据透视",
+                                                                 "excel表格分析",
+                                                                 "分析excel"
                                                              ],
                                         "negative_keywords":  [
                                                                   "xlsx",
@@ -1564,7 +1569,11 @@
                                 "negative_keywords":  [
                                                           "docx",
                                                           "markdown docs",
-                                                          "audio transcription"
+                                                          "audio transcription",
+                                                          "large csv",
+                                                          "big csv",
+                                                          "streaming csv",
+                                                          "pdf"
                                                       ],
                                 "equivalent_group":  "tabular-processing",
                                 "canonical_for_task":  [
@@ -1620,7 +1629,15 @@
                                                       ],
                                 "negative_keywords":  [
                                                           "xlsx",
-                                                          "screenshot"
+                                                          "spreadsheet",
+                                                          "csv",
+                                                          "pdf",
+                                                          "screenshot",
+                                                          "批注",
+                                                          "回复批注",
+                                                          "comment reply",
+                                                          "comments.xml",
+                                                          "audio transcription"
                                                       ],
                                 "equivalent_group":  "doc-authoring",
                                  "canonical_for_task":  [
@@ -1673,6 +1690,12 @@
                                                      ],
                                "negative_keywords":  [
                                                          "audio transcription",
+                                                         "docx",
+                                                         "word",
+                                                         "xlsx",
+                                                         "spreadsheet",
+                                                         "csv",
+                                                         "screenshot",
                                                          "markitdown",
                                                          "convert to markdown",
                                                          "pdf to markdown",
@@ -1696,10 +1719,26 @@
                                       "positive_keywords":  [
                                                                 "write docs",
                                                                 "documentation style",
-                                                                "文档写作"
+                                                                "documentation",
+                                                                "documentation page",
+                                                                "markdown docs",
+                                                                "说明文档",
+                                                                "用户文档",
+                                                                "使用说明",
+                                                                "文档写作",
+                                                                "markdown文档"
                                                             ],
                                       "negative_keywords":  [
-                                                                "review existing docs only"
+                                                                "review existing docs only",
+                                                                "docx",
+                                                                "pdf",
+                                                                "xlsx",
+                                                                "spreadsheet",
+                                                                "csv",
+                                                                "批注",
+                                                                "会议录音",
+                                                                "语音合成",
+                                                                "截图"
                                                             ],
                                       "equivalent_group":  "docs-authoring",
                                       "canonical_for_task":  [
@@ -1731,10 +1770,20 @@
                                        "positive_keywords":  [
                                                                  "docs review",
                                                                  "writing style",
-                                                                 "文档审阅"
+                                                                 "documentation review",
+                                                                 "style guide",
+                                                                 "文档审阅",
+                                                                 "文档评审",
+                                                                 "说明文档审阅",
+                                                                 "文案审阅"
                                                              ],
                                        "negative_keywords":  [
-                                                                 "new feature implementation"
+                                                                 "new feature implementation",
+                                                                 "code review",
+                                                                 "pull request",
+                                                                 "github",
+                                                                 "批注回复",
+                                                                 "comments.xml"
                                                              ],
                                        "equivalent_group":  null,
                                        "canonical_for_task":  [
@@ -1771,7 +1820,12 @@
                                                         ],
                                   "negative_keywords":  [
                                                             "transcribe",
-                                                            "speaker diarization"
+                                                            "speaker diarization",
+                                                            "会议录音",
+                                                            "录音转文字",
+                                                            "语音转文字",
+                                                            "说话人分离",
+                                                            "screenshot"
                                                         ],
                                   "equivalent_group":  null,
                                   "canonical_for_task":  [
@@ -1791,7 +1845,10 @@
                                                             ],
                                       "negative_keywords":  [
                                                                 "tts",
-                                                                "voiceover"
+                                                                "voiceover",
+                                                                "text to speech",
+                                                                "语音合成",
+                                                                "文本转语音"
                                                             ],
                                       "equivalent_group":  null,
                                       "canonical_for_task":  [
@@ -1881,7 +1938,13 @@
                                                                 "屏幕快照"
                                                             ],
                                       "negative_keywords":  [
-                                                                "word document edit"
+                                                                "word document edit",
+                                                                "docx",
+                                                                "pdf",
+                                                                "xlsx",
+                                                                "spreadsheet",
+                                                                "transcribe",
+                                                                "语音合成"
                                                             ],
                                       "equivalent_group":  null,
                                       "canonical_for_task":  [

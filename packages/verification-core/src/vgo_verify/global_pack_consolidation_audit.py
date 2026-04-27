@@ -255,8 +255,7 @@ def _rule_keywords(routing_rules: dict[str, Any], skill_id: str) -> list[str]:
     skills = _as_dict(routing_rules.get("skills"))
     entry = _as_dict(skills.get(skill_id))
     positive = [str(item).strip().lower() for item in _as_list(entry.get("positive_keywords")) if str(item).strip()]
-    negative = [str(item).strip().lower() for item in _as_list(entry.get("negative_keywords")) if str(item).strip()]
-    return positive + negative
+    return positive
 
 
 def _broad_keyword_count(keyword_index: dict[str, Any], routing_rules: dict[str, Any], skill_ids: list[str]) -> int:

@@ -224,6 +224,24 @@ class GlobalPackConsolidationAuditTests(unittest.TestCase):
         after = {path: path.read_text(encoding="utf-8") for path in config_paths}
         self.assertEqual(before, after)
 
+    def test_negative_keywords_do_not_raise_overlap_risk(self) -> None:
+        before = audit_repository(self.root)
+        before_rows = {row.pack_id: row for row in before.rows}
+
+        rules_path = self.root / "config" / "skill-routing-rules.json"
+        rules = json.loads(rules_path.read_text(encoding="utf-8"))
+        rules["skills"]["code-review"]["negative_keywords"] = ["shared negative only"]
+        rules["skills"]["code-reviewer"]["negative_keywords"] = ["shared negative only"]
+        rules_path.write_text(json.dumps(rules, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+        after = audit_repository(self.root)
+        after_rows = {row.pack_id: row for row in after.rows}
+
+        self.assertEqual(
+            before_rows["code-quality"].broad_keyword_count,
+            after_rows["code-quality"].broad_keyword_count,
+        )
+
     def test_audit_reads_bom_encoded_json_config(self) -> None:
         pack_manifest_path = self.root / "config" / "pack-manifest.json"
         original = pack_manifest_path.read_text(encoding="utf-8")
