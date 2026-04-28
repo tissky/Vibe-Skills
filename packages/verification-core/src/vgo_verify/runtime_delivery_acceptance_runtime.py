@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -45,6 +46,95 @@ def _normalize_entrypoint_path_for_compare(value: object) -> str:
     return normalized
 
 
+def _load_skill_usage(
+    session_root: Path,
+    runtime_input_packet: dict[str, Any],
+    execution_manifest: dict[str, Any],
+    execute_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    skill_usage_path = session_root / "skill-usage.json"
+    if skill_usage_path.exists():
+        return load_json(skill_usage_path)
+    for candidate in (
+        execute_receipt.get("skill_usage"),
+        execution_manifest.get("skill_usage"),
+        runtime_input_packet.get("skill_usage"),
+    ):
+        if isinstance(candidate, dict):
+            return candidate
+    return {
+        "schema_version": 1,
+        "state_model": "binary_used_unused",
+        "used_skills": [],
+        "unused_skills": [],
+        "loaded_skills": [],
+        "evidence": [],
+        "unused_reasons": [],
+    }
+
+
+def _evaluate_skill_usage_truth(skill_usage: dict[str, Any]) -> dict[str, Any]:
+    used_skill_ids = _normalize_skill_id_list(skill_usage.get("used_skills") or [])
+    unused_skill_ids = _normalize_skill_id_list(skill_usage.get("unused_skills") or [])
+    loaded_records = list(skill_usage.get("loaded_skills") or [])
+    evidence_records = list(skill_usage.get("evidence") or [])
+    failure_reasons: list[str] = []
+    loaded_by_skill: dict[str, dict[str, Any]] = {}
+    for record in loaded_records:
+        if not isinstance(record, dict):
+            continue
+        skill_id = str(record.get("skill_id") or "").strip()
+        if skill_id and skill_id not in loaded_by_skill:
+            loaded_by_skill[skill_id] = record
+    evidence_by_skill: dict[str, list[dict[str, Any]]] = {skill_id: [] for skill_id in used_skill_ids}
+    for record in evidence_records:
+        if not isinstance(record, dict):
+            continue
+        skill_id = str(record.get("skill_id") or "").strip()
+        if skill_id in evidence_by_skill:
+            evidence_by_skill[skill_id].append(record)
+
+    if str(skill_usage.get("state_model") or "") != "binary_used_unused":
+        failure_reasons.append("invalid_state_model")
+
+    for skill_id in used_skill_ids:
+        loaded = loaded_by_skill.get(skill_id)
+        if not loaded:
+            failure_reasons.append("missing_full_load")
+            continue
+        if str(loaded.get("load_status") or "") != "loaded_full_skill_md":
+            failure_reasons.append("missing_full_load")
+        if not str(loaded.get("skill_md_path") or "").strip():
+            failure_reasons.append("missing_skill_md_path")
+        if not re.match(r"^[0-9a-f]{64}$", str(loaded.get("skill_md_sha256") or "")):
+            failure_reasons.append("missing_skill_md_sha256")
+        impacts = evidence_by_skill.get(skill_id) or []
+        if not impacts:
+            failure_reasons.append("missing_artifact_impact")
+        for impact in impacts:
+            if not str(impact.get("stage") or "").strip():
+                failure_reasons.append("missing_impact_stage")
+            if not str(impact.get("artifact_ref") or "").strip():
+                failure_reasons.append("missing_impact_artifact_ref")
+            if not str(impact.get("impact_summary") or "").strip():
+                failure_reasons.append("missing_impact_summary")
+
+    state = "PASS" if not failure_reasons else "FAIL"
+    return {
+        "state": state,
+        "truth_state": "passing" if state == "PASS" else "failing",
+        "state_model": str(skill_usage.get("state_model") or ""),
+        "used_skill_ids": used_skill_ids,
+        "unused_skill_ids": unused_skill_ids,
+        "loaded_skill_ids": sorted(loaded_by_skill),
+        "evidence_count": len(evidence_records),
+        "evidence_paths": _normalize_string_list(
+            [record.get("artifact_ref") for record in evidence_records if isinstance(record, dict)]
+        ),
+        "failure_reasons": sorted(set(failure_reasons)),
+    }
+
+
 def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[str, Any]:
     contract = load_json(repo_root / "config" / "project-delivery-acceptance-contract.json")
     execute_receipt_path = session_root / "phase-execute.json"
@@ -64,6 +154,8 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
     runtime_input_packet = load_json(runtime_input_packet_path) if runtime_input_packet_path.exists() else {}
     specialist_dispatch = runtime_input_packet.get("specialist_dispatch") or {}
     specialist_accounting = execution_manifest.get("specialist_accounting") or {}
+    skill_usage = _load_skill_usage(session_root, runtime_input_packet, execution_manifest, execute_receipt)
+    skill_usage_truth = _evaluate_skill_usage_truth(skill_usage)
 
     product_acceptance_criteria = _extract_bullets(requirement_text, "Product Acceptance Criteria")
     manual_spot_checks, manual_section_missing = _manual_spot_checks_from_requirement(requirement_text)
@@ -862,6 +954,11 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
             "evidence": specialist_decision_evidence,
             "notes": " ".join(specialist_decision_notes).strip(),
         },
+        "skill_usage_truth": {
+            "state": str(skill_usage_truth.get("truth_state") or "passing"),
+            "evidence": list(skill_usage_truth.get("evidence_paths") or []),
+            "notes": ", ".join(skill_usage_truth.get("failure_reasons") or []),
+        },
         "code_task_tdd_evidence_truth": {
             "state": _normalize_truth_state(code_task_tdd_evidence_state),
             "evidence": code_task_tdd_evidence_evidence,
@@ -948,6 +1045,8 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
         residual_risks.append("Specialist decision truth is missing required fallback or dispatch detail.")
     if specialist_decision_state == "degraded":
         residual_risks.append("Specialist decision recorded a traceable but non-green specialist fallback path.")
+    if str(skill_usage_truth.get("state") or "") == "FAIL":
+        residual_risks.append("Binary skill usage truth is missing full-load or artifact-impact evidence.")
     if specialist_host_continuation_pending:
         residual_risks.append("Approved execution is still waiting on direct current-session host continuation.")
     elif specialist_host_resolution_state == "invalid":
@@ -1000,6 +1099,7 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
             }
             for layer, info in truth_layers.items()
         },
+        "skill_usage_truth": skill_usage_truth,
         "artifact_review_coverage": {
             "covered_baseline_document_quality_dimensions": covered_baseline_document_quality_dimensions,
             "missing_baseline_document_quality_dimensions": missing_baseline_document_quality_dimensions,

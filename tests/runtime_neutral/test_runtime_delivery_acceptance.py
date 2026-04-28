@@ -62,6 +62,7 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
         specialist_decision_path: str | None = None,
         specialist_execution_path: str | None = None,
         omit_default_specialist_decision: bool = False,
+        skill_usage: dict[str, object] | None = None,
     ) -> Path:
         tempdir = tempfile.TemporaryDirectory()
         self.addCleanup(tempdir.cleanup)
@@ -205,6 +206,8 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 "status": "auto_promote_when_safe_same_round",
             }
         write_json(runtime_input_packet_path, runtime_input_packet_payload)
+        if skill_usage is not None:
+            write_json(session_root / "skill-usage.json", skill_usage)
         phase_execute_payload = {
             "run_id": run_id,
             "requirement_doc_path": str(requirement_doc_path),
@@ -274,6 +277,87 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
         if sidecar_specialist_execution is not None:
             write_json(session_root / "specialist-execution.json", sidecar_specialist_execution)
         return session_root
+
+    def test_binary_skill_usage_passes_with_full_load_and_artifact_impact(self) -> None:
+        session_root = self._build_session(
+            skill_usage={
+                "schema_version": 1,
+                "state_model": "binary_used_unused",
+                "used_skills": ["scanpy"],
+                "unused_skills": [],
+                "loaded_skills": [
+                    {
+                        "skill_id": "scanpy",
+                        "skill_md_path": "bundled/skills/scanpy/SKILL.md",
+                        "skill_md_sha256": "a" * 64,
+                        "load_status": "loaded_full_skill_md",
+                        "loaded_at_stage": "skeleton_check",
+                    }
+                ],
+                "evidence": [
+                    {
+                        "skill_id": "scanpy",
+                        "stage": "xl_plan",
+                        "artifact_ref": "xl_plan.md",
+                        "impact_summary": "Plan adopts the loaded scanpy workflow.",
+                    }
+                ],
+                "unused_reasons": [],
+            }
+        )
+
+        report = evaluate(REPO_ROOT, session_root)
+        self.assertEqual("PASS", report["skill_usage_truth"]["state"])
+        self.assertEqual(["scanpy"], report["skill_usage_truth"]["used_skill_ids"])
+
+    def test_binary_skill_usage_fails_when_used_skill_lacks_artifact_impact(self) -> None:
+        session_root = self._build_session(
+            skill_usage={
+                "schema_version": 1,
+                "state_model": "binary_used_unused",
+                "used_skills": ["scanpy"],
+                "unused_skills": [],
+                "loaded_skills": [
+                    {
+                        "skill_id": "scanpy",
+                        "skill_md_path": "bundled/skills/scanpy/SKILL.md",
+                        "skill_md_sha256": "b" * 64,
+                        "load_status": "loaded_full_skill_md",
+                        "loaded_at_stage": "skeleton_check",
+                    }
+                ],
+                "evidence": [],
+                "unused_reasons": [],
+            }
+        )
+
+        report = evaluate(REPO_ROOT, session_root)
+        self.assertEqual("FAIL", report["skill_usage_truth"]["state"])
+        self.assertIn("missing_artifact_impact", report["skill_usage_truth"]["failure_reasons"])
+
+    def test_approved_dispatch_without_skill_usage_does_not_count_as_used(self) -> None:
+        session_root = self._build_session(
+            approved_dispatch=[
+                {
+                    "skill_id": "scanpy",
+                    "native_skill_entrypoint": "bundled/skills/scanpy/SKILL.md",
+                }
+            ],
+            skill_usage={
+                "schema_version": 1,
+                "state_model": "binary_used_unused",
+                "used_skills": [],
+                "unused_skills": ["scanpy"],
+                "loaded_skills": [],
+                "evidence": [],
+                "unused_reasons": [{"skill_id": "scanpy", "reason": "dispatch_without_verified_artifact_impact"}],
+            },
+        )
+
+        report = evaluate(REPO_ROOT, session_root)
+        self.assertEqual("PASS", report["skill_usage_truth"]["state"])
+        self.assertEqual([], report["skill_usage_truth"]["used_skill_ids"])
+        self.assertEqual(["scanpy"], report["skill_usage_truth"]["unused_skill_ids"])
 
     def test_runtime_delivery_acceptance_passes_for_clean_root_run(self) -> None:
         session_root = self._build_session(
