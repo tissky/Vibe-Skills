@@ -17,6 +17,7 @@ Set-StrictMode -Off
 $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'VibeRuntime.Common.ps1')
+. (Join-Path $PSScriptRoot 'VibeSkillUsage.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeExecution.Common.ps1')
 
 function New-VibeDelegatedLaneSpec {
@@ -1146,6 +1147,25 @@ $runtimeInputPacket = if (Test-Path -LiteralPath $runtimeInputPath) {
 } else {
     $null
 }
+$skillUsage = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'skill_usage') {
+    Read-VibeSkillUsageArtifact -SessionRoot $sessionRoot -Fallback $runtimeInputPacket.skill_usage
+} else {
+    Read-VibeSkillUsageArtifact -SessionRoot $sessionRoot -Fallback $null
+}
+$selectedUsageSkill = if ($runtimeInputPacket -and $runtimeInputPacket.route_snapshot) {
+    [string]$runtimeInputPacket.route_snapshot.selected_skill
+} else {
+    ''
+}
+if ($skillUsage -and -not [string]::IsNullOrWhiteSpace($selectedUsageSkill)) {
+    $skillUsage = Update-VibeSkillUsageArtifactImpact `
+        -SkillUsage $skillUsage `
+        -SkillId $selectedUsageSkill `
+        -Stage 'plan_execute' `
+        -ArtifactRef 'execution-manifest.json' `
+        -ImpactSummary ('Execution manifest preserves binary skill usage truth for {0}; execution cannot use routing, hints, consultation, or dispatch alone as usage proof.' -f $selectedUsageSkill)
+    Write-VibeJsonArtifact -Path (Get-VibeSkillUsagePath -SessionRoot $sessionRoot) -Value $skillUsage
+}
 $hierarchyState = Get-VibeHierarchyState `
     -GovernanceScope $(if ($runtimeInputPacket) { [string]$runtimeInputPacket.governance_scope } else { $GovernanceScope }) `
     -RunId $RunId `
@@ -1860,6 +1880,7 @@ $executionManifest = [pscustomobject]@{
     execution_plan_path = $planPath
     execution_topology_path = $executionTopologyPath
     runtime_input_packet_path = $runtimeInputPath
+    skill_usage = $skillUsage
     execution_memory_context_path = if ([string]::IsNullOrWhiteSpace($ExecutionMemoryContextPath)) { $null } else { $ExecutionMemoryContextPath }
     generated_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
     planned_wave_count = @($profile.waves).Count
@@ -1989,6 +2010,9 @@ $proofManifest = [pscustomobject]@{
     task = $Task
     session_root = $sessionRoot
     execution_manifest_path = $executionManifestPath
+    skill_usage_path = if ($skillUsage) { Get-VibeSkillUsagePath -SessionRoot $sessionRoot } else { $null }
+    used_skill_count = if ($skillUsage) { @($skillUsage.used_skills).Count } else { 0 }
+    unused_skill_count = if ($skillUsage) { @($skillUsage.unused_skills).Count } else { 0 }
     plan_shadow_path = $planShadow.path
     execution_topology_path = $executionTopologyPath
     result_paths = @($resultPaths)
@@ -2084,6 +2108,8 @@ $receipt = [pscustomobject]@{
     execution_memory_context_path = if ([string]::IsNullOrWhiteSpace($ExecutionMemoryContextPath)) { $null } else { $ExecutionMemoryContextPath }
     plan_shadow_path = $planShadow.path
     execution_manifest_path = $executionManifestPath
+    skill_usage_path = if ($skillUsage) { Get-VibeSkillUsagePath -SessionRoot $sessionRoot } else { $null }
+    skill_usage = $skillUsage
     execution_proof_manifest_path = $proofManifestPath
     execution_topology_path = $executionTopologyPath
     executed_unit_count = $executedUnitCount

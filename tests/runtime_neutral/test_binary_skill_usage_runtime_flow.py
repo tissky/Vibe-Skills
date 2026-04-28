@@ -77,6 +77,56 @@ class BinarySkillUsageRuntimeFlowTests(unittest.TestCase):
             self.assertIn("## Skill Usage", requirement_text)
             self.assertIn("## Binary Skill Usage Plan", plan_text)
 
+    def test_plan_execute_and_cleanup_preserve_skill_usage_truth(self) -> None:
+        shell = resolve_powershell()
+        if shell is None:
+            self.skipTest("PowerShell executable not available")
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir) / "artifacts"
+            run_id = "pytest-binary-skill-usage-execute"
+            task = "Use biopython to parse FASTA and summarize sequence lengths."
+            for script_name in (
+                "Freeze-RuntimeInputPacket.ps1",
+                "Invoke-SkeletonCheck.ps1",
+                "Invoke-DeepInterview.ps1",
+                "Write-RequirementDoc.ps1",
+                "Write-XlPlan.ps1",
+                "Invoke-PlanExecute.ps1",
+                "Invoke-PhaseCleanup.ps1",
+            ):
+                command = [
+                    shell,
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-File",
+                    str(REPO_ROOT / "scripts" / "runtime" / script_name),
+                    "-Task",
+                    task,
+                    "-Mode",
+                    "interactive_governed",
+                    "-RunId",
+                    run_id,
+                    "-ArtifactRoot",
+                    str(artifact_root),
+                ]
+                subprocess.run(command, cwd=REPO_ROOT, capture_output=True, text=True, encoding="utf-8", check=True)
+
+            session_root = next(artifact_root.rglob(run_id))
+            usage = json.loads((session_root / "skill-usage.json").read_text(encoding="utf-8"))
+            execution_manifest = json.loads((session_root / "execution-manifest.json").read_text(encoding="utf-8"))
+            phase_execute = json.loads((session_root / "phase-execute.json").read_text(encoding="utf-8"))
+            cleanup = json.loads((session_root / "cleanup-receipt.json").read_text(encoding="utf-8"))
+            selected_skill = json.loads((session_root / "runtime-input-packet.json").read_text(encoding="utf-8"))[
+                "route_snapshot"
+            ]["selected_skill"]
+
+            self.assertIn(selected_skill, usage["used_skills"])
+            self.assertEqual(usage["used_skills"], execution_manifest["skill_usage"]["used_skills"])
+            self.assertEqual(usage["used_skills"], phase_execute["skill_usage"]["used_skills"])
+            self.assertEqual(usage["used_skills"], cleanup["skill_usage"]["used_skills"])
+            self.assertGreaterEqual(cleanup["skill_usage_summary"]["used_skill_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
