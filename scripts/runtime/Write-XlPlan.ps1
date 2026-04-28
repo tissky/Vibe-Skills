@@ -22,6 +22,7 @@ $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'VibeRuntime.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeSkillUsage.Common.ps1')
+. (Join-Path $PSScriptRoot 'VibeSkillRouting.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeExecution.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeConsultation.Common.ps1')
 . (Join-Path $PSScriptRoot '..\common\AntiProxyGoalDrift.ps1')
@@ -244,8 +245,9 @@ $stageLifecycleDisclosure = New-VibeSpecialistLifecycleDisclosureProjection `
     -RuntimeInputPacket $runtimeInputPacket `
     -DiscussionConsultationReceipt $discussionConsultation `
     -PlanningConsultationReceipt $planningConsultation
-$approvedDispatch = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch) { @($runtimeInputPacket.specialist_dispatch.approved_dispatch) } else { @() }
-$localSuggestions = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch) { @($runtimeInputPacket.specialist_dispatch.local_specialist_suggestions) } else { @() }
+$selectedSkillRouting = @(Get-VibeSkillRoutingSelected -RuntimeInputPacket $runtimeInputPacket)
+$approvedDispatch = @(Convert-VibeSkillRoutingSelectedToDispatch -RuntimeInputPacket $runtimeInputPacket)
+$localSuggestions = @()
 $executionPhaseDecomposition = if (
     $runtimeInputPacket -and
     $runtimeInputPacket.PSObject.Properties.Name -contains 'execution_phase_decomposition' -and
@@ -261,7 +263,8 @@ $executionTopology = New-VibeExecutionTopology `
     -GovernanceScope ([string]$hierarchyState.governance_scope) `
     -ExecutionPolicy $runtime.execution_runtime_policy `
     -TopologyPolicy $runtime.execution_topology_policy `
-    -ApprovedDispatch @($approvedDispatch)
+    -ApprovedDispatch @() `
+    -SelectedSkills @($approvedDispatch)
 $executionTopologyPath = Get-VibeExecutionTopologyPath -RepoRoot $runtime.repo_root -RunId $RunId -ArtifactRoot $ArtifactRoot
 Write-VibeJsonArtifact -Path $executionTopologyPath -Value $executionTopology
 
@@ -476,8 +479,8 @@ if (@($approvedDispatch).Count -gt 0) {
         '',
         '## Specialist Skill Dispatch Plan',
         '- Specialist routing is mandatory and bounded inside governed `vibe`; it does not transfer runtime authority away from vibe.',
-        '- This section lists only effective approved dispatch; non-adopted router candidates and local suggestions remain packet/audit data, not user-facing execution requirements.',
-        '- Before specialist execution starts, governed `vibe` emits one unified disclosure for the effective `approved_dispatch` set using each skill''s real `native_skill_entrypoint`.',
+        '- This section lists only skills selected into the six-stage work through `skill_routing.selected`.',
+        '- Before specialist execution starts, governed `vibe` emits one unified disclosure for selected skills using each skill''s real `skill_md_path` or `native_skill_entrypoint`.',
         '- Each specialist must be invoked through its native workflow, input contract, and validation style.',
         '- Specialist outputs remain subordinate to the frozen requirement and the governed plan.'
     )
@@ -602,8 +605,8 @@ if ($skillUsage -and -not [string]::IsNullOrWhiteSpace($selectedUsageSkill)) {
         '',
         '## Binary Skill Usage Plan',
         ('- Used skill candidate: `{0}`.' -f $selectedUsageSkill),
-        '- Execution must preserve the loaded skill workflow and report usage only from `skill_usage`.',
-        '- `approved_dispatch`, `specialist_recommendations`, `stage_assistant_hints`, and consultation receipts remain audit data, not usage proof.'
+        '- Execution must preserve the loaded skill workflow and report final use only from `skill_usage.used` / `skill_usage.unused`.',
+        '- Legacy routing fields remain audit data, not usage proof.'
     )
     Write-VibeJsonArtifact -Path (Get-VibeSkillUsagePath -SessionRoot $sessionRoot) -Value $skillUsage
 }

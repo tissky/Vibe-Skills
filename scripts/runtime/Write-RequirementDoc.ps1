@@ -21,6 +21,7 @@ $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'VibeRuntime.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeSkillUsage.Common.ps1')
+. (Join-Path $PSScriptRoot 'VibeSkillRouting.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeConsultation.Common.ps1')
 . (Join-Path $PSScriptRoot '..\common\AntiProxyGoalDrift.ps1')
 
@@ -799,15 +800,9 @@ if ($runtimeInputPacket) {
         $lines += @($hostSpecialistDispatchLines)
     }
 
-    $approvedSpecialistDispatch = if (
-        $runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_dispatch' -and
-        $null -ne $runtimeInputPacket.specialist_dispatch -and
-        $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'approved_dispatch'
-    ) {
-        @($runtimeInputPacket.specialist_dispatch.approved_dispatch)
-    } else {
-        @()
-    }
+    $selectedSkillRouting = @(Get-VibeSkillRoutingSelected -RuntimeInputPacket $runtimeInputPacket)
+    # Compatibility variable name; authority is skill_routing.selected.
+    $approvedSpecialistDispatch = @(Convert-VibeSkillRoutingSelectedToDispatch -RuntimeInputPacket $runtimeInputPacket)
     if (($runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_recommendations' -and @($runtimeInputPacket.specialist_recommendations).Count -gt 0) -or @($approvedSpecialistDispatch).Count -gt 0) {
         $lines += @(
             '',

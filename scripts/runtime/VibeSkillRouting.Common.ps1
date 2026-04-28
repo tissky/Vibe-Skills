@@ -46,6 +46,16 @@ function New-VibeSkillRoutingEntry {
         parallelizable_in_root_xl = [bool](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'parallelizable_in_root_xl' -DefaultValue $false)
         native_usage_required = [bool](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'native_usage_required' -DefaultValue $true)
         native_skill_entrypoint = if ([string]::IsNullOrWhiteSpace($nativeEntrypoint)) { $null } else { $nativeEntrypoint }
+        bounded_role = [string](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'bounded_role' -DefaultValue 'selected_skill')
+        must_preserve_workflow = [bool](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'must_preserve_workflow' -DefaultValue $true)
+        binding_profile = [string](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'binding_profile' -DefaultValue 'selected_skill')
+        lane_policy = [string](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'lane_policy' -DefaultValue 'native_contract')
+        write_scope = [string](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'write_scope' -DefaultValue ('specialist:{0}' -f $SkillId))
+        review_mode = [string](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'review_mode' -DefaultValue 'native_contract')
+        execution_priority = [int](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'execution_priority' -DefaultValue 50)
+        required_inputs = [object[]]@(Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'required_inputs' -DefaultValue @())
+        expected_outputs = [object[]]@(Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'expected_outputs' -DefaultValue @())
+        verification_expectation = [string](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'verification_expectation' -DefaultValue 'Record selected skill usage evidence before completion.')
         legacy_source = [string](Get-VibeSkillRoutingProperty -InputObject $Source -PropertyName 'source' -DefaultValue '')
     }
 }
@@ -188,6 +198,16 @@ function Convert-VibeSkillRoutingSelectedToDispatch {
             dispatch_phase = [string](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'dispatch_phase' -DefaultValue 'in_execution')
             parallelizable_in_root_xl = [bool](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'parallelizable_in_root_xl' -DefaultValue $false)
             native_usage_required = [bool](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'native_usage_required' -DefaultValue $true)
+            bounded_role = [string](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'bounded_role' -DefaultValue 'selected_skill')
+            must_preserve_workflow = [bool](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'must_preserve_workflow' -DefaultValue $true)
+            binding_profile = [string](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'binding_profile' -DefaultValue 'selected_skill')
+            lane_policy = [string](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'lane_policy' -DefaultValue 'native_contract')
+            write_scope = [string](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'write_scope' -DefaultValue ('specialist:{0}' -f [string](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'skill_id' -DefaultValue 'unknown')))
+            review_mode = [string](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'review_mode' -DefaultValue 'native_contract')
+            execution_priority = [int](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'execution_priority' -DefaultValue 50)
+            required_inputs = [object[]]@(Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'required_inputs' -DefaultValue @())
+            expected_outputs = [object[]]@(Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'expected_outputs' -DefaultValue @())
+            verification_expectation = [string](Get-VibeSkillRoutingProperty -InputObject $entry -PropertyName 'verification_expectation' -DefaultValue 'Record selected skill usage evidence before completion.')
         }
     })
 }
