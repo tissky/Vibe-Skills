@@ -59,10 +59,11 @@ class BundledStageAssistantFreezeTests(unittest.TestCase):
             self.assertEqual("vibe", packet["divergence_shadow"]["runtime_selected_skill"])
             self.assertEqual("science-figures-visualization", packet["route_snapshot"]["selected_pack"])
             self.assertEqual("scientific-visualization", packet["route_snapshot"]["selected_skill"])
+            legacy = packet["legacy_skill_routing"]
 
             recommendation_pairs = [
                 (item["skill_id"], item["source"])
-                for item in packet["specialist_recommendations"]
+                for item in legacy["specialist_recommendations"]
             ]
             self.assertNotIn(("matplotlib", "route_stage_assistant"), recommendation_pairs)
             self.assertNotIn(("seaborn", "route_stage_assistant"), recommendation_pairs)
@@ -70,7 +71,7 @@ class BundledStageAssistantFreezeTests(unittest.TestCase):
 
             hint_pairs = [
                 (item["skill_id"], item["source"])
-                for item in packet["stage_assistant_hints"]
+                for item in legacy["stage_assistant_hints"]
             ]
             self.assertIn(("matplotlib", "route_stage_assistant"), hint_pairs)
             self.assertIn(("seaborn", "route_stage_assistant"), hint_pairs)

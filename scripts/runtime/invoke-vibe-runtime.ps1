@@ -374,7 +374,7 @@ if ($confirmRequired) {
             }
         })
     } else {
-        @($runtimeInputPacket.specialist_recommendations | ForEach-Object {
+        @(Get-VibeRuntimeSpecialistRecommendations -RuntimeInputPacket $runtimeInputPacket | ForEach-Object {
             [pscustomobject]@{
                 skill_id = if ($_.PSObject.Properties.Name -contains 'skill_id') { [string]$_.skill_id } else { $null }
                 description = if ($_.PSObject.Properties.Name -contains 'rationale') { [string]$_.rationale } else { $null }
@@ -459,7 +459,7 @@ $discussionConsultation = Invoke-VibeSpecialistConsultationWindow `
     -WindowId 'discussion' `
     -Stage 'deep_interview' `
     -SourceArtifactPath ([string]$interview.receipt_path) `
-    -Recommendations @($(if ($runtimeInputPacket) { $runtimeInputPacket.specialist_recommendations } else { @() })) `
+    -Recommendations @(Get-VibeRuntimeSpecialistRecommendations -RuntimeInputPacket $runtimeInputPacket) `
     -Policy $runtime.specialist_consultation_policy
 $discussionConsultationLayer = New-VibeSpecialistConsultationLifecycleLayerProjection -ConsultationReceipt $discussionConsultation.receipt
 if ($discussionConsultationLayer) {
@@ -562,7 +562,7 @@ $planningConsultation = Invoke-VibeSpecialistConsultationWindow `
     -WindowId 'planning' `
     -Stage 'requirement_doc' `
     -SourceArtifactPath ([string]$requirement.requirement_doc_path) `
-    -Recommendations @($(if ($runtimeInputPacket) { $runtimeInputPacket.specialist_recommendations } else { @() })) `
+    -Recommendations @(Get-VibeRuntimeSpecialistRecommendations -RuntimeInputPacket $runtimeInputPacket) `
     -Policy $runtime.specialist_consultation_policy
 $planningConsultationLayer = New-VibeSpecialistConsultationLifecycleLayerProjection -ConsultationReceipt $planningConsultation.receipt
 if ($planningConsultationLayer) {

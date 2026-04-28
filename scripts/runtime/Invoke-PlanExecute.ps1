@@ -629,13 +629,14 @@ function Resolve-VibeEffectiveSpecialistDispatch {
     $originalLocalSuggestions = @($LocalSuggestions)
     $frozenApprovedSkillIds = @($frozenApprovedDispatch | ForEach-Object { [string]$_.skill_id } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
     $originalLocalSkillIds = @($originalLocalSuggestions | ForEach-Object { [string]$_.skill_id } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
-    $originalEscalationRequired = if ($RuntimeInputPacket -and $RuntimeInputPacket.specialist_dispatch) {
-        [bool]$RuntimeInputPacket.specialist_dispatch.escalation_required
+    $runtimeSpecialistDispatch = Get-VibeRuntimeSpecialistDispatchProjection -RuntimeInputPacket $RuntimeInputPacket
+    $originalEscalationRequired = if ($runtimeSpecialistDispatch) {
+        [bool]$runtimeSpecialistDispatch.escalation_required
     } else {
         @($originalLocalSuggestions).Count -gt 0
     }
-    $originalEscalationStatus = if ($RuntimeInputPacket -and $RuntimeInputPacket.specialist_dispatch -and $RuntimeInputPacket.specialist_dispatch.escalation_status) {
-        [string]$RuntimeInputPacket.specialist_dispatch.escalation_status
+    $originalEscalationStatus = if ($runtimeSpecialistDispatch -and $runtimeSpecialistDispatch.escalation_status) {
+        [string]$runtimeSpecialistDispatch.escalation_status
     } elseif ($originalEscalationRequired) {
         'root_approval_required'
     } else {
@@ -759,12 +760,10 @@ function Resolve-VibeEffectiveSpecialistDispatch {
     }
 
     $recommendationLookup = @{}
-    if ($RuntimeInputPacket -and $RuntimeInputPacket.PSObject.Properties.Name -contains 'specialist_recommendations') {
-        foreach ($recommendation in @($RuntimeInputPacket.specialist_recommendations)) {
-            $skillId = [string]$recommendation.skill_id
-            if (-not [string]::IsNullOrWhiteSpace($skillId) -and -not $recommendationLookup.ContainsKey($skillId)) {
-                $recommendationLookup[$skillId] = $recommendation
-            }
+    foreach ($recommendation in @(Get-VibeRuntimeSpecialistRecommendations -RuntimeInputPacket $RuntimeInputPacket)) {
+        $skillId = [string]$recommendation.skill_id
+        if (-not [string]::IsNullOrWhiteSpace($skillId) -and -not $recommendationLookup.ContainsKey($skillId)) {
+            $recommendationLookup[$skillId] = $recommendation
         }
     }
 
@@ -1203,7 +1202,8 @@ $tokens = @{
     '${ROOT_RUN_ID}' = [string]$hierarchyState.root_run_id
 }
 $planShadow = Get-VibePlanDerivedExecutionShadow -PlanPath $planPath -RunId $RunId -SessionRoot $sessionRoot
-$specialistRecommendations = if ($runtimeInputPacket) { @($runtimeInputPacket.specialist_recommendations) } else { @() }
+$runtimeSpecialistDispatch = Get-VibeRuntimeSpecialistDispatchProjection -RuntimeInputPacket $runtimeInputPacket
+$specialistRecommendations = @(Get-VibeRuntimeSpecialistRecommendations -RuntimeInputPacket $runtimeInputPacket)
 $skillRouting = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'skill_routing') {
     $runtimeInputPacket.skill_routing
 } else {
@@ -1212,13 +1212,13 @@ $skillRouting = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Proper
 $selectedSkills = @(Convert-VibeSkillRoutingSelectedToDispatch -RuntimeInputPacket $runtimeInputPacket -SkillRouting $skillRouting)
 $frozenApprovedDispatch = @($selectedSkills)
 $frozenLocalSuggestions = @()
-$frozenBlockedDispatch = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'blocked' -and $null -ne $runtimeInputPacket.specialist_dispatch.blocked) { @($runtimeInputPacket.specialist_dispatch.blocked) } else { @() }
-$frozenDegradedDispatch = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'degraded' -and $null -ne $runtimeInputPacket.specialist_dispatch.degraded) { @($runtimeInputPacket.specialist_dispatch.degraded) } else { @() }
-$matchedSkillIds = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'matched_skill_ids' -and $null -ne $runtimeInputPacket.specialist_dispatch.matched_skill_ids) { @($runtimeInputPacket.specialist_dispatch.matched_skill_ids) } else { @() }
-$surfacedSkillIds = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'surfaced_skill_ids' -and $null -ne $runtimeInputPacket.specialist_dispatch.surfaced_skill_ids) { @($runtimeInputPacket.specialist_dispatch.surfaced_skill_ids) } else { @() }
-$blockedSkillIds = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'blocked_skill_ids' -and $null -ne $runtimeInputPacket.specialist_dispatch.blocked_skill_ids) { @($runtimeInputPacket.specialist_dispatch.blocked_skill_ids) } else { @() }
-$degradedSkillIds = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'degraded_skill_ids' -and $null -ne $runtimeInputPacket.specialist_dispatch.degraded_skill_ids) { @($runtimeInputPacket.specialist_dispatch.degraded_skill_ids) } else { @() }
-$ghostMatchSkillIds = if ($runtimeInputPacket -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'ghost_match_skill_ids' -and $null -ne $runtimeInputPacket.specialist_dispatch.ghost_match_skill_ids) { @($runtimeInputPacket.specialist_dispatch.ghost_match_skill_ids) } else { @() }
+$frozenBlockedDispatch = if ($runtimeSpecialistDispatch -and $runtimeSpecialistDispatch.PSObject.Properties.Name -contains 'blocked' -and $null -ne $runtimeSpecialistDispatch.blocked) { @($runtimeSpecialistDispatch.blocked) } else { @() }
+$frozenDegradedDispatch = if ($runtimeSpecialistDispatch -and $runtimeSpecialistDispatch.PSObject.Properties.Name -contains 'degraded' -and $null -ne $runtimeSpecialistDispatch.degraded) { @($runtimeSpecialistDispatch.degraded) } else { @() }
+$matchedSkillIds = if ($runtimeSpecialistDispatch -and $runtimeSpecialistDispatch.PSObject.Properties.Name -contains 'matched_skill_ids' -and $null -ne $runtimeSpecialistDispatch.matched_skill_ids) { @($runtimeSpecialistDispatch.matched_skill_ids) } else { @() }
+$surfacedSkillIds = if ($runtimeSpecialistDispatch -and $runtimeSpecialistDispatch.PSObject.Properties.Name -contains 'surfaced_skill_ids' -and $null -ne $runtimeSpecialistDispatch.surfaced_skill_ids) { @($runtimeSpecialistDispatch.surfaced_skill_ids) } else { @() }
+$blockedSkillIds = if ($runtimeSpecialistDispatch -and $runtimeSpecialistDispatch.PSObject.Properties.Name -contains 'blocked_skill_ids' -and $null -ne $runtimeSpecialistDispatch.blocked_skill_ids) { @($runtimeSpecialistDispatch.blocked_skill_ids) } else { @() }
+$degradedSkillIds = if ($runtimeSpecialistDispatch -and $runtimeSpecialistDispatch.PSObject.Properties.Name -contains 'degraded_skill_ids' -and $null -ne $runtimeSpecialistDispatch.degraded_skill_ids) { @($runtimeSpecialistDispatch.degraded_skill_ids) } else { @() }
+$ghostMatchSkillIds = if ($runtimeSpecialistDispatch -and $runtimeSpecialistDispatch.PSObject.Properties.Name -contains 'ghost_match_skill_ids' -and $null -ne $runtimeSpecialistDispatch.ghost_match_skill_ids) { @($runtimeSpecialistDispatch.ghost_match_skill_ids) } else { @() }
 $hasCanonicalSelectedSkills = $null -ne $skillRouting -and $skillRouting.PSObject.Properties.Name -contains 'selected' -and @($skillRouting.selected).Count -gt 0
 if ($hasCanonicalSelectedSkills) {
     $specialistDispatchResolution = [pscustomobject]@{
@@ -1883,8 +1883,8 @@ $specialistDecision = New-VibeSpecialistDecisionProjection `
     -LocalSuggestions @($localSuggestions) `
     -BlockedDispatch @($blockedSpecialistUnits) `
     -DegradedDispatch @($degradedSpecialistUnits) `
-    -MatchedSkillIds $(if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_dispatch' -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'matched_skill_ids' -and $null -ne $runtimeInputPacket.specialist_dispatch.matched_skill_ids) { @($runtimeInputPacket.specialist_dispatch.matched_skill_ids) } else { @() }) `
-    -SurfacedSkillIds $(if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_dispatch' -and $runtimeInputPacket.specialist_dispatch -and $runtimeInputPacket.specialist_dispatch.PSObject.Properties.Name -contains 'surfaced_skill_ids' -and $null -ne $runtimeInputPacket.specialist_dispatch.surfaced_skill_ids) { @($runtimeInputPacket.specialist_dispatch.surfaced_skill_ids) } else { @() }) `
+    -MatchedSkillIds @($matchedSkillIds) `
+    -SurfacedSkillIds @($surfacedSkillIds) `
     -RecommendationCount @($specialistRecommendations).Count `
     -OverridePayload $(if ($specialistDecisionOverride) { $specialistDecisionOverride.payload } else { $null }) `
     -OverrideSourcePath $(if ($specialistDecisionOverride) { [string]$specialistDecisionOverride.path } else { '' })

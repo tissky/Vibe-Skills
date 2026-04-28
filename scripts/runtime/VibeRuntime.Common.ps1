@@ -219,6 +219,93 @@ function Get-VibeNestedPropertySafe {
     return $current
 }
 
+function Get-VibeRuntimeLegacySkillRouting {
+    param(
+        [AllowNull()] [object]$RuntimeInputPacket = $null
+    )
+
+    if (
+        $null -ne $RuntimeInputPacket -and
+        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'legacy_skill_routing') -and
+        $null -ne $RuntimeInputPacket.legacy_skill_routing
+    ) {
+        return $RuntimeInputPacket.legacy_skill_routing
+    }
+
+    return $null
+}
+
+function Get-VibeRuntimeSpecialistDispatchProjection {
+    param(
+        [AllowNull()] [object]$RuntimeInputPacket = $null
+    )
+
+    if (
+        $null -ne $RuntimeInputPacket -and
+        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'specialist_dispatch') -and
+        $null -ne $RuntimeInputPacket.specialist_dispatch
+    ) {
+        return $RuntimeInputPacket.specialist_dispatch
+    }
+
+    $legacyRouting = Get-VibeRuntimeLegacySkillRouting -RuntimeInputPacket $RuntimeInputPacket
+    if (
+        $null -ne $legacyRouting -and
+        (Test-VibeObjectHasProperty -InputObject $legacyRouting -PropertyName 'specialist_dispatch') -and
+        $null -ne $legacyRouting.specialist_dispatch
+    ) {
+        return $legacyRouting.specialist_dispatch
+    }
+
+    return $null
+}
+
+function Get-VibeRuntimeSpecialistRecommendations {
+    param(
+        [AllowNull()] [object]$RuntimeInputPacket = $null
+    )
+
+    if (
+        $null -ne $RuntimeInputPacket -and
+        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'specialist_recommendations')
+    ) {
+        return [object[]]@($RuntimeInputPacket.specialist_recommendations)
+    }
+
+    $legacyRouting = Get-VibeRuntimeLegacySkillRouting -RuntimeInputPacket $RuntimeInputPacket
+    if (
+        $null -ne $legacyRouting -and
+        (Test-VibeObjectHasProperty -InputObject $legacyRouting -PropertyName 'specialist_recommendations')
+    ) {
+        return [object[]]@($legacyRouting.specialist_recommendations)
+    }
+
+    return @()
+}
+
+function Get-VibeRuntimeStageAssistantHints {
+    param(
+        [AllowNull()] [object]$RuntimeInputPacket = $null
+    )
+
+    if (
+        $null -ne $RuntimeInputPacket -and
+        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'stage_assistant_hints')
+    ) {
+        return [object[]]@($RuntimeInputPacket.stage_assistant_hints)
+    }
+
+    $legacyRouting = Get-VibeRuntimeLegacySkillRouting -RuntimeInputPacket $RuntimeInputPacket
+    if (
+        $null -ne $legacyRouting -and
+        (Test-VibeObjectHasProperty -InputObject $legacyRouting -PropertyName 'stage_assistant_hints')
+    ) {
+        return [object[]]@($legacyRouting.stage_assistant_hints)
+    }
+
+    return @()
+}
+
 function ConvertFrom-VibeHostDecisionJson {
     param(
         [AllowEmptyString()] [string]$HostDecisionJson = ''
@@ -1599,15 +1686,7 @@ function New-VibeSpecialistDecisionProjection {
         [AllowEmptyString()] [string]$OverrideSourcePath = ''
     )
 
-    $dispatchSource = if (
-        $null -ne $RuntimeInputPacket -and
-        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'specialist_dispatch') -and
-        $null -ne $RuntimeInputPacket.specialist_dispatch
-    ) {
-        $RuntimeInputPacket.specialist_dispatch
-    } else {
-        $null
-    }
+    $dispatchSource = Get-VibeRuntimeSpecialistDispatchProjection -RuntimeInputPacket $RuntimeInputPacket
 
     $approvedDispatchArray = if ((Get-VibeSafeArrayCount -InputObject $ApprovedDispatch) -gt 0) {
         @($ApprovedDispatch)
@@ -1684,8 +1763,8 @@ function New-VibeSpecialistDecisionProjection {
     }
     $recommendationCountResolved = if ($RecommendationCount -ge 0) {
         [int]$RecommendationCount
-    } elseif ($null -ne $RuntimeInputPacket -and (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'specialist_recommendations')) {
-        @($RuntimeInputPacket.specialist_recommendations).Count
+    } elseif ($null -ne $RuntimeInputPacket) {
+        @(Get-VibeRuntimeSpecialistRecommendations -RuntimeInputPacket $RuntimeInputPacket).Count
     } else {
         @($surfacedSkillIds).Count
     }
@@ -1900,6 +1979,33 @@ function New-VibeRuntimeInputPacketProjection {
         -SurfacedSkillIds $(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'surfaced_skill_ids' -and $null -ne $SpecialistDispatch.surfaced_skill_ids) { @($SpecialistDispatch.surfaced_skill_ids) } else { @() }) `
         -RecommendationCount @($SpecialistRecommendations).Count
 
+    $specialistDispatchProjection = [pscustomobject]@{
+        approved_dispatch = [object[]]@($SpecialistDispatch.approved_dispatch)
+        local_specialist_suggestions = [object[]]@($SpecialistDispatch.local_specialist_suggestions)
+        blocked = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'blocked' -and $null -ne $SpecialistDispatch.blocked) { $SpecialistDispatch.blocked } else { @() }))
+        degraded = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'degraded' -and $null -ne $SpecialistDispatch.degraded) { $SpecialistDispatch.degraded } else { @() }))
+        approved_skill_ids = @($SpecialistDispatch.approved_dispatch | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
+        local_suggestion_skill_ids = @($SpecialistDispatch.local_specialist_suggestions | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
+        matched_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'matched_skill_ids' -and $null -ne $SpecialistDispatch.matched_skill_ids) { $SpecialistDispatch.matched_skill_ids } else { @() }))
+        surfaced_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'surfaced_skill_ids' -and $null -ne $SpecialistDispatch.surfaced_skill_ids) { $SpecialistDispatch.surfaced_skill_ids } else { @() }))
+        blocked_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'blocked_skill_ids' -and $null -ne $SpecialistDispatch.blocked_skill_ids) { $SpecialistDispatch.blocked_skill_ids } else { @() }))
+        degraded_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'degraded_skill_ids' -and $null -ne $SpecialistDispatch.degraded_skill_ids) { $SpecialistDispatch.degraded_skill_ids } else { @() }))
+        ghost_match_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'ghost_match_skill_ids' -and $null -ne $SpecialistDispatch.ghost_match_skill_ids) { $SpecialistDispatch.ghost_match_skill_ids } else { @() }))
+        promotion_outcomes = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'promotion_outcomes' -and $null -ne $SpecialistDispatch.promotion_outcomes) { $SpecialistDispatch.promotion_outcomes } else { @() }))
+        host_decision_applied = ($null -ne $HostSpecialistDispatchDecision)
+        host_selection_mode = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'selection_mode')) { [string]$HostSpecialistDispatchDecision.selection_mode } else { $null }
+        host_approved_skill_ids = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'approved_skill_ids')) { [object[]]@($HostSpecialistDispatchDecision.approved_skill_ids) } else { @() }
+        host_deferred_skill_ids = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'deferred_skill_ids')) { [object[]]@($HostSpecialistDispatchDecision.deferred_skill_ids) } else { @() }
+        host_rejected_skill_ids = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'rejected_skill_ids')) { [object[]]@($HostSpecialistDispatchDecision.rejected_skill_ids) } else { @() }
+        host_stale_skill_ids = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'stale_skill_ids')) { [object[]]@($HostSpecialistDispatchDecision.stale_skill_ids) } else { @() }
+        host_reconciliation_state = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'reconciliation_state')) { [string]$HostSpecialistDispatchDecision.reconciliation_state } else { $null }
+        host_requires_recuration = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'requires_recuration')) { [bool]$HostSpecialistDispatchDecision.requires_recuration } else { $false }
+        escalation_required = Get-VibeNestedPropertySafe -InputObject $SpecialistDispatch -PropertyPath @('escalation_required') -DefaultValue $false
+        escalation_status = Get-VibeNestedPropertySafe -InputObject $SpecialistDispatch -PropertyPath @('escalation_status') -DefaultValue ''
+        approval_owner = Get-VibeNestedPropertySafe -InputObject $Policy -PropertyPath @('child_specialist_suggestion_contract', 'approval_owner') -DefaultValue 'root_vibe'
+        status = Get-VibeNestedPropertySafe -InputObject $Policy -PropertyPath @('child_specialist_suggestion_contract', 'status') -DefaultValue 'auto_promote_when_safe_same_round'
+    }
+
     return [pscustomobject]@{
         stage = 'runtime_input_freeze'
         run_id = $RunId
@@ -1966,16 +2072,8 @@ function New-VibeRuntimeInputPacketProjection {
         legacy_skill_routing = [pscustomobject]@{
             specialist_recommendations = @($SpecialistRecommendations)
             stage_assistant_hints = @($StageAssistantHints)
-            specialist_dispatch = [pscustomobject]@{
-                approved_dispatch = [object[]]@($SpecialistDispatch.approved_dispatch)
-                local_specialist_suggestions = [object[]]@($SpecialistDispatch.local_specialist_suggestions)
-                blocked = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'blocked' -and $null -ne $SpecialistDispatch.blocked) { $SpecialistDispatch.blocked } else { @() }))
-                degraded = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'degraded' -and $null -ne $SpecialistDispatch.degraded) { $SpecialistDispatch.degraded } else { @() }))
-                promotion_outcomes = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'promotion_outcomes' -and $null -ne $SpecialistDispatch.promotion_outcomes) { $SpecialistDispatch.promotion_outcomes } else { @() }))
-            }
+            specialist_dispatch = $specialistDispatchProjection
         }
-        specialist_recommendations = @($SpecialistRecommendations)
-        stage_assistant_hints = @($StageAssistantHints)
         skill_usage = if ($null -ne $SkillUsage) {
             $SkillUsage
         } else {
@@ -1988,32 +2086,6 @@ function New-VibeRuntimeInputPacketProjection {
                 evidence = @()
                 unused_reasons = @()
             }
-        }
-        specialist_dispatch = [pscustomobject]@{
-            approved_dispatch = [object[]]@($SpecialistDispatch.approved_dispatch)
-            local_specialist_suggestions = [object[]]@($SpecialistDispatch.local_specialist_suggestions)
-            blocked = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'blocked' -and $null -ne $SpecialistDispatch.blocked) { $SpecialistDispatch.blocked } else { @() }))
-            degraded = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'degraded' -and $null -ne $SpecialistDispatch.degraded) { $SpecialistDispatch.degraded } else { @() }))
-            approved_skill_ids = @($SpecialistDispatch.approved_dispatch | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
-            local_suggestion_skill_ids = @($SpecialistDispatch.local_specialist_suggestions | ForEach-Object { [string]$_.skill_id } | Select-Object -Unique)
-            matched_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'matched_skill_ids' -and $null -ne $SpecialistDispatch.matched_skill_ids) { $SpecialistDispatch.matched_skill_ids } else { @() }))
-            surfaced_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'surfaced_skill_ids' -and $null -ne $SpecialistDispatch.surfaced_skill_ids) { $SpecialistDispatch.surfaced_skill_ids } else { @() }))
-            blocked_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'blocked_skill_ids' -and $null -ne $SpecialistDispatch.blocked_skill_ids) { $SpecialistDispatch.blocked_skill_ids } else { @() }))
-            degraded_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'degraded_skill_ids' -and $null -ne $SpecialistDispatch.degraded_skill_ids) { $SpecialistDispatch.degraded_skill_ids } else { @() }))
-            ghost_match_skill_ids = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'ghost_match_skill_ids' -and $null -ne $SpecialistDispatch.ghost_match_skill_ids) { $SpecialistDispatch.ghost_match_skill_ids } else { @() }))
-            promotion_outcomes = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'promotion_outcomes' -and $null -ne $SpecialistDispatch.promotion_outcomes) { $SpecialistDispatch.promotion_outcomes } else { @() }))
-            host_decision_applied = ($null -ne $HostSpecialistDispatchDecision)
-            host_selection_mode = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'selection_mode')) { [string]$HostSpecialistDispatchDecision.selection_mode } else { $null }
-            host_approved_skill_ids = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'approved_skill_ids')) { [object[]]@($HostSpecialistDispatchDecision.approved_skill_ids) } else { @() }
-            host_deferred_skill_ids = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'deferred_skill_ids')) { [object[]]@($HostSpecialistDispatchDecision.deferred_skill_ids) } else { @() }
-            host_rejected_skill_ids = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'rejected_skill_ids')) { [object[]]@($HostSpecialistDispatchDecision.rejected_skill_ids) } else { @() }
-            host_stale_skill_ids = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'stale_skill_ids')) { [object[]]@($HostSpecialistDispatchDecision.stale_skill_ids) } else { @() }
-            host_reconciliation_state = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'reconciliation_state')) { [string]$HostSpecialistDispatchDecision.reconciliation_state } else { $null }
-            host_requires_recuration = if ($null -ne $HostSpecialistDispatchDecision -and (Test-VibeObjectHasProperty -InputObject $HostSpecialistDispatchDecision -PropertyName 'requires_recuration')) { [bool]$HostSpecialistDispatchDecision.requires_recuration } else { $false }
-            escalation_required = Get-VibeNestedPropertySafe -InputObject $SpecialistDispatch -PropertyPath @('escalation_required') -DefaultValue $false
-            escalation_status = Get-VibeNestedPropertySafe -InputObject $SpecialistDispatch -PropertyPath @('escalation_status') -DefaultValue ''
-            approval_owner = Get-VibeNestedPropertySafe -InputObject $Policy -PropertyPath @('child_specialist_suggestion_contract', 'approval_owner') -DefaultValue 'root_vibe'
-            status = Get-VibeNestedPropertySafe -InputObject $Policy -PropertyPath @('child_specialist_suggestion_contract', 'status') -DefaultValue 'auto_promote_when_safe_same_round'
         }
         specialist_decision = $packetSpecialistDecision
         overlay_decisions = @($OverlayDecisions)
@@ -3038,13 +3110,14 @@ function New-VibeSpecialistRoutingLifecycleLayerProjection {
         [AllowNull()] [object]$RuntimeInputPacket
     )
 
-    if ($null -eq $RuntimeInputPacket -or -not (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'specialist_recommendations')) {
+    $specialistRecommendations = @(Get-VibeRuntimeSpecialistRecommendations -RuntimeInputPacket $RuntimeInputPacket)
+    if ($null -eq $RuntimeInputPacket -or @($specialistRecommendations).Count -eq 0) {
         return $null
     }
 
     $skills = New-Object System.Collections.Generic.List[object]
     $renderedLines = @('Discussion-chain routed Skills:')
-    foreach ($recommendation in @($RuntimeInputPacket.specialist_recommendations)) {
+    foreach ($recommendation in @($specialistRecommendations)) {
         if ($null -eq $recommendation) {
             continue
         }

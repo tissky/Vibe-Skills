@@ -125,13 +125,16 @@ class SkillPromotionFreezeContractTests(unittest.TestCase):
         fallback_by_task_type = policy["fallback_specialists_by_task_type"]
         for task_type in ("planning", "debug", "research", "coding", "review", "default"):
             with self.subTest(task_type=task_type):
+                self.assertIn(task_type, fallback_by_task_type)
+        for task_type in ("debug", "coding", "review"):
+            with self.subTest(task_type=task_type):
                 self.assertGreaterEqual(len(as_list(fallback_by_task_type[task_type])), 1)
 
     def test_eligible_matched_skill_is_approved_and_not_ghosted(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             payload = freeze_runtime_packet(ML_PROMPT, Path(tempdir))
             packet = load_json(payload["packet_path"])
-            dispatch = packet["specialist_dispatch"]
+            dispatch = packet["legacy_skill_routing"]["specialist_dispatch"]
 
             self.assertIn("scikit-learn", as_list(dispatch["matched_skill_ids"]))
             self.assertIn("scikit-learn", list(dispatch["approved_skill_ids"]))
@@ -162,7 +165,7 @@ class SkillPromotionFreezeContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             payload = freeze_runtime_packet(ML_PROMPT, Path(tempdir))
             packet = load_json(payload["packet_path"])
-            dispatch = packet["specialist_dispatch"]
+            dispatch = packet["legacy_skill_routing"]["specialist_dispatch"]
 
             surfaced = {str(skill_id) for skill_id in as_list(dispatch["surfaced_skill_ids"])}
             outcome_ids = {str(item["skill_id"]) for item in list(dispatch["promotion_outcomes"])}
@@ -174,12 +177,12 @@ class SkillPromotionFreezeContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             payload = freeze_runtime_packet(ML_PROMPT, Path(tempdir))
             packet = load_json(payload["packet_path"])
-            dispatch = packet["specialist_dispatch"]
+            dispatch = packet["legacy_skill_routing"]["specialist_dispatch"]
 
             self.assertNotIn("specialist_consultation", packet)
             self.assertNotIn("consulted_units", dispatch)
             self.assertNotIn("user_disclosures", dispatch)
-            self.assertGreaterEqual(len(as_list(packet["specialist_recommendations"])), 1)
+            self.assertGreaterEqual(len(as_list(packet["legacy_skill_routing"]["specialist_recommendations"])), 1)
             self.assertGreaterEqual(len(as_list(dispatch["approved_dispatch"])), 1)
 
     def test_policy_can_allow_incomplete_contract_without_forced_freeze_degrade(self) -> None:

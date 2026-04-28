@@ -353,6 +353,8 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
             self.assertIn("## Baseline UI Quality Mapping", execution_plan)
 
             runtime_input_packet = json.loads(runtime_input_packet_path.read_text(encoding="utf-8"))
+            legacy_skill_routing = runtime_input_packet["legacy_skill_routing"]
+            selected_skill_ids = [item["skill_id"] for item in runtime_input_packet["skill_routing"]["selected"]]
             governance_capsule = json.loads(governance_capsule_path.read_text(encoding="utf-8"))
             stage_lineage = json.loads(stage_lineage_path.read_text(encoding="utf-8"))
             execute_receipt = json.loads(execute_receipt_path.read_text(encoding="utf-8"))
@@ -370,11 +372,15 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
             self.assertEqual("systematic-debugging", runtime_input_packet["route_snapshot"]["selected_skill"])
             self.assertEqual("vibe", runtime_input_packet["divergence_shadow"]["runtime_selected_skill"])
             self.assertTrue(runtime_input_packet["divergence_shadow"]["skill_mismatch"])
-            self.assertGreaterEqual(len(runtime_input_packet["specialist_recommendations"]), 1)
+            self.assertNotIn("specialist_recommendations", runtime_input_packet)
+            self.assertNotIn("stage_assistant_hints", runtime_input_packet)
+            self.assertNotIn("specialist_dispatch", runtime_input_packet)
+            self.assertGreaterEqual(len(legacy_skill_routing["specialist_recommendations"]), 1)
             self.assertIn("specialist_decision", runtime_input_packet)
+            self.assertIn("systematic-debugging", selected_skill_ids)
             self.assertIn(
                 "systematic-debugging",
-                [item["skill_id"] for item in runtime_input_packet["specialist_recommendations"]],
+                [item["skill_id"] for item in legacy_skill_routing["specialist_recommendations"]],
             )
             self.assertNotEqual("execution-contract-prepared", execute_receipt["status"])
             self.assertGreaterEqual(execute_receipt["executed_unit_count"], 2)
@@ -422,7 +428,7 @@ class GovernedRuntimeBridgeTests(unittest.TestCase):
             self.assertEqual("approved_dispatch", specialist_decision["decision_state"])
             self.assertEqual("approved_dispatch", specialist_decision["resolution_mode"])
             self.assertEqual(
-                runtime_input_packet["specialist_dispatch"]["surfaced_skill_ids"],
+                legacy_skill_routing["specialist_dispatch"]["surfaced_skill_ids"],
                 specialist_decision["surfaced_skill_ids"],
             )
             self.assertIn("systematic-debugging", specialist_decision["surfaced_skill_ids"])

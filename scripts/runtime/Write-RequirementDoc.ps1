@@ -803,7 +803,8 @@ if ($runtimeInputPacket) {
     $selectedSkillRouting = @(Get-VibeSkillRoutingSelected -RuntimeInputPacket $runtimeInputPacket)
     # Compatibility variable name; authority is skill_routing.selected.
     $approvedSpecialistDispatch = @(Convert-VibeSkillRoutingSelectedToDispatch -RuntimeInputPacket $runtimeInputPacket)
-    if (($runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_recommendations' -and @($runtimeInputPacket.specialist_recommendations).Count -gt 0) -or @($approvedSpecialistDispatch).Count -gt 0) {
+    $legacySpecialistRecommendations = @(Get-VibeRuntimeSpecialistRecommendations -RuntimeInputPacket $runtimeInputPacket)
+    if (@($legacySpecialistRecommendations).Count -gt 0 -or @($approvedSpecialistDispatch).Count -gt 0) {
         $lines += @(
             '',
             '## Specialist Recommendations',

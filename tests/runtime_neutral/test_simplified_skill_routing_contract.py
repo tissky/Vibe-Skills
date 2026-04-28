@@ -167,3 +167,42 @@ class SimplifiedSkillRoutingContractTests(unittest.TestCase):
             self.assertIn("skill_id", selected)
             self.assertIn("task_slice", selected)
             self.assertIn("skill_md_path", selected)
+
+    def test_new_freeze_packet_isolates_legacy_specialist_fields(self) -> None:
+        shell = resolve_powershell()
+        if shell is None:
+            self.skipTest("PowerShell executable not available")
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir) / "artifacts"
+            subprocess.run(
+                [
+                    shell,
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-File",
+                    str(FREEZE_SCRIPT),
+                    "-Task",
+                    "Use biopython to parse FASTA and summarize sequence lengths.",
+                    "-Mode",
+                    "interactive_governed",
+                    "-RunId",
+                    "pytest-skill-routing-legacy-isolation",
+                    "-ArtifactRoot",
+                    str(artifact_root),
+                ],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                check=True,
+            )
+            packet_path = next(artifact_root.rglob("runtime-input-packet.json"))
+            packet = json.loads(packet_path.read_text(encoding="utf-8"))
+
+        self.assertIn("skill_routing", packet)
+        self.assertIn("legacy_skill_routing", packet)
+        self.assertNotIn("stage_assistant_hints", packet)
+        self.assertNotIn("specialist_recommendations", packet)
+        self.assertNotIn("specialist_dispatch", packet)
+        self.assertIn("specialist_recommendations", packet["legacy_skill_routing"])
+        self.assertIn("specialist_dispatch", packet["legacy_skill_routing"])
