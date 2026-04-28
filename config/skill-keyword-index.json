@@ -9,12 +9,6 @@
     "fallback_to_first_when_score_below": 0.15
   },
   "skills": {
-    "brainstorming": {
-      "keywords": ["brainstorm", "ideation", "头脑风暴", "方案发散", "创意讨论", "比较几个方案", "比较几个方向"]
-    },
-    "writing-plans": {
-      "keywords": ["implementation plan", "task breakdown", "execution plan", "milestone roadmap", "migration plan", "governance rollout", "rollout plan", "runbook", "wave plan", "cross-module migration", "routing governance", "计划书", "实施计划", "执行计划", "任务拆解", "里程碑规划", "迁移计划"]
-    },
     "vibe": {
       "keywords": ["/vibe", "$vibe", "vibe route", "vibe 路由", "vibe内核", "vibe skills", "路由融合", "路由冲突", "命中稳定", "误路由", "权重计算", "阈值计算"]
     },
@@ -32,9 +26,6 @@
     },
     "deepagent-memory-fold": {
       "keywords": ["deepagent", "memory folding", "fold", "context compression", "compress context", "resume prompt", "handoff", "handover", "long-running", "上下文压缩", "记忆折叠", "续跑", "交接", "恢复提示"]
-    },
-    "subagent-driven-development": {
-      "keywords": ["subagent", "parallel agents", "multi-agent", "independent tasks", "子代理", "多代理", "并行执行", "拆成多个代理", "多个 agent"]
     },
     "spec-kit-vibe-compat": {
       "keywords": ["/speckit", "speckit", "spec-kit", ".specify", "specify cli", "spec.md", "tasks.md", "constitution.md"]

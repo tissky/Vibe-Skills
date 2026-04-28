@@ -50,62 +50,7 @@
                                                            "planning"
                                                        ]
                             },
-                   "brainstorming":  {
-                                         "task_allow":  [
-                                                            "planning",
-                                                            "research"
-                                                        ],
-                                         "positive_keywords":  [
-                                                                   "brainstorm",
-                                                                   "ideation",
-                                                                   "头脑风暴",
-                                                                   "方案发散",
-                                                                   "创意讨论",
-                                                                   "比较几个方案",
-                                                                   "比较几个方向"
-                                                               ],
-                                         "negative_keywords":  [
-                                                                   "直接实现",
-                                                                   "fix bug",
-                                                                   "部署"
-                                                               ],
-                                         "equivalent_group":  null,
-                                         "canonical_for_task":  [
-                                                                    "planning"
-                                                                ]
-                                     },
-                   "writing-plans":  {
-                                         "task_allow":  [
-                                                            "planning"
-                                                        ],
-                                         "positive_keywords":  [
-                                                                   "implementation plan",
-                                                                   "task breakdown",
-                                                                   "execution plan",
-                                                                   "milestone roadmap",
-                                                                   "migration plan",
-                                                                   "governance rollout",
-                                                                   "rollout plan",
-                                                                   "runbook",
-                                                                   "wave plan",
-                                                                   "计划",
-                                                                   "实施计划",
-                                                                   "执行计划",
-                                                                   "任务拆解",
-                                                                   "里程碑",
-                                                                   "迁移计划"
-                                                               ],
-                                         "negative_keywords":  [
-                                                                   "bug",
-                                                                   "traceback",
-                                                                   "security audit"
-                                                               ],
-                                         "equivalent_group":  "plan-authoring",
-                                         "canonical_for_task":  [
-                                                                    "planning"
-                                                                ]
-                                     },
-                   "flashrag-evidence":  {
+                    "flashrag-evidence":  {
                                              "task_allow":  [
                                                                 "planning",
                                                                 "review",
@@ -391,37 +336,7 @@
 
                                                                ]
                                     },
-                   "subagent-driven-development":  {
-                                                       "task_allow":  [
-                                                                          "planning",
-                                                                          "coding",
-                                                                          "review",
-                                                                          "debug",
-                                                                          "research"
-                                                                      ],
-                                                       "positive_keywords":  [
-                                                                                 "subagent",
-                                                                                 "parallel agents",
-                                                                                 "multi-agent",
-                                                                                 "independent tasks",
-                                                                                 "子代理",
-                                                                                 "多代理",
-                                                                                 "并行执行",
-                                                                                 "拆成多个代理",
-                                                                                 "多个 agent"
-                                                                             ],
-                                                       "negative_keywords":  [
-                                                                                 "single file typo",
-                                                                                 "ordinary coding",
-                                                                                 "普通改代码",
-                                                                                 "普通调试"
-                                                                             ],
-                                                       "equivalent_group":  null,
-                                                       "canonical_for_task":  [
-                                                                              ],
-                                                       "requires_positive_keyword_match":  true
-                                                   },
-                   "spec-kit-vibe-compat":  {
+                    "spec-kit-vibe-compat":  {
                                                "task_allow":  [
                                                                   "planning",
                                                                   "coding",

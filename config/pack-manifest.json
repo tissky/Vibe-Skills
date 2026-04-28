@@ -4,77 +4,6 @@
     "legacy_matrix_fallback":  true,
     "packs":  [
                   {
-                      "id":  "orchestration-core",
-                      "priority":  100,
-                        "grade_allow":  [
-                                            "M",
-                                            "L",
-                                            "XL"
-                                        ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "review",
-                                         "debug",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "vibe",
-                                               "orchestrate",
-                                               "workflow",
-                                               "plan",
-                                               "brainstorm",
-                                               "spec",
-                                               "subagent",
-                                               "migration",
-                                               "governance",
-                                               "rollout",
-                                               "runbook",
-                                               "wave",
-                                               "cross-module",
-                                               "编排",
-                                               "工作流",
-                                               "规划",
-                                               "计划",
-                                               "方案",
-                                               "迁移",
-                                               "治理",
-                                               "发布推进",
-                                               "运行手册",
-                                               "波次",
-                                               "跨模块",
-                                               "子代理",
-                                               "多代理",
-                                               "路由"
-                                           ],
-                      "skill_candidates":  [
-                                               "brainstorming",
-                                               "writing-plans",
-                                               "subagent-driven-development",
-                                               "context-hunter",
-                                               "think-harder",
-                                               "dialectic",
-                                               "local-vco-roles",
-                                               "spec-kit-vibe-compat"
-                                           ],
-                      "route_authority_candidates":  [
-                                                       "brainstorming",
-                                                       "writing-plans",
-                                                       "subagent-driven-development",
-                                                       "spec-kit-vibe-compat"
-                                                   ],
-                      "stage_assistant_candidates":  [
-                                                       "context-hunter",
-                                                       "think-harder",
-                                                       "dialectic",
-                                                       "local-vco-roles"
-                                                   ],
-                      "defaults_by_task":  {
-                                               "planning":  "writing-plans",
-                                               "research":  "brainstorming"
-                                           }
-                  },
-                  {
                       "id":  "aios-core",
                       "priority":  96,
                       "grade_allow":  [
@@ -140,6 +69,39 @@
                                                "research":  "aios-master",
                                                "coding":  "aios-master",
                                                "review":  "aios-master"
+                                           }
+                  },
+                  {
+                      "id":  "workflow-compatibility",
+                      "priority":  89,
+                      "grade_allow":  [
+                                          "M",
+                                          "L",
+                                          "XL"
+                                      ],
+                      "task_allow":  [
+                                         "planning",
+                                         "coding",
+                                         "review",
+                                         "debug",
+                                         "research"
+                                     ],
+                      "trigger_keywords":  [
+                                               "/speckit",
+                                               "speckit",
+                                               "speckit.",
+                                               "spec-kit",
+                                               ".specify"
+                                           ],
+                      "skill_candidates":  [
+                                               "spec-kit-vibe-compat"
+                                           ],
+                      "route_authority_candidates":  [
+                                                       "spec-kit-vibe-compat"
+                                                   ],
+                      "stage_assistant_candidates":  [
+                                                    ],
+                      "defaults_by_task":  {
                                            }
                   },
                   {
