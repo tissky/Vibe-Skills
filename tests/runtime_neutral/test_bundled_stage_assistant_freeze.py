@@ -28,7 +28,7 @@ def resolve_powershell() -> str | None:
 
 
 class BundledStageAssistantFreezeTests(unittest.TestCase):
-    def test_runtime_freeze_keeps_vibe_as_route_authority_and_splits_stage_assistants_from_specialists(self) -> None:
+    def test_runtime_freeze_keeps_vibe_runtime_authority_and_splits_stage_assistants_from_specialists(self) -> None:
         shell = resolve_powershell()
         if shell is None:
             self.skipTest("PowerShell executable not available in PATH")
@@ -43,7 +43,7 @@ class BundledStageAssistantFreezeTests(unittest.TestCase):
                 "-File",
                 str(FREEZE_SCRIPT),
                 "-Task",
-                "Please keep task_plan.md and progress.md updated for this complex task.",
+                "Create a journal-ready multi-panel figure with a colorblind-safe palette and vector export.",
                 "-Mode",
                 "interactive_governed",
                 "-RunId",
@@ -56,21 +56,25 @@ class BundledStageAssistantFreezeTests(unittest.TestCase):
             packet_path = next(artifact_root.rglob("runtime-input-packet.json"))
             packet = json.loads(packet_path.read_text(encoding="utf-8"))
 
-            self.assertEqual("vibe", packet["route_snapshot"]["selected_skill"])
+            self.assertEqual("vibe", packet["divergence_shadow"]["runtime_selected_skill"])
+            self.assertEqual("science-figures-visualization", packet["route_snapshot"]["selected_pack"])
+            self.assertEqual("scientific-visualization", packet["route_snapshot"]["selected_skill"])
 
             recommendation_pairs = [
                 (item["skill_id"], item["source"])
                 for item in packet["specialist_recommendations"]
             ]
-            self.assertNotIn(("writing-plans", "route_stage_assistant"), recommendation_pairs)
-            self.assertNotIn(("planning-with-files", "route_stage_assistant"), recommendation_pairs)
+            self.assertNotIn(("matplotlib", "route_stage_assistant"), recommendation_pairs)
+            self.assertNotIn(("seaborn", "route_stage_assistant"), recommendation_pairs)
+            self.assertNotIn(("plotly", "route_stage_assistant"), recommendation_pairs)
 
             hint_pairs = [
                 (item["skill_id"], item["source"])
                 for item in packet["stage_assistant_hints"]
             ]
-            self.assertIn(("writing-plans", "route_stage_assistant"), hint_pairs)
-            self.assertIn(("planning-with-files", "route_stage_assistant"), hint_pairs)
+            self.assertIn(("matplotlib", "route_stage_assistant"), hint_pairs)
+            self.assertIn(("seaborn", "route_stage_assistant"), hint_pairs)
+            self.assertIn(("plotly", "route_stage_assistant"), hint_pairs)
 
 
 if __name__ == "__main__":
