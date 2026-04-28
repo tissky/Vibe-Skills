@@ -598,9 +598,39 @@
                                                 "cobrapy",
                                                 "esm",
                                                 "flowio",
-                                                "geniml",
-                                                "string-database"
-                                            ],
+                                               "geniml",
+                                               "string-database"
+                                           ],
+                      "route_authority_candidates":  [
+                                                       "scanpy",
+                                                       "pydeseq2",
+                                                       "pysam",
+                                                       "biopython",
+                                                       "gget",
+                                                       "esm",
+                                                       "cobrapy",
+                                                       "flowio",
+                                                       "arboreto",
+                                                       "geniml"
+                                                   ],
+                      "stage_assistant_candidates":  [
+                                                       "anndata",
+                                                       "scvi-tools",
+                                                       "deeptools",
+                                                       "bioservices",
+                                                       "alphafold-database",
+                                                       "clinvar-database",
+                                                       "cosmic-database",
+                                                       "ensembl-database",
+                                                       "gene-database",
+                                                       "gwas-database",
+                                                       "kegg-database",
+                                                       "opentargets-database",
+                                                       "pdb-database",
+                                                       "reactome-database",
+                                                       "string-database",
+                                                       "cellxgene-census"
+                                                   ],
                       "defaults_by_task":  {
                                                "planning":  "biopython",
                                                "coding":  "biopython",

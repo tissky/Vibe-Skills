@@ -208,6 +208,22 @@ class BioSciencePackConsolidationAuditTests(unittest.TestCase):
         after = {path: path.read_text(encoding="utf-8") for path in config_paths}
         self.assertEqual(before, after)
 
+    def test_real_bio_science_pack_has_target_role_split(self) -> None:
+        manifest = json.loads((REPO_ROOT / "config" / "pack-manifest.json").read_text(encoding="utf-8-sig"))
+        bio_pack = next(pack for pack in manifest["packs"] if pack["id"] == "bio-science")
+
+        self.assertEqual(BIO_SCIENCE_CANDIDATES, bio_pack["skill_candidates"])
+        self.assertEqual(BIO_SCIENCE_ROUTE_AUTHORITIES, bio_pack["route_authority_candidates"])
+        self.assertEqual(BIO_SCIENCE_STAGE_ASSISTANTS, bio_pack["stage_assistant_candidates"])
+        self.assertEqual(
+            {
+                "planning": "biopython",
+                "coding": "biopython",
+                "research": "scanpy",
+            },
+            bio_pack["defaults_by_task"],
+        )
+
     def test_runtime_neutral_wrapper_exposes_main(self) -> None:
         wrapper = REPO_ROOT / "scripts" / "verify" / "runtime_neutral" / "bio_science_pack_consolidation_audit.py"
         text = wrapper.read_text(encoding="utf-8")
