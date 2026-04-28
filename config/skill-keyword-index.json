@@ -130,16 +130,22 @@
       "keywords": ["preprocess data", "data preprocessing", "data cleaning pipeline", "etl pipeline", "data transformation", "feature encoding", "standardize data", "normalize data", "数据预处理", "清洗数据", "ETL流水线", "数据转换"]
     },
     "scanpy": {
-      "keywords": ["scanpy", "single-cell", "scRNA", "单细胞分析", "细胞聚类", "marker基因"]
+      "keywords": ["scanpy", "single-cell", "single-cell clustering", "scRNA", "h5ad", "10x", "leiden", "marker genes", "单细胞聚类", "细胞注释", "marker基因"]
     },
     "pydeseq2": {
-      "keywords": ["deseq2", "differential expression", "差异表达", "de分析", "rna-seq差异"]
+      "keywords": ["pydeseq2", "deseq2", "bulk RNA-seq", "differential expression", "volcano plot", "MA plot", "padj", "差异表达", "差异表达分析", "de分析", "rna-seq差异"]
     },
     "pysam": {
-      "keywords": ["bam", "sam", "vcf", "cram", "测序比对文件", "变异文件解析"]
+      "keywords": ["pysam", "bam", "sam", "cram", "vcf", "pileup", "coverage", "测序比对文件", "变异文件", "变异文件解析", "覆盖度"]
     },
     "biopython": {
-      "keywords": ["biopython", "fasta", "genbank", "序列解析", "生物序列处理", "生物信息学分析", "生信分析", "基因注释", "序列注释"]
+      "keywords": ["biopython", "seqio", "fasta", "genbank", "entrez", "sequence conversion", "序列格式转换", "序列解析", "生物序列处理"]
+    },
+    "gget": {
+      "keywords": ["gget", "Ensembl lookup", "gene symbol", "transcript lookup", "quick BLAST", "快速生信查询", "基因symbol", "Ensembl ID"]
+    },
+    "bioservices": {
+      "keywords": ["bioservices", "cross database", "uniprot", "kegg", "chembl", "多数据库", "跨数据库查询"]
     },
     "docs-write": {
       "keywords": ["write docs", "documentation", "documentation page", "markdown docs", "mdx docs", "说明文档", "文档写作", "用户文档", "使用说明", "markdown文档"]
@@ -415,19 +421,19 @@
       "keywords": ["research grant", "grant", "grants", "grant proposal", "proposal", "proposals", "nih", "nsf", "nsfc", "darpa", "科研基金", "项目申请书", "基金申请", "基金申请书", "基金标书"]
     },
     "arboreto": {
-      "keywords": ["arboreto", "grn", "gene regulatory network", "pySCENIC", "基因调控网络", "转录因子"]
+      "keywords": ["arboreto", "pyscenic", "pySCENIC", "grn", "gene regulatory network", "transcription factor network", "基因调控网络", "转录因子网络"]
     },
     "cobrapy": {
-      "keywords": ["cobrapy", "flux balance", "fba", "metabolic model", "代谢建模", "通量平衡"]
+      "keywords": ["cobrapy", "COBRApy", "fba", "flux balance", "metabolic model", "constraint-based metabolic model", "代谢建模", "通量平衡"]
     },
     "esm": {
-      "keywords": ["esm", "protein language model", "protein embedding", "蛋白语言模型", "蛋白嵌入"]
+      "keywords": ["esm", "protein language model", "protein embedding", "protein embeddings", "protein lm", "蛋白语言模型", "蛋白嵌入"]
     },
     "flowio": {
-      "keywords": ["flowio", "flow cytometry", "fcs", "cytometry", "流式细胞", "FCS"]
+      "keywords": ["flowio", "flow cytometry", "fcs", "cytometry", "channel matrix", "流式细胞", "FCS"]
     },
     "geniml": {
-      "keywords": ["geniml", "genomic ml", "genome embedding", "基因组机器学习", "基因组嵌入"]
+      "keywords": ["geniml", "genomic ml", "genomic machine learning", "genome embedding", "基因组机器学习", "基因组嵌入"]
     },
     "scientific-slides": {
       "keywords": ["scientific slides", "slide deck", "ppt", "pptx", "科研幻灯片", "学术幻灯片"]

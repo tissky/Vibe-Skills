@@ -1413,84 +1413,170 @@
 
                                                                                ]
                                                     },
-                   "biopython":  {
-                                     "task_allow":  [
-                                                        "planning",
-                                                        "coding",
-                                                        "research"
-                                                    ],
-                                     "positive_keywords":  [
-                                                               "biopython",
-                                                               "fasta",
-                                                               "genbank",
-                                                               "序列处理"
-                                                           ],
-                                     "negative_keywords":  [
-                                                               "ci logs",
-                                                               "deployment"
-                                                           ],
-                                     "equivalent_group":  null,
-                                     "canonical_for_task":  [
-                                                                "planning",
-                                                                "coding"
-                                                            ]
-                                 },
-                   "scanpy":  {
-                                  "task_allow":  [
-                                                     "research",
-                                                     "coding"
-                                                 ],
-                                  "positive_keywords":  [
-                                                            "scanpy",
-                                                            "single-cell",
-                                                            "scRNA",
-                                                            "单细胞"
-                                                        ],
-                                  "negative_keywords":  [
-                                                            "vercel"
-                                                        ],
-                                  "equivalent_group":  null,
-                                  "canonical_for_task":  [
-                                                             "research"
-                                                         ]
-                              },
-                   "pydeseq2":  {
+                  "biopython":  {
                                     "task_allow":  [
-                                                       "research",
-                                                       "coding"
+                                                       "planning",
+                                                       "coding",
+                                                       "research"
                                                    ],
                                     "positive_keywords":  [
-                                                              "deseq2",
-                                                              "differential expression",
-                                                              "差异表达"
+                                                              "biopython",
+                                                              "SeqIO",
+                                                              "FASTA",
+                                                              "GenBank",
+                                                              "Entrez",
+                                                              "sequence conversion",
+                                                              "序列格式转换",
+                                                              "序列处理"
                                                           ],
                                     "negative_keywords":  [
-                                                              "prompt engineering"
+                                                              "scanpy",
+                                                              "single-cell",
+                                                              "h5ad",
+                                                              "DESeq2",
+                                                              "pydeseq2",
+                                                              "BAM",
+                                                              "VCF",
+                                                              "pysam",
+                                                              "ESM",
+                                                              "protein embedding",
+                                                              "FBA",
+                                                              "COBRApy",
+                                                              "flow cytometry",
+                                                              "FCS",
+                                                              "RDKit",
+                                                              "SMILES",
+                                                              "PubMed",
+                                                              "BibTeX",
+                                                              "DICOM",
+                                                              "cover letter",
+                                                              "rebuttal"
                                                           ],
                                     "equivalent_group":  null,
                                     "canonical_for_task":  [
-
+                                                               "planning",
+                                                               "coding"
                                                            ]
                                 },
-                   "pysam":  {
+                  "scanpy":  {
                                  "task_allow":  [
                                                     "research",
                                                     "coding"
                                                 ],
                                  "positive_keywords":  [
-                                                           "bam",
-                                                           "sam",
-                                                           "vcf",
-                                                           "coverage"
+                                                           "scanpy",
+                                                           "single-cell",
+                                                           "single cell",
+                                                           "scRNA",
+                                                           "h5ad",
+                                                           "10x",
+                                                           "leiden",
+                                                           "marker genes",
+                                                           "单细胞",
+                                                           "单细胞聚类",
+                                                           "细胞注释"
                                                        ],
                                  "negative_keywords":  [
-                                                           "ux workshop"
+                                                           "bulk RNA-seq",
+                                                           "DESeq2",
+                                                           "pydeseq2",
+                                                           "BAM",
+                                                           "SAM",
+                                                           "CRAM",
+                                                           "VCF",
+                                                           "pysam",
+                                                           "protein embedding",
+                                                           "ESM",
+                                                           "FBA",
+                                                           "COBRApy",
+                                                           "flow cytometry",
+                                                           "FCS",
+                                                           "RDKit",
+                                                           "SMILES",
+                                                           "PubMed",
+                                                           "BibTeX",
+                                                           "DICOM",
+                                                           "cover letter",
+                                                           "rebuttal"
                                                        ],
                                  "equivalent_group":  null,
                                  "canonical_for_task":  [
-
+                                                            "research"
                                                         ]
                              },
+                  "pydeseq2":  {
+                                   "task_allow":  [
+                                                      "research",
+                                                      "coding"
+                                                  ],
+                                   "positive_keywords":  [
+                                                             "pydeseq2",
+                                                             "deseq2",
+                                                             "bulk RNA-seq",
+                                                             "differential expression",
+                                                             "volcano plot",
+                                                             "MA plot",
+                                                             "padj",
+                                                             "差异表达",
+                                                             "差异表达分析"
+                                                         ],
+                                   "negative_keywords":  [
+                                                             "scanpy",
+                                                             "single-cell",
+                                                             "h5ad",
+                                                             "BAM",
+                                                             "VCF",
+                                                             "pysam",
+                                                             "ESM",
+                                                             "protein embedding",
+                                                             "COBRApy",
+                                                             "FBA",
+                                                             "flow cytometry",
+                                                             "RDKit",
+                                                             "SMILES",
+                                                             "PubMed",
+                                                             "DICOM"
+                                                         ],
+                                   "equivalent_group":  null,
+                                   "canonical_for_task":  [
+
+                                                          ]
+                               },
+                  "pysam":  {
+                                "task_allow":  [
+                                                   "research",
+                                                   "coding"
+                                               ],
+                                "positive_keywords":  [
+                                                          "pysam",
+                                                          "BAM",
+                                                          "SAM",
+                                                          "CRAM",
+                                                          "VCF",
+                                                          "pileup",
+                                                          "coverage",
+                                                          "变异文件",
+                                                          "覆盖度"
+                                                      ],
+                                "negative_keywords":  [
+                                                          "scanpy",
+                                                          "single-cell",
+                                                          "DESeq2",
+                                                          "volcano plot",
+                                                          "ESM",
+                                                          "protein embedding",
+                                                          "COBRApy",
+                                                          "FBA",
+                                                          "flow cytometry",
+                                                          "RDKit",
+                                                          "PubMed",
+                                                          "DICOM"
+                                                      ],
+                                "equivalent_group":  null,
+                                "canonical_for_task":  [
+
+                                                       ]
+                            },
                    "bioservices":  {
                                        "task_allow":  [
                                                           "research",
@@ -1510,24 +1596,42 @@
 
                                                               ]
                                    },
-                   "gget":  {
-                                "task_allow":  [
-                                                   "research",
-                                                   "coding"
-                                               ],
-                                "positive_keywords":  [
-                                                          "quick blast",
-                                                          "gget",
-                                                          "快速生信查询"
-                                                      ],
-                                "negative_keywords":  [
-                                                          "release notes"
-                                                      ],
-                                "equivalent_group":  null,
-                                "canonical_for_task":  [
+                  "gget":  {
+                               "task_allow":  [
+                                                  "research",
+                                                  "coding"
+                                              ],
+                               "positive_keywords":  [
+                                                         "gget",
+                                                         "Ensembl lookup",
+                                                         "gene symbol",
+                                                         "transcript lookup",
+                                                         "quick BLAST",
+                                                         "快速生信查询",
+                                                         "Ensembl ID"
+                                                     ],
+                               "negative_keywords":  [
+                                                         "scanpy",
+                                                         "single-cell",
+                                                         "h5ad",
+                                                         "DESeq2",
+                                                         "pydeseq2",
+                                                         "bulk RNA-seq",
+                                                         "BAM",
+                                                         "VCF",
+                                                         "pysam",
+                                                         "COBRApy",
+                                                         "FBA",
+                                                         "flow cytometry",
+                                                         "DICOM",
+                                                         "cover letter",
+                                                         "rebuttal"
+                                                     ],
+                               "equivalent_group":  null,
+                               "canonical_for_task":  [
 
-                                                       ]
-                            },
+                                                      ]
+                           },
                    "spreadsheet":  {
                                        "task_allow":  [
                                                           "coding",
@@ -4879,43 +4983,33 @@
                                                                       "planning"
                                                                   ]
                                        },
-                   "arboreto":  {
-                                    "task_allow":  [
-                                                       "coding",
-                                                       "research"
-                                                   ],
-                                    "positive_keywords":  [
-                                                              "arboreto",
-                                                              "pyscenic",
-                                                              "gene regulatory network",
-                                                              "grn",
-                                                              "转录因子",
-                                                              "基因调控网络"
-                                                          ],
-                                    "negative_keywords":  [
-                                                              "dicom",
-                                                              "patent"
-                                                          ],
-                                    "equivalent_group":  "bio-systems",
-                                    "canonical_for_task":  [
-                                                               "coding"
-                                                           ]
-                                },
-                   "cobrapy":  {
+                  "arboreto":  {
                                    "task_allow":  [
                                                       "coding",
                                                       "research"
                                                   ],
                                    "positive_keywords":  [
-                                                             "cobrapy",
-                                                             "fba",
-                                                             "flux balance",
-                                                             "metabolic model",
-                                                             "代谢建模",
-                                                             "通量平衡"
+                                                             "arboreto",
+                                                             "pySCENIC",
+                                                             "pyscenic",
+                                                             "GRN",
+                                                             "gene regulatory network",
+                                                             "transcription factor network",
+                                                             "基因调控网络",
+                                                             "转录因子网络"
                                                          ],
                                    "negative_keywords":  [
-                                                             "dicom",
+                                                             "bulk RNA-seq",
+                                                             "DESeq2",
+                                                             "BAM",
+                                                             "VCF",
+                                                             "ESM",
+                                                             "protein embedding",
+                                                             "COBRApy",
+                                                             "FBA",
+                                                             "flow cytometry",
+                                                             "RDKit",
+                                                             "DICOM",
                                                              "patent"
                                                          ],
                                    "equivalent_group":  "bio-systems",
@@ -4923,50 +5017,109 @@
                                                               "coding"
                                                           ]
                                },
-                   "esm":  {
-                               "task_allow":  [
-                                                  "coding",
-                                                  "research"
-                                              ],
-                               "positive_keywords":  [
-                                                         "esm",
-                                                         "protein language model",
-                                                         "protein embedding",
-                                                         "protein lm",
-                                                         "蛋白语言模型",
-                                                         "蛋白嵌入"
-                                                     ],
-                               "negative_keywords":  [
-                                                         "dicom",
-                                                         "patent"
-                                                     ],
-                               "equivalent_group":  "bio-ml",
-                               "canonical_for_task":  [
-                                                          "coding"
-                                                      ]
-                           },
-                   "flowio":  {
+                  "cobrapy":  {
                                   "task_allow":  [
                                                      "coding",
                                                      "research"
                                                  ],
                                   "positive_keywords":  [
-                                                            "flowio",
-                                                            "flow cytometry",
-                                                            "fcs",
-                                                            "cytometry",
-                                                            "流式细胞",
-                                                            "FCS"
+                                                            "COBRApy",
+                                                            "cobrapy",
+                                                            "FBA",
+                                                            "flux balance",
+                                                            "metabolic model",
+                                                            "constraint-based metabolic model",
+                                                            "代谢建模",
+                                                            "通量平衡"
                                                         ],
                                   "negative_keywords":  [
-                                                            "dicom",
+                                                            "scanpy",
+                                                            "single-cell",
+                                                            "DESeq2",
+                                                            "BAM",
+                                                            "VCF",
+                                                            "ESM",
+                                                            "protein embedding",
+                                                            "flow cytometry",
+                                                            "RDKit",
+                                                            "SMILES",
+                                                            "DICOM",
+                                                            "PubMed",
                                                             "patent"
                                                         ],
-                                  "equivalent_group":  "bio-data-io",
+                                  "equivalent_group":  "bio-systems",
                                   "canonical_for_task":  [
                                                              "coding"
                                                          ]
                               },
+                  "esm":  {
+                              "task_allow":  [
+                                                 "coding",
+                                                 "research"
+                                             ],
+                              "positive_keywords":  [
+                                                        "ESM",
+                                                        "esm",
+                                                        "protein language model",
+                                                        "protein embedding",
+                                                        "protein embeddings",
+                                                        "protein lm",
+                                                        "蛋白语言模型",
+                                                        "蛋白嵌入"
+                                                    ],
+                              "negative_keywords":  [
+                                                        "scanpy",
+                                                        "single-cell",
+                                                        "DESeq2",
+                                                        "BAM",
+                                                        "VCF",
+                                                        "COBRApy",
+                                                        "FBA",
+                                                        "flow cytometry",
+                                                        "RDKit",
+                                                        "SMILES",
+                                                        "DICOM",
+                                                        "PubMed",
+                                                        "patent"
+                                                    ],
+                              "equivalent_group":  "bio-ml",
+                              "canonical_for_task":  [
+                                                         "coding"
+                                                     ]
+                          },
+                  "flowio":  {
+                                 "task_allow":  [
+                                                    "coding",
+                                                    "research"
+                                                ],
+                                 "positive_keywords":  [
+                                                           "flowio",
+                                                           "flow cytometry",
+                                                           "FCS",
+                                                           "fcs",
+                                                           "cytometry",
+                                                           "channel matrix",
+                                                           "流式细胞"
+                                                       ],
+                                 "negative_keywords":  [
+                                                           "scanpy",
+                                                           "single-cell",
+                                                           "DESeq2",
+                                                           "BAM",
+                                                           "VCF",
+                                                           "ESM",
+                                                           "protein embedding",
+                                                           "COBRApy",
+                                                           "FBA",
+                                                           "RDKit",
+                                                           "DICOM",
+                                                           "patent"
+                                                       ],
+                                 "equivalent_group":  "bio-data-io",
+                                 "canonical_for_task":  [
+                                                            "coding"
+                                                        ]
+                             },
                    "modal-labs":  {
                                      "task_allow":  [
                                                         "planning",
@@ -4999,25 +5152,37 @@
                                                                 "coding"
                                                             ]
                                  },
-                   "geniml":  {
-                                  "task_allow":  [
-                                                     "coding",
-                                                     "research"
-                                                 ],
-                                  "positive_keywords":  [
-                                                            "geniml",
-                                                            "genomic ml",
-                                                            "genome embedding",
-                                                            "基因组嵌入",
-                                                            "基因组机器学习"
-                                                        ],
-                                  "negative_keywords":  [
-                                                            "dicom",
-                                                            "patent"
-                                                        ],
-                                  "equivalent_group":  "bio-ml",
-                                  "canonical_for_task":  [
-                                                             "coding"
+                  "geniml":  {
+                                 "task_allow":  [
+                                                    "coding",
+                                                    "research"
+                                                ],
+                                 "positive_keywords":  [
+                                                           "geniml",
+                                                           "genomic ML",
+                                                           "genomic machine learning",
+                                                           "genome embedding",
+                                                           "基因组机器学习",
+                                                           "基因组嵌入"
+                                                       ],
+                                 "negative_keywords":  [
+                                                           "scanpy",
+                                                           "single-cell",
+                                                           "DESeq2",
+                                                           "BAM",
+                                                           "VCF",
+                                                           "ESM",
+                                                           "protein embedding",
+                                                           "COBRApy",
+                                                           "FBA",
+                                                           "flow cytometry",
+                                                           "RDKit",
+                                                           "DICOM",
+                                                           "patent"
+                                                       ],
+                                 "equivalent_group":  "bio-ml",
+                                 "canonical_for_task":  [
+                                                            "coding"
                                                          ]
                               }
                 }
