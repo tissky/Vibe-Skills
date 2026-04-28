@@ -1835,6 +1835,7 @@ function New-VibeRuntimeInputPacketProjection {
         [AllowNull()] [object]$HostDecision = $null,
         [AllowNull()] [object[]]$SpecialistRecommendations = @(),
         [AllowNull()] [object[]]$StageAssistantHints = @(),
+        [AllowNull()] [object]$SkillUsage = $null,
         [Parameter(Mandatory)] [object]$SpecialistDispatch,
         [AllowNull()] [object[]]$OverlayDecisions = @(),
         [Parameter(Mandatory)] [object]$Policy
@@ -1953,6 +1954,19 @@ function New-VibeRuntimeInputPacketProjection {
         host_specialist_dispatch_decision = $HostSpecialistDispatchDecision
         specialist_recommendations = @($SpecialistRecommendations)
         stage_assistant_hints = @($StageAssistantHints)
+        skill_usage = if ($null -ne $SkillUsage) {
+            $SkillUsage
+        } else {
+            [pscustomobject]@{
+                schema_version = 1
+                state_model = 'binary_used_unused'
+                used_skills = @()
+                unused_skills = @()
+                loaded_skills = @()
+                evidence = @()
+                unused_reasons = @()
+            }
+        }
         specialist_dispatch = [pscustomobject]@{
             approved_dispatch = [object[]]@($SpecialistDispatch.approved_dispatch)
             local_specialist_suggestions = [object[]]@($SpecialistDispatch.local_specialist_suggestions)

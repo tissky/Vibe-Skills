@@ -21,6 +21,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'VibeRuntime.Common.ps1')
+. (Join-Path $PSScriptRoot 'VibeSkillUsage.Common.ps1')
 
 function Get-VibeRouterTaskType {
     param(
@@ -1154,6 +1155,45 @@ $specialistRecommendations = @(Add-VibeExecutionPhaseMetadataToRecords `
 $stageAssistantHints = @(Add-VibeExecutionPhaseMetadataToRecords `
     -Records @($stageAssistantHints) `
     -PhaseDecomposition $executionPhaseDecomposition)
+$skillUsageTouched = New-Object System.Collections.Generic.List[object]
+if (-not [string]::IsNullOrWhiteSpace([string]$routerSelectedSkill)) {
+    $skillUsageTouched.Add([pscustomobject]@{
+        skill_id = [string]$routerSelectedSkill
+        reason = 'loaded_but_no_artifact_impact'
+    }) | Out-Null
+}
+foreach ($recommendation in @($specialistRecommendations)) {
+    $candidateSkillId = if ($recommendation.PSObject.Properties.Name -contains 'skill_id') { [string]$recommendation.skill_id } else { '' }
+    if (-not [string]::IsNullOrWhiteSpace($candidateSkillId)) {
+        $skillUsageTouched.Add([pscustomobject]@{
+            skill_id = $candidateSkillId
+            reason = 'recommendation_only'
+        }) | Out-Null
+    }
+}
+foreach ($hint in @($stageAssistantHints)) {
+    $hintSkillId = if ($hint.PSObject.Properties.Name -contains 'skill_id') { [string]$hint.skill_id } else { '' }
+    if (-not [string]::IsNullOrWhiteSpace($hintSkillId)) {
+        $skillUsageTouched.Add([pscustomobject]@{
+            skill_id = $hintSkillId
+            reason = 'route_hint_only'
+        }) | Out-Null
+    }
+}
+
+$loadedMainSkill = if (-not [string]::IsNullOrWhiteSpace([string]$routerSelectedSkill)) {
+    New-VibeSkillUsageLoadedSkill `
+        -RepoRoot $runtime.repo_root `
+        -SkillId ([string]$routerSelectedSkill) `
+        -LoadedAtStage 'skeleton_check' `
+        -TargetRoot $routerTargetRoot `
+        -HostId $routerHostId
+} else {
+    $null
+}
+$skillUsage = New-VibeInitialSkillUsage `
+    -LoadedSkills @($(if ($null -ne $loadedMainSkill) { $loadedMainSkill } else { @() })) `
+    -TouchedSkills @($skillUsageTouched.ToArray())
 $hostSpecialistDispatchDecision = Resolve-VibeHostSpecialistDispatchDecision `
     -HostDecision $hostDecision `
     -Recommendations @($specialistRecommendations) `
@@ -1211,6 +1251,7 @@ $packet = New-VibeRuntimeInputPacketProjection `
     -HostDecision $hostDecision `
     -SpecialistRecommendations @($specialistRecommendations) `
     -StageAssistantHints @($stageAssistantHints) `
+    -SkillUsage $skillUsage `
     -SpecialistDispatch $specialistDispatch `
     -OverlayDecisions @($overlayDecisions) `
     -Policy $policy

@@ -100,6 +100,51 @@ class BinarySkillUsageContractTests(unittest.TestCase):
             self.assertEqual("xl_plan.md", payload["evidence"][0]["artifact_ref"])
             self.assertIn("loaded demo skill workflow", payload["evidence"][0]["impact_summary"])
 
+    def test_runtime_freeze_emits_initial_binary_skill_usage(self) -> None:
+        shell = resolve_powershell()
+        if shell is None:
+            self.skipTest("PowerShell executable not available")
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            artifact_root = Path(tempdir) / "artifacts"
+            run_id = "pytest-binary-skill-usage-freeze"
+            command = [
+                shell,
+                "-NoLogo",
+                "-NoProfile",
+                "-File",
+                str(REPO_ROOT / "scripts" / "runtime" / "Freeze-RuntimeInputPacket.ps1"),
+                "-Task",
+                "Use biopython to parse FASTA and summarize sequence lengths.",
+                "-Mode",
+                "interactive_governed",
+                "-RunId",
+                run_id,
+                "-ArtifactRoot",
+                str(artifact_root),
+            ]
+            subprocess.run(command, cwd=REPO_ROOT, capture_output=True, text=True, encoding="utf-8", check=True)
+
+            packet_path = next(artifact_root.rglob("runtime-input-packet.json"))
+            packet = json.loads(packet_path.read_text(encoding="utf-8"))
+            selected_skill = packet["route_snapshot"]["selected_skill"]
+            usage = packet["skill_usage"]
+
+            self.assertEqual("binary_used_unused", usage["state_model"])
+            self.assertIn(selected_skill, [item["skill_id"] for item in usage["loaded_skills"]])
+            selected_record = next(item for item in usage["loaded_skills"] if item["skill_id"] == selected_skill)
+            self.assertEqual("loaded_full_skill_md", selected_record["load_status"])
+            self.assertTrue(Path(selected_record["skill_md_path"]).exists())
+            self.assertRegex(selected_record["skill_md_sha256"], r"^[0-9a-f]{64}$")
+            self.assertEqual([], usage["used_skills"])
+            self.assertIn(selected_skill, usage["unused_skills"])
+            self.assertIn(
+                "loaded_but_no_artifact_impact",
+                [item["reason"] for item in usage["unused_reasons"] if item["skill_id"] == selected_skill],
+            )
+            for hint in packet["stage_assistant_hints"]:
+                self.assertIn(hint["skill_id"], usage["unused_skills"])
+
 
 if __name__ == "__main__":
     unittest.main()

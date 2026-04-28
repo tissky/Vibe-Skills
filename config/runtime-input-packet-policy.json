@@ -18,6 +18,7 @@
     "canonical_router",
     "route_snapshot",
     "specialist_recommendations",
+    "skill_usage",
     "specialist_dispatch",
     "overlay_decisions",
     "authority_flags",
