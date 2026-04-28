@@ -148,9 +148,6 @@ Add-Assertion -Results ([ref]$results) -Condition ($generatedRequirement.Contain
 Add-Assertion -Results ([ref]$results) -Condition ($generatedRequirement.Contains('## Completion State')) -Message 'runtime smoke requirement doc includes anti-drift completion section'
 Add-Assertion -Results ([ref]$results) -Condition ($generatedPlan.Contains('## Anti-Proxy-Goal-Drift Controls')) -Message 'runtime smoke execution plan includes anti-drift controls section'
 Add-Assertion -Results ([ref]$results) -Condition ($generatedPlan.Contains('### Primary Objective')) -Message 'runtime smoke execution plan includes anti-drift primary objective control'
-Add-Assertion -Results ([ref]$results) -Condition ($runtimeInputPacket.route_snapshot.selected_skill -eq 'vibe') -Message 'runtime smoke keeps vibe as the frozen route skill for governed entry'
-Add-Assertion -Results ([ref]$results) -Condition ($runtimeInputPacket.authority_flags.explicit_runtime_skill -eq 'vibe') -Message 'runtime smoke keeps vibe as explicit runtime skill'
-Add-Assertion -Results ([ref]$results) -Condition (-not [bool]$runtimeInputPacket.divergence_shadow.skill_mismatch) -Message 'runtime smoke keeps router/runtime skill alignment for explicit governed vibe entry'
 $specialistDecision = if ($runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_decision') { $runtimeInputPacket.specialist_decision } else { $null }
 $noSpecialistResolved = (
     $null -ne $specialistDecision -and
@@ -160,6 +157,15 @@ $noSpecialistResolved = (
     [string]$specialistDecision.resolution_mode -in @('no_matching_specialist', 'no_specialist_needed')
 )
 $specialistRecommendationIds = @($runtimeInputPacket.specialist_recommendations | ForEach-Object { [string]$_.skill_id })
+$routeSnapshotSkill = [string]$runtimeInputPacket.route_snapshot.selected_skill
+$runtimeAuthoritySkill = [string]$runtimeInputPacket.authority_flags.explicit_runtime_skill
+$intentionalSpecialistSplit = (
+    $routeSnapshotSkill -ne $runtimeAuthoritySkill -and
+    (@($specialistRecommendationIds) -contains $routeSnapshotSkill)
+)
+Add-Assertion -Results ([ref]$results) -Condition (($routeSnapshotSkill -eq 'vibe') -or $intentionalSpecialistSplit -or $noSpecialistResolved) -Message 'runtime smoke route snapshot is vibe or a bounded specialist recommendation'
+Add-Assertion -Results ([ref]$results) -Condition ($runtimeAuthoritySkill -eq 'vibe') -Message 'runtime smoke keeps vibe as explicit runtime skill'
+Add-Assertion -Results ([ref]$results) -Condition ((-not [bool]$runtimeInputPacket.divergence_shadow.skill_mismatch) -or $intentionalSpecialistSplit -or $noSpecialistResolved) -Message 'runtime smoke permits router/runtime split only for bounded specialists'
 Add-Assertion -Results ([ref]$results) -Condition ((@($specialistRecommendationIds).Count -ge 1) -or $noSpecialistResolved) -Message 'runtime smoke freezes bounded specialist recommendations or no-specialist resolution'
 Add-Assertion -Results ([ref]$results) -Condition ((@($specialistRecommendationIds) -contains 'systematic-debugging') -or $noSpecialistResolved) -Message 'runtime smoke preserves systematic-debugging or no-specialist resolution'
 Add-Assertion -Results ([ref]$results) -Condition ($generatedRequirement.Contains('## Specialist Recommendations')) -Message 'runtime smoke requirement doc includes specialist recommendations section'

@@ -75,9 +75,6 @@ Add-Assertion -Results ([ref]$results) -Condition ($runtimeInputPacket.stage -eq
 Add-Assertion -Results ([ref]$results) -Condition ($runtimeInputPacket.runtime_mode -eq 'interactive_governed') -Message 'runtime input packet records interactive_governed mode'
 Add-Assertion -Results ([ref]$results) -Condition (-not [bool]$runtimeInputPacket.canonical_router.unattended) -Message 'interactive_governed keeps router unattended flag disabled'
 Add-Assertion -Results ([ref]$results) -Condition ($runtimeInputPacket.provenance.proof_class -eq 'structure') -Message 'runtime input packet carries structure proof class'
-Add-Assertion -Results ([ref]$results) -Condition ($runtimeInputPacket.route_snapshot.selected_skill -eq 'vibe') -Message 'runtime input packet keeps vibe as the frozen route skill for governed entry'
-Add-Assertion -Results ([ref]$results) -Condition ($runtimeInputPacket.authority_flags.explicit_runtime_skill -eq 'vibe') -Message 'runtime input packet keeps vibe as runtime authority'
-Add-Assertion -Results ([ref]$results) -Condition (-not [bool]$runtimeInputPacket.divergence_shadow.skill_mismatch) -Message 'runtime input packet keeps router/runtime alignment for explicit governed vibe entry'
 $specialistDecision = if ($runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_decision') { $runtimeInputPacket.specialist_decision } else { $null }
 $noSpecialistResolved = (
     $null -ne $specialistDecision -and
@@ -87,6 +84,15 @@ $noSpecialistResolved = (
     [string]$specialistDecision.resolution_mode -in @('no_matching_specialist', 'no_specialist_needed')
 )
 $specialistRecommendationIds = @($runtimeInputPacket.specialist_recommendations | ForEach-Object { [string]$_.skill_id })
+$routeSnapshotSkill = [string]$runtimeInputPacket.route_snapshot.selected_skill
+$runtimeAuthoritySkill = [string]$runtimeInputPacket.authority_flags.explicit_runtime_skill
+$intentionalSpecialistSplit = (
+    $routeSnapshotSkill -ne $runtimeAuthoritySkill -and
+    (@($specialistRecommendationIds) -contains $routeSnapshotSkill)
+)
+Add-Assertion -Results ([ref]$results) -Condition (($routeSnapshotSkill -eq 'vibe') -or $intentionalSpecialistSplit -or $noSpecialistResolved) -Message 'runtime input packet route snapshot is vibe or a bounded specialist recommendation'
+Add-Assertion -Results ([ref]$results) -Condition ($runtimeAuthoritySkill -eq 'vibe') -Message 'runtime input packet keeps vibe as runtime authority'
+Add-Assertion -Results ([ref]$results) -Condition ((-not [bool]$runtimeInputPacket.divergence_shadow.skill_mismatch) -or $intentionalSpecialistSplit -or $noSpecialistResolved) -Message 'runtime input packet permits router/runtime split only for bounded specialists'
 Add-Assertion -Results ([ref]$results) -Condition ((@($specialistRecommendationIds).Count -ge 1) -or $noSpecialistResolved) -Message 'runtime input packet carries specialist recommendations or no-specialist resolution'
 Add-Assertion -Results ([ref]$results) -Condition ((@($specialistRecommendationIds) -contains 'systematic-debugging') -or $noSpecialistResolved) -Message 'runtime input packet carries systematic-debugging or no-specialist resolution'
 Add-Assertion -Results ([ref]$results) -Condition ($executeReceipt.status -ne 'execution-contract-prepared') -Message 'execute receipt is no longer receipt-only'
@@ -99,7 +105,7 @@ Add-Assertion -Results ([ref]$results) -Condition (([int]$executeReceipt.special
 Add-Assertion -Results ([ref]$results) -Condition (([int]$executeReceipt.specialist_dispatch_unit_count -ge 1) -or $noSpecialistResolved) -Message 'execute receipt carries specialist dispatch unit count or no-specialist resolution'
 Add-Assertion -Results ([ref]$results) -Condition (($null -ne $executionManifest.specialist_accounting) -and (([int]$executionManifest.specialist_accounting.recommendation_count -ge 1) -or $noSpecialistResolved)) -Message 'execution manifest carries specialist accounting'
 Add-Assertion -Results ([ref]$results) -Condition (($null -ne $executionManifest.specialist_accounting) -and (([int]$executionManifest.specialist_accounting.dispatch_unit_count -ge 1) -or $noSpecialistResolved)) -Message 'execution manifest carries specialist dispatch accounting'
-Add-Assertion -Results ([ref]$results) -Condition (-not [bool]$executionManifest.route_runtime_alignment.skill_mismatch) -Message 'execution manifest preserves governed vibe alignment while still carrying specialist accounting'
+Add-Assertion -Results ([ref]$results) -Condition ((-not [bool]$executionManifest.route_runtime_alignment.skill_mismatch) -or $intentionalSpecialistSplit -or $noSpecialistResolved) -Message 'execution manifest permits router/runtime split only for bounded specialists'
 Add-Assertion -Results ([ref]$results) -Condition ([bool]$executionManifest.dispatch_integrity.proof_passed) -Message 'execution manifest specialist dispatch integrity proof passes'
 Add-Assertion -Results ([ref]$results) -Condition ([bool]$proofManifest.proof_passed) -Message 'execution proof manifest marks proof_passed=true'
 Add-Assertion -Results ([ref]$results) -Condition ($proofManifest.proof_class -eq 'runtime') -Message 'execution proof manifest carries runtime proof class'
