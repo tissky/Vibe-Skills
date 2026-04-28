@@ -73,7 +73,7 @@
                   },
                   {
                       "id":  "workflow-compatibility",
-                      "priority":  89,
+                      "priority":  10,
                       "grade_allow":  [
                                           "M",
                                           "L",
