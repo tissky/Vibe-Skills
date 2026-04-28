@@ -160,7 +160,8 @@ class BinarySkillUsageContractTests(unittest.TestCase):
                 "selected_but_no_artifact_impact",
                 [item["reason"] for item in as_list(usage["unused"]) if item["skill_id"] == selected_skill],
             )
-            for hint in packet["stage_assistant_hints"]:
+            self.assertNotIn("stage_assistant_hints", packet)
+            for hint in packet["legacy_skill_routing"]["stage_assistant_hints"]:
                 self.assertIn(hint["skill_id"], usage["unused_skills"])
 
 

@@ -156,18 +156,31 @@ $noSpecialistResolved = (
     [string]$specialistDecision.decision_state -eq 'no_specialist_recommendations' -and
     [string]$specialistDecision.resolution_mode -in @('no_matching_specialist', 'no_specialist_needed')
 )
-$specialistRecommendationIds = @($runtimeInputPacket.specialist_recommendations | ForEach-Object { [string]$_.skill_id })
+$legacySkillRouting = if ($runtimeInputPacket.PSObject.Properties.Name -contains 'legacy_skill_routing') { $runtimeInputPacket.legacy_skill_routing } else { $null }
+$specialistRecommendations = if ($runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_recommendations') {
+    @($runtimeInputPacket.specialist_recommendations)
+} elseif ($null -ne $legacySkillRouting -and $legacySkillRouting.PSObject.Properties.Name -contains 'specialist_recommendations') {
+    @($legacySkillRouting.specialist_recommendations)
+} else {
+    @()
+}
+$specialistRecommendationIds = @($specialistRecommendations | ForEach-Object { [string]$_.skill_id })
+$selectedSkillIds = if ($runtimeInputPacket.PSObject.Properties.Name -contains 'skill_routing' -and $runtimeInputPacket.skill_routing.PSObject.Properties.Name -contains 'selected') {
+    @($runtimeInputPacket.skill_routing.selected | ForEach-Object { [string]$_.skill_id })
+} else {
+    @()
+}
 $routeSnapshotSkill = [string]$runtimeInputPacket.route_snapshot.selected_skill
 $runtimeAuthoritySkill = [string]$runtimeInputPacket.authority_flags.explicit_runtime_skill
-$intentionalSpecialistSplit = (
+$intentionalSelectedSkillSplit = (
     $routeSnapshotSkill -ne $runtimeAuthoritySkill -and
-    (@($specialistRecommendationIds) -contains $routeSnapshotSkill)
+    ((@($selectedSkillIds) -contains $routeSnapshotSkill) -or (@($specialistRecommendationIds) -contains $routeSnapshotSkill))
 )
-Add-Assertion -Results ([ref]$results) -Condition (($routeSnapshotSkill -eq 'vibe') -or $intentionalSpecialistSplit -or $noSpecialistResolved) -Message 'runtime smoke route snapshot is vibe or a bounded specialist recommendation'
+Add-Assertion -Results ([ref]$results) -Condition (($routeSnapshotSkill -eq 'vibe') -or $intentionalSelectedSkillSplit -or $noSpecialistResolved) -Message 'runtime smoke route snapshot is vibe or a selected bounded skill'
 Add-Assertion -Results ([ref]$results) -Condition ($runtimeAuthoritySkill -eq 'vibe') -Message 'runtime smoke keeps vibe as explicit runtime skill'
-Add-Assertion -Results ([ref]$results) -Condition ((-not [bool]$runtimeInputPacket.divergence_shadow.skill_mismatch) -or $intentionalSpecialistSplit -or $noSpecialistResolved) -Message 'runtime smoke permits router/runtime split only for bounded specialists'
-Add-Assertion -Results ([ref]$results) -Condition ((@($specialistRecommendationIds).Count -ge 1) -or $noSpecialistResolved) -Message 'runtime smoke freezes bounded specialist recommendations or no-specialist resolution'
-Add-Assertion -Results ([ref]$results) -Condition ((@($specialistRecommendationIds) -contains 'systematic-debugging') -or $noSpecialistResolved) -Message 'runtime smoke preserves systematic-debugging or no-specialist resolution'
+Add-Assertion -Results ([ref]$results) -Condition ((-not [bool]$runtimeInputPacket.divergence_shadow.skill_mismatch) -or $intentionalSelectedSkillSplit -or $noSpecialistResolved) -Message 'runtime smoke permits router/runtime split only for selected bounded skills'
+Add-Assertion -Results ([ref]$results) -Condition ((@($selectedSkillIds).Count -ge 1) -or (@($specialistRecommendationIds).Count -ge 1) -or $noSpecialistResolved) -Message 'runtime smoke freezes selected skills, legacy specialist recommendations, or no-specialist resolution'
+Add-Assertion -Results ([ref]$results) -Condition ((@($selectedSkillIds) -contains 'systematic-debugging') -or (@($specialistRecommendationIds) -contains 'systematic-debugging') -or $noSpecialistResolved) -Message 'runtime smoke preserves systematic-debugging as selected or legacy recommended skill, or no-specialist resolution'
 Add-Assertion -Results ([ref]$results) -Condition ($generatedRequirement.Contains('## Specialist Recommendations')) -Message 'runtime smoke requirement doc includes specialist recommendations section'
 Add-Assertion -Results ([ref]$results) -Condition ($generatedPlan.Contains('## Specialist Skill Dispatch Plan')) -Message 'runtime smoke execution plan includes specialist dispatch section'
 Add-Assertion -Results ([ref]$results) -Condition (($null -ne $executionManifest.specialist_accounting) -and (([int]$executionManifest.specialist_accounting.recommendation_count -ge 1) -or $noSpecialistResolved)) -Message 'runtime smoke execution manifest carries specialist accounting or no-specialist resolution'

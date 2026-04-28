@@ -154,6 +154,8 @@ Pack configuration should also converge:
 route_authority_candidates + stage_assistant_candidates -> skill_candidates
 ```
 
+During migration, pack routers must prefer `skill_candidates`. If an old pack lacks that field, they may fall back to the union of `route_authority_candidates` and `stage_assistant_candidates`. Old pack role fields may be recorded as `legacy_role` for audit, but they must not decide whether a candidate can be selected.
+
 If a skill cannot enter work as a selected skill, it should not remain as a routed skill. It should be merged into a stronger skill, moved to documentation/reference material, or removed in a later cleanup.
 
 ## 6. Runtime Flow
