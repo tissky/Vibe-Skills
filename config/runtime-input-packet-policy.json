@@ -247,24 +247,18 @@
   "include_stage_assistant_recommendations": false,
   "specialist_recommendation_limit": 6,
   "fallback_specialists_by_task_type": {
-    "planning": [
-      "writing-plans"
-    ],
+    "planning": [],
     "debug": [
       "systematic-debugging"
     ],
-    "research": [
-      "brainstorming"
-    ],
+    "research": [],
     "coding": [
       "test-driven-development"
     ],
     "review": [
       "requesting-code-review"
     ],
-    "default": [
-      "writing-plans"
-    ]
+    "default": []
   },
   "bounded_router_task_type_default": "planning"
 }

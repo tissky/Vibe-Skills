@@ -202,9 +202,6 @@
         "范围"
       ],
       "skills": [
-        "brainstorming",
-        "writing-plans",
-        "create-plan",
         "vibe"
       ],
       "problem_domains": [
@@ -238,10 +235,10 @@
         "Retire when VCO planning owner changes and an equivalent governed slice is introduced."
       ],
       "materialization": {
-        "mode": "runtime_recommendation",
-        "canonical_owner": "config/pack-manifest.json",
-        "runtime_surface": "vco-native",
-        "promotion_stage": "soft"
+        "mode": "vibe_stage_method",
+        "canonical_owner": "protocols/think.md",
+        "runtime_surface": "vibe.deep_interview.xl_plan",
+        "promotion_stage": "absorbed"
       },
       "evaluation_hooks": [
         "scripts/verify/vibe-deep-discovery-gate.ps1",
@@ -572,7 +569,6 @@
       "skills": [
         "aios-architect",
         "architecture-patterns",
-        "writing-plans",
         "vibe"
       ],
       "problem_domains": [
@@ -858,10 +854,7 @@
         "团队模板"
       ],
       "skills": [
-        "vibe",
-        "subagent-driven-development",
-        "hive-mind-advanced",
-        "local-vco-roles"
+        "vibe"
       ],
       "problem_domains": [
         "team orchestration",
@@ -894,10 +887,10 @@
         "Retire when VCO stops consuming capability hits for orchestration suggestions."
       ],
       "materialization": {
-        "mode": "runtime_recommendation",
-        "canonical_owner": "references/team-templates.md",
-        "runtime_surface": "vco-native",
-        "promotion_stage": "soft"
+        "mode": "vibe_stage_method",
+        "canonical_owner": "protocols/team.md",
+        "runtime_surface": "vibe.plan_execute",
+        "promotion_stage": "absorbed"
       },
       "evaluation_hooks": [
         "scripts/verify/vibe-capability-catalog-gate.ps1",

@@ -37,6 +37,8 @@ The fixed user-facing runtime path remains:
 
 This protocol only activates after the requirement and plan are already frozen.
 
+subagent-driven-development is treated as an absorbed method here, not as a route-owning specialist. The decision to use child lanes belongs to `vibe.plan_execute` and must follow the frozen M/L/XL plan.
+
 ## Scope
 Activated for XL grade tasks that require:
 - Multi-agent coordination with dependency-aware waves
@@ -79,7 +81,7 @@ Child-governed lanes must not:
 - `L` execution is handled in `do.md` as serial native execution; this protocol is not the default L executor.
 - `XL` execution is wave-sequential by dependency.
 - Parallel work in `XL` is step-scoped and bounded to independent units only.
-- Specialist routing is expected on governed runs, and eligible bounded specialist recommendations should become executable dispatch by default.
+- Specialist recommendations are expected on governed runs, but process methods such as brainstorming, planning, and child-lane decomposition are owned by `vibe` stages rather than external route authorities.
 - Specialist dispatch is phase-bound: `pre_execution`, `in_execution`, `post_execution`, `verification`.
 - In `XL`, specialist lanes may join bounded parallel windows only when their write scopes are disjoint and their lane policy allows it.
 
@@ -492,7 +494,7 @@ Limitations vs XL: no intra-group dialogue (only 1 agent per perspective), no Ph
 
 - If `dialectic_team_requested = true` AND grade = L/XL → skip think.md B2 Self-Check, use Dialectic Mode instead
 - If `dialectic_team_requested = true` AND grade = M → use think.md B2 Self-Check (team dialectic is overkill for M)
-- Dialectic Mode output feeds into writing-plans as the design foundation
+- Dialectic Mode output feeds into `vibe.xl_plan` as the design foundation
 
 ## Conflict Avoidance
 - Do NOT use Everything-CC agents as the primary XL executor (use Codex native team)
