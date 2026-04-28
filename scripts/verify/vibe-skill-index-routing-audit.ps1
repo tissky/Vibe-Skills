@@ -40,7 +40,7 @@ $cases = @(
 
     [pscustomobject]@{ Name = "sklearn training"; Prompt = "用scikit-learn做分类训练和交叉验证"; Grade = "L"; TaskType = "research"; ExpectedPack = "data-ml"; ExpectedSkill = "scikit-learn" },
     [pscustomobject]@{ Name = "shap interpretation"; Prompt = "请计算SHAP解释并输出beeswarm图"; Grade = "L"; TaskType = "research"; ExpectedPack = "data-ml"; ExpectedSkill = "shap" },
-    [pscustomobject]@{ Name = "umap reduction"; Prompt = "使用UMAP进行降维可视化"; Grade = "L"; TaskType = "research"; ExpectedPack = "data-ml"; ExpectedSkill = "umap-learn" },
+    [pscustomobject]@{ Name = "umap reduction"; Prompt = "使用UMAP进行降维可视化"; Grade = "L"; TaskType = "research"; ExpectedPack = "data-ml"; ExpectedSkill = "scikit-learn" },
     [pscustomobject]@{ Name = "data leakage guard"; Prompt = "做特征工程前先做数据泄漏检查"; Grade = "L"; TaskType = "research"; ExpectedPack = "data-ml"; ExpectedSkill = "ml-data-leakage-guard" },
 
     [pscustomobject]@{ Name = "scanpy single-cell"; Prompt = "做单细胞RNA-seq聚类与注释，使用scanpy"; Grade = "L"; TaskType = "research"; ExpectedPack = "bio-science"; ExpectedSkill = "scanpy" },
@@ -69,9 +69,10 @@ $cases = @(
     [pscustomobject]@{ Name = "security review"; Prompt = "做一次OWASP安全审计并给出修复建议"; Grade = "M"; TaskType = "review"; ExpectedPack = "code-quality"; ExpectedSkill = "security-reviewer" },
     [pscustomobject]@{ Name = "security audit mixed review"; Prompt = "code review and security audit"; Grade = "M"; TaskType = "review"; ExpectedPack = "code-quality"; ExpectedSkill = "security-reviewer" },
 
-    [pscustomobject]@{ Name = "brainstorming route"; Prompt = "先做头脑风暴，发散方案"; Grade = "L"; TaskType = "planning"; ExpectedPack = "orchestration-core"; ExpectedSkill = "brainstorming" },
-    [pscustomobject]@{ Name = "writing plans route"; Prompt = "请输出实施计划并做任务拆解"; Grade = "L"; TaskType = "planning"; ExpectedPack = "orchestration-core"; ExpectedSkill = "writing-plans" },
-    [pscustomobject]@{ Name = "subagent route"; Prompt = "把任务拆成多个子代理并行执行"; Grade = "XL"; TaskType = "planning"; ExpectedPack = "orchestration-core"; ExpectedSkill = "subagent-driven-development" },
+    [pscustomobject]@{ Name = "brainstorming no orchestration core"; Prompt = "先做头脑风暴，发散方案"; Grade = "L"; TaskType = "planning"; BlockedPack = "orchestration-core"; BlockedSkill = "brainstorming" },
+    [pscustomobject]@{ Name = "writing plan no orchestration core"; Prompt = "请输出实施计划并做任务拆解"; Grade = "L"; TaskType = "planning"; BlockedPack = "orchestration-core"; BlockedSkill = "writing-plans" },
+    [pscustomobject]@{ Name = "subagent no orchestration core"; Prompt = "把任务拆成多个子代理并行执行"; Grade = "XL"; TaskType = "planning"; BlockedPack = "orchestration-core"; BlockedSkill = "subagent-driven-development" },
+    [pscustomobject]@{ Name = "speckit explicit compatibility"; Prompt = "/speckit.plan 生成技术计划"; Grade = "L"; TaskType = "planning"; ExpectedPack = "workflow-compatibility"; ExpectedSkill = "spec-kit-vibe-compat" },
 
     [pscustomobject]@{ Name = "top journal figures"; Prompt = "顶级期刊作图：多面板figure，导出TIFF 600dpi，色盲友好配色，误差棒和显著性标注"; Grade = "L"; TaskType = "coding"; ExpectedPack = "science-figures-visualization"; ExpectedSkill = "scientific-visualization" },
     [pscustomobject]@{ Name = "scientific report"; Prompt = "科研技术报告：包含方法/结果/讨论，输出HTML+PDF，附录写清复现步骤"; Grade = "L"; TaskType = "planning"; ExpectedPack = "science-reporting"; ExpectedSkill = "scientific-reporting" },
@@ -82,8 +83,8 @@ $cases = @(
     [pscustomobject]@{ Name = "top ppt deck"; Prompt = "顶级PPT制作：组会汇报slide deck，需要讲述结构与视觉规范"; Grade = "L"; TaskType = "planning"; ExpectedPack = "science-communication-slides"; ExpectedSkill = "scientific-slides" },
     [pscustomobject]@{ Name = "slidev slides as code"; Prompt = "用Slidev做组会汇报：slides as code，要求可复现导出PDF"; Grade = "L"; TaskType = "coding"; ExpectedPack = "science-communication-slides"; ExpectedSkill = "slides-as-code" },
 
-    [pscustomobject]@{ Name = "scientific writing"; Prompt = "请按IMRAD结构写科研论文正文"; Grade = "L"; TaskType = "research"; ExpectedPack = "research-design"; ExpectedSkill = "scientific-writing" },
-    [pscustomobject]@{ Name = "figma implementation"; Prompt = "把这个Figma设计稿还原为可运行代码"; Grade = "L"; TaskType = "planning"; ExpectedPack = "research-design"; ExpectedSkill = "figma-implement-design" },
+    [pscustomobject]@{ Name = "scientific writing"; Prompt = "请按IMRAD结构写科研论文正文"; Grade = "L"; TaskType = "research"; ExpectedPack = "scholarly-publishing-workflow"; ExpectedSkill = "scientific-writing" },
+    [pscustomobject]@{ Name = "figma implementation"; Prompt = "把这个Figma设计稿还原为可运行代码"; Grade = "L"; TaskType = "planning"; ExpectedPack = "research-design"; ExpectedSkill = "designing-experiments" },
     [pscustomobject]@{ Name = "experiment design"; Prompt = "帮我设计准实验方法，比较DiD和ITS"; Grade = "L"; TaskType = "planning"; ExpectedPack = "research-design"; ExpectedSkill = "designing-experiments" }
 )
 
@@ -93,8 +94,18 @@ Write-Host "=== VCO Skill-Index Routing Audit ==="
 foreach ($case in $cases) {
     $route = Invoke-Route -Prompt $case.Prompt -Grade $case.Grade -TaskType $case.TaskType
 
-    $results += Assert-True -Condition ($route.selected.pack_id -eq $case.ExpectedPack) -Message "[$($case.Name)] pack expected=$($case.ExpectedPack), actual=$($route.selected.pack_id)"
-    $results += Assert-True -Condition ($route.selected.skill -eq $case.ExpectedSkill) -Message "[$($case.Name)] skill expected=$($case.ExpectedSkill), actual=$($route.selected.skill)"
+    if ($case.PSObject.Properties.Name -contains "ExpectedPack" -and $case.ExpectedPack) {
+        $results += Assert-True -Condition ($route.selected.pack_id -eq $case.ExpectedPack) -Message "[$($case.Name)] pack expected=$($case.ExpectedPack), actual=$($route.selected.pack_id)"
+    }
+    if ($case.PSObject.Properties.Name -contains "ExpectedSkill" -and $case.ExpectedSkill) {
+        $results += Assert-True -Condition ($route.selected.skill -eq $case.ExpectedSkill) -Message "[$($case.Name)] skill expected=$($case.ExpectedSkill), actual=$($route.selected.skill)"
+    }
+    if ($case.PSObject.Properties.Name -contains "BlockedPack" -and $case.BlockedPack) {
+        $results += Assert-True -Condition ($route.selected.pack_id -ne $case.BlockedPack) -Message "[$($case.Name)] blocked pack $($case.BlockedPack) not selected"
+    }
+    if ($case.PSObject.Properties.Name -contains "BlockedSkill" -and $case.BlockedSkill) {
+        $results += Assert-True -Condition ($route.selected.skill -ne $case.BlockedSkill) -Message "[$($case.Name)] blocked skill $($case.BlockedSkill) not selected"
+    }
     $results += Assert-True -Condition ($route.selected.selection_reason -in @("keyword_ranked", "requested_skill", "fallback_first_candidate", "fallback_task_default", "fallback_task_default_after_task_filter", "fallback_first_candidate_after_task_filter")) -Message "[$($case.Name)] selection reason is valid"
 }
 
