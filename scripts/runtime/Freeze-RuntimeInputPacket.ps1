@@ -22,6 +22,7 @@ $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'VibeRuntime.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeSkillUsage.Common.ps1')
+. (Join-Path $PSScriptRoot 'VibeSkillRouting.Common.ps1')
 
 function Get-VibeRouterTaskType {
     param(
@@ -1181,19 +1182,6 @@ foreach ($hint in @($stageAssistantHints)) {
     }
 }
 
-$loadedMainSkill = if (-not [string]::IsNullOrWhiteSpace([string]$routerSelectedSkill)) {
-    New-VibeSkillUsageLoadedSkill `
-        -RepoRoot $runtime.repo_root `
-        -SkillId ([string]$routerSelectedSkill) `
-        -LoadedAtStage 'skeleton_check' `
-        -TargetRoot $routerTargetRoot `
-        -HostId $routerHostId
-} else {
-    $null
-}
-$skillUsage = New-VibeInitialSkillUsage `
-    -LoadedSkills @($(if ($null -ne $loadedMainSkill) { $loadedMainSkill } else { @() })) `
-    -TouchedSkills @($skillUsageTouched.ToArray())
 $hostSpecialistDispatchDecision = Resolve-VibeHostSpecialistDispatchDecision `
     -HostDecision $hostDecision `
     -Recommendations @($specialistRecommendations) `
@@ -1216,6 +1204,31 @@ $specialistDispatch = Split-VibeSpecialistDispatch `
     -ApprovedSpecialistSkillIds @($ApprovedSpecialistSkillIds) `
     -HostSpecialistDispatchDecision $hostSpecialistDispatchDecision `
     -SuggestionContract $policy.child_specialist_suggestion_contract
+$skillRouting = New-VibeSkillRoutingFromLegacy `
+    -RouterSelectedSkill ([string]$routerSelectedSkill) `
+    -Recommendations @($specialistRecommendations) `
+    -StageAssistantHints @($stageAssistantHints) `
+    -SpecialistDispatch $specialistDispatch
+$selectedSkillLoads = @()
+foreach ($selectedSkill in @(Get-VibeSkillRoutingSelected -SkillRouting $skillRouting)) {
+    $selectedSkillId = [string]$selectedSkill.skill_id
+    if ([string]::IsNullOrWhiteSpace($selectedSkillId)) {
+        continue
+    }
+    $selectedSkillLoads += New-VibeSkillUsageLoadedSkill `
+        -RepoRoot $runtime.repo_root `
+        -SkillId $selectedSkillId `
+        -LoadedAtStage 'skeleton_check' `
+        -TargetRoot $routerTargetRoot `
+        -HostId $routerHostId
+}
+$routingTouchedSkills = @(
+    @($skillRouting.selected | ForEach-Object { [pscustomobject]@{ skill_id = [string]$_.skill_id; reason = 'loaded_but_no_artifact_impact' } }) +
+    @($skillRouting.candidates | ForEach-Object { [pscustomobject]@{ skill_id = [string]$_.skill_id; reason = 'not_selected' } })
+)
+$skillUsage = New-VibeInitialSkillUsage `
+    -LoadedSkills @($selectedSkillLoads) `
+    -TouchedSkills @($routingTouchedSkills + @($skillUsageTouched.ToArray()))
 $hierarchyProjection = New-VibeHierarchyProjection -HierarchyState $hierarchyState -IncludeGovernanceScope
 $authorityFlagsProjection = New-VibeRuntimePacketAuthorityFlagsProjection `
     -HierarchyState $hierarchyState `
@@ -1252,6 +1265,7 @@ $packet = New-VibeRuntimeInputPacketProjection `
     -SpecialistRecommendations @($specialistRecommendations) `
     -StageAssistantHints @($stageAssistantHints) `
     -SkillUsage $skillUsage `
+    -SkillRouting $skillRouting `
     -SpecialistDispatch $specialistDispatch `
     -OverlayDecisions @($overlayDecisions) `
     -Policy $policy

@@ -1836,6 +1836,7 @@ function New-VibeRuntimeInputPacketProjection {
         [AllowNull()] [object[]]$SpecialistRecommendations = @(),
         [AllowNull()] [object[]]$StageAssistantHints = @(),
         [AllowNull()] [object]$SkillUsage = $null,
+        [AllowNull()] [object]$SkillRouting = $null,
         [Parameter(Mandatory)] [object]$SpecialistDispatch,
         [AllowNull()] [object[]]$OverlayDecisions = @(),
         [Parameter(Mandatory)] [object]$Policy
@@ -1952,6 +1953,27 @@ function New-VibeRuntimeInputPacketProjection {
         execution_phase_decomposition = $ExecutionPhaseDecomposition
         code_task_tdd_decision = $CodeTaskTddDecision
         host_specialist_dispatch_decision = $HostSpecialistDispatchDecision
+        skill_routing = if ($null -ne $SkillRouting) {
+            $SkillRouting
+        } else {
+            [pscustomobject]@{
+                schema_version = 'simplified_skill_routing_v1'
+                candidates = @()
+                selected = @()
+                rejected = @()
+            }
+        }
+        legacy_skill_routing = [pscustomobject]@{
+            specialist_recommendations = @($SpecialistRecommendations)
+            stage_assistant_hints = @($StageAssistantHints)
+            specialist_dispatch = [pscustomobject]@{
+                approved_dispatch = [object[]]@($SpecialistDispatch.approved_dispatch)
+                local_specialist_suggestions = [object[]]@($SpecialistDispatch.local_specialist_suggestions)
+                blocked = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'blocked' -and $null -ne $SpecialistDispatch.blocked) { $SpecialistDispatch.blocked } else { @() }))
+                degraded = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'degraded' -and $null -ne $SpecialistDispatch.degraded) { $SpecialistDispatch.degraded } else { @() }))
+                promotion_outcomes = @($(if ($SpecialistDispatch.PSObject.Properties.Name -contains 'promotion_outcomes' -and $null -ne $SpecialistDispatch.promotion_outcomes) { $SpecialistDispatch.promotion_outcomes } else { @() }))
+            }
+        }
         specialist_recommendations = @($SpecialistRecommendations)
         stage_assistant_hints = @($StageAssistantHints)
         skill_usage = if ($null -ne $SkillUsage) {
