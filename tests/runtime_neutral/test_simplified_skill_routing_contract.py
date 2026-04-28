@@ -110,7 +110,7 @@ class SimplifiedSkillRoutingContractTests(unittest.TestCase):
             "}"
         )
 
-        self.assertEqual(["new-authority"], payload["selected_skill_ids"])
+        self.assertEqual(["new-authority"], as_list(payload["selected_skill_ids"]))
 
     def test_selected_skill_ids_fall_back_to_legacy_only_when_skill_routing_is_absent(self) -> None:
         payload = run_ps_json(
@@ -125,7 +125,7 @@ class SimplifiedSkillRoutingContractTests(unittest.TestCase):
             "}"
         )
 
-        self.assertEqual(["legacy-skill"], payload["selected_skill_ids"])
+        self.assertEqual(["legacy-skill"], as_list(payload["selected_skill_ids"]))
 
     def test_freeze_emits_skill_routing_with_selected_skills(self) -> None:
         shell = resolve_powershell()
