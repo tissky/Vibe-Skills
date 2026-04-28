@@ -20,6 +20,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'VibeRuntime.Common.ps1')
+. (Join-Path $PSScriptRoot 'VibeSkillUsage.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeConsultation.Common.ps1')
 . (Join-Path $PSScriptRoot '..\common\AntiProxyGoalDrift.ps1')
 
@@ -360,6 +361,16 @@ $runtimeInputPacket = if (-not [string]::IsNullOrWhiteSpace($runtimeInputPath) -
     Get-Content -LiteralPath $runtimeInputPath -Raw -Encoding UTF8 | ConvertFrom-Json
 } else {
     $null
+}
+$skillUsage = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'skill_usage') {
+    $runtimeInputPacket.skill_usage
+} else {
+    $null
+}
+$selectedUsageSkill = if ($runtimeInputPacket -and $runtimeInputPacket.route_snapshot) {
+    [string]$runtimeInputPacket.route_snapshot.selected_skill
+} else {
+    ''
 }
 $runtimeTaskType = if (
     $runtimeInputPacket -and
@@ -723,6 +734,24 @@ if ($runtimeInputPacket) {
         $lines += @($executionPhaseLines)
     }
 
+    if ($skillUsage -and -not [string]::IsNullOrWhiteSpace($selectedUsageSkill)) {
+        $skillUsage = Update-VibeSkillUsageArtifactImpact `
+            -SkillUsage $skillUsage `
+            -SkillId $selectedUsageSkill `
+            -Stage 'requirement_doc' `
+            -ArtifactRef ([System.IO.Path]::GetFileName($docPath)) `
+            -ImpactSummary ('Requirement doc adopts the loaded {0} SKILL.md as the workflow authority for downstream planning and completion evidence.' -f $selectedUsageSkill)
+        $lines += @(
+            '',
+            '## Skill Usage',
+            '- Skill usage state model: binary `used` / `unused`.',
+            ('- Used skill candidate: `{0}` is promoted only because full `SKILL.md` load evidence exists and this requirement doc adopts it as workflow authority.' -f $selectedUsageSkill),
+            '- Routing, hints, recommendations, consultation, and dispatch do not by themselves prove skill use.',
+            '- Final completion must read `skill_usage.used_skills` and `skill_usage.evidence` before claiming a skill was used.'
+        )
+        Write-VibeJsonArtifact -Path (Get-VibeSkillUsagePath -SessionRoot $sessionRoot) -Value $skillUsage
+    }
+
     $specialistDecision = if (
         $runtimeInputPacket.PSObject.Properties.Name -contains 'specialist_decision' -and
         $null -ne $runtimeInputPacket.specialist_decision
@@ -914,6 +943,8 @@ $receipt = [pscustomobject]@{
     inherited_requirement_doc_path = if ($isChildScope) { $docPath } else { $null }
     runtime_input_packet_path = $runtimeInputPath
     code_task_tdd_decision = $codeTaskTddDecision
+    skill_usage_path = if ($skillUsage) { Get-VibeSkillUsagePath -SessionRoot $sessionRoot } else { $null }
+    skill_usage = $skillUsage
     discussion_consultation_path = if ($discussionConsultation) { $DiscussionConsultationPath } else { $null }
     discussion_consultation_count = if ($discussionConsultation) { @($discussionConsultation.consulted_units).Count } else { 0 }
     discussion_consultation_user_disclosure_count = if ($discussionConsultation) { @($discussionConsultation.user_disclosures).Count } else { 0 }

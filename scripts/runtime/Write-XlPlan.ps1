@@ -21,6 +21,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'VibeRuntime.Common.ps1')
+. (Join-Path $PSScriptRoot 'VibeSkillUsage.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeExecution.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeConsultation.Common.ps1')
 . (Join-Path $PSScriptRoot '..\common\AntiProxyGoalDrift.ps1')
@@ -118,6 +119,16 @@ $runtimeInputPacket = if (-not [string]::IsNullOrWhiteSpace($runtimeInputPath) -
     Get-Content -LiteralPath $runtimeInputPath -Raw -Encoding UTF8 | ConvertFrom-Json
 } else {
     $null
+}
+$skillUsage = if ($runtimeInputPacket -and $runtimeInputPacket.PSObject.Properties.Name -contains 'skill_usage') {
+    Read-VibeSkillUsageArtifact -SessionRoot $sessionRoot -Fallback $runtimeInputPacket.skill_usage
+} else {
+    Read-VibeSkillUsageArtifact -SessionRoot $sessionRoot -Fallback $null
+}
+$selectedUsageSkill = if ($runtimeInputPacket -and $runtimeInputPacket.route_snapshot) {
+    [string]$runtimeInputPacket.route_snapshot.selected_skill
+} else {
+    ''
 }
 $requestedGradeFloor = if (
     $runtimeInputPacket -and
@@ -580,6 +591,22 @@ if ($planMemoryContext -and ((@($planMemoryContext.items).Count -gt 0) -or (@($s
         $lines += @($planMemoryContext.items | ForEach-Object { "- $_" })
     }
 }
+if ($skillUsage -and -not [string]::IsNullOrWhiteSpace($selectedUsageSkill)) {
+    $skillUsage = Update-VibeSkillUsageArtifactImpact `
+        -SkillUsage $skillUsage `
+        -SkillId $selectedUsageSkill `
+        -Stage 'xl_plan' `
+        -ArtifactRef ([System.IO.Path]::GetFileName($planPath)) `
+        -ImpactSummary ('Execution plan carries the loaded {0} SKILL.md workflow authority into the planned verification and completion path.' -f $selectedUsageSkill)
+    $lines += @(
+        '',
+        '## Binary Skill Usage Plan',
+        ('- Used skill candidate: `{0}`.' -f $selectedUsageSkill),
+        '- Execution must preserve the loaded skill workflow and report usage only from `skill_usage`.',
+        '- `approved_dispatch`, `specialist_recommendations`, `stage_assistant_hints`, and consultation receipts remain audit data, not usage proof.'
+    )
+    Write-VibeJsonArtifact -Path (Get-VibeSkillUsagePath -SessionRoot $sessionRoot) -Value $skillUsage
+}
 $lines += @(
     '',
     '## Completion Language Rules',
@@ -647,6 +674,8 @@ $receipt = [pscustomobject]@{
     canonical_write_allowed = -not $isChildScope
     inherited_execution_plan_path = if ($isChildScope) { $planPath } else { $null }
     runtime_input_packet_path = $runtimeInputPath
+    skill_usage_path = if ($skillUsage) { Get-VibeSkillUsagePath -SessionRoot $sessionRoot } else { $null }
+    skill_usage = $skillUsage
     planning_consultation_path = if ($planningConsultation) { $PlanningConsultationPath } else { $null }
     planning_consultation_count = if ($planningConsultation) { @($planningConsultation.consulted_units).Count } else { 0 }
     planning_consultation_user_disclosure_count = if ($planningConsultation) { @($planningConsultation.user_disclosures).Count } else { 0 }
