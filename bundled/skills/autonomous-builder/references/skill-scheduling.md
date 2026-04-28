@@ -336,7 +336,7 @@ Steps:
 ```yaml
 Feature: ML Model Training
 Steps:
-  1. Feature engineering → invoke: engineering-features-for-machine-learning
+  1. Feature engineering → invoke: preprocessing-data-with-automated-pipelines
   2. Model training → invoke: pytorch-lightning
   3. Evaluation → invoke: evaluating-machine-learning-models
   4. Interpretation → invoke: shap

@@ -91,6 +91,8 @@ outputs/skills-audit/data-ml-problem-consolidation.md
 
 ## 后续建议
 
+2026-04-28 后续处理：下面 4 个合并迁移对象已经物理删除。删除边界和资产复核记录见 `docs/governance/data-ml-physical-skill-deletion-2026-04-28.md`。
+
 下一轮如果继续收敛实际目录数量，建议只处理 4 个合并迁移对象：
 
 ```text

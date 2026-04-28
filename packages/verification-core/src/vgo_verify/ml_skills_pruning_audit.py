@@ -547,6 +547,19 @@ def _current_role(record: dict[str, set[str]]) -> str:
     return "candidate"
 
 
+def _current_pack_role(skill_id: str, pack: dict[str, Any]) -> str:
+    skill_candidates = {str(item).strip() for item in _as_list(pack.get("skill_candidates"))}
+    route_authorities = {str(item).strip() for item in _as_list(pack.get("route_authority_candidates"))}
+    stage_assistants = {str(item).strip() for item in _as_list(pack.get("stage_assistant_candidates"))}
+    if skill_id in route_authorities:
+        return "route_authority"
+    if skill_id in stage_assistants:
+        return "stage_assistant"
+    if skill_id not in skill_candidates:
+        return "removed_from_pack"
+    return "candidate"
+
+
 def _quality_score(
     skill_id: str,
     *,
@@ -801,13 +814,11 @@ def _problem_decision_for(skill_id: str) -> dict[str, Any]:
 def audit_data_ml_problem_map(repo_root: Path) -> ProblemMapArtifact:
     repo_root = repo_root.resolve()
     pack_manifest = _read_json(repo_root / "config" / "pack-manifest.json")
-    pack_index = _build_pack_index(pack_manifest)
     data_ml = _data_ml_pack(pack_manifest)
     rows: list[ProblemMapRow] = []
     data_ml_candidates = [str(item).strip() for item in _as_list(data_ml.get("skill_candidates")) if str(item).strip()]
     skill_ids = list(dict.fromkeys(data_ml_candidates + list(DATA_ML_PROBLEM_DECISIONS)))
     for skill_id in skill_ids:
-        record = pack_index.get(skill_id, {"packs": set(), "route_authority": set(), "stage_assistant": set(), "defaults": set()})
         decision = _problem_decision_for(skill_id)
         skill_dir = repo_root / "bundled" / "skills" / skill_id
         rows.append(
@@ -815,7 +826,7 @@ def audit_data_ml_problem_map(repo_root: Path) -> ProblemMapArtifact:
                 skill_id=skill_id,
                 problem_ids="; ".join(_as_list(decision.get("problem_ids"))),
                 primary_problem_id=str(decision.get("primary_problem_id", "")),
-                current_role=_current_role(record),
+                current_role=_current_pack_role(skill_id, data_ml),
                 target_role=str(decision.get("target_role", "manual-review")),
                 target_owner=str(decision.get("target_owner", "")),
                 overlap_with=str(decision.get("overlap_with", "")),

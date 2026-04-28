@@ -421,7 +421,7 @@
       "skills": [
         "scikit-learn",
         "ml-pipeline-workflow",
-        "training-machine-learning-models",
+        "preprocessing-data-with-automated-pipelines",
         "evaluating-machine-learning-models",
         "shap"
       ],

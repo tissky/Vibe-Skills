@@ -24,7 +24,7 @@ Use this skill when:
 
 ## Not For / Boundaries
 
-- Whole-task ML ownership: use `scikit-learn`, `ml-pipeline-workflow`, or `training-machine-learning-models`
+- Whole-task ML ownership: use `scikit-learn` or `ml-pipeline-workflow`
 - Leakage and prediction-time auditing: use `ml-data-leakage-guard`
 - Grouped scientific preprocessing with stronger methodological constraints: use `scientific-data-preprocessing`
 

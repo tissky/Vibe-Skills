@@ -1,9 +1,9 @@
 ﻿{
     "version":  1,
-    "generated_at":  "2026-04-28T18:30:31+08:00",
+    "generated_at":  "2026-04-28T23:16:05+08:00",
     "source":  "bundled/skills",
-    "skill_count":  333,
-    "total_bytes":  21297031,
+    "skill_count":  329,
+    "total_bytes":  20959139,
     "skills":  [
                    {
                        "name":  ".system",
@@ -185,9 +185,9 @@
                        "name":  "autonomous-builder",
                        "relative_path":  "bundled/skills/autonomous-builder",
                        "file_count":  25,
-                       "bytes":  249387,
+                       "bytes":  249389,
                        "skill_md_hash":  "37adcc0486afdaca2c699b7dcc1d8bd5eec90fc46ca75ae80adb038190e95aad",
-                       "dir_hash":  "8c3cbba459400a57c46e681351a7a65391167bd852e346ac7e82b840f64e2dd3"
+                       "dir_hash":  "9c9dc0702618e2e2b001e61433c30c0615480e2f28bfd6664ca8f5014d3e9e82"
                    },
                    {
                        "name":  "benchling-integration",
@@ -470,14 +470,6 @@
                        "dir_hash":  "36fede332c932286e1f15c5377d140f03aab9c63925d6354cb993b5da692e3f7"
                    },
                    {
-                       "name":  "data-exploration-visualization",
-                       "relative_path":  "bundled/skills/data-exploration-visualization",
-                       "file_count":  11,
-                       "bytes":  250863,
-                       "skill_md_hash":  "f7c74a056cceddeacd70256865db59b1af7decffbc08423eef896c1d87d2b965",
-                       "dir_hash":  "1940eb253b6ed23d9ee1729e4cda2f157be51bb3af94742e7fa2305f615c66ef"
-                   },
-                   {
                        "name":  "datamol",
                        "relative_path":  "bundled/skills/datamol",
                        "file_count":  7,
@@ -577,9 +569,9 @@
                        "name":  "detecting-data-anomalies",
                        "relative_path":  "bundled/skills/detecting-data-anomalies",
                        "file_count":  11,
-                       "bytes":  18290,
-                       "skill_md_hash":  "e0fbfed3b5a63be520588eeb65111f6fbdf08dff6aa9a78a332e558a3cf4a9d4",
-                       "dir_hash":  "41969e73a99197ec0e65a5ebc6257cfacbed455a3ab2553ad4e590071ece17ef"
+                       "bytes":  18296,
+                       "skill_md_hash":  "f92ba4bb2656e65706610873fede711f8cb82fb1e12f754c642ec50ac0ff173e",
+                       "dir_hash":  "34a3b30c08c68d1b591e1bd5f770618ae16aaa4750771d375ba9bfa613d6e243"
                    },
                    {
                        "name":  "detecting-performance-regressions",
@@ -710,14 +702,6 @@
                        "dir_hash":  "11cf0ccd54c2e3a9715a5cabaadbf4c346a11447f220592541f7ea7245fceba9"
                    },
                    {
-                       "name":  "engineering-features-for-machine-learning",
-                       "relative_path":  "bundled/skills/engineering-features-for-machine-learning",
-                       "file_count":  11,
-                       "bytes":  32748,
-                       "skill_md_hash":  "de9deef2abf168cc50d039ffa4af784cd7334e322f6802c7d5b976bd317083e6",
-                       "dir_hash":  "2aa2cdf97551df80ff3ef2f46fb28c9d4eee28a0120aada4be6dea6b6c7b52b2"
-                   },
-                   {
                        "name":  "ensembl-database",
                        "relative_path":  "bundled/skills/ensembl-database",
                        "file_count":  3,
@@ -777,9 +761,9 @@
                        "name":  "evaluating-machine-learning-models",
                        "relative_path":  "bundled/skills/evaluating-machine-learning-models",
                        "file_count":  8,
-                       "bytes":  17430,
-                       "skill_md_hash":  "17ff5dc43e2a19245721c592868ac1c14a597e90aca861a41d7fccc73a42ff8f",
-                       "dir_hash":  "08b48a849ae92c90e838f53eb45672ced44e8537b1896647dd5ffbac4e94b05c"
+                       "bytes":  17495,
+                       "skill_md_hash":  "29dd1c57e2ae537f01912b5a1f24c4509b98bb84f800ee49136f6da63f06f2f1",
+                       "dir_hash":  "521d38d5ffb28561290688c5a82faf9a5872b0e5441e09f257ae4a355e75416f"
                    },
                    {
                        "name":  "experiment-failure-analysis",
@@ -793,9 +777,9 @@
                        "name":  "explaining-machine-learning-models",
                        "relative_path":  "bundled/skills/explaining-machine-learning-models",
                        "file_count":  10,
-                       "bytes":  22195,
-                       "skill_md_hash":  "ecf1f5697b72c249ef678be7aec9de88becc95fe7a43ce886dcb72019cfa4efb",
-                       "dir_hash":  "ec2d6a6723400cb7a081ffb13ee102f367561f4377e3ef0ce7e660826d4a8b2c"
+                       "bytes":  22175,
+                       "skill_md_hash":  "39cf26cd01ae9dbead8045c6b52fa79ce9feb6aea0cce8bdb39c0cd10cf339b4",
+                       "dir_hash":  "0470e36bbed62849a0be3a467eca27f350c32c19e16938d126a3daf00b2792fd"
                    },
                    {
                        "name":  "exploratory-data-analysis",
@@ -1569,9 +1553,9 @@
                        "name":  "preprocessing-data-with-automated-pipelines",
                        "relative_path":  "bundled/skills/preprocessing-data-with-automated-pipelines",
                        "file_count":  9,
-                       "bytes":  48777,
-                       "skill_md_hash":  "2291acf79e5a0ccaec19679fa6532cf5380e3be58af04c2843c0b37e80b0195e",
-                       "dir_hash":  "7081b4b04e5e02226538a6746fc94132a798019e1ed50155ee1bceb86ef75939"
+                       "bytes":  48740,
+                       "skill_md_hash":  "943022423cb0eb12d7ae05a23c0a26d46dab5b35e0f64573ace5a81df6d63636",
+                       "dir_hash":  "d260e9ee204c67e551a1c91a6f7d9bcb4a94c3a718f680c009e1ee0dc3e6e02f"
                    },
                    {
                        "name":  "prompt-lookup",
@@ -1836,14 +1820,6 @@
                        "bytes":  73748,
                        "skill_md_hash":  "9e0026d4aee146eea5bedbe66a377ad8c67904be9163fd00c51af4b837b6a89a",
                        "dir_hash":  "0a959a0b78fecba4eff6f8838841269c5e5093ec84e6826e6704d227c9880ccc"
-                   },
-                   {
-                       "name":  "running-clustering-algorithms",
-                       "relative_path":  "bundled/skills/running-clustering-algorithms",
-                       "file_count":  12,
-                       "bytes":  25496,
-                       "skill_md_hash":  "6d30a105d32e983d90ae0c6638ebbe8e0b2d91668b5c3fc73698e13dbf44e281",
-                       "dir_hash":  "5a85f2549cba9eb21df7aca18d0cfe795dad9e19437eb67df60e8738c038d777"
                    },
                    {
                        "name":  "scanpy",
@@ -2233,9 +2209,9 @@
                        "name":  "splitting-datasets",
                        "relative_path":  "bundled/skills/splitting-datasets",
                        "file_count":  8,
-                       "bytes":  10951,
-                       "skill_md_hash":  "c14e7438b6923a128e219502ea83dd6d808ae4b6fc7c4fe6e12ff4dc21103754",
-                       "dir_hash":  "06cf1c45c96f7f5f3e108c24e74af505991ff9e8387fa4a7ca617a4c58fe8321"
+                       "bytes":  10931,
+                       "skill_md_hash":  "42903cae04fcad1fac07f2bebf45d91ecb7e20e4a16709e81aacb636d65a1590",
+                       "dir_hash":  "7353cb0d43edaad81eaa28a423d8f61d7e1ca27f242be5f484628f549dbc7725"
                    },
                    {
                        "name":  "spreadsheet",
@@ -2404,14 +2380,6 @@
                        "bytes":  108120,
                        "skill_md_hash":  "af419f919c00587854dade6f8ed6fc818aa83f13979440ad640072b38ae6d8d9",
                        "dir_hash":  "f0743cd1870801cc018496a499f1f203d230a49f7c65b82d4cea3d11214072f9"
-                   },
-                   {
-                       "name":  "training-machine-learning-models",
-                       "relative_path":  "bundled/skills/training-machine-learning-models",
-                       "file_count":  12,
-                       "bytes":  28781,
-                       "skill_md_hash":  "e9a6589b8d348210a41e1028a0da25a500ab8f18bc5e61530a27fc11ce533917",
-                       "dir_hash":  "7d0538b1582f8f1e969e1456275518d89b58757f18c8945499b3fbd98964c157"
                    },
                    {
                        "name":  "transcribe",

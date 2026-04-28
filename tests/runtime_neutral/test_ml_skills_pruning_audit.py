@@ -20,6 +20,14 @@ from vgo_verify.ml_skills_pruning_audit import (
 )
 
 
+PHYSICAL_DELETE_DATA_ML_SKILLS = [
+    "data-exploration-visualization",
+    "engineering-features-for-machine-learning",
+    "running-clustering-algorithms",
+    "training-machine-learning-models",
+]
+
+
 class MlSkillsPruningAuditTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tempdir = tempfile.TemporaryDirectory()
@@ -264,6 +272,25 @@ class MlSkillsPruningAuditTests(unittest.TestCase):
         text = wrapper.read_text(encoding="utf-8")
         self.assertIn("from vgo_verify.ml_skills_pruning_audit import", text)
         self.assertIn("raise SystemExit(main())", text)
+
+    def test_real_data_ml_delete_candidates_are_not_live_skill_directories(self) -> None:
+        for skill_id in PHYSICAL_DELETE_DATA_ML_SKILLS:
+            self.assertFalse((REPO_ROOT / "bundled" / "skills" / skill_id).exists(), skill_id)
+
+        live_paths = [
+            REPO_ROOT / "README.md",
+            REPO_ROOT / "README.zh.md",
+            REPO_ROOT / "config" / "capability-catalog.json",
+            REPO_ROOT / "config" / "framework-interop-overlay.json",
+            REPO_ROOT / "config" / "ml-lifecycle-overlay.json",
+            REPO_ROOT / "config" / "skills-lock.json",
+        ]
+        live_paths.extend(path for path in (REPO_ROOT / "bundled" / "skills").rglob("SKILL.md"))
+        live_paths.extend(path for path in (REPO_ROOT / "bundled" / "skills").rglob("references/*.md"))
+
+        live_text = "\n".join(path.read_text(encoding="utf-8-sig") for path in live_paths if path.exists())
+        for skill_id in PHYSICAL_DELETE_DATA_ML_SKILLS:
+            self.assertNotIn(skill_id, live_text)
 
 
 if __name__ == "__main__":

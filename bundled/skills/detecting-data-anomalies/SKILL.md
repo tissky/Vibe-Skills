@@ -26,7 +26,7 @@ Use this skill when:
 ## Not For / Boundaries
 
 - Null/duplicate/schema/range validation: use `exploratory-data-analysis`
-- Full model training or end-to-end pipeline ownership: use `training-machine-learning-models`
+- Full model training or end-to-end pipeline ownership: use `scikit-learn` or `ml-pipeline-workflow`
 - Publication-grade figure production: use `scientific-visualization`
 
 ## Typical Outputs

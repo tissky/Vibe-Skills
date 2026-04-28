@@ -453,8 +453,8 @@ _If you only want to judge whether VibeSkills fits your task, the table below is
 | **💡 Requirements, Planning & Product Work** | Clarify vague ideas, write specs, and break work into executable plans and tasks | `brainstorming`, `writing-plans`, `speckit-specify` |
 | **🏗️ Engineering, Architecture & Governed Execution** | Design systems, implement changes, and coordinate multi-step governed workflows | `aios-architect`, `autonomous-builder`, `vibe` |
 | **🔧 Debugging, Testing & Quality Control** | Investigate failures, add tests, review code, and verify changes before completion | `systematic-debugging`, `verification-before-completion`, `code-review` |
-| **📊 Data Analysis & Statistical Modeling** | Clean data, run statistical analysis, explore patterns, and explain results | `statistical-analysis`, `performing-regression-analysis`, `data-exploration-visualization` |
-| **🤖 Machine Learning & AI Engineering** | Train, evaluate, explain, and iterate on model-driven workflows | `senior-ml-engineer`, `training-machine-learning-models`, `evaluating-machine-learning-models` |
+| **📊 Data Analysis & Statistical Modeling** | Clean data, run statistical analysis, explore patterns, and explain results | `statistical-analysis`, `performing-regression-analysis`, `exploratory-data-analysis` |
+| **🤖 Machine Learning & AI Engineering** | Train, evaluate, explain, and iterate on model-driven workflows | `senior-ml-engineer`, `scikit-learn`, `evaluating-machine-learning-models` |
 | **🔬 Research, Literature & Life Sciences** | Review papers, support scientific workflows, and handle bioinformatics-heavy tasks | `literature-review`, `research-lookup`, `scanpy` |
 | **📐 Scientific Computing & Mathematical Modeling** | Handle symbolic math, probabilistic modeling, simulation, and optimization | `sympy`, `pymc-bayesian-modeling`, `pymoo` |
 | **🎨 Documentation, Visualization & Output** | Turn work into readable docs, charts, figures, slides, and other deliverables | `docs-write`, `plotly`, `scientific-visualization` |
@@ -524,7 +524,7 @@ The names below are representative, not a full inventory dump. The point of this
 
 **How you usually meet them**: before modeling, during experiment analysis, or anytime the question is "what does this data actually say?"
 
-**Representative entries**: `statistical-analysis`, `performing-regression-analysis`, `detecting-data-anomalies`, `data-exploration-visualization`
+**Representative entries**: `statistical-analysis`, `performing-regression-analysis`, `detecting-data-anomalies`, `exploratory-data-analysis`
 
 ---
 
@@ -536,7 +536,7 @@ The names below are representative, not a full inventory dump. The point of this
 
 **How you usually meet them**: after data prep is done, when you need to train something, compare results, or understand why a model behaves a certain way.
 
-**Representative entries**: `senior-ml-engineer`, `training-machine-learning-models`, `evaluating-machine-learning-models`, `explaining-machine-learning-models`
+**Representative entries**: `senior-ml-engineer`, `scikit-learn`, `evaluating-machine-learning-models`, `explaining-machine-learning-models`
 
 ---
 
