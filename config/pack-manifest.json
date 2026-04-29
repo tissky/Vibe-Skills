@@ -1350,6 +1350,13 @@
                                                "pennylane",
                                                "qutip"
                                            ],
+                      "route_authority_candidates":  [
+                                                         "qiskit",
+                                                         "cirq",
+                                                         "pennylane",
+                                                         "qutip"
+                                                     ],
+                      "stage_assistant_candidates":  [],
                       "defaults_by_task":  {
                                                "planning":  "qiskit",
                                                "coding":  "qiskit",
@@ -1636,13 +1643,27 @@
                                                "modallabs",
                                                "modal run",
                                                "modal deploy",
+                                               "modal 部署",
+                                               "部署到 modal",
+                                               "modal 而不是 vercel",
                                                "serverless gpu",
+                                               "gpu function",
+                                               "python gpu function",
                                                "batch job",
-                                               "gpu container"
+                                               "gpu container",
+                                               "云端运行",
+                                               "云端作业",
+                                               "云端 gpu",
+                                               "gpu 容器",
+                                               "gpu 函数"
                                            ],
                       "skill_candidates":  [
                                                "modal-labs"
                                            ],
+                      "route_authority_candidates":  [
+                                                         "modal-labs"
+                                                     ],
+                      "stage_assistant_candidates":  [],
                       "defaults_by_task":  {
                                                "planning":  "modal-labs",
                                                "coding":  "modal-labs",
@@ -1824,11 +1845,19 @@
                                                "torch-geometric",
                                                "torch_geometric",
                                                "pyg",
-                                               "pytorch geometric"
+                                               "pytorch geometric",
+                                               "graph neural network",
+                                               "gnn",
+                                               "图神经网络"
                                            ],
                       "skill_candidates":  [
-                                               "torch-geometric",
-                                               "torch_geometric"
+                                               "torch-geometric"
+                                           ],
+                      "route_authority_candidates":  [
+                                                         "torch-geometric"
+                                                     ],
+                      "stage_assistant_candidates":  [
+
                                            ],
                       "defaults_by_task":  {
                                                "planning":  "torch-geometric",
