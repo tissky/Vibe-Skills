@@ -126,7 +126,11 @@ class PythonValidationContractTests(unittest.TestCase):
     def test_pack_route_overrides_stay_inside_authority_ranked_results(self) -> None:
         text = RESOLVE_PACK_ROUTE.read_text(encoding="utf-8-sig")
         normalized_text = re.sub(r"\s+", " ", text)
-        selection_pool = "$selectionPool = if ($authorityRanked.Count -gt 0) { @($authorityRanked) } else { @($ranked) }"
+        selectable_ranked = '$selectableRanked = @($ranked | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_.selected_candidate) })'
+        selection_pool = (
+            "$selectionPool = if ($authorityRanked.Count -gt 0) { @($authorityRanked) } "
+            "elseif ($selectableRanked.Count -gt 0) { @($selectableRanked) } else { @($ranked) }"
+        )
         selection_lookup = (
             "$overrideTop = $selectionPool | Where-Object { [string]$_.pack_id -eq $overridePackId } | "
             "Select-Object -First 1"
@@ -136,6 +140,7 @@ class PythonValidationContractTests(unittest.TestCase):
             "Select-Object -First 1"
         )
 
+        self.assertIn(selectable_ranked, normalized_text)
         self.assertIn(selection_pool, normalized_text)
         self.assertEqual(2, normalized_text.count(selection_lookup))
         self.assertNotIn(ranked_lookup, normalized_text)
