@@ -742,15 +742,7 @@
                                                "labarchive",
                                                "ginkgo cloud lab",
                                                "cloud.ginkgo.bio",
-                                               "ginkgo bioworks cloud lab",
-                                               "liquid handling robot",
-                                               "pipetting robot",
-                                               "lims",
-                                               "实验室自动化",
-                                               "移液机器人",
-                                               "液体处理机器人",
-                                               "电子实验记录",
-                                               "云实验室"
+                                               "ginkgo bioworks cloud lab"
                                            ],
                       "skill_candidates":  [
                                                "opentrons-integration",

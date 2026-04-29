@@ -230,6 +230,20 @@ class ScienceLabAutomationPackConsolidationTests(unittest.TestCase):
             grade="M",
         )
 
+    def test_generic_eln_with_negated_vendors_does_not_route_to_lab_automation(self) -> None:
+        self.assert_not_science_lab_automation(
+            "帮我整理电子实验记录 ELN 模板，不指定 Benchling 或 LabArchives",
+            task_type="planning",
+            grade="M",
+        )
+
+    def test_generic_attachments_with_negated_vendors_does_not_route_to_lab_automation(self) -> None:
+        self.assert_not_science_lab_automation(
+            "把实验图片和 CSV 附件整理到实验记录里，不使用 LabArchives 或 Benchling",
+            task_type="planning",
+            grade="M",
+        )
+
     def test_generic_markdown_protocol_does_not_route_to_protocolsio(self) -> None:
         self.assert_not_science_lab_automation(
             "写一个普通 wet-lab protocol 的 Markdown 文档，不使用 protocols.io 或机器人",

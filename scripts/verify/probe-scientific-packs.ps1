@@ -24,15 +24,19 @@ function Get-CaseMetrics {
 
     $expectedPack = if ($Case.expected_pack) { [string]$Case.expected_pack } else { "" }
     $expectedSkill = if ($Case.expected_skill) { [string]$Case.expected_skill } else { "" }
+    $blockedPack = if ($Case.blocked_pack) { [string]$Case.blocked_pack } else { "" }
+    $blockedSkill = if ($Case.blocked_skill) { [string]$Case.blocked_skill } else { "" }
 
-    $packMatch = if ($expectedPack) { ($selectedPack -eq $expectedPack) } else { $null }
-    $skillMatch = if ($expectedSkill) { ($selectedSkill -eq $expectedSkill) } else { $null }
+    $packMatch = if ($expectedPack) { ($selectedPack -eq $expectedPack) } elseif ($blockedPack) { ($selectedPack -ne $blockedPack) } else { $null }
+    $skillMatch = if ($expectedSkill) { ($selectedSkill -eq $expectedSkill) } elseif ($blockedSkill) { ($selectedSkill -ne $blockedSkill) } else { $null }
 
     return [pscustomobject]@{
         pack_match = $packMatch
         skill_match = $skillMatch
         selected_pack = $selectedPack
         selected_skill = $selectedSkill
+        blocked_pack = $blockedPack
+        blocked_skill = $blockedSkill
     }
 }
 
@@ -452,6 +456,39 @@ $cases = @(
         expected_skill = "ginkgo-cloud-lab"
         requested_skill = $null
     },
+    [pscustomobject]@{
+        name = "lab_generic_eln_negated_vendors_not_lab_automation"
+        group = "science-lab-automation"
+        prompt = "/vibe 帮我整理电子实验记录 ELN 模板，不指定 Benchling 或 LabArchives"
+        grade = "M"
+        task_type = "planning"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-lab-automation"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "lab_generic_attachments_negated_vendors_not_lab_automation"
+        group = "science-lab-automation"
+        prompt = "/vibe 把实验图片和 CSV 附件整理到实验记录里，不使用 LabArchives 或 Benchling"
+        grade = "M"
+        task_type = "planning"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-lab-automation"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "lab_generic_markdown_protocol_not_lab_automation"
+        group = "science-lab-automation"
+        prompt = "/vibe 写一个普通 wet-lab protocol 的 Markdown 文档，不使用 protocols.io 或机器人"
+        grade = "M"
+        task_type = "planning"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-lab-automation"
+        requested_skill = $null
+    },
 
     # science-communication-slides
     [pscustomobject]@{
@@ -820,6 +857,8 @@ foreach ($case in $cases) {
         probe_reference = if ($result -and $result.probe_reference) { [string]$result.probe_reference } else { "" }
         expected_pack = [string]$case.expected_pack
         expected_skill = [string]$case.expected_skill
+        blocked_pack = $metrics.blocked_pack
+        blocked_skill = $metrics.blocked_skill
     }
 }
 

@@ -62,6 +62,7 @@ Positive examples that remain inside `science-lab-automation`:
 Negative examples that must not route to `science-lab-automation`:
 
 - LatchBio computational bioinformatics workflows.
+- Generic ELN or attachment organization when Benchling and LabArchives are explicitly negated.
 - Generic wet-lab protocol Markdown authoring without a supported automation platform.
 - PubMed wet-lab methods literature search or summarization.
 

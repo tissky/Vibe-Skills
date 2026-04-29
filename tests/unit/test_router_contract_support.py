@@ -80,6 +80,30 @@ def test_resolve_repo_root_prefers_nearest_config_root_without_git(tmp_path: Pat
     assert resolved == installed_root
 
 
+def test_keyword_hit_ignores_keywords_only_present_in_negated_scope() -> None:
+    module = _load_module()
+    prompt = "帮我整理电子实验记录 ELN 模板，不指定 Benchling 或 LabArchives".casefold()
+
+    assert module.keyword_hit(prompt, "benchling") is False
+    assert module.keyword_hit(prompt, "labarchives") is False
+
+
+def test_keyword_hit_keeps_positive_keyword_outside_negated_scope() -> None:
+    module = _load_module()
+    prompt = "用 Opentrons 写 protocol，不使用 Benchling 或 LabArchives".casefold()
+
+    assert module.keyword_hit(prompt, "opentrons") is True
+    assert module.keyword_hit(prompt, "benchling") is False
+
+
+def test_keyword_hit_keeps_explicit_negative_phrase_matchable() -> None:
+    module = _load_module()
+    prompt = "写一个普通 wet-lab protocol 的 Markdown 文档，不使用 protocols.io 或机器人".casefold()
+
+    assert module.keyword_hit(prompt, "protocols.io") is False
+    assert module.keyword_hit(prompt, "不使用 protocols.io") is True
+
+
 def test_resolve_target_root_defaults_codex_to_real_home_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     module = _load_module()
     monkeypatch.delenv("CODEX_HOME", raising=False)

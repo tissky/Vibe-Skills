@@ -94,6 +94,10 @@ $cases = @(
 
     [pscustomobject]@{ Name = "aios-core planning"; Prompt = "create PRD and user story backlog with quality gate"; Grade = "L"; TaskType = "planning"; RequestedSkill = $null; ExpectedPack = "aios-core"; AllowedModes = @("pack_overlay", "confirm_required", "legacy_fallback") },
 
+    [pscustomobject]@{ Name = "lab automation generic eln negated vendors blocked"; Prompt = "帮我整理电子实验记录 ELN 模板，不指定 Benchling 或 LabArchives"; Grade = "M"; TaskType = "planning"; RequestedSkill = $null; ExpectedPack = $null; BlockedPack = "science-lab-automation"; AllowedModes = @("pack_overlay", "confirm_required", "legacy_fallback") },
+    [pscustomobject]@{ Name = "lab automation generic attachments negated vendors blocked"; Prompt = "把实验图片和 CSV 附件整理到实验记录里，不使用 LabArchives 或 Benchling"; Grade = "M"; TaskType = "planning"; RequestedSkill = $null; ExpectedPack = $null; BlockedPack = "science-lab-automation"; AllowedModes = @("pack_overlay", "confirm_required", "legacy_fallback") },
+    [pscustomobject]@{ Name = "lab automation generic markdown protocol blocked"; Prompt = "写一个普通 wet-lab protocol 的 Markdown 文档，不使用 protocols.io 或机器人"; Grade = "M"; TaskType = "planning"; RequestedSkill = $null; ExpectedPack = $null; BlockedPack = "science-lab-automation"; AllowedModes = @("pack_overlay", "confirm_required", "legacy_fallback") },
+
     [pscustomobject]@{ Name = "low-signal fallback"; Prompt = "help me with this"; Grade = "M"; TaskType = "research"; RequestedSkill = $null; ExpectedPack = $null; AllowedModes = @("pack_overlay", "legacy_fallback", "confirm_required") },
 
     [pscustomobject]@{ Name = "docs-media explicit requested xlsx XL"; Prompt = "process xlsx workbook and preserve formulas"; Grade = "XL"; TaskType = "coding"; RequestedSkill = "xlsx"; ExpectedPack = "docs-media"; ExpectedSkill = "xlsx"; AllowedModes = @("pack_overlay", "confirm_required") },
