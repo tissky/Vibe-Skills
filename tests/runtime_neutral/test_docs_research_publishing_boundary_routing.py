@@ -148,3 +148,12 @@ class DocsResearchPublishingBoundaryRoutingTests(unittest.TestCase):
             task_type="coding",
             requested_skill="xlsx",
         )
+
+    def test_chinese_xlsx_to_docx_pdf_output_stays_in_docs_media(self) -> None:
+        self.assert_selected(
+            "请处理表格xlsx并生成docx和pdf文档",
+            "docs-media",
+            "xlsx",
+            grade="M",
+            task_type="coding",
+        )

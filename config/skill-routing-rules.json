@@ -1742,7 +1742,11 @@
                                                           "xlsx formatting",
                                                           "spreadsheet formatting",
                                                           "formula retention",
+                                                          "process spreadsheet",
+                                                          "generate docx pdf output",
                                                           "工作簿",
+                                                          "处理表格",
+                                                          "生成docx和pdf文档",
                                                           "excel公式",
                                                           "公式"
                                                       ],
