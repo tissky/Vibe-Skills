@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generated_at": "2026-04-29T22:58:50+08:00",
+  "generated_at": "2026-04-30T00:08:59+08:00",
   "source": "bundled/skills",
-  "skill_count": 314,
-  "total_bytes": 20854814.0,
+  "skill_count": 313,
+  "total_bytes": 20853870.0,
   "skills": [
     {
       "name": ".system",
@@ -2238,20 +2238,12 @@
       "dir_hash": "597004a8f975a080799c952a20467a8c922b6323d297661a32b98ce22e42b556"
     },
     {
-      "name": "torch_geometric",
-      "relative_path": "bundled/skills/torch_geometric",
-      "file_count": 1,
-      "bytes": 1164,
-      "skill_md_hash": "f587c0e2e574d3b791774f8d9b08e2711c0d9183c2db31c2210e39caf47811cd",
-      "dir_hash": "314ab5cedae2140c680cf02f30f86c5c1303c168c9820caaf5beebf94792cd8d"
-    },
-    {
       "name": "torch-geometric",
       "relative_path": "bundled/skills/torch-geometric",
       "file_count": 7,
-      "bytes": 108120,
-      "skill_md_hash": "af419f919c00587854dade6f8ed6fc818aa83f13979440ad640072b38ae6d8d9",
-      "dir_hash": "f0743cd1870801cc018496a499f1f203d230a49f7c65b82d4cea3d11214072f9"
+      "bytes": 108340,
+      "skill_md_hash": "306a9aeebba89c890701d81bdc264bc2cff5c4408f2509aa702966b293419636",
+      "dir_hash": "87f25323c16d8dee8ecf22b5db1d10beedd0c102634e34161c8fade0bb446c52"
     },
     {
       "name": "torchdrug",
