@@ -189,11 +189,71 @@ $cases = @(
     [pscustomobject]@{
         name = "chem_chembl_ic50"
         group = "science-chem-drug"
-        prompt = "/vibe 在 ChEMBL 查询某靶点的 IC50 / Ki 活性数据，并输出结构化表格"
+        prompt = "/vibe 在 ChEMBL 查询某靶点的 IC50 / Ki / Kd 活性数据，并输出结构化表格"
         grade = "M"
         task_type = "research"
         expected_pack = "science-chem-drug"
         expected_skill = "chembl-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_drugbank_interaction"
+        group = "science-chem-drug"
+        prompt = "/vibe 查询 DrugBank 药物相互作用、药物靶点和药理信息"
+        grade = "M"
+        task_type = "research"
+        expected_pack = "science-chem-drug"
+        expected_skill = "drugbank-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_pubchem_cid"
+        group = "science-chem-drug"
+        prompt = "/vibe 查询 PubChem CID、SMILES、InChI 和化合物物性"
+        grade = "M"
+        task_type = "research"
+        expected_pack = "science-chem-drug"
+        expected_skill = "pubchem-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_zinc_library"
+        group = "science-chem-drug"
+        prompt = "/vibe 从 ZINC 下载可购买小分子库用于 virtual screening"
+        grade = "M"
+        task_type = "research"
+        expected_pack = "science-chem-drug"
+        expected_skill = "zinc-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_brenda_kinetics"
+        group = "science-chem-drug"
+        prompt = "/vibe 在 BRENDA 查询 EC number 的 Km、kcat 和酶动力学参数"
+        grade = "M"
+        task_type = "research"
+        expected_pack = "science-chem-drug"
+        expected_skill = "brenda-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_hmdb_msms"
+        group = "science-chem-drug"
+        prompt = "/vibe 在 HMDB 里按 MS/MS 谱和代谢物名称做 metabolite identification"
+        grade = "M"
+        task_type = "research"
+        expected_pack = "science-chem-drug"
+        expected_skill = "hmdb-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_medchem_sar"
+        group = "science-chem-drug"
+        prompt = "/vibe 做药物化学 SAR 分析、PAINS 过滤和先导化合物优化建议"
+        grade = "M"
+        task_type = "planning"
+        expected_pack = "science-chem-drug"
+        expected_skill = "medchem"
         requested_skill = $null
     },
     [pscustomobject]@{
@@ -204,6 +264,46 @@ $cases = @(
         task_type = "coding"
         expected_pack = "science-chem-drug"
         expected_skill = "diffdock"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_deepchem_admet_model"
+        group = "science-chem-drug"
+        prompt = "/vibe 用 DeepChem 训练分子属性预测模型，做 scaffold split、ADMET 毒性预测和 GNN"
+        grade = "L"
+        task_type = "coding"
+        expected_pack = "science-chem-drug"
+        expected_skill = "deepchem"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_pytdc_admet_benchmark"
+        group = "science-chem-drug"
+        prompt = "/vibe 用 Therapeutics Data Commons / PyTDC 加载 ADMET benchmark 数据集并做 scaffold split"
+        grade = "L"
+        task_type = "research"
+        expected_pack = "science-chem-drug"
+        expected_skill = "pytdc"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_datamol_standardize_routes_rdkit"
+        group = "science-chem-drug"
+        prompt = "/vibe 用 datamol 批量标准化 SMILES 并生成分子指纹"
+        grade = "M"
+        task_type = "coding"
+        expected_pack = "science-chem-drug"
+        expected_skill = "rdkit"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "chem_molfeat_embedding_routes_deepchem"
+        group = "science-chem-drug"
+        prompt = "/vibe 用 MolFeat 生成 ChemBERTa 分子 embedding 和 ECFP 特征用于分子机器学习"
+        grade = "M"
+        task_type = "coding"
+        expected_pack = "science-chem-drug"
+        expected_skill = "deepchem"
         requested_skill = $null
     },
 
