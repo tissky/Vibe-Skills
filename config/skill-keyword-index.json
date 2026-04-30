@@ -313,19 +313,19 @@
       "keywords": ["clinical decision support", "cds", "clinical guideline", "grade evidence", "treatment algorithm", "cohort analysis", "biomarker stratification", "evidence-based", "临床决策支持", "用药指南", "循证"]
     },
     "pydicom": {
-      "keywords": ["pydicom", "dicom", "ct", "mri", "dicom tag", "医学影像", "DICOM"]
+      "keywords": ["pydicom", "dicom", "dicom tag", "dicom metadata", "dicom anonymization", "dicom pixel data", "medical scan", "ct", "mri", "pet", "x-ray", "radiology", "医学影像", "dicom文件", "影像tag", "DICOM"]
     },
     "imaging-data-commons": {
-      "keywords": ["imaging data commons", "idc", "imaging dataset", "dicom dataset", "影像数据集", "IDC"]
+      "keywords": ["nci imaging data commons", "imaging data commons", "idc", "tcia", "dicomweb", "cancer imaging cohort", "public cancer imaging data", "radiology dataset", "dicom dataset", "影像数据集", "癌症影像队列", "IDC"]
     },
     "histolab": {
-      "keywords": ["histolab", "whole slide image", "wsi", "histopathology", "病理切片", "WSI"]
+      "keywords": ["histolab", "whole slide image", "wsi", "wsi tile extraction", "tile extraction", "tissue detection", "h&e tile", "histopathology", "病理切片", "全视野切片", "组织检测", "WSI"]
     },
     "omero-integration": {
-      "keywords": ["omero", "microscopy", "image server", "bioimaging", "显微图像", "图像服务器"]
+      "keywords": ["omero", "omero server", "omero python api", "microscopy image server", "image server", "roi annotation", "roi annotations", "microscopy dataset", "high-content screening", "bioimaging server", "显微图像", "图像服务器", "ROI标注"]
     },
     "pathml": {
-      "keywords": ["pathml", "digital pathology", "wsi", "tissue segmentation", "数字病理", "病理图像分析"]
+      "keywords": ["pathml", "digital pathology", "computational pathology", "wsi analysis pipeline", "nucleus segmentation", "spatial pathology", "multiplex pathology", "tissue graph", "cell graph", "multiparametric imaging", "数字病理", "病理图像分析", "细胞核分割", "空间病理"]
     },
     "opentrons-integration": {
       "keywords": ["opentrons", "ot-2", "ot2", "opentrons flex", "opentrons protocol", "opentrons thermocycler", "opentrons module", "opentrons api", "opentrons pipetting robot", "opentrons 移液机器人"]
