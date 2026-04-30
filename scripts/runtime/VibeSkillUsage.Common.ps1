@@ -125,6 +125,29 @@ function New-VibeInitialSkillUsage {
     }
 }
 
+function Select-VibeSkillUsageRowsExceptSkill {
+    param(
+        [AllowNull()] [object]$Rows = $null,
+        [Parameter(Mandatory)] [string]$SkillId
+    )
+
+    $selectedRows = @()
+    foreach ($row in @($Rows)) {
+        if ($null -eq $row) {
+            continue
+        }
+        $rowSkillId = if ($row.PSObject.Properties.Name -contains 'skill_id') { [string]$row.skill_id } else { '' }
+        if ([string]::IsNullOrWhiteSpace($rowSkillId)) {
+            continue
+        }
+        if (-not [string]::Equals($rowSkillId, $SkillId, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $selectedRows += $row
+        }
+    }
+
+    return [object[]]@($selectedRows)
+}
+
 function Update-VibeSkillUsageArtifactImpact {
     param(
         [Parameter(Mandatory)] [object]$SkillUsage,
@@ -136,11 +159,17 @@ function Update-VibeSkillUsageArtifactImpact {
 
     $loaded = @($SkillUsage.loaded_skills)
     $loadedRecord = @($loaded | Where-Object { [string]$_.skill_id -eq $SkillId } | Select-Object -First 1)
-    $usedRows = if ($SkillUsage.PSObject.Properties.Name -contains 'used') { @($SkillUsage.used | Where-Object { [string]$_.skill_id -ne $SkillId }) } else { @() }
-    $unusedRows = if ($SkillUsage.PSObject.Properties.Name -contains 'unused') {
-        @($SkillUsage.unused | Where-Object { [string]$_.skill_id -ne $SkillId })
+    $usedRows = if ($SkillUsage.PSObject.Properties.Name -contains 'used' -and $null -ne $SkillUsage.used) {
+        @(Select-VibeSkillUsageRowsExceptSkill -Rows $SkillUsage.used -SkillId $SkillId)
     } else {
-        @($SkillUsage.unused_reasons | Where-Object { [string]$_.skill_id -ne $SkillId })
+        @()
+    }
+    $unusedRows = if ($SkillUsage.PSObject.Properties.Name -contains 'unused' -and $null -ne $SkillUsage.unused) {
+        @(Select-VibeSkillUsageRowsExceptSkill -Rows $SkillUsage.unused -SkillId $SkillId)
+    } elseif ($SkillUsage.PSObject.Properties.Name -contains 'unused_reasons' -and $null -ne $SkillUsage.unused_reasons) {
+        @(Select-VibeSkillUsageRowsExceptSkill -Rows $SkillUsage.unused_reasons -SkillId $SkillId)
+    } else {
+        @()
     }
     $evidence = @($SkillUsage.evidence)
     $impactRecord = [pscustomobject]@{

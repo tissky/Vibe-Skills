@@ -113,6 +113,32 @@ class BinarySkillUsageContractTests(unittest.TestCase):
             self.assertEqual("xl_plan.md", payload["evidence"][0]["artifact_ref"])
             self.assertIn("loaded demo skill workflow", payload["evidence"][0]["impact_summary"])
 
+    def test_artifact_impact_can_update_after_empty_unused_json_roundtrip(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            skill_dir = root / "bundled" / "skills" / "demo-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("# Demo\nUse it.\n", encoding="utf-8", newline="\n")
+
+            payload = run_ps_json(
+                "& { "
+                f". {ps_quote(str(RUNTIME_COMMON))}; "
+                f". {ps_quote(str(SKILL_USAGE_COMMON))}; "
+                f"$loaded = New-VibeSkillUsageLoadedSkill -RepoRoot {ps_quote(str(root))} -SkillId 'demo-skill' -LoadedAtStage 'skeleton_check'; "
+                "$usage = New-VibeInitialSkillUsage -LoadedSkills @($loaded) -TouchedSkills @([pscustomobject]@{ skill_id = 'demo-skill'; reason = 'loaded_but_no_artifact_impact' }); "
+                "$usage = Update-VibeSkillUsageArtifactImpact -SkillUsage $usage -SkillId 'demo-skill' -Stage 'requirement_doc' -ArtifactRef 'requirement.md' -ImpactSummary 'Requirement uses the demo skill.'; "
+                "$usage = ($usage | ConvertTo-Json -Depth 20 | ConvertFrom-Json); "
+                "$usage = Update-VibeSkillUsageArtifactImpact -SkillUsage $usage -SkillId 'demo-skill' -Stage 'xl_plan' -ArtifactRef 'xl_plan.md' -ImpactSummary 'Plan keeps using the demo skill.'; "
+                "$usage | ConvertTo-Json -Depth 20 "
+                "}"
+            )
+
+            self.assertEqual(["demo-skill"], payload["used_skills"])
+            self.assertEqual([], payload["unused_skills"])
+            self.assertEqual([], as_list(payload["unused"]))
+            stages = [item["stage"] for item in as_list(payload["evidence"])]
+            self.assertEqual(["requirement_doc", "xl_plan"], stages)
+
     def test_runtime_freeze_emits_initial_binary_skill_usage(self) -> None:
         shell = resolve_powershell()
         if shell is None:
@@ -161,6 +187,7 @@ class BinarySkillUsageContractTests(unittest.TestCase):
                 [item["reason"] for item in as_list(usage["unused"]) if item["skill_id"] == selected_skill],
             )
             self.assertNotIn("stage_assistant_hints", packet)
+            self.assertEqual([], packet["legacy_skill_routing"]["stage_assistant_hints"])
             for hint in packet["legacy_skill_routing"]["stage_assistant_hints"]:
                 self.assertIn(hint["skill_id"], usage["unused_skills"])
 

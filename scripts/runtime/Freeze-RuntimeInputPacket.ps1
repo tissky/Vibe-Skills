@@ -510,59 +510,9 @@ function Get-VibeStageAssistantHints {
         policy = $Policy
     }
 
-    $customAdmissionIndex = Get-VibeCustomAdmissionIndex -RouteResult $RouteResult
-    $seen = @{}
-    $hints = @()
-    foreach ($ranked in @($RouteResult.ranked)) {
-        if (@($hints).Count -ge $limit) {
-            break
-        }
-        if (-not ($ranked.PSObject.Properties.Name -contains 'stage_assistant_candidates')) {
-            continue
-        }
-
-        foreach ($assistant in @($ranked.stage_assistant_candidates)) {
-            if (@($hints).Count -ge $limit) {
-                break
-            }
-
-            $skillId = if ($assistant.PSObject.Properties.Name -contains 'skill') { [string]$assistant.skill } else { $null }
-            if ([string]::IsNullOrWhiteSpace($skillId)) {
-                continue
-            }
-            if ([string]::Equals($skillId, $RuntimeSelectedSkill, [System.StringComparison]::OrdinalIgnoreCase)) {
-                continue
-            }
-            if ($seen.ContainsKey($skillId)) {
-                continue
-            }
-
-            $customMetadata = if ($customAdmissionIndex.ContainsKey($skillId)) { $customAdmissionIndex[$skillId] } else { $null }
-            $reason = "pack stage assistant from '{0}'" -f ([string]$ranked.pack_id)
-            $assistantScore = if ($assistant.PSObject.Properties.Name -contains 'score') { [double]$assistant.score } else { 0.0 }
-            $hint = New-VibeSpecialistRecommendation `
-                -RepoRoot $RepoRoot `
-                -Task $Task `
-                -SkillId $skillId `
-                -Source 'route_stage_assistant' `
-                -TaskType $TaskType `
-                -Reason $reason `
-                -PackId ([string]$ranked.pack_id) `
-                -Confidence $assistantScore `
-                -Rank (@($hints).Count + 1) `
-                -DispatchContract $dispatchContractForHint `
-                -PromotionPolicy $PromotionPolicy `
-                -CustomMetadata $customMetadata `
-                -TargetRoot $TargetRoot `
-                -HostId $HostId
-            $hint | Add-Member -NotePropertyName hint_class -NotePropertyValue 'stage_assistant' -Force
-            $hint | Add-Member -NotePropertyName user_visible_specialist_surface -NotePropertyValue $false -Force
-            $hints += $hint
-            $seen[$skillId] = $true
-        }
-    }
-
-    return @($hints)
+    # Current route output no longer writes stage_assistant_candidates. Old runtime
+    # packets remain readable through VibeRuntime.Common.ps1 compatibility helpers.
+    return @()
 }
 
 function Get-VibeSpecialistRecommendations {
