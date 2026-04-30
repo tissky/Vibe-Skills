@@ -1865,7 +1865,6 @@
         "synthetic control",
         "causal analysis",
         "causal inference",
-        "regression analysis",
         "scientific hypothesis",
         "hypothesis generation",
         "hypogenic",
@@ -1884,7 +1883,6 @@
         "合成控制",
         "因果分析",
         "因果推断",
-        "回归分析",
         "科研假设",
         "假设生成",
         "科研基金",
@@ -1895,30 +1893,22 @@
       ],
       "skill_candidates": [
         "designing-experiments",
-        "experiment-failure-analysis",
-        "hypogenic",
         "hypothesis-generation",
-        "literature-matrix",
         "performing-causal-analysis",
-        "performing-regression-analysis",
         "research-grants",
         "scientific-brainstorming"
       ],
       "route_authority_candidates": [
         "designing-experiments",
-        "experiment-failure-analysis",
-        "hypogenic",
         "hypothesis-generation",
-        "literature-matrix",
         "performing-causal-analysis",
-        "performing-regression-analysis",
         "research-grants",
         "scientific-brainstorming"
       ],
       "stage_assistant_candidates": [],
       "defaults_by_task": {
         "planning": "designing-experiments",
-        "review": "experiment-failure-analysis",
+        "review": "designing-experiments",
         "research": "hypothesis-generation"
       }
     },

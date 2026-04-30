@@ -10,20 +10,20 @@
 - P0：6
 - P1：10
 - P2：25
-- 当前最高风险 pack：`research-design`
+- 当前最高风险 pack：`science-literature-citations`
 
 ## 全局排序
 
 | priority | pack | score | skills | route authority | stage assistant | rationale |
 |---|---|---:|---:|---:|---:|---|
-| P0 | `research-design` | 49.90 | 9 | 9 | 0 | 9 route authorities; 1 suspected overlap pairs; 7 shared broad keywords; 2 tool-like primary candidates; 6 candidates with scripts/references/assets |
 | P0 | `science-literature-citations` | 42.70 | 7 | 7 | 0 | 7 route authorities; 5 shared broad keywords; 6 tool-like primary candidates; 6 candidates with scripts/references/assets |
 | P0 | `code-quality` | 39.20 | 10 | 10 | 0 | 10 route authorities; 3 suspected overlap pairs; 2 candidates with scripts/references/assets |
 | P0 | `docs-media` | 37.00 | 8 | 8 | 0 | 8 route authorities; 1 suspected overlap pairs; 5 tool-like primary candidates; 5 candidates with scripts/references/assets |
 | P0 | `scholarly-publishing-workflow` | 34.20 | 8 | 8 | 0 | 8 route authorities; 1 shared broad keywords; 3 tool-like primary candidates; 5 candidates with scripts/references/assets |
 | P0 | `finance-edgar-macro` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
-| P1 | `science-clinical-regulatory` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P0 | `science-clinical-regulatory` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
 | P1 | `data-ml` | 31.60 | 8 | 8 | 0 | 8 route authorities; 1 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P1 | `research-design` | 30.50 | 5 | 5 | 0 | 5 route authorities; 7 shared broad keywords; 3 candidates with scripts/references/assets |
 | P1 | `integration-devops` | 23.80 | 6 | 6 | 0 | 6 route authorities; 1 tool-like primary candidates; 5 candidates with scripts/references/assets |
 | P1 | `science-communication-slides` | 22.60 | 4 | 4 | 0 | 3 shared broad keywords; 2 tool-like primary candidates; 3 candidates with scripts/references/assets |
 | P1 | `ai-llm` | 20.70 | 5 | 5 | 0 | 5 route authorities; 3 tool-like primary candidates; 2 candidates with scripts/references/assets |
@@ -62,19 +62,19 @@
 
 | priority | pack | score | skills | route authority | stage assistant | rationale |
 |---|---|---:|---:|---:|---:|---|
-| P0 | `research-design` | 49.90 | 9 | 9 | 0 | 9 route authorities; 1 suspected overlap pairs; 7 shared broad keywords; 2 tool-like primary candidates; 6 candidates with scripts/references/assets |
 | P0 | `science-literature-citations` | 42.70 | 7 | 7 | 0 | 7 route authorities; 5 shared broad keywords; 6 tool-like primary candidates; 6 candidates with scripts/references/assets |
 | P0 | `code-quality` | 39.20 | 10 | 10 | 0 | 10 route authorities; 3 suspected overlap pairs; 2 candidates with scripts/references/assets |
 | P0 | `docs-media` | 37.00 | 8 | 8 | 0 | 8 route authorities; 1 suspected overlap pairs; 5 tool-like primary candidates; 5 candidates with scripts/references/assets |
 | P0 | `scholarly-publishing-workflow` | 34.20 | 8 | 8 | 0 | 8 route authorities; 1 shared broad keywords; 3 tool-like primary candidates; 5 candidates with scripts/references/assets |
 | P0 | `finance-edgar-macro` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P0 | `science-clinical-regulatory` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
 
 ## P1
 
 | priority | pack | score | skills | route authority | stage assistant | rationale |
 |---|---|---:|---:|---:|---:|---|
-| P1 | `science-clinical-regulatory` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
 | P1 | `data-ml` | 31.60 | 8 | 8 | 0 | 8 route authorities; 1 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P1 | `research-design` | 30.50 | 5 | 5 | 0 | 5 route authorities; 7 shared broad keywords; 3 candidates with scripts/references/assets |
 | P1 | `integration-devops` | 23.80 | 6 | 6 | 0 | 6 route authorities; 1 tool-like primary candidates; 5 candidates with scripts/references/assets |
 | P1 | `science-communication-slides` | 22.60 | 4 | 4 | 0 | 3 shared broad keywords; 2 tool-like primary candidates; 3 candidates with scripts/references/assets |
 | P1 | `ai-llm` | 20.70 | 5 | 5 | 0 | 5 route authorities; 3 tool-like primary candidates; 2 candidates with scripts/references/assets |

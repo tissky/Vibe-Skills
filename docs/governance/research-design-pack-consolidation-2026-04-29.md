@@ -2,6 +2,8 @@
 
 Date: 2026-04-29
 
+Superseded note: the retained-owner set in this first-pass document was reduced again on 2026-04-30 by `research-design-high-prune-2026-04-30.md`.
+
 ## Summary
 
 This pass shrinks `research-design` into a research-methods pack. It keeps research design, scientific ideation, hypothesis formulation, experiment failure analysis, causal/regression methodology, literature-combination matrices, and grant proposal planning.

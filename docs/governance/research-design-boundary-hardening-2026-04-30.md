@@ -2,6 +2,8 @@
 
 Date: 2026-04-30
 
+Superseded note: this boundary-hardening pass kept 9 owners. A later 2026-04-30 high-prune pass reduced `research-design` to 5 owners and physically deleted 4 directories; see `research-design-high-prune-2026-04-30.md`.
+
 ## Summary
 
 This pass hardens the already-pruned `research-design` pack. It keeps all 9 retained research-method owners, removes stale cross-skill/helper language, and protects the internal boundaries with focused route probes.

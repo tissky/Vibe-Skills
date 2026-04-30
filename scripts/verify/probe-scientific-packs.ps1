@@ -906,6 +906,16 @@ $cases = @(
         requested_skill = $null
     },
     [pscustomobject]@{
+        name = "research_hypogenic_absorbed"
+        group = "research-design"
+        prompt = "/vibe 用 HypoGeniC 从数据和文献中生成并测试科研假设"
+        grade = "L"
+        task_type = "research"
+        expected_pack = "research-design"
+        expected_skill = "hypothesis-generation"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
         name = "research_grant_outline"
         group = "research-design"
         prompt = "/vibe 写一份 NIH grant proposal outline：Specific Aims + Significance + Approach"
@@ -913,6 +923,16 @@ $cases = @(
         task_type = "planning"
         expected_pack = "research-design"
         expected_skill = "research-grants"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "research_experiment_failure_absorbed"
+        group = "research-design"
+        prompt = "/vibe 分析科学实验失败原因，设计下一轮验证实验，判断是否继续优化还是放弃该方案"
+        grade = "L"
+        task_type = "planning"
+        expected_pack = "research-design"
+        expected_skill = "designing-experiments"
         requested_skill = $null
     },
     [pscustomobject]@{
@@ -926,6 +946,16 @@ $cases = @(
         requested_skill = $null
     },
     [pscustomobject]@{
+        name = "research_literature_matrix_absorbed"
+        group = "research-design"
+        prompt = "/vibe 构建论文组合矩阵，寻找 A+B 的研究创新点"
+        grade = "L"
+        task_type = "planning"
+        expected_pack = "research-design"
+        expected_skill = "scientific-brainstorming"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
         name = "research_existing_data_causal_effect"
         group = "research-design"
         prompt = "/vibe 我已有面板数据，请用 DiD 估计政策的因果效应并做稳健性检验"
@@ -933,6 +963,16 @@ $cases = @(
         task_type = "research"
         expected_pack = "research-design"
         expected_skill = "performing-causal-analysis"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "research_regression_moves_to_data_ml"
+        group = "data-ml"
+        prompt = "/vibe 做回归分析并解释系数、置信区间和诊断结果"
+        grade = "L"
+        task_type = "research"
+        expected_pack = "data-ml"
+        expected_skill = "scikit-learn"
         requested_skill = $null
     },
     [pscustomobject]@{

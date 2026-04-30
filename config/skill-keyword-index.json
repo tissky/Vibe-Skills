@@ -519,11 +519,23 @@
         "sklearn",
         "classification",
         "regression",
+        "regression analysis",
+        "linear regression",
+        "multiple regression",
+        "coefficient",
+        "confidence interval",
+        "regression diagnostics",
         "cross validation",
         "tabular machine learning",
         "scikit学习",
         "分类模型",
         "回归模型",
+        "回归分析",
+        "线性回归",
+        "多元回归",
+        "系数",
+        "置信区间",
+        "回归诊断",
         "交叉验证"
       ]
     },
@@ -953,11 +965,7 @@
         "设计准实验方案",
         "选择研究设计",
         "先决定",
-        "不要开始建模"
-      ]
-    },
-    "experiment-failure-analysis": {
-      "keywords": [
+        "不要开始建模",
         "experiment failure",
         "failed experiment",
         "failure analysis",
@@ -971,41 +979,6 @@
         "优化失败",
         "是否放弃",
         "验证计划"
-      ]
-    },
-    "hypogenic": {
-      "keywords": [
-        "hypogenic",
-        "automated hypothesis generation",
-        "automated hypothesis testing",
-        "llm hypothesis",
-        "hypothesis discovery",
-        "generate and test hypotheses",
-        "HypoGeniC",
-        "HypoRefine",
-        "从数据生成假设",
-        "自动假设生成",
-        "自动假设验证",
-        "科研假设自动化"
-      ]
-    },
-    "literature-matrix": {
-      "keywords": [
-        "literature matrix",
-        "paper combination matrix",
-        "research idea matrix",
-        "method combination",
-        "a+b research idea",
-        "A+B innovation",
-        "unified framework",
-        "paper combination",
-        "论文组合矩阵",
-        "文献矩阵",
-        "研究创新点",
-        "方法组合",
-        "统一框架",
-        "A+B",
-        "A+B 创新点"
       ]
     },
     "performing-causal-analysis": {
@@ -1061,7 +1034,22 @@
         "实验方向",
         "开放式科研构思",
         "发散研究方向",
-        "不要求形成可检验假设报告"
+        "不要求形成可检验假设报告",
+        "literature matrix",
+        "paper combination matrix",
+        "research idea matrix",
+        "method combination",
+        "a+b research idea",
+        "A+B innovation",
+        "unified framework",
+        "paper combination",
+        "论文组合矩阵",
+        "文献矩阵",
+        "研究创新点",
+        "方法组合",
+        "统一框架",
+        "A+B",
+        "A+B 创新点"
       ]
     },
     "figma-implement-design": {
@@ -1090,25 +1078,6 @@
         "文献检索",
         "查找论文",
         "研究调研"
-      ]
-    },
-    "performing-regression-analysis": {
-      "keywords": [
-        "regression analysis",
-        "linear regression",
-        "multiple regression",
-        "glm",
-        "ols",
-        "coefficient",
-        "confidence interval",
-        "regression diagnostics",
-        "回归分析",
-        "线性回归",
-        "多元回归",
-        "回归建模",
-        "回归诊断",
-        "系数",
-        "置信区间"
       ]
     },
     "pubmed-database": {
@@ -1781,6 +1750,14 @@
         "testable hypothesis",
         "ordinary hypothesis generation",
         "plain hypothesis generation",
+        "hypogenic",
+        "automated hypothesis generation",
+        "automated hypothesis testing",
+        "llm hypothesis",
+        "hypothesis discovery",
+        "generate and test hypotheses",
+        "HypoGeniC",
+        "HypoRefine",
         "falsifiable",
         "prediction",
         "mechanism",
@@ -1790,6 +1767,10 @@
         "科研假设",
         "普通科研假设生成",
         "没有提 HypoGeniC",
+        "从数据生成假设",
+        "自动假设生成",
+        "自动假设验证",
+        "科研假设自动化",
         "可检验",
         "可证伪",
         "预测",

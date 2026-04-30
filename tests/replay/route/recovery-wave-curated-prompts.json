@@ -140,8 +140,8 @@
           "pack_overlay",
           "confirm_required"
         ],
-        "selected_pack": "research-design",
-        "selected_skill": "performing-regression-analysis"
+        "selected_pack": "data-ml",
+        "selected_skill": "scikit-learn"
       }
     },
     {

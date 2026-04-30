@@ -14,12 +14,8 @@ from vgo_runtime.router_contract_runtime import route_prompt  # noqa: E402
 
 RESEARCH_DESIGN_SKILLS = [
     "designing-experiments",
-    "experiment-failure-analysis",
-    "hypogenic",
     "hypothesis-generation",
-    "literature-matrix",
     "performing-causal-analysis",
-    "performing-regression-analysis",
     "research-grants",
     "scientific-brainstorming",
 ]
@@ -38,6 +34,17 @@ MOVED_OUT_SKILLS = [
     "verification-quality-assurance",
     "report-generator",
     "structured-content-storage",
+    "experiment-failure-analysis",
+    "hypogenic",
+    "literature-matrix",
+    "performing-regression-analysis",
+]
+
+DELETED_RESEARCH_DESIGN_SKILLS = [
+    "experiment-failure-analysis",
+    "hypogenic",
+    "literature-matrix",
+    "performing-regression-analysis",
 ]
 
 
@@ -121,6 +128,10 @@ class ResearchDesignPackConsolidationTests(unittest.TestCase):
         for moved_skill in MOVED_OUT_SKILLS:
             self.assertNotIn(moved_skill, pack.get("skill_candidates") or [])
 
+    def test_pruned_research_design_skill_directories_are_absent(self) -> None:
+        for skill_id in DELETED_RESEARCH_DESIGN_SKILLS:
+            self.assertFalse((REPO_ROOT / "bundled" / "skills" / skill_id).exists(), skill_id)
+
     def test_retained_skills_do_not_require_cross_skill_invocation(self) -> None:
         banned_by_skill = {
             "hypothesis-generation": [
@@ -190,19 +201,19 @@ class ResearchDesignPackConsolidationTests(unittest.TestCase):
             task_type="planning",
         )
 
-    def test_experiment_failure_analysis_routes_to_failure_analysis(self) -> None:
+    def test_experiment_failure_analysis_routes_to_designing_experiments(self) -> None:
         self.assert_selected(
-            "分析实验失败原因，判断是否继续优化还是放弃该方案",
+            "分析科学实验失败原因，设计下一轮验证实验，判断是否继续优化还是放弃该方案",
             "research-design",
-            "experiment-failure-analysis",
-            task_type="review",
+            "designing-experiments",
+            task_type="planning",
         )
 
-    def test_hypogenic_routes_to_hypogenic(self) -> None:
+    def test_hypogenic_routes_to_hypothesis_generation(self) -> None:
         self.assert_selected(
             "用 HypoGeniC 从数据和文献中生成并测试科研假设",
             "research-design",
-            "hypogenic",
+            "hypothesis-generation",
             task_type="research",
         )
 
@@ -214,11 +225,11 @@ class ResearchDesignPackConsolidationTests(unittest.TestCase):
             task_type="planning",
         )
 
-    def test_literature_matrix_routes_to_literature_matrix(self) -> None:
+    def test_literature_matrix_routes_to_scientific_brainstorming(self) -> None:
         self.assert_selected(
             "构建论文组合矩阵，寻找 A+B 的研究创新点",
             "research-design",
-            "literature-matrix",
+            "scientific-brainstorming",
             task_type="planning",
         )
 
@@ -230,11 +241,11 @@ class ResearchDesignPackConsolidationTests(unittest.TestCase):
             task_type="research",
         )
 
-    def test_regression_method_routes_to_regression_analysis(self) -> None:
+    def test_regression_method_routes_to_data_ml(self) -> None:
         self.assert_selected(
             "做回归分析并解释系数、置信区间和诊断结果",
-            "research-design",
-            "performing-regression-analysis",
+            "data-ml",
+            "scikit-learn",
             task_type="research",
         )
 

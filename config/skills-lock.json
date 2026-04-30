@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generated_at": "2026-04-30T21:53:58+08:00",
+  "generated_at": "2026-04-30T22:29:13+08:00",
   "source": "bundled/skills",
-  "skill_count": 265,
-  "total_bytes": 18317604.0,
+  "skill_count": 261,
+  "total_bytes": 18181821.0,
   "skills": [
     {
       "name": ".system",
@@ -137,9 +137,9 @@
       "name": "claude-skills",
       "relative_path": "bundled/skills/claude-skills",
       "file_count": 11,
-      "bytes": 41800,
+      "bytes": 41749,
       "skill_md_hash": "f660d6a166c5231e5ec6bedb8797752ddcdb0ffe14137773ebe6ec92bdc3f6de",
-      "dir_hash": "2b0859a4e8eca4e15a6385d2e802ef839c281d31c2bce19e99be050de71e6f4a"
+      "dir_hash": "8e9c0bf24afa8882abe95c512c29dc5f8750b7612e87f630dbeab6717e6ec35d"
     },
     {
       "name": "clinical-decision-support",
@@ -313,9 +313,9 @@
       "name": "designing-experiments",
       "relative_path": "bundled/skills/designing-experiments",
       "file_count": 1,
-      "bytes": 1786,
-      "skill_md_hash": "6b03c49a3b45683b967e5c6cc26e05e93ceae198da0a7fa4f033ff369772234b",
-      "dir_hash": "82b8a397fe75f65f51ba4d434edba458f7349404352fba1ddec19843aab6caa4"
+      "bytes": 2399,
+      "skill_md_hash": "6d8432ef4448736cff92960769cf64a0ef63137fb245cc61bdcd1ef3d65d8f09",
+      "dir_hash": "c6cf6b8edf745f609641e5f52de10e5120b9a6c0c43298692e5e35996f99db35"
     },
     {
       "name": "deslop",
@@ -494,14 +494,6 @@
       "dir_hash": "521d38d5ffb28561290688c5a82faf9a5872b0e5441e09f257ae4a355e75416f"
     },
     {
-      "name": "experiment-failure-analysis",
-      "relative_path": "bundled/skills/experiment-failure-analysis",
-      "file_count": 1,
-      "bytes": 7213,
-      "skill_md_hash": "1b4ed74fab5fe9786c8a8dff6509ce3243b0405eebfb9e8457181d115e8a5270",
-      "dir_hash": "43380c083103eabc849fca69f96c8f581c2d2d65af52b4c71f8695330b2a0507"
-    },
-    {
       "name": "explaining-machine-learning-models",
       "relative_path": "bundled/skills/explaining-machine-learning-models",
       "file_count": 10,
@@ -678,20 +670,12 @@
       "dir_hash": "76f93da3a83b0d37e68ced1d184391e29fa6fa46c897b9b6852f63624304e9b4"
     },
     {
-      "name": "hypogenic",
-      "relative_path": "bundled/skills/hypogenic",
-      "file_count": 2,
-      "bytes": 25657,
-      "skill_md_hash": "a050d06df066c4c69ae3a742a94a6e675be3990274b3c6a0756d6a569e9f52b3",
-      "dir_hash": "473bd5169ea7d64844ca7ae067351d0861131b09387632a5a5a0dc1beca118a1"
-    },
-    {
       "name": "hypothesis-generation",
       "relative_path": "bundled/skills/hypothesis-generation",
       "file_count": 7,
-      "bytes": 102815,
-      "skill_md_hash": "751d123ac5144a7d03df4d8cec8a176130c579cca6b4761da5278b2ff752b975",
-      "dir_hash": "0b5b63160f7a25b7803d71491151c508cb2026b95e00f397a22bf649be095c0e"
+      "bytes": 102954,
+      "skill_md_hash": "17739ba3f71f36cb82920d3bfbd648b0d8fb0055f889717f559016f240becbb5",
+      "dir_hash": "6b4ce227f9d0e2371be8c41a77b7dda0aa77dc177e4cdacfca1330a56edd3551"
     },
     {
       "name": "hypothesis-testing",
@@ -780,14 +764,6 @@
       "bytes": 2642,
       "skill_md_hash": "3c68b01f18987d214aef37cdccd1ee7bea89b005f58ebdee4d3a44db1d0d80f2",
       "dir_hash": "e035ca25ec792d5dd9def805e36e1384b68a6fa8555080df059c70f19aa529fe"
-    },
-    {
-      "name": "literature-matrix",
-      "relative_path": "bundled/skills/literature-matrix",
-      "file_count": 10,
-      "bytes": 53446,
-      "skill_md_hash": "67f126ca2c3d395cd8c2e1d48b6e3cbfb0d4fd662f714f197713bdff41ee02a1",
-      "dir_hash": "0cf4d90007b0178cd208483f10e1f139110886cb9368a0ecf38d9c730862b71f"
     },
     {
       "name": "literature-review",
@@ -929,9 +905,9 @@
       "name": "metric-calculator",
       "relative_path": "bundled/skills/metric-calculator",
       "file_count": 1,
-      "bytes": 1349,
-      "skill_md_hash": "bdaa22cbd9e8515079658b82b3ec7b1b651ae886903e16307e9aa16aeeb236b1",
-      "dir_hash": "817c0941f59979d306d26e2ddeb829c2ee551e4279f6c06b5984dee80f7b4c13"
+      "bytes": 1382,
+      "skill_md_hash": "58c31162504cce587aa4f2f8d2fed292c192d8869db4b704bd2d605faa9e0675",
+      "dir_hash": "01888d034d1807be39fe3376bc4bf725c3a6815055ea05fee1dee0dc2f156a5c"
     },
     {
       "name": "ml-data-leakage-guard",
@@ -1076,14 +1052,6 @@
       "bytes": 6209,
       "skill_md_hash": "aa94660374b648ce6cbc0622cc1ffe35ef522ba358113e1009345b6cbe75ae28",
       "dir_hash": "939a0305be27efaf8cd93895010bbb0e437a80ad56ebae0bc814c4e6afee982e"
-    },
-    {
-      "name": "performing-regression-analysis",
-      "relative_path": "bundled/skills/performing-regression-analysis",
-      "file_count": 9,
-      "bytes": 50983,
-      "skill_md_hash": "89d62f03a8f6174ee35b0c7c8262f34eb2594050144a8220492c69fc41ecd44b",
-      "dir_hash": "3a0918f2fe3034307c226bc43227a9b150ee38314e4eb5da02982fa0d62e7e27"
     },
     {
       "name": "perplexity-search",
@@ -1369,9 +1337,9 @@
       "name": "scientific-brainstorming",
       "relative_path": "bundled/skills/scientific-brainstorming",
       "file_count": 2,
-      "bytes": 20075,
-      "skill_md_hash": "20a7a0d1e0a0a5a590468f690c6d9aecde0692b0e0558def026e90771a8511ba",
-      "dir_hash": "b05ba84dede4696c305fa7b5445bd96ddac67630e8f3141ea9a6ca8618c9b43f"
+      "bytes": 20491,
+      "skill_md_hash": "e9adea226d8478d8f3d0d5bf73db70f8d20f282a0028003eaf0ac41683803aed",
+      "dir_hash": "af3d836c92e068c34538a009e7a7d3b0851c3edcc0e1543ebfa566dd193e842e"
     },
     {
       "name": "scientific-critical-thinking",
@@ -1441,9 +1409,9 @@
       "name": "scikit-learn",
       "relative_path": "bundled/skills/scikit-learn",
       "file_count": 9,
-      "bytes": 118330,
-      "skill_md_hash": "d3a430a730af3b366cbec1b4d3a4dcb3beb486b23696a21ed8c20f0ea0aa051e",
-      "dir_hash": "e16689741893e1f623987ff25afec82904dd010b7f8063edc8a3706ffee0d660"
+      "bytes": 118696,
+      "skill_md_hash": "9b35bf41ead7570091cbec803a722534857bdd659c0cece8086c021edaa06f98",
+      "dir_hash": "dedf712b66ae39fc9fdc1e4dd1184b55c8896fbf3b72dfc5e25fd6de2ef0c42b"
     },
     {
       "name": "scikit-survival",

@@ -1,6 +1,6 @@
 ---
 name: scientific-brainstorming
-description: "Open-ended scientific ideation partner. Use for research gaps, mechanism exploration, interdisciplinary connections, assumptions, and possible research directions. For structured testable hypotheses and validation plans, use hypothesis-generation instead."
+description: "Open-ended scientific ideation partner. Use for research gaps, mechanism exploration, interdisciplinary connections, assumptions, possible research directions, and lightweight literature matrix or A+B paper-combination idea mapping. For structured testable hypotheses and validation plans, use hypothesis-generation instead."
 ---
 
 # Scientific Brainstorming
@@ -17,6 +17,7 @@ This skill should be used when:
 - Challenging assumptions in existing research frameworks
 - Developing new methodological approaches
 - Identifying research gaps or opportunities
+- Building lightweight paper-combination or A+B idea maps without a separate matrix workflow
 - Overcoming creative blocks in problem-solving
 - Brainstorming experimental designs or study plans
 
@@ -106,6 +107,8 @@ Help identify patterns, themes, and unexpected connections among the generated i
 - "I notice several ideas involve [theme]—what if we combined them?"
 - "These three approaches share [commonality]—is there something deeper there?"
 - "What's the most unexpected connection you're seeing?"
+
+For literature-combination work, keep the matrix lightweight: list candidate papers or methods, compare complementarity, data compatibility, theory fit, implementation cost, and likely innovation value. Do not turn this into a separate routed workflow.
 
 ### Phase 4: Critical Evaluation
 

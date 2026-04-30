@@ -380,7 +380,7 @@ class RouterBridgeTests(unittest.TestCase):
         self.assertEqual("code-quality", result["selected"]["pack_id"])
         self.assertEqual("generating-test-reports", result["selected"]["skill"])
 
-    def test_regression_analysis_routes_to_regression_owner(self) -> None:
+    def test_regression_analysis_routes_to_data_ml_owner(self) -> None:
         result = run_bridge(
             "请对这个实验数据做回归分析：线性回归或 GLM 建模、残差诊断、系数解释和拟合优度比较",
             "L",
@@ -388,8 +388,8 @@ class RouterBridgeTests(unittest.TestCase):
         )
 
         self.assertIn(result["route_mode"], {"pack_overlay", "confirm_required"})
-        self.assertEqual("research-design", result["selected"]["pack_id"])
-        self.assertEqual("performing-regression-analysis", result["selected"]["skill"])
+        self.assertEqual("data-ml", result["selected"]["pack_id"])
+        self.assertEqual("scikit-learn", result["selected"]["skill"])
 
     def test_preprocessing_pipeline_routes_as_direct_data_ml_owner(self) -> None:
         result = run_bridge(

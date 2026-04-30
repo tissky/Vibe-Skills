@@ -126,7 +126,11 @@ $deletedSkillIds = @(
     "cobrapy",
     "geniml",
     "arboreto",
-    "flowio"
+    "flowio",
+    "experiment-failure-analysis",
+    "hypogenic",
+    "literature-matrix",
+    "performing-regression-analysis"
 )
 $deepDiscoveryPolicy = Get-Content -LiteralPath $deepDiscoveryPolicyPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $capabilityCatalog = Get-Content -LiteralPath $capabilityCatalogPath -Raw -Encoding UTF8 | ConvertFrom-Json

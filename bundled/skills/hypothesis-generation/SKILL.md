@@ -1,6 +1,6 @@
 ---
 name: hypothesis-generation
-description: Structured hypothesis formulation from observations. Use when you have experimental observations or data and need to formulate testable hypotheses with predictions, propose mechanisms, and design experiments to test them. Follows scientific method framework. For open-ended ideation use scientific-brainstorming; for automated LLM-driven hypothesis testing on datasets use hypogenic.
+description: Structured hypothesis formulation from observations. Use when you have experimental observations or data and need to formulate testable hypotheses with predictions, propose mechanisms, and design experiments to test them. Also owns explicit HypoGeniC-style or automated LLM-driven hypothesis generation/testing requests inside this single skill. For open-ended ideation use scientific-brainstorming.
 allowed-tools: Read Write Edit Bash
 license: MIT license
 metadata:
@@ -21,6 +21,7 @@ This skill should be used when:
 - Exploring competing explanations for phenomena
 - Formulating testable predictions for research
 - Conducting literature-based hypothesis generation
+- Running a lightweight HypoGeniC-style workflow when the user explicitly asks for automated hypothesis generation/testing
 - Planning mechanistic studies across scientific domains
 
 ## Outputs
