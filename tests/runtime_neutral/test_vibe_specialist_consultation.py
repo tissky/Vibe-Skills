@@ -695,6 +695,15 @@ def set_directory_writable(path: Path) -> None:
 
 
 class VibeSpecialistConsultationTests(unittest.TestCase):
+    def test_consultation_module_declares_legacy_compatibility_boundary(self) -> None:
+        text = CONSULTATION_SCRIPT.read_text(encoding="utf-8")
+
+        self.assertIn("Legacy compatibility boundary:", text)
+        self.assertIn("legacy_consultation_compatibility_only", text)
+        self.assertIn("New runtime sessions use", text)
+        self.assertIn("skill_routing.selected", text)
+        self.assertIn("skill_usage.used / skill_usage.unused", text)
+
     def test_legacy_bucketed_consultation_selection_remains_readable(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             temp_root = Path(tempdir)
@@ -1248,7 +1257,7 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
         self.assertEqual("pytest-source-run", segment["source_run_id"])
         self.assertEqual("pytest-token-123", segment["reentry_token"])
 
-    def test_consultation_window_invokes_specialist_and_emits_progressive_disclosure(self) -> None:
+    def test_legacy_consultation_window_invokes_specialist_and_emits_progressive_disclosure(self) -> None:
         shell = resolve_powershell()
         if shell is None:
             self.skipTest("PowerShell executable not available in PATH")
@@ -1325,7 +1334,7 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             assert_live_consultation_result(self, consulted)
             self.assertIn("fake codex consultation ok", list(consulted["stdout_preview"]))
 
-    def test_consultation_window_bypasses_codex_repo_check_for_non_git_roots(self) -> None:
+    def test_legacy_consultation_window_bypasses_codex_repo_check_for_non_git_roots(self) -> None:
         shell = resolve_powershell()
         if shell is None:
             self.skipTest("PowerShell executable not available in PATH")
@@ -1393,7 +1402,7 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             self.assertIn("--skip-git-repo-check", list(consulted["arguments"]))
             self.assertIn("fake codex repo-check ok", list(consulted["stdout_preview"]))
 
-    def test_consultation_window_fails_verification_when_non_git_working_root_is_modified(self) -> None:
+    def test_legacy_consultation_window_fails_verification_when_non_git_working_root_is_modified(self) -> None:
         shell = resolve_powershell()
         if shell is None:
             self.skipTest("PowerShell executable not available in PATH")
@@ -1469,7 +1478,7 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             self.assertEqual(["wrote-by-fake.txt"], list(degraded["observed_changed_files"]))
             self.assertIn("live_degraded_result:systematic-debugging", list(receipt["freeze_gate"]["errors"]))
 
-    def test_consultation_window_falls_back_to_writable_artifact_root_when_repo_root_is_read_only(self) -> None:
+    def test_legacy_consultation_window_falls_back_to_writable_artifact_root_when_repo_root_is_read_only(self) -> None:
         shell = resolve_powershell()
         if shell is None:
             self.skipTest("PowerShell executable not available in PATH")
@@ -1789,7 +1798,7 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             self.assertIn("systematic-debugging", requirement_doc)
             self.assertIn("systematic-debugging", execution_plan)
 
-    def test_live_consultation_with_empty_guidance_routes_directly_and_keeps_freeze_gate_green(self) -> None:
+    def test_legacy_consultation_with_empty_guidance_routes_directly_and_keeps_freeze_gate_green(self) -> None:
         shell = resolve_powershell()
         if shell is None:
             self.skipTest("PowerShell executable not available in PATH")

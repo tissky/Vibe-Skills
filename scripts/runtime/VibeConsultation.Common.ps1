@@ -1,6 +1,13 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Legacy compatibility boundary:
+# This module reads and verifies old specialist-consultation receipts. It is not
+# part of the current default routing model. New runtime sessions use
+# skill_routing.selected plus skill_usage.used / skill_usage.unused for current
+# skill selection and material-use proof.
+$script:VibeConsultationCompatibilityBoundary = 'legacy_consultation_compatibility_only'
+
 . (Join-Path $PSScriptRoot 'VibeRuntime.Common.ps1')
 . (Join-Path $PSScriptRoot 'VibeExecution.Common.ps1')
 
