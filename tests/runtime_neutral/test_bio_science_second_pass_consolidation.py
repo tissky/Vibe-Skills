@@ -15,9 +15,13 @@ from vgo_runtime.router_contract_runtime import route_prompt  # noqa: E402
 BIO_SCIENCE_DIRECT_OWNERS = [
     "biopython",
     "scanpy",
+    "pydeseq2",
+    "bio-database-evidence",
+]
+
+PRUNED_DIRECT_SKILLS = [
     "anndata",
     "scvi-tools",
-    "pydeseq2",
     "pysam",
     "deeptools",
     "esm",
@@ -25,7 +29,6 @@ BIO_SCIENCE_DIRECT_OWNERS = [
     "geniml",
     "arboreto",
     "flowio",
-    "bio-database-evidence",
 ]
 
 MERGED_DATABASE_SKILLS = [
@@ -44,6 +47,8 @@ MERGED_DATABASE_SKILLS = [
     "reactome-database",
     "string-database",
 ]
+
+REMOVED_BIO_SCIENCE_SKILLS = MERGED_DATABASE_SKILLS + PRUNED_DIRECT_SKILLS
 
 
 def load_json(relative_path: str) -> dict[str, object]:
@@ -106,7 +111,19 @@ class BioScienceSecondPassConsolidationTests(unittest.TestCase):
         result = route(prompt, task_type=task_type, grade=grade)
         self.assertEqual((expected_pack, expected_skill), selected(result), ranked_summary(result))
 
-    def test_bio_science_manifest_has_thirteen_direct_owners(self) -> None:
+    def assert_not_selected(
+        self,
+        prompt: str,
+        blocked_pack: str,
+        blocked_skill: str,
+        *,
+        task_type: str = "research",
+        grade: str = "M",
+    ) -> None:
+        result = route(prompt, task_type=task_type, grade=grade)
+        self.assertNotEqual((blocked_pack, blocked_skill), selected(result), ranked_summary(result))
+
+    def test_bio_science_manifest_has_four_direct_owners(self) -> None:
         pack = pack_by_id("bio-science")
 
         self.assertEqual(BIO_SCIENCE_DIRECT_OWNERS, pack.get("skill_candidates"))
@@ -121,7 +138,7 @@ class BioScienceSecondPassConsolidationTests(unittest.TestCase):
             pack.get("defaults_by_task"),
         )
 
-    def test_merged_database_skills_are_removed_from_live_surfaces(self) -> None:
+    def test_removed_bio_science_skills_are_absent_from_live_surfaces(self) -> None:
         keyword_index = load_json("config/skill-keyword-index.json")
         routing_rules = load_json("config/skill-routing-rules.json")
         skills_lock = load_json("config/skills-lock.json")
@@ -139,7 +156,7 @@ class BioScienceSecondPassConsolidationTests(unittest.TestCase):
         self.assertIn("bio-database-evidence", routing_skills)
         self.assertTrue((REPO_ROOT / "bundled" / "skills" / "bio-database-evidence").exists())
 
-        for skill_id in MERGED_DATABASE_SKILLS:
+        for skill_id in REMOVED_BIO_SCIENCE_SKILLS:
             self.assertNotIn(skill_id, keyword_skills)
             self.assertNotIn(skill_id, routing_skills)
             self.assertNotIn(skill_id, lock_names)
@@ -180,33 +197,33 @@ class BioScienceSecondPassConsolidationTests(unittest.TestCase):
             "pydeseq2",
         )
 
-    def test_pysam_still_owns_alignment_variant_files(self) -> None:
+    def test_scanpy_absorbs_anndata_container_work(self) -> None:
         self.assert_selected(
-            "读取 BAM VCF 做 pileup、coverage 和 region extraction",
+            "用 AnnData 读写 h5ad，管理 obs/var 元数据和 backed mode 稀疏矩阵",
             "bio-science",
-            "pysam",
+            "scanpy",
         )
 
-    def test_esm_still_owns_protein_embeddings(self) -> None:
+    def test_scanpy_absorbs_scvi_latent_model_work(self) -> None:
         self.assert_selected(
-            "用 ESM protein language model 做 protein embedding 和 inverse folding",
+            "用 scVI 和 scANVI 做 single-cell batch correction、latent model 和 cell type annotation",
             "bio-science",
-            "esm",
+            "scanpy",
         )
 
-    def test_cobrapy_still_owns_flux_balance(self) -> None:
-        self.assert_selected(
-            "用 COBRApy 做 FBA flux balance analysis 和 SBML metabolic model",
-            "bio-science",
-            "cobrapy",
-        )
-
-    def test_geniml_still_owns_bed_interval_embedding(self) -> None:
-        self.assert_selected(
-            "对 BED genomic intervals 做 Region2Vec embedding 和 regulatory region similarity",
-            "bio-science",
-            "geniml",
-        )
+    def test_pruned_cold_direct_skills_are_not_selected(self) -> None:
+        blocked_cases = [
+            ("读取 BAM VCF 做 pileup、coverage 和 region extraction", "pysam"),
+            ("用 deepTools bamCoverage computeMatrix plotHeatmap 生成 ChIP-seq profile", "deeptools"),
+            ("用 ESM protein language model 做 protein embedding 和 inverse folding", "esm"),
+            ("用 COBRApy 做 FBA flux balance analysis 和 SBML metabolic model", "cobrapy"),
+            ("对 BED genomic intervals 做 Region2Vec embedding 和 regulatory region similarity", "geniml"),
+            ("用 pySCENIC 和 arboreto 推断 gene regulatory network", "arboreto"),
+            ("读取 FCS flow cytometry 文件，提取 channel matrix", "flowio"),
+        ]
+        for prompt, skill_id in blocked_cases:
+            with self.subTest(skill_id=skill_id):
+                self.assert_not_selected(prompt, "bio-science", skill_id)
 
     def test_rdkit_stays_in_chem_drug(self) -> None:
         self.assert_selected(

@@ -1,5 +1,7 @@
 # Bio-Science Second-Pass Consolidation - 2026-04-30
 
+> Superseded note: `bio-science-high-prune-2026-04-30.md` further shrinks this pack from 13 retained route authorities to 4 and physically deletes the remaining cold/narrow direct-owner skills.
+
 ## Scope
 
 This pass shrinks `bio-science` from a broad database/tool list into a smaller direct-owner pack. It does not change the six-stage Vibe runtime and does not introduce helper experts, advisory routing, consultation routing, primary/secondary skill states, or stage assistants.

@@ -68,8 +68,8 @@ class BioScienceBoundaryHardeningTests(unittest.TestCase):
         result = route(prompt, task_type=task_type, grade=grade)
         self.assertNotEqual((blocked_pack, blocked_skill), selected(result), ranked_summary(result))
 
-    def test_geniml_owns_bed_genomic_interval_embeddings(self) -> None:
-        self.assert_selected(
+    def test_geniml_no_longer_owns_bed_genomic_interval_embeddings(self) -> None:
+        self.assert_not_selected(
             "对 BED genomic intervals 做 embeddings 和 similarity search。",
             "bio-science",
             "geniml",
@@ -108,14 +108,14 @@ class BioScienceBoundaryHardeningTests(unittest.TestCase):
         self.assert_selected(
             "编辑 AnnData h5ad 文件的 obs/var 元数据、layers 和 backed mode",
             "bio-science",
-            "anndata",
+            "scanpy",
         )
 
-    def test_scvi_tools_owns_latent_single_cell_models(self) -> None:
+    def test_scvi_tools_prompts_route_to_scanpy(self) -> None:
         self.assert_selected(
             "用 scVI 训练 single-cell latent model 做 batch correction 和 scANVI 注释",
             "bio-science",
-            "scvi-tools",
+            "scanpy",
         )
 
     def test_bio_database_evidence_owns_census_queries(self) -> None:
@@ -132,15 +132,15 @@ class BioScienceBoundaryHardeningTests(unittest.TestCase):
             "pydeseq2",
         )
 
-    def test_pysam_owns_alignment_variant_files(self) -> None:
-        self.assert_selected(
+    def test_pysam_no_longer_owns_alignment_variant_files(self) -> None:
+        self.assert_not_selected(
             "用 pysam 读取 BAM/CRAM/VCF 做 pileup、coverage 和 region extraction",
             "bio-science",
             "pysam",
         )
 
-    def test_deeptools_owns_genomics_signal_tracks(self) -> None:
-        self.assert_selected(
+    def test_deeptools_no_longer_owns_genomics_signal_tracks(self) -> None:
+        self.assert_not_selected(
             "用 deepTools bamCoverage 把 BAM 转 bigWig，并用 computeMatrix plotHeatmap 围绕 TSS 作图",
             "bio-science",
             "deeptools",
@@ -160,32 +160,32 @@ class BioScienceBoundaryHardeningTests(unittest.TestCase):
             "bio-database-evidence",
         )
 
-    def test_cobrapy_owns_flux_balance_analysis(self) -> None:
-        self.assert_selected(
+    def test_cobrapy_no_longer_owns_flux_balance_analysis(self) -> None:
+        self.assert_not_selected(
             "用 COBRApy 构建 metabolic model 并做 FBA flux balance analysis",
             "bio-science",
             "cobrapy",
         )
 
-    def test_esm_owns_protein_embeddings(self) -> None:
-        self.assert_selected(
+    def test_esm_no_longer_owns_protein_embeddings(self) -> None:
+        self.assert_not_selected(
             "用 ESM protein language model 生成蛋白 embedding，不做 Biopython 序列解析",
             "bio-science",
             "esm",
         )
 
-    def test_flowio_owns_real_fcs_flow_cytometry(self) -> None:
-        self.assert_selected(
+    def test_flowio_no_longer_owns_real_fcs_flow_cytometry(self) -> None:
+        self.assert_not_selected(
             "读取 FCS flow cytometry 文件，提取 channel matrix 和 compensation",
             "bio-science",
             "flowio",
         )
 
-    def test_scanpy_loses_to_anndata_for_container_only_work(self) -> None:
+    def test_scanpy_absorbs_anndata_for_container_only_work(self) -> None:
         self.assert_selected(
             "只需要整理 h5ad AnnData 的 obs、var、layers、raw 和 backed mode，不做聚类分析",
             "bio-science",
-            "anndata",
+            "scanpy",
         )
 
     def test_scanpy_loses_to_bio_database_evidence_for_census_query(self) -> None:
@@ -195,8 +195,8 @@ class BioScienceBoundaryHardeningTests(unittest.TestCase):
             "bio-database-evidence",
         )
 
-    def test_biopython_loses_to_pysam_for_bam_vcf_files(self) -> None:
-        self.assert_selected(
+    def test_deleted_pysam_is_not_selected_for_bam_vcf_files(self) -> None:
+        self.assert_not_selected(
             "解析 BAM/VCF 文件，计算 coverage 和 pileup，不做序列格式转换",
             "bio-science",
             "pysam",

@@ -611,6 +611,7 @@
       "keywords": [
         "scanpy",
         "single-cell",
+        "single cell",
         "single-cell clustering",
         "scRNA",
         "single-cell RNA-seq",
@@ -620,40 +621,23 @@
         "10x",
         "leiden",
         "marker genes",
-        "单细胞聚类",
-        "细胞注释",
-        "marker基因",
-        "单细胞 RNA-seq",
-        "单细胞RNA-seq"
-      ]
-    },
-    "anndata": {
-      "keywords": [
-        "anndata",
         "AnnData",
+        "anndata",
         "h5ad",
         "obs",
         "var",
         "backed mode",
-        "annotated data matrix",
-        "sparse matrix",
-        "zarr",
-        "元数据",
-        "稀疏矩阵"
-      ]
-    },
-    "scvi-tools": {
-      "keywords": [
-        "scvi-tools",
         "scVI",
         "scANVI",
-        "single-cell latent model",
         "batch correction",
+        "latent model",
         "cell type annotation",
-        "multimodal single-cell",
-        "spatial transcriptomics",
-        "批次校正",
-        "细胞类型注释"
+        "单细胞聚类",
+        "细胞注释",
+        "marker基因",
+        "单细胞 RNA-seq",
+        "单细胞RNA-seq",
+        "批次校正"
       ]
     },
     "pydeseq2": {
@@ -665,43 +649,11 @@
         "volcano plot",
         "MA plot",
         "padj",
+        "Wald test",
         "差异表达",
         "差异表达分析",
         "de分析",
         "rna-seq差异"
-      ]
-    },
-    "pysam": {
-      "keywords": [
-        "pysam",
-        "bam",
-        "sam",
-        "cram",
-        "vcf",
-        "pileup",
-        "coverage",
-        "测序比对文件",
-        "变异文件",
-        "变异文件解析",
-        "覆盖度"
-      ]
-    },
-    "deeptools": {
-      "keywords": [
-        "deeptools",
-        "deepTools",
-        "bam to bigwig",
-        "bigWig",
-        "bamCoverage",
-        "computeMatrix",
-        "plotHeatmap",
-        "TSS heatmap",
-        "profile plot",
-        "ChIP-seq heatmap",
-        "ATAC-seq signal",
-        "NGS track",
-        "信号轨道",
-        "热图"
       ]
     },
     "biopython": {
@@ -709,9 +661,13 @@
         "biopython",
         "seqio",
         "fasta",
+        "fastq",
         "genbank",
         "entrez",
+        "blast",
         "sequence conversion",
+        "sequence alignment",
+        "phylogenetic tree",
         "序列格式转换",
         "序列解析",
         "生物序列处理"
@@ -753,7 +709,11 @@
         "STRING",
         "CELLxGENE Census",
         "RefSeq",
-        "scanpy"
+        "CELLxGENE",
+        "cellxgene",
+        "cell census",
+        "single-cell census",
+        "细胞图谱"
       ]
     },
     "docs-write": {
@@ -1322,97 +1282,6 @@
         "药物靶点活性"
       ]
     },
-    "drugbank-database": {
-      "keywords": [
-        "drugbank",
-        "drug interaction",
-        "drug-drug interaction",
-        "drug target",
-        "pharmacology",
-        "atc",
-        "药物相互作用",
-        "药物靶点",
-        "药理信息"
-      ]
-    },
-    "pubchem-database": {
-      "keywords": [
-        "pubchem",
-        "cid",
-        "pug-rest",
-        "compound property",
-        "smiles",
-        "inchi",
-        "molecular formula",
-        "化合物物性",
-        "化合物编号",
-        "化学结构"
-      ]
-    },
-    "brenda-database": {
-      "keywords": [
-        "brenda",
-        "ec number",
-        "enzyme kinetics",
-        "km",
-        "kcat",
-        "vmax",
-        "substrate specificity",
-        "酶动力学",
-        "酶参数",
-        "酶底物"
-      ]
-    },
-    "hmdb-database": {
-      "keywords": [
-        "hmdb",
-        "metabolite",
-        "metabolomics",
-        "ms/ms",
-        "nmr",
-        "metabolite identification",
-        "biomarker",
-        "代谢物",
-        "代谢组",
-        "代谢物鉴定"
-      ]
-    },
-    "zinc-database": {
-      "keywords": [
-        "zinc",
-        "zinc id",
-        "purchasable compounds",
-        "virtual screening library",
-        "compound library",
-        "vendor compound",
-        "可购买小分子",
-        "化合物库",
-        "虚拟筛选库"
-      ]
-    },
-    "datamol": {
-      "keywords": [
-        "datamol"
-      ]
-    },
-    "deepchem": {
-      "keywords": [
-        "deepchem",
-        "molecular ml",
-        "molecular machine learning",
-        "admet prediction",
-        "toxicity prediction",
-        "moleculenet",
-        "graph neural network",
-        "gnn",
-        "chemberta",
-        "molfeat",
-        "molecular embedding",
-        "药物发现",
-        "分子机器学习",
-        "分子属性预测"
-      ]
-    },
     "medchem": {
       "keywords": [
         "medchem",
@@ -1423,9 +1292,14 @@
         "pains",
         "lipinski",
         "drug-likeness",
+        "admet",
+        "structural alert",
+        "lead compound",
         "药物化学",
         "构效关系",
-        "先导优化"
+        "先导优化",
+        "成药性",
+        "结构警示"
       ]
     },
     "rdkit": {
@@ -1433,50 +1307,23 @@
         "rdkit",
         "datamol",
         "smiles",
+        "inchi",
         "sdf",
         "fingerprint",
         "morgan fingerprint",
+        "ecfp",
         "descriptor",
+        "molecular descriptor",
         "substructure",
         "similarity",
         "standardize smiles",
+        "molecule standardization",
         "logp",
         "tpsa",
         "分子指纹",
         "分子描述符",
-        "分子标准化"
-      ]
-    },
-    "diffdock": {
-      "keywords": [
-        "diffdock",
-        "docking",
-        "protein ligand",
-        "binding pose",
-        "pose prediction",
-        "pdb smiles",
-        "molecular docking",
-        "分子对接",
-        "结合构象",
-        "蛋白配体"
-      ]
-    },
-    "molfeat": {
-      "keywords": [
-        "molfeat"
-      ]
-    },
-    "pytdc": {
-      "keywords": [
-        "pytdc",
-        "tdc",
-        "therapeutics data commons",
-        "admet benchmark",
-        "drug discovery benchmark",
-        "scaffold split",
-        "get_split",
-        "药物发现数据集",
-        "基准数据集"
+        "分子标准化",
+        "化学结构"
       ]
     },
     "clinicaltrials-database": {
@@ -1975,69 +1822,6 @@
         "项目申请书",
         "立项依据",
         "创新性"
-      ]
-    },
-    "arboreto": {
-      "keywords": [
-        "arboreto",
-        "pyscenic",
-        "pySCENIC",
-        "grn",
-        "gene regulatory network",
-        "transcription factor network",
-        "基因调控网络",
-        "转录因子网络"
-      ]
-    },
-    "cobrapy": {
-      "keywords": [
-        "cobrapy",
-        "COBRApy",
-        "fba",
-        "flux balance",
-        "metabolic model",
-        "constraint-based metabolic model",
-        "代谢建模",
-        "通量平衡"
-      ]
-    },
-    "esm": {
-      "keywords": [
-        "esm",
-        "protein language model",
-        "protein embedding",
-        "protein embeddings",
-        "protein lm",
-        "蛋白语言模型",
-        "蛋白嵌入"
-      ]
-    },
-    "flowio": {
-      "keywords": [
-        "flowio",
-        "flow cytometry",
-        "fcs",
-        "cytometry",
-        "channel matrix",
-        "流式细胞",
-        "FCS"
-      ]
-    },
-    "geniml": {
-      "keywords": [
-        "geniml",
-        "genomic ml",
-        "genomic machine learning",
-        "genome embedding",
-        "genome embeddings",
-        "genomic interval",
-        "genomic intervals",
-        "BED genomic intervals",
-        "regulatory region embedding",
-        "regulatory region similarity",
-        "基因组机器学习",
-        "基因组嵌入",
-        "基因组区间"
       ]
     },
     "scientific-slides": {

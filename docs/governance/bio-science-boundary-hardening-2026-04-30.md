@@ -1,5 +1,7 @@
 # Bio-Science Boundary Hardening - 2026-04-30
 
+> Superseded note: this document describes the earlier boundary-hardening state before high-prune consolidation. `bio-science-high-prune-2026-04-30.md` is the current simplified routing contract.
+
 ## Scope
 
 This pass hardens the `bio-science` routing boundary. It does not change the public six-stage Vibe runtime and does not introduce helper experts, advisory routing, consultation routing, primary/secondary skill states, or stage assistants.

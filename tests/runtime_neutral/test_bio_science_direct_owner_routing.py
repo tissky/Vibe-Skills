@@ -55,14 +55,25 @@ class BioScienceDirectOwnerRoutingTests(unittest.TestCase):
         result = route(prompt, task_type=task_type, grade=grade)
         self.assertEqual(("bio-science", expected_skill), selected(result), ranked_summary(result))
 
-    def test_anndata_routes_as_direct_owner_for_h5ad_container_work(self) -> None:
-        self.assert_selected("用 AnnData 读写 h5ad，管理 obs/var 元数据和 backed mode 稀疏矩阵", "anndata")
+    def assert_not_selected(
+        self,
+        prompt: str,
+        blocked_skill: str,
+        *,
+        task_type: str = "research",
+        grade: str = "M",
+    ) -> None:
+        result = route(prompt, task_type=task_type, grade=grade)
+        self.assertNotEqual(("bio-science", blocked_skill), selected(result), ranked_summary(result))
 
-    def test_scvi_tools_routes_as_direct_owner_for_single_cell_latent_models(self) -> None:
-        self.assert_selected("用 scVI 和 scANVI 做 single-cell batch correction、latent model 和 cell type annotation", "scvi-tools")
+    def test_anndata_routes_to_scanpy_for_h5ad_container_work(self) -> None:
+        self.assert_selected("用 AnnData 读写 h5ad，管理 obs/var 元数据和 backed mode 稀疏矩阵", "scanpy")
 
-    def test_deeptools_routes_as_direct_owner_for_ngs_tracks(self) -> None:
-        self.assert_selected("用 deepTools 把 BAM 转 bigWig，并围绕 TSS 画 ChIP-seq heatmap profile", "deeptools")
+    def test_scvi_tools_routes_to_scanpy_for_single_cell_latent_models(self) -> None:
+        self.assert_selected("用 scVI 和 scANVI 做 single-cell batch correction、latent model 和 cell type annotation", "scanpy")
+
+    def test_deeptools_no_longer_routes_as_direct_owner_for_ngs_tracks(self) -> None:
+        self.assert_not_selected("用 deepTools 把 BAM 转 bigWig，并围绕 TSS 画 ChIP-seq heatmap profile", "deeptools")
 
     def test_bio_database_evidence_routes_for_cross_database_queries(self) -> None:
         self.assert_selected("用 BioServices 同时查询 UniProt、KEGG、Reactome 并做 ID mapping", "bio-database-evidence")

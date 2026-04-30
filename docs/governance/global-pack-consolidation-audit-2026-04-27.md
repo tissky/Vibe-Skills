@@ -6,119 +6,113 @@
 
 本报告是只读体检，不修改 live routing，不删除 skill 目录。
 
-- pack 总数：44
+- pack 总数：41
 - P0：6
-- P1：14
-- P2：24
-- 当前最高风险 pack：`bio-science`
+- P1：10
+- P2：25
+- 当前最高风险 pack：`research-design`
 
 ## 全局排序
 
 | priority | pack | score | skills | route authority | stage assistant | rationale |
 |---|---|---:|---:|---:|---:|---|
-| P0 | `bio-science` | 66.40 | 26 | 0 | 0 | 26 skill candidates; no explicit role split; 15 tool-like primary candidates; 26 candidates with scripts/references/assets |
-| P0 | `research-design` | 64.40 | 24 | 14 | 3 | 24 skill candidates; 14 route authorities; 3 suspected overlap pairs; 1 shared broad keywords; 2 tool-like primary candidates; 15 candidates with scripts/references/assets |
-| P0 | `science-literature-citations` | 61.40 | 12 | 10 | 2 | 12 skill candidates; 10 route authorities; 5 shared broad keywords; 9 tool-like primary candidates; 11 candidates with scripts/references/assets |
-| P0 | `scholarly-publishing-workflow` | 59.70 | 13 | 0 | 0 | 13 skill candidates; no explicit role split; 13 shared broad keywords; 4 tool-like primary candidates; 9 candidates with scripts/references/assets |
-| P0 | `science-chem-drug` | 57.70 | 13 | 0 | 0 | 13 skill candidates; no explicit role split; 6 shared broad keywords; 6 tool-like primary candidates; 13 candidates with scripts/references/assets |
-| P0 | `science-lab-automation` | 47.90 | 7 | 0 | 0 | no explicit role split; 6 shared broad keywords; 6 tool-like primary candidates; 7 candidates with scripts/references/assets |
-| P1 | `integration-devops` | 42.90 | 13 | 0 | 0 | 13 skill candidates; no explicit role split; 3 tool-like primary candidates; 12 candidates with scripts/references/assets |
-| P1 | `science-communication-slides` | 40.20 | 8 | 0 | 0 | no explicit role split; 3 shared broad keywords; 4 tool-like primary candidates; 6 candidates with scripts/references/assets |
-| P1 | `orchestration-core` | 39.60 | 27 | 1 | 26 | 27 skill candidates; 2 suspected overlap pairs; 1 shared broad keywords; 9 candidates with scripts/references/assets |
-| P1 | `ai-llm` | 39.30 | 11 | 0 | 0 | no explicit role split; 1 shared broad keywords; 4 tool-like primary candidates; 6 candidates with scripts/references/assets |
-| P1 | `science-clinical-regulatory` | 37.70 | 7 | 0 | 0 | no explicit role split; 1 shared broad keywords; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
-| P1 | `code-quality` | 37.00 | 10 | 9 | 1 | 9 route authorities; 3 suspected overlap pairs; 2 candidates with scripts/references/assets |
-| P1 | `docs-media` | 37.00 | 8 | 8 | 0 | 8 route authorities; 1 suspected overlap pairs; 5 tool-like primary candidates; 5 candidates with scripts/references/assets |
-| P1 | `finance-edgar-macro` | 35.90 | 7 | 0 | 0 | no explicit role split; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
-| P1 | `data-ml` | 29.40 | 8 | 7 | 1 | 7 route authorities; 1 tool-like primary candidates; 7 candidates with scripts/references/assets |
-| P1 | `science-medical-imaging` | 28.30 | 5 | 0 | 0 | no explicit role split; 1 shared broad keywords; 5 candidates with scripts/references/assets |
-| P1 | `aios-core` | 16.40 | 12 | 1 | 11 | 12 skill candidates; 1 suspected overlap pairs; 1 tool-like primary candidates |
-| P1 | `science-quantum` | 15.80 | 4 | 0 | 0 | 3 shared broad keywords; 3 tool-like primary candidates; 4 candidates with scripts/references/assets |
+| P0 | `research-design` | 49.90 | 9 | 9 | 0 | 9 route authorities; 1 suspected overlap pairs; 7 shared broad keywords; 2 tool-like primary candidates; 6 candidates with scripts/references/assets |
+| P0 | `science-literature-citations` | 42.70 | 7 | 7 | 0 | 7 route authorities; 5 shared broad keywords; 6 tool-like primary candidates; 6 candidates with scripts/references/assets |
+| P0 | `code-quality` | 39.20 | 10 | 10 | 0 | 10 route authorities; 3 suspected overlap pairs; 2 candidates with scripts/references/assets |
+| P0 | `docs-media` | 37.00 | 8 | 8 | 0 | 8 route authorities; 1 suspected overlap pairs; 5 tool-like primary candidates; 5 candidates with scripts/references/assets |
+| P0 | `scholarly-publishing-workflow` | 34.20 | 8 | 8 | 0 | 8 route authorities; 1 shared broad keywords; 3 tool-like primary candidates; 5 candidates with scripts/references/assets |
+| P0 | `finance-edgar-macro` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P1 | `science-clinical-regulatory` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P1 | `data-ml` | 31.60 | 8 | 8 | 0 | 8 route authorities; 1 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P1 | `integration-devops` | 23.80 | 6 | 6 | 0 | 6 route authorities; 1 tool-like primary candidates; 5 candidates with scripts/references/assets |
+| P1 | `science-communication-slides` | 22.60 | 4 | 4 | 0 | 3 shared broad keywords; 2 tool-like primary candidates; 3 candidates with scripts/references/assets |
+| P1 | `ai-llm` | 20.70 | 5 | 5 | 0 | 5 route authorities; 3 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P1 | `science-medical-imaging` | 19.50 | 5 | 5 | 0 | 5 route authorities; 5 candidates with scripts/references/assets |
+| P1 | `bio-science` | 18.00 | 4 | 4 | 0 | 2 tool-like primary candidates; 4 candidates with scripts/references/assets |
 | P1 | `media-video` | 15.30 | 3 | 3 | 0 | 3 tool-like primary candidates; 3 candidates with scripts/references/assets |
-| P1 | `science-figures-visualization` | 15.10 | 5 | 2 | 3 | 1 shared broad keywords; 1 tool-like primary candidates; 4 candidates with scripts/references/assets |
-| P2 | `science-reporting` | 13.30 | 5 | 2 | 3 | 1 tool-like primary candidates; 4 candidates with scripts/references/assets |
-| P2 | `ml-torch-geometric` | 12.00 | 2 | 0 | 0 | 1 suspected overlap pairs; 4 shared broad keywords; 1 candidates with scripts/references/assets |
-| P2 | `ruc-nlpir-augmentation` | 11.40 | 4 | 2 | 2 | 1 shared broad keywords; 2 candidates with scripts/references/assets |
-| P2 | `science-geospatial` | 9.30 | 3 | 0 | 0 | 1 shared broad keywords; 2 tool-like primary candidates; 3 candidates with scripts/references/assets |
-| P2 | `science-zarr-polars` | 9.00 | 4 | 0 | 0 | 1 shared broad keywords; 1 tool-like primary candidates; 3 candidates with scripts/references/assets |
-| P2 | `science-peer-review` | 8.70 | 3 | 0 | 0 | 3 tool-like primary candidates; 3 candidates with scripts/references/assets |
-| P2 | `web-scraping` | 4.60 | 2 | 0 | 0 | 1 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P1 | `science-peer-review` | 15.30 | 3 | 3 | 0 | 3 tool-like primary candidates; 3 candidates with scripts/references/assets |
+| P1 | `science-zarr-polars` | 14.70 | 3 | 3 | 0 | 1 shared broad keywords; 1 tool-like primary candidates; 3 candidates with scripts/references/assets |
+| P2 | `science-chem-drug` | 12.90 | 3 | 3 | 0 | 1 tool-like primary candidates; 3 candidates with scripts/references/assets |
+| P2 | `science-geospatial` | 10.80 | 2 | 2 | 0 | 1 shared broad keywords; 1 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P2 | `science-figures-visualization` | 9.00 | 2 | 2 | 0 | 1 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P2 | `web-scraping` | 9.00 | 2 | 2 | 0 | 1 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P2 | `science-reporting` | 8.20 | 2 | 2 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `ruc-nlpir-augmentation` | 7.80 | 2 | 2 | 0 | 2 candidates with scripts/references/assets |
+| P2 | `docs-markitdown-conversion` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `ip-uspto-patents` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `ml-stable-baselines3` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `science-fluidsim-cfd` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `science-pymoo-optimization` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `science-rowan-chemistry` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `science-simpy-simulation` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `design-implementation` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `ml-torch-geometric` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-astropy` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-matchms-spectra` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-matlab-octave` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-neuropixels` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-pymatgen` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-pymc-bayesian` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-timesfm-forecasting` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
 | P2 | `screen-capture` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `docs-markitdown-conversion` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `ip-uspto-patents` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `ml-stable-baselines3` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-fluidsim-cfd` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-pymoo-optimization` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-rowan-chemistry` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-simpy-simulation` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-astropy` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-matchms-spectra` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-matlab-octave` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-neuropixels` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-pymatgen` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-pymc-bayesian` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-timesfm-forecasting` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `cloud-modalcom` | 0.90 | 1 | 0 | 0 | low structural risk |
-| P2 | `science-tiledbvcf` | 0.90 | 1 | 0 | 0 | low structural risk |
+| P2 | `workflow-compatibility` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-tiledbvcf` | 3.10 | 1 | 1 | 0 | low structural risk |
 
 ## P0
 
 | priority | pack | score | skills | route authority | stage assistant | rationale |
 |---|---|---:|---:|---:|---:|---|
-| P0 | `bio-science` | 66.40 | 26 | 0 | 0 | 26 skill candidates; no explicit role split; 15 tool-like primary candidates; 26 candidates with scripts/references/assets |
-| P0 | `research-design` | 64.40 | 24 | 14 | 3 | 24 skill candidates; 14 route authorities; 3 suspected overlap pairs; 1 shared broad keywords; 2 tool-like primary candidates; 15 candidates with scripts/references/assets |
-| P0 | `science-literature-citations` | 61.40 | 12 | 10 | 2 | 12 skill candidates; 10 route authorities; 5 shared broad keywords; 9 tool-like primary candidates; 11 candidates with scripts/references/assets |
-| P0 | `scholarly-publishing-workflow` | 59.70 | 13 | 0 | 0 | 13 skill candidates; no explicit role split; 13 shared broad keywords; 4 tool-like primary candidates; 9 candidates with scripts/references/assets |
-| P0 | `science-chem-drug` | 57.70 | 13 | 0 | 0 | 13 skill candidates; no explicit role split; 6 shared broad keywords; 6 tool-like primary candidates; 13 candidates with scripts/references/assets |
-| P0 | `science-lab-automation` | 47.90 | 7 | 0 | 0 | no explicit role split; 6 shared broad keywords; 6 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P0 | `research-design` | 49.90 | 9 | 9 | 0 | 9 route authorities; 1 suspected overlap pairs; 7 shared broad keywords; 2 tool-like primary candidates; 6 candidates with scripts/references/assets |
+| P0 | `science-literature-citations` | 42.70 | 7 | 7 | 0 | 7 route authorities; 5 shared broad keywords; 6 tool-like primary candidates; 6 candidates with scripts/references/assets |
+| P0 | `code-quality` | 39.20 | 10 | 10 | 0 | 10 route authorities; 3 suspected overlap pairs; 2 candidates with scripts/references/assets |
+| P0 | `docs-media` | 37.00 | 8 | 8 | 0 | 8 route authorities; 1 suspected overlap pairs; 5 tool-like primary candidates; 5 candidates with scripts/references/assets |
+| P0 | `scholarly-publishing-workflow` | 34.20 | 8 | 8 | 0 | 8 route authorities; 1 shared broad keywords; 3 tool-like primary candidates; 5 candidates with scripts/references/assets |
+| P0 | `finance-edgar-macro` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
 
 ## P1
 
 | priority | pack | score | skills | route authority | stage assistant | rationale |
 |---|---|---:|---:|---:|---:|---|
-| P1 | `integration-devops` | 42.90 | 13 | 0 | 0 | 13 skill candidates; no explicit role split; 3 tool-like primary candidates; 12 candidates with scripts/references/assets |
-| P1 | `science-communication-slides` | 40.20 | 8 | 0 | 0 | no explicit role split; 3 shared broad keywords; 4 tool-like primary candidates; 6 candidates with scripts/references/assets |
-| P1 | `orchestration-core` | 39.60 | 27 | 1 | 26 | 27 skill candidates; 2 suspected overlap pairs; 1 shared broad keywords; 9 candidates with scripts/references/assets |
-| P1 | `ai-llm` | 39.30 | 11 | 0 | 0 | no explicit role split; 1 shared broad keywords; 4 tool-like primary candidates; 6 candidates with scripts/references/assets |
-| P1 | `science-clinical-regulatory` | 37.70 | 7 | 0 | 0 | no explicit role split; 1 shared broad keywords; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
-| P1 | `code-quality` | 37.00 | 10 | 9 | 1 | 9 route authorities; 3 suspected overlap pairs; 2 candidates with scripts/references/assets |
-| P1 | `docs-media` | 37.00 | 8 | 8 | 0 | 8 route authorities; 1 suspected overlap pairs; 5 tool-like primary candidates; 5 candidates with scripts/references/assets |
-| P1 | `finance-edgar-macro` | 35.90 | 7 | 0 | 0 | no explicit role split; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
-| P1 | `data-ml` | 29.40 | 8 | 7 | 1 | 7 route authorities; 1 tool-like primary candidates; 7 candidates with scripts/references/assets |
-| P1 | `science-medical-imaging` | 28.30 | 5 | 0 | 0 | no explicit role split; 1 shared broad keywords; 5 candidates with scripts/references/assets |
-| P1 | `aios-core` | 16.40 | 12 | 1 | 11 | 12 skill candidates; 1 suspected overlap pairs; 1 tool-like primary candidates |
-| P1 | `science-quantum` | 15.80 | 4 | 0 | 0 | 3 shared broad keywords; 3 tool-like primary candidates; 4 candidates with scripts/references/assets |
+| P1 | `science-clinical-regulatory` | 33.30 | 7 | 7 | 0 | 7 route authorities; 5 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P1 | `data-ml` | 31.60 | 8 | 8 | 0 | 8 route authorities; 1 tool-like primary candidates; 7 candidates with scripts/references/assets |
+| P1 | `integration-devops` | 23.80 | 6 | 6 | 0 | 6 route authorities; 1 tool-like primary candidates; 5 candidates with scripts/references/assets |
+| P1 | `science-communication-slides` | 22.60 | 4 | 4 | 0 | 3 shared broad keywords; 2 tool-like primary candidates; 3 candidates with scripts/references/assets |
+| P1 | `ai-llm` | 20.70 | 5 | 5 | 0 | 5 route authorities; 3 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P1 | `science-medical-imaging` | 19.50 | 5 | 5 | 0 | 5 route authorities; 5 candidates with scripts/references/assets |
+| P1 | `bio-science` | 18.00 | 4 | 4 | 0 | 2 tool-like primary candidates; 4 candidates with scripts/references/assets |
 | P1 | `media-video` | 15.30 | 3 | 3 | 0 | 3 tool-like primary candidates; 3 candidates with scripts/references/assets |
-| P1 | `science-figures-visualization` | 15.10 | 5 | 2 | 3 | 1 shared broad keywords; 1 tool-like primary candidates; 4 candidates with scripts/references/assets |
+| P1 | `science-peer-review` | 15.30 | 3 | 3 | 0 | 3 tool-like primary candidates; 3 candidates with scripts/references/assets |
+| P1 | `science-zarr-polars` | 14.70 | 3 | 3 | 0 | 1 shared broad keywords; 1 tool-like primary candidates; 3 candidates with scripts/references/assets |
 
 ## P2
 
 | priority | pack | score | skills | route authority | stage assistant | rationale |
 |---|---|---:|---:|---:|---:|---|
-| P2 | `science-reporting` | 13.30 | 5 | 2 | 3 | 1 tool-like primary candidates; 4 candidates with scripts/references/assets |
-| P2 | `ml-torch-geometric` | 12.00 | 2 | 0 | 0 | 1 suspected overlap pairs; 4 shared broad keywords; 1 candidates with scripts/references/assets |
-| P2 | `ruc-nlpir-augmentation` | 11.40 | 4 | 2 | 2 | 1 shared broad keywords; 2 candidates with scripts/references/assets |
-| P2 | `science-geospatial` | 9.30 | 3 | 0 | 0 | 1 shared broad keywords; 2 tool-like primary candidates; 3 candidates with scripts/references/assets |
-| P2 | `science-zarr-polars` | 9.00 | 4 | 0 | 0 | 1 shared broad keywords; 1 tool-like primary candidates; 3 candidates with scripts/references/assets |
-| P2 | `science-peer-review` | 8.70 | 3 | 0 | 0 | 3 tool-like primary candidates; 3 candidates with scripts/references/assets |
-| P2 | `web-scraping` | 4.60 | 2 | 0 | 0 | 1 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P2 | `science-chem-drug` | 12.90 | 3 | 3 | 0 | 1 tool-like primary candidates; 3 candidates with scripts/references/assets |
+| P2 | `science-geospatial` | 10.80 | 2 | 2 | 0 | 1 shared broad keywords; 1 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P2 | `science-figures-visualization` | 9.00 | 2 | 2 | 0 | 1 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P2 | `web-scraping` | 9.00 | 2 | 2 | 0 | 1 tool-like primary candidates; 2 candidates with scripts/references/assets |
+| P2 | `science-reporting` | 8.20 | 2 | 2 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `ruc-nlpir-augmentation` | 7.80 | 2 | 2 | 0 | 2 candidates with scripts/references/assets |
+| P2 | `docs-markitdown-conversion` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `ip-uspto-patents` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `ml-stable-baselines3` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `science-fluidsim-cfd` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `science-pymoo-optimization` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `science-rowan-chemistry` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `science-simpy-simulation` | 5.10 | 1 | 1 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
+| P2 | `design-implementation` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `ml-torch-geometric` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-astropy` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-matchms-spectra` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-matlab-octave` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-neuropixels` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-pymatgen` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-pymc-bayesian` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-timesfm-forecasting` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
 | P2 | `screen-capture` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `docs-markitdown-conversion` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `ip-uspto-patents` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `ml-stable-baselines3` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-fluidsim-cfd` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-pymoo-optimization` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-rowan-chemistry` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-simpy-simulation` | 2.90 | 1 | 0 | 0 | 1 tool-like primary candidates; 1 candidates with scripts/references/assets |
-| P2 | `science-astropy` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-matchms-spectra` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-matlab-octave` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-neuropixels` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-pymatgen` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-pymc-bayesian` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `science-timesfm-forecasting` | 1.70 | 1 | 0 | 0 | 1 candidates with scripts/references/assets |
-| P2 | `cloud-modalcom` | 0.90 | 1 | 0 | 0 | low structural risk |
-| P2 | `science-tiledbvcf` | 0.90 | 1 | 0 | 0 | low structural risk |
+| P2 | `workflow-compatibility` | 3.90 | 1 | 1 | 0 | 1 candidates with scripts/references/assets |
+| P2 | `science-tiledbvcf` | 3.10 | 1 | 1 | 0 | low structural risk |
 
 ## 边界说明
 

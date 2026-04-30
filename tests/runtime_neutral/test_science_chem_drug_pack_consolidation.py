@@ -14,19 +14,19 @@ from vgo_runtime.router_contract_runtime import route_prompt  # noqa: E402
 
 KEPT_SKILLS = [
     "chembl-database",
+    "medchem",
+    "rdkit",
+]
+
+DELETED_SKILLS = [
     "drugbank-database",
     "pubchem-database",
     "brenda-database",
     "hmdb-database",
     "zinc-database",
     "deepchem",
-    "medchem",
-    "rdkit",
     "diffdock",
     "pytdc",
-]
-
-MOVED_OUT_SKILLS = [
     "datamol",
     "molfeat",
 ]
@@ -99,17 +99,20 @@ class ScienceChemDrugPackConsolidationTests(unittest.TestCase):
         result = route(prompt, task_type=task_type, grade=grade)
         self.assertNotEqual("science-chem-drug", selected(result)[0], ranked_summary(result))
 
-    def test_manifest_shrinks_to_eleven_route_owners(self) -> None:
+    def test_manifest_shrinks_to_three_route_owners(self) -> None:
         pack = pack_by_id("science-chem-drug")
         self.assertEqual(KEPT_SKILLS, pack.get("skill_candidates"))
         self.assertEqual(KEPT_SKILLS, pack.get("route_authority_candidates"))
         self.assertEqual([], pack.get("stage_assistant_candidates"))
 
-    def test_manifest_removes_helper_overlap_skills(self) -> None:
+    def test_deleted_skills_removed_from_manifest_and_disk(self) -> None:
         pack = pack_by_id("science-chem-drug")
         candidates = set(pack.get("skill_candidates") or [])
-        for skill in MOVED_OUT_SKILLS:
+        route_authorities = set(pack.get("route_authority_candidates") or [])
+        for skill in DELETED_SKILLS:
             self.assertNotIn(skill, candidates)
+            self.assertNotIn(skill, route_authorities)
+            self.assertFalse((REPO_ROOT / "bundled" / "skills" / skill).exists(), skill)
 
     def test_defaults_match_kept_route_owners(self) -> None:
         pack = pack_by_id("science-chem-drug")
@@ -137,46 +140,6 @@ class ScienceChemDrugPackConsolidationTests(unittest.TestCase):
             grade="M",
         )
 
-    def test_drugbank_interaction_routes_to_drugbank(self) -> None:
-        self.assert_selected(
-            "查询 DrugBank 中华法林和阿司匹林的药物相互作用、靶点和药理信息",
-            "science-chem-drug",
-            "drugbank-database",
-            grade="M",
-        )
-
-    def test_pubchem_identifier_routes_to_pubchem(self) -> None:
-        self.assert_selected(
-            "查询 PubChem CID、SMILES、InChI 和化合物物性",
-            "science-chem-drug",
-            "pubchem-database",
-            grade="M",
-        )
-
-    def test_zinc_screening_library_routes_to_zinc(self) -> None:
-        self.assert_selected(
-            "从 ZINC 下载可购买小分子库用于 virtual screening",
-            "science-chem-drug",
-            "zinc-database",
-            grade="M",
-        )
-
-    def test_brenda_enzyme_kinetics_routes_to_brenda(self) -> None:
-        self.assert_selected(
-            "在 BRENDA 查询某个 EC number 的 Km、kcat、Vmax 和酶动力学参数",
-            "science-chem-drug",
-            "brenda-database",
-            grade="M",
-        )
-
-    def test_hmdb_metabolite_identification_routes_to_hmdb(self) -> None:
-        self.assert_selected(
-            "在 HMDB 里按 MS/MS 谱和代谢物名称做 metabolite identification",
-            "science-chem-drug",
-            "hmdb-database",
-            grade="M",
-        )
-
     def test_medchem_sar_routes_to_medchem(self) -> None:
         self.assert_selected(
             "做药物化学 SAR 分析、PAINS 过滤、Lipinski 规则和先导化合物优化建议",
@@ -185,43 +148,27 @@ class ScienceChemDrugPackConsolidationTests(unittest.TestCase):
             task_type="planning",
         )
 
-    def test_diffdock_pose_routes_to_diffdock(self) -> None:
-        self.assert_selected(
-            "用 DiffDock 做 protein-ligand docking pose prediction，输入 PDB 和 SMILES",
-            "science-chem-drug",
-            "diffdock",
-            task_type="coding",
-        )
+    def test_deleted_cold_specialists_do_not_route_to_chem_drug(self) -> None:
+        prompts = [
+            "查询 DrugBank 中华法林和阿司匹林的药物相互作用、靶点和药理信息",
+            "查询 PubChem CID、PUG-REST 和化合物编号",
+            "从 ZINC 下载可购买小分子库用于 virtual screening",
+            "在 BRENDA 查询某个 EC number 的 Km、kcat、Vmax 和酶动力学参数",
+            "在 HMDB 里按 MS/MS 谱和代谢物名称做 metabolite identification",
+            "用 DiffDock 做 docking pose prediction，输入 PDB 和 ligand",
+            "用 DeepChem 训练 MoleculeNet 毒性预测模型和 GNN",
+            "用 Therapeutics Data Commons / PyTDC 加载 benchmark 数据集并做 scaffold split",
+            "用 MolFeat 生成 ChemBERTa embedding 用于分子机器学习",
+        ]
+        for prompt in prompts:
+            with self.subTest(prompt=prompt):
+                self.assert_not_science_chem_drug(prompt, grade="M")
 
-    def test_deepchem_admet_model_routes_to_deepchem(self) -> None:
-        self.assert_selected(
-            "用 DeepChem 训练分子属性预测模型，做 scaffold split、ADMET 毒性预测和 GNN",
-            "science-chem-drug",
-            "deepchem",
-            task_type="coding",
-        )
-
-    def test_pytdc_benchmark_routes_to_pytdc(self) -> None:
-        self.assert_selected(
-            "用 Therapeutics Data Commons / PyTDC 加载 ADMET benchmark 数据集并做 scaffold split",
-            "science-chem-drug",
-            "pytdc",
-        )
-
-    def test_datamol_prompt_routes_to_rdkit(self) -> None:
+    def test_datamol_compat_prompt_routes_to_rdkit(self) -> None:
         self.assert_selected(
             "用 datamol 批量标准化 SMILES 并生成分子指纹",
             "science-chem-drug",
             "rdkit",
-            task_type="coding",
-            grade="M",
-        )
-
-    def test_molfeat_embedding_prompt_routes_to_deepchem(self) -> None:
-        self.assert_selected(
-            "用 MolFeat 生成 ChemBERTa 分子 embedding 和 ECFP 特征用于分子机器学习",
-            "science-chem-drug",
-            "deepchem",
             task_type="coding",
             grade="M",
         )

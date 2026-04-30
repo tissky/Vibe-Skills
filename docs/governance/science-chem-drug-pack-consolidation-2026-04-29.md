@@ -2,6 +2,9 @@
 
 Date: 2026-04-29
 
+Superseded by the high-prune second pass on 2026-04-30:
+`docs/governance/science-chem-drug-high-prune-2026-04-30.md`.
+
 ## Summary
 
 `science-chem-drug` was consolidated into a direct chem/drug specialist routing pack.

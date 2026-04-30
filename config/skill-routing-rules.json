@@ -1089,21 +1089,33 @@
         "biopython",
         "SeqIO",
         "FASTA",
+        "FASTQ",
         "GenBank",
         "Entrez",
+        "BLAST",
         "sequence conversion",
+        "sequence alignment",
+        "phylogenetic",
         "序列格式转换",
-        "序列处理"
+        "序列处理",
+        "序列解析"
       ],
       "negative_keywords": [
         "scanpy",
         "single-cell",
+        "single cell",
         "h5ad",
+        "AnnData",
+        "scVI",
+        "scANVI",
         "DESeq2",
         "pydeseq2",
+        "bulk RNA-seq",
         "BAM",
+        "SAM",
+        "CRAM",
         "VCF",
-        "pysam",
+        "deepTools",
         "ESM",
         "protein embedding",
         "FBA",
@@ -1139,14 +1151,25 @@
         "scRNA-seq",
         "QC",
         "h5ad",
+        "AnnData",
+        "anndata",
+        "obs",
+        "var",
+        "backed mode",
         "10x",
         "leiden",
         "marker genes",
+        "scVI",
+        "scANVI",
+        "batch correction",
+        "latent model",
+        "cell type annotation",
         "单细胞",
         "单细胞聚类",
         "细胞注释",
         "单细胞 RNA-seq",
-        "单细胞RNA-seq"
+        "单细胞RNA-seq",
+        "批次校正"
       ],
       "negative_keywords": [
         "bulk RNA-seq",
@@ -1156,16 +1179,11 @@
         "SAM",
         "CRAM",
         "VCF",
-        "pysam",
-        "AnnData",
-        "obs",
-        "var",
-        "backed mode",
-        "scVI",
-        "scANVI",
-        "batch correction",
-        "CELLxGENE",
-        "census",
+        "deepTools",
+        "bamCoverage",
+        "computeMatrix",
+        "plotHeatmap",
+        "CELLxGENE Census",
         "protein embedding",
         "ESM",
         "FBA",
@@ -1178,7 +1196,13 @@
         "BibTeX",
         "DICOM",
         "cover letter",
-        "rebuttal"
+        "rebuttal",
+        "CELLxGENE",
+        "cellxgene",
+        "Census",
+        "census",
+        "reference single-cell census",
+        "细胞图谱"
       ],
       "equivalent_group": null,
       "canonical_for_task": [
@@ -1198,16 +1222,20 @@
         "volcano plot",
         "MA plot",
         "padj",
+        "Wald test",
         "差异表达",
         "差异表达分析"
       ],
       "negative_keywords": [
         "scanpy",
         "single-cell",
+        "single cell",
         "h5ad",
+        "AnnData",
+        "scVI",
         "BAM",
         "VCF",
-        "pysam",
+        "deepTools",
         "ESM",
         "protein embedding",
         "COBRApy",
@@ -1220,149 +1248,6 @@
       ],
       "equivalent_group": null,
       "canonical_for_task": []
-    },
-    "pysam": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "pysam",
-        "BAM",
-        "SAM",
-        "CRAM",
-        "VCF",
-        "pileup",
-        "coverage",
-        "变异文件",
-        "覆盖度"
-      ],
-      "negative_keywords": [
-        "scanpy",
-        "single-cell",
-        "DESeq2",
-        "volcano plot",
-        "deepTools",
-        "bigWig",
-        "bamCoverage",
-        "computeMatrix",
-        "plotHeatmap",
-        "TSS",
-        "ESM",
-        "protein embedding",
-        "COBRApy",
-        "FBA",
-        "flow cytometry",
-        "RDKit",
-        "PubMed",
-        "DICOM"
-      ],
-      "equivalent_group": null,
-      "canonical_for_task": []
-    },
-    "anndata": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "anndata",
-        "AnnData",
-        "h5ad",
-        "obs",
-        "var",
-        "backed mode",
-        "annotated data matrix",
-        "sparse matrix",
-        "zarr",
-        "元数据",
-        "稀疏矩阵"
-      ],
-      "negative_keywords": [
-        "scanpy clustering",
-        "leiden",
-        "marker genes",
-        "scVI",
-        "scANVI",
-        "CELLxGENE",
-        "DESeq2",
-        "BAM",
-        "VCF",
-        "RDKit",
-        "DICOM",
-        "PubMed"
-      ],
-      "equivalent_group": "bio-single-cell",
-      "canonical_for_task": [
-        "coding"
-      ]
-    },
-    "scvi-tools": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "scvi-tools",
-        "scVI",
-        "scANVI",
-        "single-cell latent model",
-        "batch correction",
-        "latent model",
-        "cell type annotation",
-        "multimodal single-cell",
-        "spatial transcriptomics",
-        "批次校正",
-        "细胞类型注释"
-      ],
-      "negative_keywords": [
-        "DESeq2",
-        "BAM",
-        "VCF",
-        "deepTools",
-        "RDKit",
-        "DICOM",
-        "PubMed"
-      ],
-      "equivalent_group": "bio-single-cell",
-      "canonical_for_task": [
-        "research"
-      ]
-    },
-    "deeptools": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "deeptools",
-        "deepTools",
-        "bam to bigwig",
-        "bigWig",
-        "bamCoverage",
-        "computeMatrix",
-        "plotHeatmap",
-        "TSS",
-        "heatmap profile",
-        "ChIP-seq heatmap",
-        "ATAC-seq signal",
-        "NGS track",
-        "信号轨道"
-      ],
-      "negative_keywords": [
-        "pysam",
-        "variant",
-        "VCF",
-        "ClinVar",
-        "DESeq2",
-        "single-cell",
-        "RDKit",
-        "DICOM"
-      ],
-      "equivalent_group": "bio-ngs-tracks",
-      "canonical_for_task": [
-        "coding"
-      ]
     },
     "bio-database-evidence": {
       "task_allow": [
@@ -1397,14 +1282,18 @@
         "STRING",
         "CELLxGENE Census",
         "RefSeq",
-        "scanpy",
         "生物数据库证据",
         "基因注释",
         "变异临床意义",
         "靶点疾病证据",
         "通路映射",
         "蛋白结构查询",
-        "蛋白互作网络"
+        "蛋白互作网络",
+        "CELLxGENE",
+        "cellxgene",
+        "cell census",
+        "single-cell census",
+        "细胞图谱"
       ],
       "negative_keywords": [
         "single-cell clustering",
@@ -1415,6 +1304,7 @@
         "细胞注释",
         "scVI",
         "scANVI",
+        "batch correction",
         "DESeq2",
         "PyDESeq2",
         "bulk RNA-seq differential expression",
@@ -3890,216 +3780,6 @@
         "research"
       ]
     },
-    "drugbank-database": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "drugbank",
-        "drug interaction",
-        "drug-drug interaction",
-        "drug target",
-        "pharmacology",
-        "atc",
-        "药物相互作用",
-        "药理信息"
-      ],
-      "negative_keywords": [
-        "chembl",
-        "pubchem",
-        "brenda",
-        "hmdb",
-        "pubmed",
-        "clinicaltrials",
-        "nct",
-        "bulk RNA-seq",
-        "dicom"
-      ],
-      "equivalent_group": "chem-db",
-      "canonical_for_task": []
-    },
-    "pubchem-database": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "pubchem",
-        "cid",
-        "pug-rest",
-        "compound property",
-        "molecular formula",
-        "smiles",
-        "inchi",
-        "化合物物性",
-        "化合物编号"
-      ],
-      "negative_keywords": [
-        "pubmed",
-        "pmid",
-        "chembl",
-        "drugbank",
-        "brenda",
-        "hmdb",
-        "zinc",
-        "clinicaltrials",
-        "nct",
-        "bulk RNA-seq",
-        "gene expression"
-      ],
-      "equivalent_group": "chem-db",
-      "canonical_for_task": [
-        "research"
-      ]
-    },
-    "brenda-database": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "brenda",
-        "ec number",
-        "enzyme kinetics",
-        "kinetics",
-        "km",
-        "kcat",
-        "vmax",
-        "substrate specificity",
-        "酶动力学",
-        "酶参数"
-      ],
-      "negative_keywords": [
-        "docking",
-        "pose",
-        "diffdock",
-        "pubchem",
-        "drugbank",
-        "clinical trial",
-        "dicom",
-        "pubmed"
-      ],
-      "equivalent_group": "chem-db",
-      "canonical_for_task": [
-        "research"
-      ]
-    },
-    "hmdb-database": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "hmdb",
-        "metabolite",
-        "metabolomics",
-        "ms/ms",
-        "nmr",
-        "metabolite identification",
-        "biomarker",
-        "代谢物",
-        "代谢组",
-        "代谢物鉴定"
-      ],
-      "negative_keywords": [
-        "patent",
-        "uspto",
-        "drugbank",
-        "clinical trial",
-        "nct",
-        "pubmed",
-        "bulk RNA-seq",
-        "dicom"
-      ],
-      "equivalent_group": "chem-db",
-      "canonical_for_task": []
-    },
-    "zinc-database": {
-      "task_allow": [
-        "research",
-        "coding"
-      ],
-      "positive_keywords": [
-        "zinc",
-        "zinc id",
-        "purchasable compounds",
-        "virtual screening library",
-        "compound library",
-        "vendor compound",
-        "可购买小分子",
-        "筛选库",
-        "化合物库"
-      ],
-      "negative_keywords": [
-        "pubmed",
-        "pmid",
-        "chembl",
-        "drugbank",
-        "clinical trial",
-        "dicom",
-        "bulk RNA-seq"
-      ],
-      "equivalent_group": "chem-db",
-      "canonical_for_task": []
-    },
-    "datamol": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "datamol"
-      ],
-      "negative_keywords": [
-        "rdkit",
-        "smiles",
-        "fingerprint",
-        "descriptor",
-        "clinical trial",
-        "dicom",
-        "pubmed"
-      ],
-      "equivalent_group": "chem-toolkit",
-      "canonical_for_task": []
-    },
-    "deepchem": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "deepchem",
-        "molecular ml",
-        "molecular machine learning",
-        "admet prediction",
-        "toxicity prediction",
-        "moleculenet",
-        "graphconv",
-        "graph neural network",
-        "gnn",
-        "chemberta",
-        "molfeat",
-        "molecular embedding",
-        "分子机器学习",
-        "分子属性预测"
-      ],
-      "negative_keywords": [
-        "excel",
-        "pptx",
-        "pubmed",
-        "clinical trial",
-        "drugbank interaction",
-        "cid lookup",
-        "brenda",
-        "hmdb",
-        "zinc library"
-      ],
-      "equivalent_group": "chem-toolkit",
-      "canonical_for_task": [
-        "coding"
-      ]
-    },
     "medchem": {
       "task_allow": [
         "planning",
@@ -4114,18 +3794,30 @@
         "pains",
         "lipinski",
         "drug-likeness",
+        "admet",
+        "structural alert",
+        "lead compound",
         "药物化学",
         "构效关系",
-        "先导优化"
+        "先导优化",
+        "成药性",
+        "结构警示"
       ],
       "negative_keywords": [
         "dicom",
         "clinicaltrials",
         "pubmed",
+        "pubchem",
+        "drugbank",
         "brenda",
         "hmdb",
         "zinc id",
-        "pdb"
+        "pdb",
+        "diffdock",
+        "docking",
+        "deepchem",
+        "pytdc",
+        "therapeutics data commons"
       ],
       "equivalent_group": "chem-strategy",
       "canonical_for_task": [
@@ -4141,10 +3833,13 @@
         "rdkit",
         "datamol",
         "smiles",
+        "inchi",
         "sdf",
         "fingerprint",
         "morgan fingerprint",
+        "ecfp",
         "descriptor",
+        "molecular descriptor",
         "substructure",
         "similarity",
         "standardize smiles",
@@ -4160,10 +3855,19 @@
         "pmid",
         "chembl",
         "drugbank",
+        "pubchem",
         "pubchem cid",
         "brenda",
         "hmdb",
         "zinc",
+        "diffdock",
+        "docking",
+        "binding pose",
+        "pytdc",
+        "therapeutics data commons",
+        "deepchem",
+        "chemberta",
+        "molfeat",
         "clinical trial",
         "nct",
         "bulk RNA-seq",
@@ -4180,87 +3884,6 @@
       "canonical_for_task": [
         "coding"
       ]
-    },
-    "diffdock": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "diffdock",
-        "docking",
-        "protein ligand",
-        "binding pose",
-        "pose prediction",
-        "pdb smiles",
-        "molecular docking",
-        "分子对接",
-        "结合构象",
-        "蛋白配体"
-      ],
-      "negative_keywords": [
-        "pubmed",
-        "citation",
-        "zinc library",
-        "compound library",
-        "clinical trial",
-        "drug interaction",
-        "admet benchmark"
-      ],
-      "equivalent_group": "chem-docking",
-      "canonical_for_task": [
-        "coding"
-      ]
-    },
-    "molfeat": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "molfeat"
-      ],
-      "negative_keywords": [
-        "deepchem",
-        "chemberta",
-        "embedding",
-        "fingerprint",
-        "ecfp",
-        "rdkit",
-        "dicom",
-        "pubmed",
-        "clinical"
-      ],
-      "equivalent_group": "chem-toolkit",
-      "canonical_for_task": []
-    },
-    "pytdc": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "tdc",
-        "pytdc",
-        "therapeutics data commons",
-        "admet benchmark",
-        "drug discovery benchmark",
-        "get_split",
-        "scaffold split",
-        "药物发现数据集"
-      ],
-      "negative_keywords": [
-        "pubmed",
-        "pmid",
-        "deepchem training",
-        "gnn",
-        "drugbank interaction",
-        "pubchem cid",
-        "brenda",
-        "hmdb"
-      ],
-      "equivalent_group": "chem-datasets",
-      "canonical_for_task": []
     },
     "clinicaltrials-database": {
       "task_allow": [
@@ -5662,143 +5285,6 @@
         "planning"
       ]
     },
-    "arboreto": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "arboreto",
-        "pySCENIC",
-        "pyscenic",
-        "GRN",
-        "gene regulatory network",
-        "transcription factor network",
-        "基因调控网络",
-        "转录因子网络"
-      ],
-      "negative_keywords": [
-        "bulk RNA-seq",
-        "DESeq2",
-        "BAM",
-        "VCF",
-        "ESM",
-        "protein embedding",
-        "COBRApy",
-        "FBA",
-        "flow cytometry",
-        "RDKit",
-        "DICOM",
-        "patent"
-      ],
-      "equivalent_group": "bio-systems",
-      "canonical_for_task": [
-        "coding"
-      ]
-    },
-    "cobrapy": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "COBRApy",
-        "cobrapy",
-        "FBA",
-        "flux balance",
-        "metabolic model",
-        "constraint-based metabolic model",
-        "代谢建模",
-        "通量平衡"
-      ],
-      "negative_keywords": [
-        "scanpy",
-        "single-cell",
-        "DESeq2",
-        "BAM",
-        "VCF",
-        "ESM",
-        "protein embedding",
-        "flow cytometry",
-        "RDKit",
-        "SMILES",
-        "DICOM",
-        "PubMed",
-        "patent"
-      ],
-      "equivalent_group": "bio-systems",
-      "canonical_for_task": [
-        "coding"
-      ]
-    },
-    "esm": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "ESM",
-        "esm",
-        "protein language model",
-        "protein embedding",
-        "protein embeddings",
-        "protein lm",
-        "蛋白语言模型",
-        "蛋白嵌入"
-      ],
-      "negative_keywords": [
-        "scanpy",
-        "single-cell",
-        "DESeq2",
-        "BAM",
-        "VCF",
-        "COBRApy",
-        "FBA",
-        "flow cytometry",
-        "RDKit",
-        "SMILES",
-        "DICOM",
-        "PubMed",
-        "patent"
-      ],
-      "equivalent_group": "bio-ml",
-      "canonical_for_task": [
-        "coding"
-      ]
-    },
-    "flowio": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "flowio",
-        "flow cytometry",
-        "FCS",
-        "fcs",
-        "cytometry",
-        "channel matrix",
-        "流式细胞"
-      ],
-      "negative_keywords": [
-        "scanpy",
-        "single-cell",
-        "DESeq2",
-        "BAM",
-        "VCF",
-        "ESM",
-        "protein embedding",
-        "COBRApy",
-        "FBA",
-        "RDKit",
-        "DICOM",
-        "patent"
-      ],
-      "equivalent_group": "bio-data-io",
-      "canonical_for_task": [
-        "coding"
-      ]
-    },
     "simpy": {
       "task_allow": [
         "planning",
@@ -6174,62 +5660,6 @@
         "research"
       ],
       "requires_positive_keyword_match": true
-    },
-    "geniml": {
-      "task_allow": [
-        "coding",
-        "research"
-      ],
-      "positive_keywords": [
-        "geniml",
-        "genomic ML",
-        "genomic machine learning",
-        "genome embedding",
-        "genome embeddings",
-        "genomic interval",
-        "genomic intervals",
-        "BED genomic intervals",
-        "regulatory region embedding",
-        "regulatory region similarity",
-        "基因组机器学习",
-        "基因组嵌入",
-        "基因组区间"
-      ],
-      "negative_keywords": [
-        "scanpy",
-        "single-cell",
-        "single cell",
-        "scRNA-seq",
-        "DESeq2",
-        "bulk RNA-seq",
-        "BAM",
-        "VCF",
-        "pysam",
-        "ESM",
-        "protein embedding",
-        "COBRApy",
-        "FBA",
-        "flow cytometry",
-        "FCS",
-        "RDKit",
-        "SMILES",
-        "DICOM",
-        "patent",
-        "ordinary clinical table",
-        "ordinary tabular",
-        "generic tabular",
-        "random forest",
-        "scikit-learn",
-        "not genomic ML",
-        "不是 genomic ML",
-        "不是基因组机器学习",
-        "不是 genome embedding",
-        "不是基因组嵌入"
-      ],
-      "equivalent_group": "bio-ml",
-      "canonical_for_task": [
-        "coding"
-      ]
     }
   }
 }

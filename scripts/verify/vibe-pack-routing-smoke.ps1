@@ -107,7 +107,26 @@ $deletedSkillIds = @(
     "protocolsio-integration",
     "benchling-integration",
     "labarchive-integration",
-    "ginkgo-cloud-lab"
+    "ginkgo-cloud-lab",
+    "drugbank-database",
+    "pubchem-database",
+    "brenda-database",
+    "hmdb-database",
+    "zinc-database",
+    "deepchem",
+    "diffdock",
+    "pytdc",
+    "datamol",
+    "molfeat",
+    "anndata",
+    "scvi-tools",
+    "pysam",
+    "deeptools",
+    "esm",
+    "cobrapy",
+    "geniml",
+    "arboreto",
+    "flowio"
 )
 $deepDiscoveryPolicy = Get-Content -LiteralPath $deepDiscoveryPolicyPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $capabilityCatalog = Get-Content -LiteralPath $capabilityCatalogPath -Raw -Encoding UTF8 | ConvertFrom-Json

@@ -201,56 +201,6 @@ $cases = @(
         requested_skill = $null
     },
     [pscustomobject]@{
-        name = "chem_drugbank_interaction"
-        group = "science-chem-drug"
-        prompt = "/vibe 查询 DrugBank 药物相互作用、药物靶点和药理信息"
-        grade = "M"
-        task_type = "research"
-        expected_pack = "science-chem-drug"
-        expected_skill = "drugbank-database"
-        requested_skill = $null
-    },
-    [pscustomobject]@{
-        name = "chem_pubchem_cid"
-        group = "science-chem-drug"
-        prompt = "/vibe 查询 PubChem CID、SMILES、InChI 和化合物物性"
-        grade = "M"
-        task_type = "research"
-        expected_pack = "science-chem-drug"
-        expected_skill = "pubchem-database"
-        requested_skill = $null
-    },
-    [pscustomobject]@{
-        name = "chem_zinc_library"
-        group = "science-chem-drug"
-        prompt = "/vibe 从 ZINC 下载可购买小分子库用于 virtual screening"
-        grade = "M"
-        task_type = "research"
-        expected_pack = "science-chem-drug"
-        expected_skill = "zinc-database"
-        requested_skill = $null
-    },
-    [pscustomobject]@{
-        name = "chem_brenda_kinetics"
-        group = "science-chem-drug"
-        prompt = "/vibe 在 BRENDA 查询 EC number 的 Km、kcat 和酶动力学参数"
-        grade = "M"
-        task_type = "research"
-        expected_pack = "science-chem-drug"
-        expected_skill = "brenda-database"
-        requested_skill = $null
-    },
-    [pscustomobject]@{
-        name = "chem_hmdb_msms"
-        group = "science-chem-drug"
-        prompt = "/vibe 在 HMDB 里按 MS/MS 谱和代谢物名称做 metabolite identification"
-        grade = "M"
-        task_type = "research"
-        expected_pack = "science-chem-drug"
-        expected_skill = "hmdb-database"
-        requested_skill = $null
-    },
-    [pscustomobject]@{
         name = "chem_medchem_sar"
         group = "science-chem-drug"
         prompt = "/vibe 做药物化学 SAR 分析、PAINS 过滤和先导化合物优化建议"
@@ -258,36 +208,6 @@ $cases = @(
         task_type = "planning"
         expected_pack = "science-chem-drug"
         expected_skill = "medchem"
-        requested_skill = $null
-    },
-    [pscustomobject]@{
-        name = "chem_diffdock_pose"
-        group = "science-chem-drug"
-        prompt = "/vibe 用 DiffDock 做 docking pose prediction：给定 PDB + SMILES 输出结合构象"
-        grade = "M"
-        task_type = "coding"
-        expected_pack = "science-chem-drug"
-        expected_skill = "diffdock"
-        requested_skill = $null
-    },
-    [pscustomobject]@{
-        name = "chem_deepchem_admet_model"
-        group = "science-chem-drug"
-        prompt = "/vibe 用 DeepChem 训练分子属性预测模型，做 scaffold split、ADMET 毒性预测和 GNN"
-        grade = "L"
-        task_type = "coding"
-        expected_pack = "science-chem-drug"
-        expected_skill = "deepchem"
-        requested_skill = $null
-    },
-    [pscustomobject]@{
-        name = "chem_pytdc_admet_benchmark"
-        group = "science-chem-drug"
-        prompt = "/vibe 用 Therapeutics Data Commons / PyTDC 加载 ADMET benchmark 数据集并做 scaffold split"
-        grade = "L"
-        task_type = "research"
-        expected_pack = "science-chem-drug"
-        expected_skill = "pytdc"
         requested_skill = $null
     },
     [pscustomobject]@{
@@ -301,13 +221,99 @@ $cases = @(
         requested_skill = $null
     },
     [pscustomobject]@{
-        name = "chem_molfeat_embedding_routes_deepchem"
-        group = "science-chem-drug"
-        prompt = "/vibe 用 MolFeat 生成 ChemBERTa 分子 embedding 和 ECFP 特征用于分子机器学习"
+        name = "deleted_chem_drugbank_blocked"
+        group = "deleted-science-chem-drug"
+        prompt = "/vibe 查询 DrugBank 药物相互作用、药物靶点和药理信息"
+        grade = "M"
+        task_type = "research"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-chem-drug"
+        blocked_skill = "drugbank-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "deleted_chem_pubchem_blocked"
+        group = "deleted-science-chem-drug"
+        prompt = "/vibe 查询 PubChem CID、PUG-REST 和化合物编号"
+        grade = "M"
+        task_type = "research"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-chem-drug"
+        blocked_skill = "pubchem-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "deleted_chem_zinc_blocked"
+        group = "deleted-science-chem-drug"
+        prompt = "/vibe 从 ZINC 下载可购买小分子库用于 virtual screening"
+        grade = "M"
+        task_type = "research"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-chem-drug"
+        blocked_skill = "zinc-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "deleted_chem_brenda_blocked"
+        group = "deleted-science-chem-drug"
+        prompt = "/vibe 在 BRENDA 查询 EC number 的 Km、kcat 和酶动力学参数"
+        grade = "M"
+        task_type = "research"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-chem-drug"
+        blocked_skill = "brenda-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "deleted_chem_hmdb_blocked"
+        group = "deleted-science-chem-drug"
+        prompt = "/vibe 在 HMDB 里按 MS/MS 谱和代谢物名称做 metabolite identification"
+        grade = "M"
+        task_type = "research"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-chem-drug"
+        blocked_skill = "hmdb-database"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "deleted_chem_diffdock_blocked"
+        group = "deleted-science-chem-drug"
+        prompt = "/vibe 用 DiffDock 做 docking pose prediction，输入 PDB 和 ligand"
         grade = "M"
         task_type = "coding"
-        expected_pack = "science-chem-drug"
-        expected_skill = "deepchem"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-chem-drug"
+        blocked_skill = "diffdock"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "deleted_chem_deepchem_blocked"
+        group = "deleted-science-chem-drug"
+        prompt = "/vibe 用 DeepChem 训练 MoleculeNet 毒性预测模型和 GNN"
+        grade = "M"
+        task_type = "coding"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-chem-drug"
+        blocked_skill = "deepchem"
+        requested_skill = $null
+    },
+    [pscustomobject]@{
+        name = "deleted_chem_pytdc_blocked"
+        group = "deleted-science-chem-drug"
+        prompt = "/vibe 用 Therapeutics Data Commons / PyTDC 加载 benchmark 数据集并做 scaffold split"
+        grade = "M"
+        task_type = "research"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = "science-chem-drug"
+        blocked_skill = "pytdc"
         requested_skill = $null
     },
 
@@ -942,23 +948,27 @@ $cases = @(
 
     # bio-science extensions
     [pscustomobject]@{
-        name = "bio_esm_embeddings"
-        group = "bio-science"
+        name = "deleted_bio_esm_embeddings_blocked"
+        group = "deleted-bio-science"
         prompt = "/vibe 用 ESM 生成 protein embeddings，并说明输出向量如何用于下游任务"
         grade = "M"
         task_type = "coding"
-        expected_pack = "bio-science"
-        expected_skill = "esm"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = $null
+        blocked_skill = "esm"
         requested_skill = $null
     },
     [pscustomobject]@{
-        name = "bio_cobrapy_fba"
-        group = "bio-science"
+        name = "deleted_bio_cobrapy_fba_blocked"
+        group = "deleted-bio-science"
         prompt = "/vibe 用 COBRApy 做 FBA 代谢通量分析，并解释约束条件"
         grade = "M"
         task_type = "coding"
-        expected_pack = "bio-science"
-        expected_skill = "cobrapy"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = $null
+        blocked_skill = "cobrapy"
         requested_skill = $null
     },
     [pscustomobject]@{
@@ -982,13 +992,15 @@ $cases = @(
         requested_skill = $null
     },
     [pscustomobject]@{
-        name = "bio_pysam_bam_vcf_coverage"
-        group = "bio-science"
+        name = "deleted_bio_pysam_bam_vcf_coverage_blocked"
+        group = "deleted-bio-science"
         prompt = "/vibe 解析 BAM 和 VCF 文件并统计 coverage"
         grade = "M"
         task_type = "research"
-        expected_pack = "bio-science"
-        expected_skill = "pysam"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = $null
+        blocked_skill = "pysam"
         requested_skill = $null
     },
     [pscustomobject]@{
@@ -1002,33 +1014,39 @@ $cases = @(
         requested_skill = $null
     },
     [pscustomobject]@{
-        name = "bio_flowio_fcs"
-        group = "bio-science"
+        name = "deleted_bio_flowio_fcs_blocked"
+        group = "deleted-bio-science"
         prompt = "/vibe 读取 FCS 流式细胞文件并提取通道矩阵"
         grade = "M"
         task_type = "coding"
-        expected_pack = "bio-science"
-        expected_skill = "flowio"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = $null
+        blocked_skill = "flowio"
         requested_skill = $null
     },
     [pscustomobject]@{
-        name = "bio_arboreto_grn"
-        group = "bio-science"
+        name = "deleted_bio_arboreto_grn_blocked"
+        group = "deleted-bio-science"
         prompt = "/vibe 用 pySCENIC 和 arboreto 推断 gene regulatory network"
         grade = "M"
         task_type = "research"
-        expected_pack = "bio-science"
-        expected_skill = "arboreto"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = $null
+        blocked_skill = "arboreto"
         requested_skill = $null
     },
     [pscustomobject]@{
-        name = "bio_geniml_embedding"
-        group = "bio-science"
+        name = "deleted_bio_geniml_embedding_blocked"
+        group = "deleted-bio-science"
         prompt = "/vibe 用 geniml 做 genomic ML 和 genome embedding"
         grade = "M"
         task_type = "research"
-        expected_pack = "bio-science"
-        expected_skill = "geniml"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = $null
+        blocked_skill = "geniml"
         requested_skill = $null
     },
     [pscustomobject]@{
@@ -1038,7 +1056,7 @@ $cases = @(
         grade = "M"
         task_type = "research"
         expected_pack = "bio-science"
-        expected_skill = "anndata"
+        expected_skill = "scanpy"
         requested_skill = $null
     },
     [pscustomobject]@{
@@ -1048,17 +1066,19 @@ $cases = @(
         grade = "M"
         task_type = "research"
         expected_pack = "bio-science"
-        expected_skill = "scvi-tools"
+        expected_skill = "scanpy"
         requested_skill = $null
     },
     [pscustomobject]@{
-        name = "bio_deeptools_tracks"
-        group = "bio-science"
+        name = "deleted_bio_deeptools_tracks_blocked"
+        group = "deleted-bio-science"
         prompt = "/vibe 用 deepTools 把 BAM 转 bigWig，并围绕 TSS 画 ChIP-seq heatmap profile"
         grade = "M"
         task_type = "research"
-        expected_pack = "bio-science"
-        expected_skill = "deeptools"
+        expected_pack = $null
+        expected_skill = $null
+        blocked_pack = $null
+        blocked_skill = "deeptools"
         requested_skill = $null
     },
     [pscustomobject]@{

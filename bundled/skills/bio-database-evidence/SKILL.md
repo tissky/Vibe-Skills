@@ -1,6 +1,6 @@
 ---
 name: bio-database-evidence
-description: "Unified biological database evidence owner. Use for gene annotation, variant clinical significance, cancer mutation evidence, GWAS trait associations, pathway mapping, target-disease evidence, protein structures, protein interaction networks, reference single-cell census queries, and cross-database biological ID mapping. Do not use for full single-cell analysis, bulk RNA-seq differential expression, BAM/VCF processing, protein embedding models, metabolic flux modeling, or genomic interval ML."
+description: "Unified biological database evidence owner. Use for gene annotation, variant clinical significance, cancer mutation evidence, GWAS trait associations, pathway mapping, target-disease evidence, protein structures, protein interaction networks, reference single-cell census queries, and cross-database biological ID mapping. Do not use for full single-cell analysis, bulk RNA-seq differential expression, BAM/VCF processing, protein embedding models, metabolic flux modeling, genomic interval ML, or flow-cytometry file parsing."
 ---
 
 # Bio Database Evidence
@@ -21,17 +21,14 @@ Use this skill when the main task is biological database lookup, annotation, or 
 
 ## Do Not Use This Skill For
 
-- Single-cell RNA-seq analysis, clustering, UMAP, marker genes, or cell annotation. Use `scanpy`.
-- AnnData or h5ad container editing. Use `anndata`.
-- scVI/scANVI latent models and batch correction. Use `scvi-tools`.
+- Single-cell RNA-seq analysis, clustering, UMAP, marker genes, cell annotation, AnnData/h5ad container editing, or scVI/scANVI batch-correction planning. Use `scanpy`.
 - Bulk RNA-seq differential expression. Use `pydeseq2`.
-- BAM, SAM, CRAM, VCF, pileup, coverage, or region extraction. Use `pysam`.
-- deepTools signal-track processing and heatmaps. Use `deeptools`.
-- Protein language models, embeddings, inverse folding, or design. Use `esm`.
-- Constraint-based metabolic modeling or FBA. Use `cobrapy`.
-- BED/genomic interval embeddings or genomic-region ML. Use `geniml`.
-- Gene regulatory network inference. Use `arboreto`.
-- FCS or flow cytometry file parsing. Use `flowio`.
+- BAM, SAM, CRAM, VCF, pileup, coverage, or region extraction as a primary file-processing task.
+- deepTools signal-track processing and heatmaps.
+- Protein language models, embeddings, inverse folding, or protein-design workflows.
+- Constraint-based metabolic modeling, FBA, or metabolic-engineering simulation.
+- BED/genomic interval embeddings, genomic-region ML, or gene regulatory network inference.
+- FCS or flow-cytometry file parsing.
 
 ## Workflow
 
