@@ -421,13 +421,13 @@
       "keywords": ["qutip", "quantum dynamics", "open quantum system", "master equation", "density matrix", "量子动力学", "开放量子系统", "主方程"]
     },
     "uspto-database": {
-      "keywords": ["uspto", "patent", "patents", "专利", "专利检索", "发明专利"]
+      "keywords": ["uspto", "patent", "patents", "patent claims", "patent metadata", "patent search", "专利", "专利检索", "权利要求", "发明专利"]
     },
     "astropy": {
-      "keywords": ["astropy", "fits", "astronomy", "wcs", "天文", "FITS", "天球坐标"]
+      "keywords": ["astropy", "fits", "fits file", "wcs", "astronomy", "celestial coordinates", "astropy units", "天文数据", "天文坐标"]
     },
     "pymatgen": {
-      "keywords": ["pymatgen", "materials", "crystal", "structure", "phase diagram", "材料", "晶体", "相图"]
+      "keywords": ["pymatgen", "cif", "crystal structure", "materials project", "composition", "structure analysis", "材料计算", "晶体结构", "材料结构"]
     },
     "geopandas": {
       "keywords": ["geopandas", "gis", "shapefile", "geojson", "geospatial", "地理数据", "空间数据", "地图"]
@@ -484,7 +484,7 @@
       "keywords": ["mermaid", "mermaid flowchart", "sequence diagram", "markdown diagram", "mermaid 流程图", "时序图"]
     },
     "markitdown": {
-      "keywords": ["markitdown", "convert to markdown", "pdf to markdown", "docx to markdown", "转成 markdown", "转成markdown", "markdown转换", "pdf转markdown"]
+      "keywords": ["markitdown", "convert to markdown", "pdf to markdown", "docx to markdown", "pptx to markdown", "office to markdown", "document conversion", "转成 markdown", "转成markdown", "markdown转换"]
     },
     "document-skills": {
       "keywords": ["document processing", "report formatting", "文档处理", "报告排版", "文档生成"]
@@ -493,16 +493,16 @@
       "keywords": ["generate image", "image generation", "生成图片", "图片生成", "出图"]
     },
     "fluidsim": {
-      "keywords": ["fluidsim", "cfd", "navier-stokes", "turbulence", "computational fluid dynamics", "流体仿真", "湍流"]
+      "keywords": ["fluidsim", "cfd", "navier-stokes", "fluid simulation", "turbulence", "shallow water", "stratified flow", "pseudospectral", "流体仿真", "湍流"]
     },
     "simpy": {
-      "keywords": ["simpy", "discrete event simulation", "queue", "resource", "离散事件", "排队系统", "仿真"]
+      "keywords": ["simpy", "discrete event simulation", "event simulation", "queue simulation", "resource process", "process simulation", "离散事件仿真", "排队仿真"]
     },
     "matchms": {
-      "keywords": ["matchms", "ms/ms", "msms", "mass spectrum", "spectral similarity", "代谢组", "谱图匹配"]
+      "keywords": ["matchms", "mass spectra", "mass spectrum", "ms/ms", "msms", "spectral similarity", "spectrum processing", "质谱", "谱图匹配"]
     },
     "matlab": {
-      "keywords": ["matlab", "octave", ".m script", "m-file", "simulink", "矩阵计算"]
+      "keywords": ["matlab", "octave", ".m script", "m-file", "simulink", "matrix calculation", "matlab script", "矩阵计算", "matlab脚本"]
     },
     "modal": {
       "keywords": ["modal.com", "modal run", "modal deploy", "serverless gpu", "batch job", "gpu container", "云端运行", "gpu容器"]
@@ -511,22 +511,22 @@
       "keywords": ["modal.com", "modal labs", "modallabs", "modal run", "modal deploy", "modal serve", "modal 部署", "部署到 modal", "modal 而不是 vercel", "serverless gpu", "gpu function", "python gpu function", "batch job", "autoscaling containers", "云端运行", "云端作业", "云端 gpu", "gpu 容器", "gpu 函数"]
     },
     "neuropixels-analysis": {
-      "keywords": ["neuropixels", "kilosort", "spike sorting", "spikeglx", "open ephys", "ibl", "神经电生理"]
+      "keywords": ["neuropixels", "kilosort", "spike sorting", "spikeglx", "open ephys", "ibl", "electrophysiology", "神经电生理", "峰电位排序"]
     },
     "pymc": {
-      "keywords": ["pymc", "bayesian", "mcmc", "nuts", "posterior", "hierarchical model", "贝叶斯", "后验"]
+      "keywords": ["pymc", "bayesian", "mcmc", "nuts", "posterior", "hierarchical model", "bayesian model", "贝叶斯", "后验"]
     },
     "pymoo": {
-      "keywords": ["pymoo", "multi-objective", "nsga", "pareto", "constraint optimization", "多目标优化", "帕累托"]
+      "keywords": ["pymoo", "multi-objective", "multi objective optimization", "nsga-ii", "nsga", "pareto", "constraint optimization", "多目标优化", "帕累托"]
     },
     "rowan": {
-      "keywords": ["rowan api", "quantum chemistry", "autodock vina", "pka prediction", "geometry optimization", "量子化学", "分子对接"]
+      "keywords": ["rowan", "rowan chemistry", "rowan-python", "labs.rowansci.com", "pka prediction", "conformer search", "geometry optimization", "quantum chemistry", "docking", "boltz", "chai-1", "量子化学"]
     },
     "stable-baselines3": {
-      "keywords": ["stable-baselines3", "sb3", "ppo", "sac", "dqn", "reinforcement learning", "强化学习"]
+      "keywords": ["stable-baselines3", "stable baselines3", "sb3", "ppo", "sac", "dqn", "reinforcement learning", "rl agent", "强化学习", "智能体训练"]
     },
     "timesfm-forecasting": {
-      "keywords": ["timesfm", "time series forecasting", "zero-shot forecasting", "prediction intervals", "时间序列预测", "零样本预测"]
+      "keywords": ["timesfm", "time series forecasting", "zero-shot forecasting", "prediction intervals", "foundation model forecasting", "forecast horizon", "时间序列预测", "零样本预测"]
     },
     "torch-geometric": {
       "keywords": ["torch-geometric", "torch_geometric", "pyg", "pytorch geometric", "graph neural network", "gnn", "gcn", "gat", "graph classification", "node classification", "link prediction", "图神经网络", "图分类", "节点分类"]

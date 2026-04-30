@@ -1099,34 +1099,38 @@
                                            }
                   },
                   {
-                      "id":  "docs-markitdown-conversion",
-                      "priority":  94,
-                      "grade_allow":  [
-                                          "M",
-                                          "L"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "markitdown",
-                                               "convert to markdown",
-                                               "pdf to markdown",
-                                               "docx to markdown",
-                                               "转成 markdown",
-                                               "转成markdown",
-                                               "markdown转换"
-                                           ],
-                      "skill_candidates":  [
-                                               "markitdown"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "markitdown",
-                                               "coding":  "markitdown",
-                                               "research":  "markitdown"
-                                           }
+                      "id": "docs-markitdown-conversion",
+                      "priority": 94,
+                      "grade_allow": [
+                          "M",
+                          "L"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "markitdown",
+                          "convert to markdown",
+                          "pdf to markdown",
+                          "docx to markdown",
+                          "转成 markdown",
+                          "转成markdown",
+                          "markdown转换"
+                      ],
+                      "skill_candidates": [
+                          "markitdown"
+                      ],
+                      "route_authority_candidates": [
+                          "markitdown"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "markitdown",
+                          "coding": "markitdown",
+                          "research": "markitdown"
+                      }
                   },
                   {
                       "id":  "finance-edgar-macro",
@@ -1364,95 +1368,114 @@
                                            }
                   },
                   {
-                      "id":  "ip-uspto-patents",
-                      "priority":  81,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "uspto",
-                                               "patent",
-                                               "patents",
-                                               "专利",
-                                               "专利检索"
-                                           ],
-                      "skill_candidates":  [
-                                               "uspto-database"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "uspto-database",
-                                               "coding":  "uspto-database",
-                                               "research":  "uspto-database"
-                                           }
+                      "id": "ip-uspto-patents",
+                      "priority": 81,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "uspto",
+                          "patent",
+                          "patents",
+                          "专利",
+                          "专利检索",
+                          "claims",
+                          "patent metadata"
+                      ],
+                      "skill_candidates": [
+                          "uspto-database"
+                      ],
+                      "route_authority_candidates": [
+                          "uspto-database"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "uspto-database",
+                          "coding": "uspto-database",
+                          "research": "uspto-database"
+                      }
                   },
                   {
-                      "id":  "science-astropy",
-                      "priority":  81,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "astropy",
-                                               "astronomy",
-                                               "fits",
-                                               "天文",
-                                               "天球坐标",
-                                               "赤经",
-                                               "赤纬"
-                                           ],
-                      "skill_candidates":  [
-                                               "astropy"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "astropy",
-                                               "coding":  "astropy",
-                                               "research":  "astropy"
-                                           }
+                      "id": "science-astropy",
+                      "priority": 81,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "astropy",
+                          "astronomy",
+                          "fits",
+                          "天文",
+                          "天球坐标",
+                          "赤经",
+                          "赤纬",
+                          "wcs",
+                          "天文数据"
+                      ],
+                      "skill_candidates": [
+                          "astropy"
+                      ],
+                      "route_authority_candidates": [
+                          "astropy"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "astropy",
+                          "coding": "astropy",
+                          "research": "astropy"
+                      }
                   },
                   {
-                      "id":  "science-pymatgen",
-                      "priority":  81,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "pymatgen",
-                                               "materials",
-                                               "crystal",
-                                               "phase diagram",
-                                               "材料",
-                                               "晶体",
-                                               "相图"
-                                           ],
-                      "skill_candidates":  [
-                                               "pymatgen"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "pymatgen",
-                                               "coding":  "pymatgen",
-                                               "research":  "pymatgen"
-                                           }
+                      "id": "science-pymatgen",
+                      "priority": 81,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "pymatgen",
+                          "materials",
+                          "crystal",
+                          "phase diagram",
+                          "材料",
+                          "晶体",
+                          "相图",
+                          "cif",
+                          "crystal structure",
+                          "晶体结构"
+                      ],
+                      "skill_candidates": [
+                          "pymatgen"
+                      ],
+                      "route_authority_candidates": [
+                          "pymatgen"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "pymatgen",
+                          "coding": "pymatgen",
+                          "research": "pymatgen"
+                      }
                   },
                   {
                       "id":  "science-geospatial",
@@ -1524,105 +1547,136 @@
                                            }
                   },
                   {
-                      "id":  "science-simpy-simulation",
-                      "priority":  82,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "simpy"
-                                           ],
-                      "skill_candidates":  [
-                                               "simpy"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "simpy",
-                                               "coding":  "simpy",
-                                               "research":  "simpy"
-                                           }
+                      "id": "science-simpy-simulation",
+                      "priority": 82,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "simpy",
+                          "discrete event simulation",
+                          "queue simulation",
+                          "resource process",
+                          "离散事件仿真"
+                      ],
+                      "skill_candidates": [
+                          "simpy"
+                      ],
+                      "route_authority_candidates": [
+                          "simpy"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "simpy",
+                          "coding": "simpy",
+                          "research": "simpy"
+                      }
                   },
                   {
-                      "id":  "science-fluidsim-cfd",
-                      "priority":  81,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "fluidsim"
-                                           ],
-                      "skill_candidates":  [
-                                               "fluidsim"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "fluidsim",
-                                               "coding":  "fluidsim",
-                                               "research":  "fluidsim"
-                                           }
+                      "id": "science-fluidsim-cfd",
+                      "priority": 81,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "fluidsim",
+                          "cfd",
+                          "navier-stokes",
+                          "turbulence",
+                          "流体仿真"
+                      ],
+                      "skill_candidates": [
+                          "fluidsim"
+                      ],
+                      "route_authority_candidates": [
+                          "fluidsim"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "fluidsim",
+                          "coding": "fluidsim",
+                          "research": "fluidsim"
+                      }
                   },
                   {
-                      "id":  "science-matchms-spectra",
-                      "priority":  82,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "matchms"
-                                           ],
-                      "skill_candidates":  [
-                                               "matchms"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "matchms",
-                                               "coding":  "matchms",
-                                               "research":  "matchms"
-                                           }
+                      "id": "science-matchms-spectra",
+                      "priority": 82,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "matchms",
+                          "mass spectra",
+                          "ms/ms",
+                          "spectral similarity",
+                          "质谱"
+                      ],
+                      "skill_candidates": [
+                          "matchms"
+                      ],
+                      "route_authority_candidates": [
+                          "matchms"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "matchms",
+                          "coding": "matchms",
+                          "research": "matchms"
+                      }
                   },
                   {
-                      "id":  "science-matlab-octave",
-                      "priority":  80,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "matlab",
-                                               "octave"
-                                           ],
-                      "skill_candidates":  [
-                                               "matlab"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "matlab",
-                                               "coding":  "matlab",
-                                               "research":  "matlab"
-                                           }
+                      "id": "science-matlab-octave",
+                      "priority": 80,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "matlab",
+                          "octave",
+                          ".m script",
+                          "simulink",
+                          "矩阵计算"
+                      ],
+                      "skill_candidates": [
+                          "matlab"
+                      ],
+                      "route_authority_candidates": [
+                          "matlab"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "matlab",
+                          "coding": "matlab",
+                          "research": "matlab"
+                      }
                   },
                   {
                       "id":  "cloud-modalcom",
@@ -1671,162 +1725,210 @@
                                            }
                   },
                   {
-                      "id":  "science-neuropixels",
-                      "priority":  86,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "neuropixels",
-                                               "kilosort"
-                                           ],
-                      "skill_candidates":  [
-                                               "neuropixels-analysis"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "neuropixels-analysis",
-                                               "coding":  "neuropixels-analysis",
-                                               "research":  "neuropixels-analysis"
-                                           }
+                      "id": "science-neuropixels",
+                      "priority": 86,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "neuropixels",
+                          "kilosort",
+                          "spike sorting",
+                          "spikeglx",
+                          "electrophysiology",
+                          "神经电生理"
+                      ],
+                      "skill_candidates": [
+                          "neuropixels-analysis"
+                      ],
+                      "route_authority_candidates": [
+                          "neuropixels-analysis"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "neuropixels-analysis",
+                          "coding": "neuropixels-analysis",
+                          "research": "neuropixels-analysis"
+                      }
                   },
                   {
-                      "id":  "science-pymc-bayesian",
-                      "priority":  85,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "pymc"
-                                           ],
-                      "skill_candidates":  [
-                                               "pymc"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "pymc",
-                                               "coding":  "pymc",
-                                               "research":  "pymc"
-                                           }
+                      "id": "science-pymc-bayesian",
+                      "priority": 85,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "pymc",
+                          "bayesian",
+                          "mcmc",
+                          "nuts",
+                          "贝叶斯"
+                      ],
+                      "skill_candidates": [
+                          "pymc"
+                      ],
+                      "route_authority_candidates": [
+                          "pymc"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "pymc",
+                          "coding": "pymc",
+                          "research": "pymc"
+                      }
                   },
                   {
-                      "id":  "science-pymoo-optimization",
-                      "priority":  85,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "pymoo"
-                                           ],
-                      "skill_candidates":  [
-                                               "pymoo"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "pymoo",
-                                               "coding":  "pymoo",
-                                               "research":  "pymoo"
-                                           }
+                      "id": "science-pymoo-optimization",
+                      "priority": 85,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "pymoo",
+                          "multi-objective",
+                          "nsga-ii",
+                          "pareto",
+                          "多目标优化"
+                      ],
+                      "skill_candidates": [
+                          "pymoo"
+                      ],
+                      "route_authority_candidates": [
+                          "pymoo"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "pymoo",
+                          "coding": "pymoo",
+                          "research": "pymoo"
+                      }
                   },
                   {
-                      "id":  "science-rowan-chemistry",
-                      "priority":  82,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "rowan api",
-                                               "quantum chemistry",
-                                               "autodock vina",
-                                               "pka prediction",
-                                               "geometry optimization",
-                                               "量子化学",
-                                               "分子对接"
-                                           ],
-                      "skill_candidates":  [
-                                               "rowan"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "rowan",
-                                               "coding":  "rowan",
-                                               "research":  "rowan"
-                                           }
+                      "id": "science-rowan-chemistry",
+                      "priority": 82,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "rowan api",
+                          "quantum chemistry",
+                          "autodock vina",
+                          "pka prediction",
+                          "geometry optimization",
+                          "量子化学",
+                          "分子对接",
+                          "rowan",
+                          "rowan chemistry",
+                          "conformer search"
+                      ],
+                      "skill_candidates": [
+                          "rowan"
+                      ],
+                      "route_authority_candidates": [
+                          "rowan"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "rowan",
+                          "coding": "rowan",
+                          "research": "rowan"
+                      }
                   },
                   {
-                      "id":  "ml-stable-baselines3",
-                      "priority":  84,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "stable-baselines3",
-                                               "sb3"
-                                           ],
-                      "skill_candidates":  [
-                                               "stable-baselines3"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "stable-baselines3",
-                                               "coding":  "stable-baselines3",
-                                               "research":  "stable-baselines3"
-                                           }
+                      "id": "ml-stable-baselines3",
+                      "priority": 84,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "stable-baselines3",
+                          "sb3",
+                          "ppo",
+                          "sac",
+                          "dqn",
+                          "reinforcement learning",
+                          "强化学习"
+                      ],
+                      "skill_candidates": [
+                          "stable-baselines3"
+                      ],
+                      "route_authority_candidates": [
+                          "stable-baselines3"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "stable-baselines3",
+                          "coding": "stable-baselines3",
+                          "research": "stable-baselines3"
+                      }
                   },
                   {
-                      "id":  "science-timesfm-forecasting",
-                      "priority":  84,
-                      "grade_allow":  [
-                                          "M",
-                                          "L",
-                                          "XL"
-                                      ],
-                      "task_allow":  [
-                                         "planning",
-                                         "coding",
-                                         "research"
-                                     ],
-                      "trigger_keywords":  [
-                                               "timesfm"
-                                           ],
-                      "skill_candidates":  [
-                                               "timesfm-forecasting"
-                                           ],
-                      "defaults_by_task":  {
-                                               "planning":  "timesfm-forecasting",
-                                               "coding":  "timesfm-forecasting",
-                                               "research":  "timesfm-forecasting"
-                                           }
+                      "id": "science-timesfm-forecasting",
+                      "priority": 84,
+                      "grade_allow": [
+                          "M",
+                          "L",
+                          "XL"
+                      ],
+                      "task_allow": [
+                          "planning",
+                          "coding",
+                          "research"
+                      ],
+                      "trigger_keywords": [
+                          "timesfm",
+                          "time series forecasting",
+                          "zero-shot forecasting",
+                          "prediction intervals",
+                          "时间序列预测"
+                      ],
+                      "skill_candidates": [
+                          "timesfm-forecasting"
+                      ],
+                      "route_authority_candidates": [
+                          "timesfm-forecasting"
+                      ],
+                      "stage_assistant_candidates": [],
+                      "defaults_by_task": {
+                          "planning": "timesfm-forecasting",
+                          "coding": "timesfm-forecasting",
+                          "research": "timesfm-forecasting"
+                      }
                   },
                   {
                       "id":  "ml-torch-geometric",

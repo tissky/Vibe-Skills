@@ -1,4 +1,4 @@
-﻿{
+{
     "version":  1,
     "updated":  "2026-04-18",
     "skills":  {
@@ -6347,6 +6347,312 @@
                                                                 "coding"
                                                             ]
                                  },
+                   "simpy": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "simpy",
+                           "discrete event simulation",
+                           "event simulation",
+                           "queue simulation",
+                           "resource process",
+                           "process simulation",
+                           "离散事件仿真",
+                           "排队仿真"
+                       ],
+                       "negative_keywords": [
+                           "sympy",
+                           "symbolic math",
+                           "matplotlib animation",
+                           "agent-based model"
+                       ],
+                       "equivalent_group": "simulation",
+                       "canonical_for_task": [
+                           "coding"
+                       ]
+                   },
+                   "fluidsim": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "fluidsim",
+                           "cfd",
+                           "navier-stokes",
+                           "fluid simulation",
+                           "turbulence",
+                           "shallow water",
+                           "stratified flow",
+                           "pseudospectral",
+                           "流体仿真",
+                           "湍流"
+                       ],
+                       "negative_keywords": [
+                           "css",
+                           "fluid layout",
+                           "responsive design",
+                           "fluid typography",
+                           "液态布局"
+                       ],
+                       "equivalent_group": "cfd-simulation",
+                       "canonical_for_task": [
+                           "coding",
+                           "research"
+                       ]
+                   },
+                   "matchms": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "matchms",
+                           "mass spectra",
+                           "mass spectrum",
+                           "ms/ms",
+                           "msms",
+                           "spectral similarity",
+                           "spectrum processing",
+                           "质谱",
+                           "谱图匹配"
+                       ],
+                       "negative_keywords": [
+                           "pubmed",
+                           "literature review",
+                           "plotting",
+                           "matplotlib",
+                           "not mass spectra",
+                           "不处理 mass spectra"
+                       ],
+                       "equivalent_group": "mass-spectra",
+                       "canonical_for_task": [
+                           "coding",
+                           "research"
+                       ]
+                   },
+                   "matlab": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "matlab",
+                           "octave",
+                           ".m script",
+                           "m-file",
+                           "simulink",
+                           "matrix calculation",
+                           "matlab script",
+                           "矩阵计算",
+                           "matlab脚本"
+                       ],
+                       "negative_keywords": [
+                           "not matlab",
+                           "not octave",
+                           "不使用 matlab",
+                           "不使用 MATLAB",
+                           "python matrix multiplication",
+                           "numpy matrix multiplication",
+                           "numpy array"
+                       ],
+                       "equivalent_group": "matlab-octave",
+                       "canonical_for_task": [
+                           "coding"
+                       ]
+                   },
+                   "neuropixels-analysis": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "neuropixels",
+                           "kilosort",
+                           "spike sorting",
+                           "spikeglx",
+                           "open ephys",
+                           "ibl",
+                           "electrophysiology",
+                           "神经电生理",
+                           "峰电位排序"
+                       ],
+                       "negative_keywords": [
+                           "single-cell rna",
+                           "flow cytometry",
+                           "clinical eeg",
+                           "fMRI"
+                       ],
+                       "equivalent_group": "neuro-electrophysiology",
+                       "canonical_for_task": [
+                           "research",
+                           "coding"
+                       ]
+                   },
+                   "pymc": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "pymc",
+                           "bayesian",
+                           "mcmc",
+                           "nuts",
+                           "posterior",
+                           "hierarchical model",
+                           "bayesian model",
+                           "贝叶斯",
+                           "后验"
+                       ],
+                       "negative_keywords": [
+                           "pymatgen",
+                           "crystal structure",
+                           "materials project",
+                           "pymoo",
+                           "nsga"
+                       ],
+                       "equivalent_group": "bayesian-modeling",
+                       "canonical_for_task": [
+                           "coding",
+                           "research"
+                       ]
+                   },
+                   "pymoo": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "pymoo",
+                           "multi-objective",
+                           "multi objective optimization",
+                           "nsga-ii",
+                           "nsga",
+                           "pareto",
+                           "constraint optimization",
+                           "多目标优化",
+                           "帕累托"
+                       ],
+                       "negative_keywords": [
+                           "pymc",
+                           "bayesian",
+                           "mcmc",
+                           "posterior"
+                       ],
+                       "equivalent_group": "optimization",
+                       "canonical_for_task": [
+                           "coding",
+                           "research"
+                       ]
+                   },
+                   "rowan": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "rowan api",
+                           "rowan chemistry",
+                           "rowan-python",
+                           "labs.rowansci.com",
+                           "cloud quantum chemistry",
+                           "pka prediction",
+                           "conformer search",
+                           "geometry optimization",
+                           "quantum chemistry",
+                           "docking",
+                           "boltz",
+                           "chai-1",
+                           "量子化学"
+                       ],
+                       "negative_keywords": [
+                           "quaternion",
+                           "scipy rotation",
+                           "rotation matrix",
+                           "rowan tree",
+                           "not rowan",
+                           "不调用 rowan"
+                       ],
+                       "equivalent_group": "cloud-quantum-chemistry",
+                       "canonical_for_task": [
+                           "research",
+                           "coding"
+                       ],
+                       "requires_positive_keyword_match": true
+                   },
+                   "stable-baselines3": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "stable-baselines3",
+                           "stable baselines3",
+                           "sb3",
+                           "ppo",
+                           "sac",
+                           "dqn",
+                           "reinforcement learning",
+                           "rl agent",
+                           "强化学习",
+                           "智能体训练"
+                       ],
+                       "negative_keywords": [
+                           "scikit-learn",
+                           "sklearn",
+                           "random forest",
+                           "supervised learning",
+                           "ordinary supervised",
+                           "不是 reinforcement learning",
+                           "not reinforcement learning"
+                       ],
+                       "equivalent_group": "reinforcement-learning",
+                       "canonical_for_task": [
+                           "coding",
+                           "research"
+                       ]
+                   },
+                   "timesfm-forecasting": {
+                       "task_allow": [
+                           "planning",
+                           "coding",
+                           "research"
+                       ],
+                       "positive_keywords": [
+                           "timesfm",
+                           "time series forecasting",
+                           "zero-shot forecasting",
+                           "prediction intervals",
+                           "foundation model forecasting",
+                           "forecast horizon",
+                           "时间序列预测",
+                           "零样本预测"
+                       ],
+                       "negative_keywords": [
+                           "scikit-learn",
+                           "ordinary regression",
+                           "tabular regression",
+                           "not time series",
+                           "不是 time series forecasting"
+                       ],
+                       "equivalent_group": "time-series-forecasting",
+                       "canonical_for_task": [
+                           "coding",
+                           "research"
+                       ]
+                   },
                    "torch-geometric":  {
                                            "task_allow":  [
                                                               "planning",
