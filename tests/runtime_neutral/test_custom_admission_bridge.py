@@ -240,13 +240,15 @@ class CustomAdmissionBridgeTests(unittest.TestCase):
                 "genomics-qc-flow",
                 [row["skill_id"] for row in result["custom_admission"]["admitted_candidates"]],
             )
+            for admitted in result["custom_admission"]["admitted_candidates"]:
+                self.assertNotIn("route_authority_eligible", admitted)
 
             custom_ranked = next(
                 (row for row in result["ranked"] if row["pack_id"] == "custom-workflow-genomics-qc-flow"),
                 None,
             )
             self.assertIsNotNone(custom_ranked)
-            self.assertFalse(bool(custom_ranked["route_authority_eligible"]))
+            self.assertNotIn("route_authority_eligible", custom_ranked)
             self.assertNotEqual("genomics-qc-flow", result["selected"]["skill"])
 
     def test_runtime_neutral_router_explicit_request_can_activate_custom_route_authority(self) -> None:
@@ -314,8 +316,9 @@ class CustomAdmissionBridgeTests(unittest.TestCase):
             self.assertEqual("admitted", packet["custom_admission"]["status"])
             self.assertIn("genomics-qc-flow", packet["custom_admission"]["admitted_skill_ids"])
 
+            legacy_routing = packet["legacy_skill_routing"]
             custom_recommendation = next(
-                item for item in packet["specialist_recommendations"] if item["skill_id"] == "genomics-qc-flow"
+                item for item in legacy_routing["specialist_recommendations"] if item["skill_id"] == "genomics-qc-flow"
             )
             self.assertEqual("workflow", custom_recommendation["binding_profile"])
             self.assertEqual("in_execution", custom_recommendation["dispatch_phase"])
@@ -329,7 +332,7 @@ class CustomAdmissionBridgeTests(unittest.TestCase):
                 )
             )
 
-            approved_dispatch = packet["specialist_dispatch"]["approved_dispatch"]
+            approved_dispatch = legacy_routing["specialist_dispatch"]["approved_dispatch"]
             self.assertIn("genomics-qc-flow", [item["skill_id"] for item in approved_dispatch])
 
     def test_runtime_freeze_uses_resolved_runtime_mirror_entrypoint_in_progressive_load_policy(self) -> None:
@@ -351,8 +354,9 @@ class CustomAdmissionBridgeTests(unittest.TestCase):
                 artifact_root=artifact_root,
             )
             packet = payload["packet"]
+            legacy_routing = packet["legacy_skill_routing"]
             custom_recommendation = next(
-                item for item in packet["specialist_recommendations"] if item["skill_id"] == "genomics-qc-flow"
+                item for item in legacy_routing["specialist_recommendations"] if item["skill_id"] == "genomics-qc-flow"
             )
 
             self.assertTrue(

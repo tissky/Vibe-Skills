@@ -120,7 +120,6 @@ class RouterBridgeTests(unittest.TestCase):
                         {"skill": "skill-e", "score": 0.51},
                         {"skill": "selected-skill", "score": 0.42},
                     ],
-                    "stage_assistant_candidates": [],
                 }
             ],
         }
@@ -175,10 +174,9 @@ class RouterBridgeTests(unittest.TestCase):
                     for row in result["ranked"]:
                         if not isinstance(row, dict):
                             continue
-                        for field in ("candidate_ranking", "stage_assistant_candidates"):
-                            for item in row.get(field) or []:
-                                if isinstance(item, dict):
-                                    ranked_skills.add(str(item.get("skill") or ""))
+                        for item in row.get("candidate_ranking") or []:
+                            if isinstance(item, dict):
+                                ranked_skills.add(str(item.get("skill") or ""))
                     self.assertFalse(
                         [skill for skill in sorted(ranked_skills) if skill.startswith(blocked_prefix)],
                         ranked_skills,
@@ -315,9 +313,12 @@ class RouterBridgeTests(unittest.TestCase):
             {"scientific-visualization", "scientific-schematics"},
             set(ranking_by_skill),
         )
-        self.assertEqual("skill_candidate", ranking_by_skill["scientific-visualization"]["legacy_role"])
-        self.assertEqual("skill_candidate", ranking_by_skill["scientific-schematics"]["legacy_role"])
-        self.assertEqual([], figure_row["stage_assistant_candidates"])
+        self.assertNotIn("legacy_role", ranking_by_skill["scientific-visualization"])
+        self.assertNotIn("route_authority_eligible", ranking_by_skill["scientific-visualization"])
+        self.assertNotIn("legacy_role", ranking_by_skill["scientific-schematics"])
+        self.assertNotIn("route_authority_eligible", ranking_by_skill["scientific-schematics"])
+        self.assertNotIn("stage_assistant_candidates", figure_row)
+        self.assertNotIn("route_authority_eligible", figure_row)
 
     def test_full_text_evidence_table_is_absorbed_by_literature_review(self) -> None:
         result = run_bridge(
@@ -343,9 +344,12 @@ class RouterBridgeTests(unittest.TestCase):
         deep_research_row = next(row for row in result["ranked"] if row["pack_id"] == "ruc-nlpir-augmentation")
         ranking_by_skill = {row["skill"]: row for row in deep_research_row["candidate_ranking"]}
         self.assertEqual({"flashrag-evidence", "webthinker-deep-research"}, set(ranking_by_skill))
-        self.assertEqual("skill_candidate", ranking_by_skill["webthinker-deep-research"]["legacy_role"])
-        self.assertEqual("skill_candidate", ranking_by_skill["flashrag-evidence"]["legacy_role"])
-        self.assertEqual([], deep_research_row["stage_assistant_candidates"])
+        self.assertNotIn("legacy_role", ranking_by_skill["webthinker-deep-research"])
+        self.assertNotIn("route_authority_eligible", ranking_by_skill["webthinker-deep-research"])
+        self.assertNotIn("legacy_role", ranking_by_skill["flashrag-evidence"])
+        self.assertNotIn("route_authority_eligible", ranking_by_skill["flashrag-evidence"])
+        self.assertNotIn("stage_assistant_candidates", deep_research_row)
+        self.assertNotIn("route_authority_eligible", deep_research_row)
 
     def test_data_leakage_audit_can_route_to_ml_data_leakage_guard(self) -> None:
         result = run_bridge(
@@ -404,11 +408,10 @@ class RouterBridgeTests(unittest.TestCase):
 
         data_ml_row = next(row for row in result["ranked"] if row["pack_id"] == "data-ml")
         ranking_by_skill = {row["skill"]: row for row in data_ml_row["candidate_ranking"]}
-        self.assertEqual(
-            "skill_candidate",
-            ranking_by_skill["preprocessing-data-with-automated-pipelines"]["legacy_role"],
-        )
-        self.assertEqual([], data_ml_row["stage_assistant_candidates"])
+        self.assertNotIn("legacy_role", ranking_by_skill["preprocessing-data-with-automated-pipelines"])
+        self.assertNotIn("route_authority_eligible", ranking_by_skill["preprocessing-data-with-automated-pipelines"])
+        self.assertNotIn("stage_assistant_candidates", data_ml_row)
+        self.assertNotIn("route_authority_eligible", data_ml_row)
 
     def test_research_report_authoring_stays_on_scientific_reporting(self) -> None:
         result = run_bridge(

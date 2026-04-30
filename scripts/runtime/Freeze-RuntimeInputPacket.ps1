@@ -646,7 +646,12 @@ function Get-VibeSpecialistRecommendations {
         } else {
             $rankedConfidence
         }
+        $hasCustomAdmissionMetadata = (
+            $ranked.PSObject.Properties.Name -contains 'custom_admission' -and
+            $null -ne $ranked.custom_admission
+        )
         if (
+            -not $hasCustomAdmissionMetadata -and
             $candidateSelectionReason -match 'fallback' -and
             ($rankedConfidence -lt $minimumRecommendationConfidence -or $candidateSelectionScore -lt $minimumRecommendationConfidence)
         ) {
