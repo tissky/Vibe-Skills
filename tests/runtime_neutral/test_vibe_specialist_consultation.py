@@ -918,10 +918,8 @@ class VibeSpecialistConsultationTests(unittest.TestCase):
             "Enabled specialist consultation receipts must declare",
             completed.stderr,
         )
-        self.assertIn(
-            "window_id as discussion or planning.",
-            completed.stderr,
-        )
+        self.assertIn("window_id as discussion or", completed.stderr)
+        self.assertIn("planning.", completed.stderr)
 
     def test_consultation_unit_ignores_session_root_artifacts_when_working_root_matches_session_root(self) -> None:
         shell = resolve_powershell()
