@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generated_at": "2026-04-30T12:10:33+08:00",
+  "generated_at": "2026-04-30T13:56:30+08:00",
   "source": "bundled/skills",
   "skill_count": 296,
-  "total_bytes": 20184253.0,
+  "total_bytes": 20165881.0,
   "skills": [
     {
       "name": ".system",
@@ -337,9 +337,9 @@
       "name": "datacommons-client",
       "relative_path": "bundled/skills/datacommons-client",
       "file_count": 5,
-      "bytes": 36958,
-      "skill_md_hash": "4d58376323fe1c3c115bc72abd6a8cc38a73d2cbed088b4ea77519bdd44f4623",
-      "dir_hash": "36fede332c932286e1f15c5377d140f03aab9c63925d6354cb993b5da692e3f7"
+      "bytes": 37445,
+      "skill_md_hash": "6aca6eee2c0c1f2b1a3cf9aaa11b0ab89fabab6ee1b5760126063c53043b6ff2",
+      "dir_hash": "83abe3186002336528759dc361a0fa178b9cf4b2fc7c381b9bdfe725097efe15"
     },
     {
       "name": "datamol",
@@ -969,9 +969,9 @@
       "name": "market-research-reports",
       "relative_path": "bundled/skills/market-research-reports",
       "file_count": 8,
-      "bytes": 206126,
-      "skill_md_hash": "ddeec472dca7b086eabd2bb389b9402566ddc2276699646559c04c0942af7567",
-      "dir_hash": "cf3333f82a9ff5148531c8ae30f9fb727bfd86003d0ca3524e218748cfbf733f"
+      "bytes": 187267,
+      "skill_md_hash": "1d83fdd7d320dd6dfe382d930c7f0e89d4c30fbca7cfaf9e983ff2ad4277f1d7",
+      "dir_hash": "9d6f890677305d7acba648f3a7befc2ddc98f84983d071964302e49de5c0edaa"
     },
     {
       "name": "markitdown",
