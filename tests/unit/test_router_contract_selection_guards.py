@@ -66,7 +66,7 @@ def test_guarded_subagent_does_not_win_generic_coding_fallback() -> None:
 
     assert selection["selected"] is None
     assert selection["reason"] == "no_usable_candidate"
-    assert selection["route_authority_eligible"] is False
+    assert selection["_selection_usable"] is False
 
 
 def test_guarded_subagent_can_win_with_explicit_positive_keyword() -> None:
@@ -74,7 +74,7 @@ def test_guarded_subagent_can_win_with_explicit_positive_keyword() -> None:
 
     assert selection["selected"] == "subagent-driven-development"
     assert selection["reason"] == "keyword_ranked"
-    assert selection["route_authority_eligible"] is True
+    assert selection["_selection_usable"] is True
 
 
 def test_requested_subagent_bypasses_guard() -> None:
@@ -133,6 +133,7 @@ def test_active_skill_candidates_do_not_need_legacy_role_fields() -> None:
     )
 
     assert selection["selected"] == "helper"
-    assert selection["ranking"][0]["legacy_role"] == "skill_candidate"
-    assert selection["stage_assistant_candidates"] == []
+    assert "legacy_role" not in selection["ranking"][0]
+    assert "route_authority_eligible" not in selection["ranking"][0]
+    assert selection["_legacy_stage_assistant_candidates"] == []
     assert "routing_role" not in selection["ranking"][0]

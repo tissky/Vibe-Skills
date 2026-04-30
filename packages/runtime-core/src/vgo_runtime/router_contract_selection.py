@@ -45,6 +45,40 @@ def get_pack_default_candidate(pack: dict[str, Any], task_type: str, filtered_ca
     return filtered_candidates[0] if filtered_candidates else (all_candidates[0] if all_candidates else None)
 
 
+INTERNAL_CANDIDATE_USABLE = "_candidate_usable"
+INTERNAL_LEGACY_ROLE = "_legacy_role"
+INTERNAL_SELECTION_USABLE = "_selection_usable"
+INTERNAL_LEGACY_STAGE_ASSISTANTS = "_legacy_stage_assistant_candidates"
+
+
+def public_candidate_row(row: dict[str, Any]) -> dict[str, Any]:
+    public = dict(row)
+    for key in (
+        INTERNAL_CANDIDATE_USABLE,
+        INTERNAL_LEGACY_ROLE,
+        "route_authority_eligible",
+        "legacy_role",
+    ):
+        public.pop(key, None)
+    return public
+
+
+def public_candidate_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [public_candidate_row(row) for row in rows]
+
+
+def candidate_is_usable(row: dict[str, Any]) -> bool:
+    if INTERNAL_CANDIDATE_USABLE in row:
+        return bool(row[INTERNAL_CANDIDATE_USABLE])
+    return bool(row.get("route_authority_eligible", True))
+
+
+def candidate_legacy_role(row: dict[str, Any]) -> str:
+    if INTERNAL_LEGACY_ROLE in row:
+        return str(row[INTERNAL_LEGACY_ROLE])
+    return str(row.get("legacy_role") or "skill_candidate")
+
+
 def select_pack_candidate(
     prompt_lower: str,
     candidates: list[str],
@@ -105,7 +139,7 @@ def select_pack_candidate(
                 "selected": requested_candidate,
                 "score": 1.0,
                 "reason": "requested_skill",
-                "ranking": [
+                "ranking": public_candidate_rows([
                     {
                         "skill": requested_candidate,
                         "score": 1.0,
@@ -114,15 +148,15 @@ def select_pack_candidate(
                         "positive_score": 1.0,
                         "negative_score": 0.0,
                         "canonical_for_task_hit": 1.0,
-                        "route_authority_eligible": True,
-                        "legacy_role": "explicit_request",
+                        INTERNAL_CANDIDATE_USABLE: True,
+                        INTERNAL_LEGACY_ROLE: "explicit_request",
                     }
-                ],
+                ]),
                 "top1_top2_gap": 1.0,
                 "filtered_out_by_task": blocked_by_task,
-                "route_authority_eligible": True,
+                INTERNAL_SELECTION_USABLE: True,
                 "relevance_score": 1.0,
-                "stage_assistant_candidates": [],
+                INTERNAL_LEGACY_STAGE_ASSISTANTS: [],
             }
         fallback = default_candidate or candidates[0]
         return {
@@ -132,9 +166,9 @@ def select_pack_candidate(
             "ranking": [],
             "top1_top2_gap": 0.0,
             "filtered_out_by_task": blocked_by_task,
-            "route_authority_eligible": True,
+            INTERNAL_SELECTION_USABLE: True,
             "relevance_score": 0.0,
-            "stage_assistant_candidates": [],
+            INTERNAL_LEGACY_STAGE_ASSISTANTS: [],
         }
 
     authority_allowlist = normalize_candidate_keys(pack.get("route_authority_candidates"))
@@ -186,19 +220,19 @@ def select_pack_candidate(
                 "positive_score": round(positive_score, 4),
                 "negative_score": round(negative_score, 4),
                 "canonical_for_task_hit": round(canonical_hit, 4),
-                "route_authority_eligible": use_eligible,
-                "legacy_role": legacy_role,
+                INTERNAL_CANDIDATE_USABLE: use_eligible,
+                INTERNAL_LEGACY_ROLE: legacy_role,
                 "requires_positive_keyword_match": requires_positive_keyword_match,
                 "ordinal": ordinal,
             }
         )
 
     ranked_all = sorted(scored, key=lambda row: (-row["score"], -row["keyword_score"], -row["positive_score"], row["ordinal"]))
-    usable_ranked = [row for row in ranked_all if bool(row["route_authority_eligible"])]
+    usable_ranked = [row for row in ranked_all if candidate_is_usable(row)]
     stage_assistant_ranked = [
         row
         for row in ranked_all
-        if row.get("legacy_role") == "stage_assistant"
+        if candidate_legacy_role(row) == "stage_assistant"
     ]
 
     overall_top = ranked_all[0]
@@ -211,7 +245,7 @@ def select_pack_candidate(
             "selected": requested_candidate,
             "score": 1.0,
             "reason": "requested_skill",
-            "ranking": [
+            "ranking": public_candidate_rows([
                 {
                     "skill": requested_candidate,
                     "score": 1.0,
@@ -220,17 +254,17 @@ def select_pack_candidate(
                     "positive_score": 1.0,
                     "negative_score": 0.0,
                     "canonical_for_task_hit": 1.0,
-                    "route_authority_eligible": True,
-                    "legacy_role": "explicit_request",
+                    INTERNAL_CANDIDATE_USABLE: True,
+                    INTERNAL_LEGACY_ROLE: "explicit_request",
                 }
-            ],
+            ]),
             "top1_top2_gap": 1.0,
             "filtered_out_by_task": blocked_by_task,
-            "route_authority_eligible": True,
+            INTERNAL_SELECTION_USABLE: True,
             "relevance_score": 1.0,
-            "stage_assistant_candidates": [
+            INTERNAL_LEGACY_STAGE_ASSISTANTS: public_candidate_rows([
                 row for row in stage_assistant_ranked if row.get("skill") != requested_candidate
-            ][:4],
+            ][:4]),
         }
 
     if not top:
@@ -241,9 +275,9 @@ def select_pack_candidate(
             "ranking": [],
             "top1_top2_gap": 0.0,
             "filtered_out_by_task": blocked_by_task,
-            "route_authority_eligible": False,
+            INTERNAL_SELECTION_USABLE: False,
             "relevance_score": float(overall_top["score"]),
-            "stage_assistant_candidates": stage_assistant_ranked[:4],
+            INTERNAL_LEGACY_STAGE_ASSISTANTS: public_candidate_rows(stage_assistant_ranked[:4]),
         }
 
     if top["score"] < fallback_min:
@@ -254,26 +288,26 @@ def select_pack_candidate(
             "selected": fallback,
             "score": float(fallback_row["score"]),
             "reason": "fallback_task_default" if default_row else "fallback_first_candidate",
-            "ranking": usable_ranked[:6],
+            "ranking": public_candidate_rows(usable_ranked[:6]),
             "top1_top2_gap": gap,
             "filtered_out_by_task": blocked_by_task,
-            "route_authority_eligible": True,
+            INTERNAL_SELECTION_USABLE: True,
             "relevance_score": float(overall_top["score"]),
-            "stage_assistant_candidates": [
+            INTERNAL_LEGACY_STAGE_ASSISTANTS: public_candidate_rows([
                 row for row in stage_assistant_ranked if row.get("skill") != fallback
-            ][:4],
+            ][:4]),
         }
 
     return {
         "selected": top["skill"],
         "score": float(top["score"]),
         "reason": "keyword_ranked",
-        "ranking": usable_ranked[:6],
+        "ranking": public_candidate_rows(usable_ranked[:6]),
         "top1_top2_gap": gap,
         "filtered_out_by_task": blocked_by_task,
-        "route_authority_eligible": True,
+        INTERNAL_SELECTION_USABLE: True,
         "relevance_score": float(overall_top["score"]),
-        "stage_assistant_candidates": [
+        INTERNAL_LEGACY_STAGE_ASSISTANTS: public_candidate_rows([
             row for row in stage_assistant_ranked if row.get("skill") != top.get("skill")
-        ][:4],
+        ][:4]),
     }
