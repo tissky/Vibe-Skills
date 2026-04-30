@@ -1,6 +1,6 @@
 ---
 name: hypogenic
-description: Automated hypothesis generation and testing using large language models. Use this skill when generating scientific hypotheses from datasets, combining literature insights with empirical data, testing hypotheses against observational data, or conducting systematic hypothesis exploration for research discovery in domains like deception detection, AI content detection, mental health analysis, or other empirical research tasks.
+description: Automated HypoGeniC-style hypothesis generation and testing using large language models. Use when the user explicitly asks for HypoGeniC, automated hypothesis generation/testing, LLM hypothesis discovery, or systematic hypothesis exploration against datasets. For ordinary scientific hypothesis formulation, use hypothesis-generation instead.
 ---
 
 # Hypogenic

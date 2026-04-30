@@ -1,6 +1,6 @@
 ---
 name: scientific-brainstorming
-description: "Research ideation partner. Generate hypotheses, explore interdisciplinary connections, challenge assumptions, develop methodologies, identify research gaps, for creative scientific problem-solving."
+description: "Open-ended scientific ideation partner. Use for research gaps, mechanism exploration, interdisciplinary connections, assumptions, and possible research directions. For structured testable hypotheses and validation plans, use hypothesis-generation instead."
 ---
 
 # Scientific Brainstorming
@@ -90,7 +90,7 @@ Help the scientist generate a wide range of ideas without judgment. The goal is 
 - Rapid-fire idea generation with the scientist
 - Build on their suggestions with "Yes, and..."
 - Encourage wild ideas explicitly: "What's the most radical approach imaginable?"
-- Consult references/brainstorming_methods.md for additional structured techniques
+- Use `references/brainstorming_methods.md` when the session needs a named structured technique
 
 ### Phase 3: Connection Making
 
@@ -167,14 +167,14 @@ Help crystallize insights and create concrete paths forward.
 
 ### references/brainstorming_methods.md
 
-Contains detailed descriptions of structured brainstorming methodologies that can be consulted when standard techniques need supplementation:
+Contains detailed descriptions of structured brainstorming methodologies for sessions that need a named method:
 - SCAMPER framework (Substitute, Combine, Adapt, Modify, Put to another use, Eliminate, Reverse)
 - Six Thinking Hats for multi-perspective analysis
 - Morphological analysis for systematic exploration
 - TRIZ principles for inventive problem-solving
 - Biomimicry approaches for nature-inspired solutions
 
-Consult this file when the scientist requests a specific methodology or when the brainstorming session would benefit from a more structured approach.
+Use this file when the scientist requests a specific methodology or when the brainstorming session would benefit from a more structured approach.
 
 ## Notes
 

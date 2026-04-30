@@ -26,6 +26,9 @@ Trigger when any of these applies:
 - Generate complete papers (provides framework drafts and code skeletons only)
 - Fabricate data or analysis results
 - Replace domain expert judgment on theoretical correctness
+- General PubMed, Semantic Scholar, or citation lookup without a matrix/composition goal
+- Manuscript writing, LaTeX build, PDF construction, or submission packaging
+- Ordinary hypothesis generation from one observation or dataset
 
 **Required inputs (ask if missing):**
 1. Research domain and keywords

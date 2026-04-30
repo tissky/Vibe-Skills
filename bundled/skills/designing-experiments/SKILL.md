@@ -1,11 +1,13 @@
 ---
 name: designing-experiments
-description: Selects the appropriate quasi-experimental method (DiD, ITS, SC) based on data structure and research questions. Use when the user is unsure which method to apply.
+description: Design experiments and quasi-experiments before analysis. Use when choosing study design, treatment/control structure, outcomes, assumptions, or which of DiD, ITS, synthetic control, or regression discontinuity fits the research question. For fitting models or estimating effects on existing data, use performing-causal-analysis instead.
 ---
 
 # Designing Experiments
 
-Helps select the appropriate causal inference method.
+Helps choose and specify a research design before data analysis starts. This skill owns study-design decisions: what is treated, what is compared, what outcome is measured, which assumptions are required, and which design is defensible.
+
+It does not fit causal models, estimate treatment effects, or interpret fitted model output from existing data.
 
 ## Decision Framework
 
