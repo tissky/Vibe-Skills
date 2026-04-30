@@ -748,7 +748,7 @@ if ($runtimeInputPacket) {
             '- Skill usage state model: binary `used` / `unused`.',
             ('- Used skill candidate: `{0}` is promoted only because full `SKILL.md` load evidence exists and this requirement doc adopts it as workflow authority.' -f $selectedUsageSkill),
             '- Routing, hints, recommendations, consultation, and dispatch do not by themselves prove skill use.',
-            '- Final completion must read `skill_usage.used_skills` and `skill_usage.evidence` before claiming a skill was used.'
+            '- Final completion must read `skill_usage.used` and `skill_usage.evidence` before claiming a skill was used.'
         )
         Write-VibeJsonArtifact -Path (Get-VibeSkillUsagePath -SessionRoot $sessionRoot) -Value $skillUsage
     }

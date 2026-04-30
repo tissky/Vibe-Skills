@@ -3379,10 +3379,22 @@ function New-VibeSpecialistLifecycleDisclosureProjection {
         }
     }
     $skillIds = @($skillIds | Select-Object -Unique)
+    $hasConsultationLayer = @($layerArray | Where-Object { [string]$_.truth_layer -eq 'consultation' }).Count -gt 0
+    $renderedIntro = if ($hasConsultationLayer) {
+        @(
+            'Legacy specialist lifecycle disclosure.',
+            'Old routing, consultation, and execution records remain readable. Usage claims still require `skill_usage.used` evidence.'
+        )
+    } else {
+        @(
+            'Skill routing and usage evidence.',
+            'This disclosure records selected skills and material-use evidence. A selected skill is not a `used` claim; material use requires `skill_usage.used` plus `skill_usage.evidence`.'
+        )
+    }
 
     return [pscustomobject]@{
         enabled = [bool](@($layerArray).Count -gt 0)
-        truth_model = if (@($layerArray | Where-Object { [string]$_.truth_layer -eq 'consultation' }).Count -gt 0) {
+        truth_model = if ($hasConsultationLayer) {
             'legacy_routing_consultation_execution_separated'
         } else {
             'skill_routing_usage_evidence'
@@ -3391,7 +3403,7 @@ function New-VibeSpecialistLifecycleDisclosureProjection {
         skill_count = @($skillIds).Count
         skill_ids = @($skillIds)
         layers = $layerArray
-        rendered_text = (@($renderedSections) -join "`n`n")
+        rendered_text = (@($renderedIntro) + @($renderedSections) -join "`n`n")
     }
 }
 
@@ -3415,7 +3427,7 @@ function Get-VibeSpecialistLifecycleDisclosureMarkdownLines {
     } else {
         @(
             '## Skill Routing And Usage Evidence',
-            'This disclosure records selected skills and execution evidence. Routing or dispatch alone is not a `used` claim; material use requires `skill_usage.used` evidence.'
+            'This disclosure records selected skills and material-use evidence. A selected skill is not a `used` claim; material use requires `skill_usage.used` plus `skill_usage.evidence`.'
         )
     }
     foreach ($layer in @($LifecycleDisclosure.layers)) {
@@ -3487,7 +3499,7 @@ function New-VibeHostUserBriefingSegmentProjection {
         'execution_dispatch' {
             $category = 'execution'
             $status = 'execution_disclosure'
-            $segmentLines += 'Vibe approved these Skills for execution dispatch. Dispatch alone is not a `used` claim:'
+            $segmentLines += 'Selected skills are available for execution. This is not a `used` claim; final use must come from `skill_usage.used` and evidence.'
         }
         default {
             if ($segmentId -match '^(discussion|planning)_consultation$') {
