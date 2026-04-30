@@ -66,19 +66,17 @@ OFR Hedge Fund Monitor and Form PF aggregate statistics stay under `hedgefundmon
 
 ## Verification Results
 
-Run after implementation:
+Passed on 2026-04-30:
 
-```powershell
-python -m pytest tests/runtime_neutral/test_finance_edgar_macro_pack_consolidation.py -q
-.\scripts\verify\probe-scientific-packs.ps1
-.\scripts\verify\vibe-skill-index-routing-audit.ps1
-.\scripts\verify\vibe-pack-regression-matrix.ps1
-.\scripts\verify\vibe-pack-routing-smoke.ps1
-.\scripts\verify\vibe-offline-skills-gate.ps1
-git diff --check
-```
-
-Record exact pass counts and any important route snippets here before the final commit.
+| Command | Result |
+|---|---|
+| `python -m pytest tests/runtime_neutral/test_finance_edgar_macro_pack_consolidation.py -q` | `10 passed in 3.56s` |
+| `.\scripts\verify\probe-scientific-packs.ps1` | `groups=19`, `cases=96`, `pack_match_all=True`, `skill_match_all=True`; `finance-edgar-macro` had `cases=9`, `skill_match=100%` |
+| `.\scripts\verify\vibe-skill-index-routing-audit.ps1` | `Total assertions: 458`, `Passed: 458`, `Failed: 0`; skill-index routing audit passed |
+| `.\scripts\verify\vibe-pack-regression-matrix.ps1` | `Total assertions: 371`, `Passed: 371`, `Failed: 0`; pack regression matrix checks passed |
+| `.\scripts\verify\vibe-pack-routing-smoke.ps1` | `Total assertions: 958`, `Passed: 958`, `Failed: 0`; pack routing smoke checks passed |
+| `.\scripts\verify\vibe-offline-skills-gate.ps1` | `present_skills=296`, `lock_skills=296`; offline skill closure gate passed |
+| `git diff --check` | no whitespace errors |
 
 ## Evidence Boundary
 
