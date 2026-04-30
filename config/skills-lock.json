@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generated_at": "2026-04-30T14:54:58+08:00",
+  "generated_at": "2026-04-30T16:02:18+08:00",
   "source": "bundled/skills",
   "skill_count": 296,
-  "total_bytes": 20167847.0,
+  "total_bytes": 20171574.0,
   "skills": [
     {
       "name": ".system",
@@ -657,9 +657,9 @@
       "name": "fluidsim",
       "relative_path": "bundled/skills/fluidsim",
       "file_count": 7,
-      "bytes": 36854,
-      "skill_md_hash": "87dfa817f9d9b7375de9b94bc0d46ddffce726765727699d741995b911a4d966",
-      "dir_hash": "622b84e5eaff9d1994dee23a77cf289b0d920bb0add76148ba241f5cbd5d7a4a"
+      "bytes": 37183,
+      "skill_md_hash": "c75c6fcc861c63b89fc27b13f8ff3cb23b323859e149197484d9f2aa45d87bac",
+      "dir_hash": "e5a7538663ea9bc339db23e3732b0bd30f57c07dda2e7a75e4eb0c7438951288"
     },
     {
       "name": "fred-economic-data",
@@ -985,9 +985,9 @@
       "name": "matchms",
       "relative_path": "bundled/skills/matchms",
       "file_count": 5,
-      "bytes": 63145,
-      "skill_md_hash": "ac8ed2f7f0c26d4038bdf522420cd040868934cc490400fb4dc06849a532538d",
-      "dir_hash": "251073075c9f26add2adbc73246aac0b94c6356d40e1f5a62b04d2ebde57d645"
+      "bytes": 63465,
+      "skill_md_hash": "0bc5320fb18f24e51dd939a4daf5e231eeed1166e26c84c6377621272a4bcfee",
+      "dir_hash": "8e31c0bf383485c412f07cc5e964fd5ff1e54a5859b164f5f5cfdb8999d00bfc"
     },
     {
       "name": "math",
@@ -1025,9 +1025,9 @@
       "name": "matlab",
       "relative_path": "bundled/skills/matlab",
       "file_count": 9,
-      "bytes": 99691,
-      "skill_md_hash": "c2edc2aaae650017f466efc3769591141994a2d45d0af92dd3839ed40d4f7e22",
-      "dir_hash": "091cb98f8833ce95c6ee0c6d20d4f9056aaa5560d43d695c1ceafb5095f6e052"
+      "bytes": 100016,
+      "skill_md_hash": "c0fb1a7cb1ddef2c1c652fd1208e3dd1d2b63a9e47bd1285f41b0e40b8da3df6",
+      "dir_hash": "05f7da7475967bd9dd664e08f543a17ab83b5c532658a3e4cd6645dc2aa65d2d"
     },
     {
       "name": "matplotlib",
@@ -1137,9 +1137,9 @@
       "name": "neuropixels-analysis",
       "relative_path": "bundled/skills/neuropixels-analysis",
       "file_count": 18,
-      "bytes": 144149,
-      "skill_md_hash": "ca82a34bb4cb03ebd8ffe7cf3b2b56c2081cf559a5352398c5c3cd72a93019dd",
-      "dir_hash": "1e3023b06e481bf7bf12b0d0c4eb6a2e919d0c831eaec5b6470d24db5021cfc1"
+      "bytes": 144453,
+      "skill_md_hash": "330d2205e429f02bc459ae5eb326bcb93ff8b55c1a7f98e6cd58bef9b905cec2",
+      "dir_hash": "04817b922ed9160eceeab20c7f3d108ba1f9f3a500361efe861af87f721a321e"
     },
     {
       "name": "node-zombie-guardian",
@@ -1433,9 +1433,9 @@
       "name": "pymc",
       "relative_path": "bundled/skills/pymc",
       "file_count": 8,
-      "bytes": 95932,
-      "skill_md_hash": "6d346f2c73ec8f512f50f5c519fab8ec8cfc59b01a0e8b5809a3c3b94c85ae52",
-      "dir_hash": "bd8faa905ccfea026cbf0726db8d5503bfe92bf6588710081c3d3f4c80afc3f6"
+      "bytes": 96246,
+      "skill_md_hash": "fdcb16869e695b348018f2681bfa308056c5fdd1f9141a1d2f596481b8675a5d",
+      "dir_hash": "e0c67a1a9b6c6cbe30005725eeb699c23665d7f40004771074f9ce39bfb34f74"
     },
     {
       "name": "pymc-bayesian-modeling",
@@ -1449,9 +1449,9 @@
       "name": "pymoo",
       "relative_path": "bundled/skills/pymoo",
       "file_count": 11,
-      "bytes": 74236,
-      "skill_md_hash": "37571351035e221176fe20a73d3f27c5b61750b6783f2c8730aa39814ddae3ab",
-      "dir_hash": "089f54020c2764c0f4a601ce81d6f423e4fe7c5237a883a6af51906c23e68608"
+      "bytes": 74549,
+      "skill_md_hash": "5855d5a94258a6865d67984e9c3664e9dab40f877b3e84ad676f6c5bf5e7e42c",
+      "dir_hash": "eca4553afee13965dbb6b91d83ea1db1209cba51a1241f1b563a9444254ba422"
     },
     {
       "name": "pyopenms",
@@ -1569,9 +1569,9 @@
       "name": "rowan",
       "relative_path": "bundled/skills/rowan",
       "file_count": 7,
-      "bytes": 73748,
-      "skill_md_hash": "9e0026d4aee146eea5bedbe66a377ad8c67904be9163fd00c51af4b837b6a89a",
-      "dir_hash": "0a959a0b78fecba4eff6f8838841269c5e5093ec84e6826e6704d227c9880ccc"
+      "bytes": 74121,
+      "skill_md_hash": "f94890062df7af235e5d7f272e07a58cff2dbb30a6350a50db30d711c8bb4e40",
+      "dir_hash": "26e68d25c9f3a41a7e11f2da803318f2f5ab87c1a6b18121376ea7a8a3974918"
     },
     {
       "name": "scanpy",
@@ -1817,9 +1817,9 @@
       "name": "simpy",
       "relative_path": "bundled/skills/simpy",
       "file_count": 8,
-      "bytes": 81022,
-      "skill_md_hash": "73be2e0f1ce521d0538014346838d9e5723d723cbb78dd1e9d0d1bbb0f5cf51a",
-      "dir_hash": "0dee9c230f391fc55bfbcb92a68d73a7e531ad46ca7e24f5c4b85da4349a0b13"
+      "bytes": 81374,
+      "skill_md_hash": "5f47b16f77441e80d096c6345806724d0ba6e1e0d79317213ef9f7500a46cf06",
+      "dir_hash": "804342d7c7ab0668c325f006904c37811fead5df9340331f3221710faff5806d"
     },
     {
       "name": "skill-creator",
@@ -1977,9 +1977,9 @@
       "name": "stable-baselines3",
       "relative_path": "bundled/skills/stable-baselines3",
       "file_count": 8,
-      "bytes": 86225,
-      "skill_md_hash": "3a3b3f98ff230ee76779162f9b4d74388e615070e6d5969c9052a6920f7227a2",
-      "dir_hash": "4f362607bbd67697326a9ed5dd26b22057ad7dd4c63e793c755ad309f2ebfda2"
+      "bytes": 86558,
+      "skill_md_hash": "337591b600c57f4b5091e72c1ee89db6fc9a6ac306589fff31786e6f4630567e",
+      "dir_hash": "588ab4ccf676bd5d263fdb56dd515d9f85ba6881c0be27706b9dd2b418f9bdb6"
     },
     {
       "name": "statistical-analysis",
@@ -2097,17 +2097,17 @@
       "name": "timesfm-forecasting",
       "relative_path": "bundled/skills/timesfm-forecasting",
       "file_count": 22,
-      "bytes": 323741,
-      "skill_md_hash": "c6425f6c5ad3e56b2ced68d437202fe2c3d4c2552361c8f7b15b9a00b198de80",
-      "dir_hash": "597004a8f975a080799c952a20467a8c922b6323d297661a32b98ce22e42b556"
+      "bytes": 324122,
+      "skill_md_hash": "718f09ac79687b237bc0d9e04afdc8f63782a04d866cab6313772b1b13de448d",
+      "dir_hash": "0db0239579380c16b54e980a5323eac84dbca1ef649ccaf486f6a94583bdc6b1"
     },
     {
       "name": "torch-geometric",
       "relative_path": "bundled/skills/torch-geometric",
       "file_count": 7,
-      "bytes": 108340,
-      "skill_md_hash": "306a9aeebba89c890701d81bdc264bc2cff5c4408f2509aa702966b293419636",
-      "dir_hash": "87f25323c16d8dee8ecf22b5db1d10beedd0c102634e34161c8fade0bb446c52"
+      "bytes": 108723,
+      "skill_md_hash": "a345bd4c9da3d14dffe9caabd9c579537f6d1eb639ab95feb99247da40f4af61",
+      "dir_hash": "7f8081e25e97cf0f06e1f2a3ce85198588bdbc9549897d97228aa2dabfa20619"
     },
     {
       "name": "torchdrug",
