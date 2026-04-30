@@ -26,6 +26,7 @@ Observed state:
 | Packs with `skill_candidates` | 41 |
 | Packs with `route_authority_candidates` | 41 |
 | Packs where `route_authority_candidates` differs from `skill_candidates` | 0 |
+| Packs with `stage_assistant_candidates` field | 37 |
 | Packs with non-empty `stage_assistant_candidates` | 0 |
 
 This means `route_authority_candidates` has become a redundant mirror of `skill_candidates`, and `stage_assistant_candidates` has no active payload in the live pack manifest.
@@ -127,11 +128,11 @@ Verification:
 - New governance text does not introduce `route owner`, `direct owner`, `主路由`, `stage assistant`, `辅助专家`, or `咨询态` as active concepts.
 - Historical documents remain readable and are not blindly rewritten.
 
-Out of scope:
+Out of scope for terminology governance itself:
 
 - No runtime code changes.
-- No `pack-manifest.json` field deletion.
 - No physical skill deletion.
+- No blind rewrite of historical docs.
 
 ### Phase 2: Active Pack Manifest Field Simplification
 
@@ -237,9 +238,9 @@ git diff --check
 
 The exact command list may expand in later phases when the implementation touches runtime output or broader tests.
 
-## First Implementation Slice
+## Approved First Implementation Slice
 
-The first implementation slice is Phase 1 only.
+The user approved option B for the first implementation slice: Phase 1 plus active `pack-manifest.json` field simplification from Phase 2. This slice should simplify the current active field model without touching runtime output cleanup or legacy reader deletion.
 
 Planned files:
 
@@ -247,15 +248,30 @@ Planned files:
 - `README.md`
 - `README.zh.md`
 - one terminology audit test or gate under the existing test/verify structure
+- `config/pack-manifest.json`
+- pack routing tests that still assert `route_authority_candidates` or `stage_assistant_candidates` as active fields
+- router selection tests that prove old-field fixture compatibility remains available only when `skill_candidates` is absent
 
 Success criteria:
 
 - The project has one canonical terminology source.
 - README glossary matches the canonical terminology.
 - New active docs cannot introduce deprecated routing terms as current concepts.
-- No runtime behavior changes occur in this slice.
+- Active `config/pack-manifest.json` has no `route_authority_candidates` or `stage_assistant_candidates`.
+- Every active pack still has non-empty `skill_candidates`.
+- Every `defaults_by_task` entry points to an existing `skill_candidates` entry.
+- Existing route probes still select the same expected skills.
+- Runtime helper code may still read old fields for old fixtures, but new active config does not write them.
+- No six-stage runtime behavior changes occur in this slice.
+
+Explicit non-goals for this slice:
+
+- Do not delete skill directories.
+- Do not continue pack quality pruning.
+- Do not remove old runtime artifact readers.
+- Do not rename the governed runtime stages.
+- Do not claim skill use from selected-only or dispatch-only data.
 
 ## Open Boundary
 
 The user mentioned doing this in stages. If video artifacts are actually required later, that should be a separate documentation or demo task after the terminology and field model are stable. This design does not include video production.
-
