@@ -366,25 +366,6 @@
 
                                                                   ]
                                        },
-                   "code-review":  {
-                                       "task_allow":  [
-                                                          "review",
-                                                          "coding"
-                                                      ],
-                                       "positive_keywords":  [
-                                                                 "code review",
-                                                                 "review comments",
-                                                                 "代码评审"
-                                                             ],
-                                       "negative_keywords":  [
-                                                                 "owasp",
-                                                                 "threat model"
-                                                             ],
-                                       "equivalent_group":  "code-review-core",
-                                       "canonical_for_task":  [
-
-                                                              ]
-                                   },
                    "code-reviewer":  {
                                          "task_allow":  [
                                                             "review",
@@ -456,29 +437,11 @@
                                                                    "学术评估",
                                                                    "评估论文"
                                                                ],
-                                         "equivalent_group":  "code-review-core",
+                                         "equivalent_group":  "code-quality-review-core",
                                          "canonical_for_task":  [
                                                                     "review"
                                                                 ]
                                      },
-                   "code-review-excellence":  {
-                                                  "task_allow":  [
-                                                                     "review",
-                                                                     "planning"
-                                                                 ],
-                                                  "positive_keywords":  [
-                                                                            "review standards",
-                                                                            "mentoring",
-                                                                            "review process"
-                                                                        ],
-                                                  "negative_keywords":  [
-                                                                            "fix failing tests"
-                                                                        ],
-                                                  "equivalent_group":  null,
-                                                  "canonical_for_task":  [
-
-                                                                         ]
-                                              },
                    "requesting-code-review":  {
                                                   "task_allow":  [
                                                                      "review"
@@ -601,42 +564,6 @@
                                                                            "debug"
                                                                        ]
                                             },
-                   "debugging-strategies":  {
-                                                "task_allow":  [
-                                                                   "debug",
-                                                                   "review"
-                                                               ],
-                                                "positive_keywords":  [
-                                                                          "profiling",
-                                                                          "debug strategy",
-                                                                          "调试策略"
-                                                                      ],
-                                                "negative_keywords":  [
-                                                                          "product planning"
-                                                                      ],
-                                                "equivalent_group":  "debug-root-cause",
-                                                "canonical_for_task":  [
-
-                                                                       ]
-                                            },
-                   "error-resolver":  {
-                                          "task_allow":  [
-                                                             "debug",
-                                                             "coding"
-                                                         ],
-                                          "positive_keywords":  [
-                                                                    "stack trace",
-                                                                    "error message",
-                                                                    "unexpected behavior"
-                                                                ],
-                                          "negative_keywords":  [
-                                                                    "design system"
-                                                                ],
-                                          "equivalent_group":  "debug-root-cause",
-                                          "canonical_for_task":  [
-
-                                                                 ]
-                                      },
                    "tdd-guide":  {
                                      "task_allow":  [
                                                         "coding",

@@ -24,12 +24,12 @@ Do not let this skill own narrower problems:
 
 ## Migrated Legacy Assets
 
-The legacy `code-review` wrapper has been absorbed into this direct route owner.
+The legacy review wrapper has been absorbed into this direct route owner.
 
 - `references/python-style-guide.md` contains the retained Python naming, import, documentation, error-handling, and secret-handling guidance.
 - `scripts/check_style.py` is a lightweight stdin/string style checker for quick local review support.
 
-Use these assets as supporting material inside `code-reviewer`; do not route to the deleted `code-review` skill.
+Use these assets as supporting material inside `code-reviewer`; do not route to the deleted wrapper skill.
 
 ## Quick Start
 
