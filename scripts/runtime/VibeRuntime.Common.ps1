@@ -219,22 +219,6 @@ function Get-VibeNestedPropertySafe {
     return $current
 }
 
-function Get-VibeRuntimeLegacySkillRouting {
-    param(
-        [AllowNull()] [object]$RuntimeInputPacket = $null
-    )
-
-    if (
-        $null -ne $RuntimeInputPacket -and
-        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'legacy_skill_routing') -and
-        $null -ne $RuntimeInputPacket.legacy_skill_routing
-    ) {
-        return $RuntimeInputPacket.legacy_skill_routing
-    }
-
-    return $null
-}
-
 function Get-VibeRuntimeSpecialistDispatchProjection {
     param(
         [AllowNull()] [object]$RuntimeInputPacket = $null
@@ -248,16 +232,38 @@ function Get-VibeRuntimeSpecialistDispatchProjection {
         return $RuntimeInputPacket.specialist_dispatch
     }
 
-    $legacyRouting = Get-VibeRuntimeLegacySkillRouting -RuntimeInputPacket $RuntimeInputPacket
     if (
-        $null -ne $legacyRouting -and
-        (Test-VibeObjectHasProperty -InputObject $legacyRouting -PropertyName 'specialist_dispatch') -and
-        $null -ne $legacyRouting.specialist_dispatch
+        $null -eq $RuntimeInputPacket -or
+        -not (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'skill_routing') -or
+        $null -eq $RuntimeInputPacket.skill_routing -or
+        -not (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket.skill_routing -PropertyName 'selected')
     ) {
-        return $legacyRouting.specialist_dispatch
+        return $null
     }
 
-    return $null
+    $approvedDispatch = [object[]]@($RuntimeInputPacket.skill_routing.selected)
+    if (@($approvedDispatch).Count -eq 0) {
+        return $null
+    }
+
+    $skillIds = @($approvedDispatch | ForEach-Object {
+        [string](Get-VibePropertySafe -InputObject $_ -PropertyName 'skill_id' -DefaultValue '')
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+
+    return [pscustomobject]@{
+        approved_dispatch = [object[]]@($approvedDispatch)
+        local_specialist_suggestions = @()
+        blocked = @()
+        degraded = @()
+        approved_skill_ids = @($skillIds)
+        local_suggestion_skill_ids = @()
+        blocked_skill_ids = @()
+        degraded_skill_ids = @()
+        surfaced_skill_ids = @($skillIds)
+        matched_skill_ids = @($skillIds)
+        status = 'derived_from_skill_routing_selected'
+        source = 'skill_routing.selected'
+    }
 }
 
 function Get-VibeRuntimeSpecialistRecommendations {
@@ -267,17 +273,23 @@ function Get-VibeRuntimeSpecialistRecommendations {
 
     if (
         $null -ne $RuntimeInputPacket -and
-        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'specialist_recommendations')
+        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'skill_routing') -and
+        $null -ne $RuntimeInputPacket.skill_routing -and
+        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket.skill_routing -PropertyName 'selected')
     ) {
-        return [object[]]@($RuntimeInputPacket.specialist_recommendations)
+        $selected = [object[]]@($RuntimeInputPacket.skill_routing.selected)
+        if (@($selected).Count -gt 0) {
+            return $selected
+        }
     }
 
-    $legacyRouting = Get-VibeRuntimeLegacySkillRouting -RuntimeInputPacket $RuntimeInputPacket
     if (
-        $null -ne $legacyRouting -and
-        (Test-VibeObjectHasProperty -InputObject $legacyRouting -PropertyName 'specialist_recommendations')
+        $null -ne $RuntimeInputPacket -and
+        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'skill_routing') -and
+        $null -ne $RuntimeInputPacket.skill_routing -and
+        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket.skill_routing -PropertyName 'candidates')
     ) {
-        return [object[]]@($legacyRouting.specialist_recommendations)
+        return [object[]]@($RuntimeInputPacket.skill_routing.candidates)
     }
 
     return @()
@@ -287,21 +299,6 @@ function Get-VibeRuntimeStageAssistantHints {
     param(
         [AllowNull()] [object]$RuntimeInputPacket = $null
     )
-
-    if (
-        $null -ne $RuntimeInputPacket -and
-        (Test-VibeObjectHasProperty -InputObject $RuntimeInputPacket -PropertyName 'stage_assistant_hints')
-    ) {
-        return [object[]]@($RuntimeInputPacket.stage_assistant_hints)
-    }
-
-    $legacyRouting = Get-VibeRuntimeLegacySkillRouting -RuntimeInputPacket $RuntimeInputPacket
-    if (
-        $null -ne $legacyRouting -and
-        (Test-VibeObjectHasProperty -InputObject $legacyRouting -PropertyName 'stage_assistant_hints')
-    ) {
-        return [object[]]@($legacyRouting.stage_assistant_hints)
-    }
 
     return @()
 }
