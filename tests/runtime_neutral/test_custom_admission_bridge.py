@@ -391,7 +391,7 @@ class CustomAdmissionBridgeTests(unittest.TestCase):
             execution_manifest = json.loads(Path(summary["artifacts"]["execution_manifest"]).read_text(encoding="utf-8"))
 
             self.assertGreaterEqual(int(execution_manifest["specialist_accounting"]["recommendation_count"]), 1)
-            self.assertGreaterEqual(int(execution_manifest["specialist_accounting"]["dispatch_unit_count"]), 1)
+            self.assertGreaterEqual(int(execution_manifest["specialist_accounting"]["skill_execution_unit_count"]), 1)
             self.assertIn(
                 "genomics-qc-flow",
                 [str(skill_id) for skill_id in execution_manifest["specialist_accounting"]["specialist_skills"]],
