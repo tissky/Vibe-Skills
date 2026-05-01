@@ -644,11 +644,11 @@ function Resolve-VibeEffectiveSpecialistDispatch {
     }
 
     $result = [ordered]@{
-        frozen_approved_dispatch = @($frozenApprovedDispatch)
+        frozen_selected_skill_execution = @($frozenApprovedDispatch)
         frozen_approved_skill_ids = @($frozenApprovedSkillIds)
-        effective_approved_dispatch = @($frozenApprovedDispatch)
+        selected_skill_execution = @($frozenApprovedDispatch)
         effective_approved_skill_ids = @($frozenApprovedSkillIds)
-        auto_approved_dispatch = @()
+        auto_selected_skill_execution = @()
         auto_approved_skill_ids = @()
         original_local_specialist_suggestions = @($originalLocalSuggestions)
         original_local_suggestion_skill_ids = @($originalLocalSkillIds)
@@ -817,9 +817,9 @@ function Resolve-VibeEffectiveSpecialistDispatch {
     $effectiveApprovedDispatch = @($frozenApprovedDispatch + $autoApprovedDispatch)
     $effectiveApprovedSkillIds = @($effectiveApprovedDispatch | ForEach-Object { [string]$_.skill_id } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
 
-    $result.effective_approved_dispatch = @($effectiveApprovedDispatch)
+    $result.selected_skill_execution = @($effectiveApprovedDispatch)
     $result.effective_approved_skill_ids = @($effectiveApprovedSkillIds)
-    $result.auto_approved_dispatch = @($autoApprovedDispatch)
+    $result.auto_selected_skill_execution = @($autoApprovedDispatch)
     $result.auto_approved_skill_ids = @($autoApprovedDispatch | ForEach-Object { [string]$_.skill_id } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
     $result.residual_local_specialist_suggestions = @($residualSuggestions)
     $result.residual_local_suggestion_skill_ids = @($residualSkillIds)
@@ -1260,9 +1260,9 @@ if (@($nonExecutableSelectedSkillIds).Count -gt 0) {
 $hasCanonicalSelectedSkills = $null -ne $skillRouting -and $skillRouting.PSObject.Properties.Name -contains 'selected' -and @($skillRouting.selected).Count -gt 0
 if ($hasCanonicalSelectedSkills) {
     $specialistDispatchResolution = [pscustomobject]@{
-        effective_approved_dispatch = @($selectedSkills)
+        selected_skill_execution = @($selectedSkills)
         residual_local_specialist_suggestions = @()
-        auto_approved_dispatch = @()
+        auto_selected_skill_execution = @()
         auto_absorb_gate = [pscustomobject]@{
             enabled = $false
             receipt_path = $null
@@ -1281,9 +1281,9 @@ if ($hasCanonicalSelectedSkills) {
         -LocalSuggestions @($frozenLocalSuggestions) `
         -SuggestionContract $runtime.runtime_input_packet_policy.child_specialist_suggestion_contract
 }
-$approvedDispatch = @($specialistDispatchResolution.effective_approved_dispatch)
+$approvedDispatch = @($specialistDispatchResolution.selected_skill_execution)
 $localSuggestions = @($specialistDispatchResolution.residual_local_specialist_suggestions)
-$autoApprovedDispatch = @($specialistDispatchResolution.auto_approved_dispatch)
+$autoApprovedDispatch = @($specialistDispatchResolution.auto_selected_skill_execution)
 $interactiveSpecialistDisclosurePolicy = Get-VibeInteractiveSpecialistDisclosurePolicy -RuntimeInputPacketPolicy $runtime.runtime_input_packet_policy
 $specialistUserDisclosure = New-VibeSpecialistUserDisclosureProjection `
     -ApprovedDispatch @($approvedDispatch) `
@@ -2031,12 +2031,6 @@ $executionManifest = [pscustomobject]@{
         frozen_selected_skill_execution = @($frozenSelectedSkillExecution)
         auto_selected_skill_execution_count = [int]$autoSelectedSkillExecutionCount
         auto_selected_skill_execution = @($autoSelectedSkillExecution)
-        frozen_approved_dispatch_count = @($frozenApprovedDispatch).Count
-        frozen_approved_dispatch = @($frozenApprovedDispatch)
-        approved_dispatch_count = @($approvedDispatch).Count
-        approved_dispatch = @($approvedDispatch)
-        auto_approved_dispatch_count = @($autoApprovedDispatch).Count
-        auto_approved_dispatch = @($autoApprovedDispatch)
         requested_host_adapter_id = $runtimePacketHostAdapterIdentity.requested_host_id
         effective_host_adapter_id = $runtimePacketHostAdapterIdentity.effective_host_id
         phase_binding_counts = [pscustomobject]@{
@@ -2045,7 +2039,7 @@ $executionManifest = [pscustomobject]@{
             post_execution = @($approvedDispatch | Where-Object { [string]$_.dispatch_phase -eq 'post_execution' }).Count
             verification = @($approvedDispatch | Where-Object { [string]$_.dispatch_phase -eq 'verification' }).Count
         }
-        parallelizable_dispatch_count = @($approvedDispatch | Where-Object { [bool]$_.parallelizable_in_root_xl }).Count
+        parallelizable_skill_execution_count = @($selectedSkillExecution | Where-Object { [bool]$_.parallelizable_in_root_xl }).Count
         attempted_specialist_unit_count = @($liveAttemptedSpecialistUnits).Count
         executed_specialist_unit_count = @($verifiedSpecialistUnits).Count
         failed_specialist_unit_count = @($failedLiveSpecialistUnits).Count
@@ -2053,22 +2047,13 @@ $executionManifest = [pscustomobject]@{
         direct_routed_skill_execution_units = @($directRoutedSpecialistUnits)
         executed_skill_execution_units = @($verifiedSpecialistUnits)
         failed_skill_execution_units = @($failedLiveSpecialistUnits)
-        direct_routed_specialist_unit_count = @($directRoutedSpecialistUnits).Count
-        direct_routed_specialist_units = @($directRoutedSpecialistUnits)
-        executed_specialist_units = @($verifiedSpecialistUnits)
-        failed_specialist_units = @($failedLiveSpecialistUnits)
         blocked_skill_execution_unit_count = [int]$blockedSkillExecutionUnitCount
         blocked_skill_execution_units = @($blockedSkillExecutionUnits)
         degraded_skill_execution_unit_count = [int]$degradedSkillExecutionUnitCount
         degraded_skill_execution_units = @($degradedSkillExecutionUnits)
-        blocked_specialist_unit_count = @($blockedSpecialistUnits).Count
-        blocked_specialist_units = @($blockedSpecialistUnits)
-        degraded_specialist_unit_count = @($degradedSpecialistUnits).Count
-        degraded_specialist_units = @($degradedSpecialistUnits)
         blocked_skill_ids = @($blockedSkillIds)
         degraded_skill_ids = @($degradedSkillIds)
         ghost_match_skill_ids = @($ghostMatchSkillIds)
-        specialist_dispatch_outcomes = @($skillExecutionOutcomes)
         execution_skill_outcome_count = $totalSpecialistDispatchOutcomeCount
         execution_skill_outcomes = @($skillExecutionOutcomes)
         skill_execution_resolution_path = $skillExecutionResolutionPath
@@ -2129,18 +2114,13 @@ $proofManifest = [pscustomobject]@{
     degraded_skill_execution_unit_count = [int]$degradedSkillExecutionUnitCount
     execution_skill_outcome_count = $totalSpecialistDispatchOutcomeCount
     skill_execution_resolution_path = $skillExecutionResolutionPath
-    specialist_dispatch_unit_count = [int]$specialistDispatchUnitCount
     attempted_specialist_unit_count = @($liveAttemptedSpecialistUnits).Count
     executed_specialist_unit_count = @($verifiedSpecialistUnits).Count
     failed_specialist_unit_count = @($failedLiveSpecialistUnits).Count
-    direct_routed_specialist_unit_count = @($directRoutedSpecialistUnits).Count
-    blocked_specialist_unit_count = @($blockedSpecialistUnits).Count
-    degraded_specialist_unit_count = @($degradedSpecialistUnits).Count
-    specialist_dispatch_outcome_count = $totalSpecialistDispatchOutcomeCount
+    direct_routed_skill_execution_unit_count = @($directRoutedSpecialistUnits).Count
     specialist_execution_status = $effectiveSpecialistExecutionStatus
     auto_approved_specialist_unit_count = @($autoApprovedDispatch).Count
     residual_local_specialist_suggestion_count = @($localSuggestions).Count
-    specialist_dispatch_resolution_path = if ($specialistDispatchResolution.auto_absorb_gate.receipt_path) { [string]$specialistDispatchResolution.auto_absorb_gate.receipt_path } else { $null }
     dispatch_integrity_proof_passed = [bool]$dispatchIntegrity.proof_passed
     delegated_lane_count = [int]$delegatedLaneCount
     review_receipt_count = [int]$reviewReceiptCount
@@ -2169,7 +2149,7 @@ $proofLines = @(
     ('- attempted_specialist_unit_count: `{0}`' -f @($liveAttemptedSpecialistUnits).Count),
     ('- executed_specialist_unit_count: `{0}`' -f @($verifiedSpecialistUnits).Count),
     ('- failed_specialist_unit_count: `{0}`' -f @($failedLiveSpecialistUnits).Count),
-    ('- direct_routed_specialist_unit_count: `{0}`' -f @($directRoutedSpecialistUnits).Count),
+    ('- direct_routed_skill_execution_unit_count: `{0}`' -f @($directRoutedSpecialistUnits).Count),
     ('- blocked_skill_execution_unit_count: `{0}`' -f [int]$blockedSkillExecutionUnitCount),
     ('- degraded_skill_execution_unit_count: `{0}`' -f [int]$degradedSkillExecutionUnitCount),
     ('- auto_approved_specialist_unit_count: `{0}`' -f @($autoApprovedDispatch).Count),
@@ -2231,14 +2211,10 @@ $receipt = [pscustomobject]@{
     degraded_skill_execution_unit_count = [int]$degradedSkillExecutionUnitCount
     execution_skill_outcome_count = $totalSpecialistDispatchOutcomeCount
     skill_execution_resolution_path = $skillExecutionResolutionPath
-    specialist_dispatch_unit_count = [int]$specialistDispatchUnitCount
     attempted_specialist_unit_count = @($liveAttemptedSpecialistUnits).Count
     executed_specialist_unit_count = @($verifiedSpecialistUnits).Count
     failed_specialist_unit_count = @($failedLiveSpecialistUnits).Count
-    direct_routed_specialist_unit_count = @($directRoutedSpecialistUnits).Count
-    blocked_specialist_unit_count = @($blockedSpecialistUnits).Count
-    degraded_specialist_unit_count = @($degradedSpecialistUnits).Count
-    specialist_dispatch_outcome_count = $totalSpecialistDispatchOutcomeCount
+    direct_routed_skill_execution_unit_count = @($directRoutedSpecialistUnits).Count
     specialist_execution_status = $effectiveSpecialistExecutionStatus
     specialist_skills = @($specialistSkills)
     auto_approved_specialist_unit_count = @($autoApprovedDispatch).Count
@@ -2249,7 +2225,6 @@ $receipt = [pscustomobject]@{
     dispatch_integrity = $dispatchIntegrity
     escalation_required = [bool]$escalationRequired
     escalation_request_path = $escalationPath
-    specialist_dispatch_resolution_path = if ($specialistDispatchResolution.auto_absorb_gate.receipt_path) { [string]$specialistDispatchResolution.auto_absorb_gate.receipt_path } else { $null }
     completion_claim_allowed = [bool]$authorityProjection.completion_claim_allowed
     proof_class = [string]$proofRegistry.artifact_class_defaults.execution_manifest
     verification_contract = @(

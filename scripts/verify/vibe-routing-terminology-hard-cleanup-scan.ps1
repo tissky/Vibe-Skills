@@ -135,12 +135,14 @@ foreach ($relative in @($config.historical_docs)) {
 }
 
 $executionInternalCount = 0
-foreach ($entry in @($config.execution_internal_allowlist)) {
-    $relative = [string]$entry.path
+foreach ($relative in @($config.execution_internal_scan_files)) {
     $fullPath = Join-Path $RepoRoot $relative
-    foreach ($lineText in @(Get-TextFileLines -Path $fullPath)) {
+    $lines = @(Get-TextFileLines -Path $fullPath)
+    for ($index = 0; $index -lt $lines.Count; $index++) {
+        $lineText = [string]$lines[$index]
         if ([string]$lineText -and $lineText.IndexOf('specialist_dispatch', [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
             $executionInternalCount += 1
+            $findings.Add((New-Finding -Category 'execution_internal_specialist_dispatch_reference' -Path ([string]$relative) -Line ($index + 1) -Pattern 'specialist_dispatch' -Text $lineText)) | Out-Null
         }
     }
 }
