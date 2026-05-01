@@ -1,18 +1,25 @@
 # Terminology Governance
 
+> Historical / Retired Note: This document records a previous routing design or
+> migration state. Current routing authority is defined by
+> `docs/governance/current-routing-contract.md` and
+> `docs/governance/current-runtime-field-contract.md`.
+
 Date: 2026-04-30
 
-## Active Model
+## Historical Model Snapshot
 
-Current routing and usage language is:
+At the time of this note, routing and usage language was:
 
 ```text
 skill_candidates -> selected skill -> used / unused
 ```
 
-This vocabulary is the active product and implementation language for new routing work.
+Current terminology authority now lives in
+`docs/governance/current-routing-contract.md` and
+`docs/governance/current-runtime-field-contract.md`.
 
-## Active Terms
+## Historical Terms
 
 | Term | Meaning |
 | --- | --- |
@@ -22,7 +29,7 @@ This vocabulary is the active product and implementation language for new routin
 | `skill_routing.selected` | Runtime evidence that a skill was selected into the governed workflow. |
 | `skill_usage.used` | Runtime evidence that a selected skill was loaded and materially shaped artifacts. |
 | `skill_usage.unused` | Runtime evidence that a selected skill was not materially used, with a reason. |
-| `legacy_skill_routing` | Legacy compatibility container used only to read older runtime artifacts. |
+| `legacy_skill_routing` | Retired compatibility container present only in historical artifacts or retired tests. |
 
 ## Deprecated Terms
 
@@ -42,7 +49,9 @@ Do not introduce these names as active concepts in new docs, config, tests, or r
 
 Old runtime artifacts may still contain `specialist_dispatch`, `specialist_recommendations`, `stage_assistant_hints`, `route_authority_candidates`, or `stage_assistant_candidates`.
 
-Readers may keep compatibility paths while old fixtures exist. New active configuration must not write those pack fields, and new public docs must not present those names as current routing concepts.
+This section records previous compatibility context. Current runtime behavior is
+defined by the current routing and runtime field contracts and does not maintain
+old-format routing fields as compatibility inputs.
 
 ## Evidence Rule
 

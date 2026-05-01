@@ -1,5 +1,10 @@
 # Binary Skill Usage Routing Governance Note
 
+> Historical / Retired Note: This document records a previous routing design or
+> migration state. Current routing authority is defined by
+> `docs/governance/current-routing-contract.md` and
+> `docs/governance/current-runtime-field-contract.md`.
+
 Date: 2026-04-28
 
 ## Decision

@@ -1,5 +1,10 @@
 # Specialist Dispatch Governance
 
+> Historical / Retired Note: This document records a previous routing design or
+> migration state. Current routing authority is defined by
+> `docs/governance/current-routing-contract.md` and
+> `docs/governance/current-runtime-field-contract.md`.
+
 This document defines how specialist skills are used inside the governed `vibe` runtime without becoming a second runtime owner.
 
 ## Mental Model
