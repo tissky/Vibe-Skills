@@ -203,7 +203,6 @@ def test_truth_gate_rejects_missing_runtime_packet_proof_fields(tmp_path: Path) 
     assert result.returncode != 0
     assert "route_snapshot" in combined
     assert "skill_routing" in combined
-    assert "legacy_skill_routing" in combined
     assert "divergence_shadow" in combined
 
 
@@ -288,6 +287,21 @@ def test_truth_gate_accepts_verified_canonical_entry_session(tmp_path: Path) -> 
     assert result.returncode == 0, result.stdout + result.stderr
     assert "[PASS] host-launch-receipt.json exists" in result.stdout
     assert "[PASS] runtime packet includes route_snapshot" in result.stdout
+
+
+def test_truth_gate_accepts_current_skill_routing_without_legacy_fields(tmp_path: Path) -> None:
+    session_root = tmp_path / "session"
+    _write_valid_canonical_entry_artifacts(session_root)
+    runtime_packet_path = session_root / "runtime-input-packet.json"
+    runtime_packet = json.loads(runtime_packet_path.read_text(encoding="utf-8"))
+    runtime_packet.pop("legacy_skill_routing")
+    _write_json(runtime_packet_path, runtime_packet)
+
+    result = _run_truth_gate(session_root)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "[PASS] runtime packet includes skill_routing" in result.stdout
+    assert "[PASS] runtime packet exposes canonical skill_routing.selected" in result.stdout
 
 
 def test_truth_gate_accepts_presentational_entry_intent_with_canonical_authority(tmp_path: Path) -> None:
