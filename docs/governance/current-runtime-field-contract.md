@@ -60,22 +60,16 @@ Final used claims require `skill_usage.used` plus matching
 Preferred current execution vocabulary:
 
 ```text
-approved_skill_execution
-skill_execution_units
 selected_skill_execution
+skill_execution_units
 execution_skill_outcomes
 ```
 
-Execution anchors: `approved_skill_execution`, `skill_execution_units`, and
+Execution anchors: `selected_skill_execution`, `skill_execution_units`, and
 `execution_skill_outcomes`.
 
-Execution artifacts may temporarily contain internal implementation names that
-include `specialist_dispatch` when those values are derived from
-`skill_routing.selected`. Those names are execution internals, not routing
-authority and not final use proof.
-
-Current root runtime packets should not expose `specialist_dispatch` as a
-routing contract field.
+Current root runtime packets should not expose retired dispatch fields as a
+routing contract surface.
 
 ## Retired Layer
 
@@ -86,6 +80,9 @@ legacy_skill_routing
 specialist_recommendations
 stage_assistant_hints
 specialist_dispatch as root routing packet field
+approved_dispatch as current execution accounting field
+approved_skill_execution
+approved_specialist_dispatch_count as current receipt field
 ## Specialist Consultation
 discussion_specialist_consultation
 planning_specialist_consultation

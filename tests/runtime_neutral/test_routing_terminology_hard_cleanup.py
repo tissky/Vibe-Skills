@@ -42,7 +42,7 @@ class RoutingTerminologyHardCleanupTests(unittest.TestCase):
             "`skill_usage.used`",
             "`skill_usage.unused`",
             "`skill_usage.evidence`",
-            "`approved_skill_execution`",
+            "`selected_skill_execution`",
             "`skill_execution_units`",
             "`execution_skill_outcomes`",
         ]:
