@@ -803,7 +803,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             self.assertEqual(0, int(specialist_accounting["executed_specialist_unit_count"]))
             selected_units = [
                 unit
-                for unit in list(specialist_accounting["specialist_dispatch_outcomes"])
+                for unit in list(specialist_accounting["execution_skill_outcomes"])
                 if str(unit.get("skill_id")) == selected_skill_id
             ]
             self.assertGreaterEqual(len(selected_units), 1)
@@ -916,7 +916,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             specialist_units = [
                 unit
                 for unit in plan_shadow["units"]
-                if unit["classification"] == "specialist_dispatch_unit"
+                if unit["classification"] == "skill_execution_unit"
             ]
 
             self.assertGreaterEqual(len(specialist_units), 1)
@@ -960,7 +960,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                     self.assertEqual(0, int(result["exit_code"]))
                     self.assertTrue(Path(result["stdout_path"]).exists())
                     self.assertTrue(Path(result["stderr_path"]).exists())
-                    if result["kind"] == "specialist_dispatch":
+                    if result["kind"] == "skill_execution":
                         self.assertEqual("completed", result["status"])
                         self.assertTrue(bool(result["verification_passed"]))
                         self.assertFalse(bool(result["degraded"]))
@@ -1095,7 +1095,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                 len(list(specialist_accounting["degraded_skill_execution_units"])),
             )
             self.assertEqual(
-                len(list(specialist_accounting["specialist_dispatch_outcomes"])),
+                len(list(specialist_accounting["execution_skill_outcomes"])),
                 len(list(specialist_accounting["execution_skill_outcomes"])),
             )
             self.assertEqual(
@@ -1254,7 +1254,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             )
             summary = payload["summary"]
             execution_manifest = load_json(summary["artifacts"]["execution_manifest"])
-            specialist_outcomes = list(execution_manifest["specialist_accounting"]["specialist_dispatch_outcomes"])
+            specialist_outcomes = list(execution_manifest["specialist_accounting"]["execution_skill_outcomes"])
             self.assertGreaterEqual(len(specialist_outcomes), 1)
 
             path_resolved_prompt_verified = False
@@ -1348,7 +1348,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
             self.assertFalse(bool(auto_absorb_gate["enabled"]))
             self.assertEqual([], list(auto_absorb_gate.get("auto_approved_skill_ids") or []))
 
-            specialist_outcomes = list(specialist_accounting["specialist_dispatch_outcomes"])
+            specialist_outcomes = list(specialist_accounting["execution_skill_outcomes"])
             for unit in specialist_outcomes:
                 with self.subTest(unit_id=unit.get("unit_id", "")):
                     self.assertIn(str(unit["skill_id"]), approved_child_ids)
@@ -1548,7 +1548,7 @@ class NativeExecutionTopologyTests(unittest.TestCase):
                     self.assertGreaterEqual(int(specialist_accounting["approved_dispatch_count"]), 1)
                     self.assertGreaterEqual(int(specialist_accounting["specialist_skill_count"]), 1)
                     self.assertFalse(bool(specialist_accounting["escalation_required"]))
-                    self.assertGreaterEqual(len(list(specialist_accounting["specialist_dispatch_outcomes"])), 1)
+                    self.assertGreaterEqual(len(list(specialist_accounting["execution_skill_outcomes"])), 1)
                     self.assertEqual("completed_local_scope", child_execution_manifest["status"])
                     self.assertFalse(bool(child_execution_manifest["authority"]["completion_claim_allowed"]))
 

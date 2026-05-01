@@ -1479,7 +1479,7 @@ function New-VibeDegradedSpecialistDispatchResult {
     $usageRequirementState = Get-VibeDispatchUsageRequirementState -Dispatch $Dispatch
     $unitResult = [pscustomobject]@{
         unit_id = $UnitId
-        kind = 'specialist_dispatch'
+        kind = 'skill_execution'
         status = [string]$Policy.degrade_contract.status
         started_at = $startedAt
         finished_at = $finishedAt
@@ -1564,7 +1564,7 @@ function New-VibeDirectRoutedSpecialistDispatchResult {
 
     $unitResult = [pscustomobject]@{
         unit_id = $UnitId
-        kind = 'specialist_dispatch'
+        kind = 'skill_execution'
         status = 'completed'
         started_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.ffffffZ')
         finished_at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.ffffffZ')
@@ -1651,7 +1651,7 @@ function New-VibeBlockedSpecialistDispatchResult {
     $usageRequirementState = Get-VibeDispatchUsageRequirementState -Dispatch $Dispatch
     $unitResult = [pscustomobject]@{
         unit_id = $UnitId
-        kind = 'specialist_dispatch'
+        kind = 'skill_execution'
         status = 'blocked'
         started_at = $startedAt
         finished_at = $finishedAt
@@ -1896,7 +1896,7 @@ function Invoke-VibeSpecialistDispatchUnit {
     $usageRequirementState = Get-VibeDispatchUsageRequirementState -Dispatch $Dispatch
     $unitResult = [pscustomobject]@{
         unit_id = $UnitId
-        kind = 'specialist_dispatch'
+        kind = 'skill_execution'
         status = $effectiveStatus
         started_at = $startedAt
         finished_at = $finishedAt
@@ -2046,7 +2046,7 @@ function New-VibeSpecialistLaneEntry {
 
     return [pscustomobject]@{
         lane_id = "specialist-{0}-{1}-{2}" -f $dispatchPhase, $phaseId, [string]$Dispatch.skill_id
-        lane_kind = 'specialist_dispatch'
+        lane_kind = 'skill_execution'
         source_unit_id = [string]$Dispatch.skill_id
         specialist_skill_id = [string]$Dispatch.skill_id
         dispatch_phase = $dispatchPhase

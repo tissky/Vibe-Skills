@@ -393,7 +393,7 @@ class PlanExecuteReceiptTests(unittest.TestCase):
             "$outcome = [pscustomobject]@{ "
             "lane_id = 'lane-1'; "
             "lane_entry = [pscustomobject]@{ "
-            "lane_kind = 'specialist_dispatch'; "
+            "lane_kind = 'skill_execution'; "
             "source_unit_id = 'unit-1'; "
             "write_scope = 'read_only'; "
             "dispatch = [pscustomobject]@{ "
@@ -524,7 +524,7 @@ class PlanExecuteReceiptTests(unittest.TestCase):
         self.assertFalse(result["prompt_injection_complete"])
         self.assertEqual([], result["missing_prompt_injection_fields"])
 
-    def test_retired_host_subprocess_mode_routes_specialist_dispatch_in_current_session(self) -> None:
+    def test_retired_host_subprocess_mode_routes_skill_execution_in_current_session(self) -> None:
         powershell = resolve_powershell()
         if powershell is None:
             self.skipTest("PowerShell not available")
@@ -648,7 +648,7 @@ class PlanExecuteReceiptTests(unittest.TestCase):
                 json.dumps(
                     {
                         "lane_id": lane_id,
-                        "lane_kind": "specialist_dispatch",
+                        "lane_kind": "skill_execution",
                         "lane_root": str(lane_root.resolve()),
                         "run_id": lane_id,
                         "mode": "interactive_governed",

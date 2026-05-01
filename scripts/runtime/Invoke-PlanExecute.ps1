@@ -522,7 +522,7 @@ function Invoke-VibeDirectLaneEntry {
                 lane_result = $executed.result
             }
         }
-        'specialist_dispatch' {
+        'skill_execution' {
             $executed = Invoke-VibeSpecialistDispatchUnit `
                 -UnitId ("{0}-specialist" -f [string]$LaneEntry.lane_id) `
                 -Dispatch $LaneEntry.dispatch `
@@ -580,10 +580,10 @@ function ConvertTo-VibeExecutedUnitReceipt {
         verification_passed = if ($Outcome.lane_result) { [bool]$Outcome.lane_result.verification_passed } else { [bool]$Outcome.lane_receipt.verification_passed }
         result_path = [string]$Outcome.lane_result_path
         lane_receipt_path = if ($Outcome.lane_receipt_path) { [string]$Outcome.lane_receipt_path } else { $null }
-        skill_id = if ([string]$Outcome.lane_entry.lane_kind -eq 'specialist_dispatch') { [string]$Outcome.lane_entry.dispatch.skill_id } else { $null }
-        dispatch_phase = if ([string]$Outcome.lane_entry.lane_kind -eq 'specialist_dispatch' -and $Outcome.lane_entry.dispatch.PSObject.Properties.Name -contains 'dispatch_phase') { [string]$Outcome.lane_entry.dispatch.dispatch_phase } else { $null }
-        binding_profile = if ([string]$Outcome.lane_entry.lane_kind -eq 'specialist_dispatch' -and $Outcome.lane_entry.dispatch.PSObject.Properties.Name -contains 'binding_profile') { [string]$Outcome.lane_entry.dispatch.binding_profile } else { $null }
-        lane_policy = if ([string]$Outcome.lane_entry.lane_kind -eq 'specialist_dispatch' -and $Outcome.lane_entry.dispatch.PSObject.Properties.Name -contains 'lane_policy') { [string]$Outcome.lane_entry.dispatch.lane_policy } else { $null }
+        skill_id = if ([string]$Outcome.lane_entry.lane_kind -eq 'skill_execution') { [string]$Outcome.lane_entry.dispatch.skill_id } else { $null }
+        dispatch_phase = if ([string]$Outcome.lane_entry.lane_kind -eq 'skill_execution' -and $Outcome.lane_entry.dispatch.PSObject.Properties.Name -contains 'dispatch_phase') { [string]$Outcome.lane_entry.dispatch.dispatch_phase } else { $null }
+        binding_profile = if ([string]$Outcome.lane_entry.lane_kind -eq 'skill_execution' -and $Outcome.lane_entry.dispatch.PSObject.Properties.Name -contains 'binding_profile') { [string]$Outcome.lane_entry.dispatch.binding_profile } else { $null }
+        lane_policy = if ([string]$Outcome.lane_entry.lane_kind -eq 'skill_execution' -and $Outcome.lane_entry.dispatch.PSObject.Properties.Name -contains 'lane_policy') { [string]$Outcome.lane_entry.dispatch.lane_policy } else { $null }
         write_scope = [string]$Outcome.lane_entry.write_scope
         execution_driver = if ($Outcome.lane_result -and $Outcome.lane_result.PSObject.Properties.Name -contains 'execution_driver') { [string]$Outcome.lane_result.execution_driver } else { $null }
         live_native_execution = if ($Outcome.lane_result -and $Outcome.lane_result.PSObject.Properties.Name -contains 'live_native_execution') { [bool]$Outcome.lane_result.live_native_execution } else { $false }
@@ -604,7 +604,7 @@ function Test-VibeReceiptCountsAsSuccessful {
     }
 
     if (
-        [string]$Receipt.lane_kind -eq 'specialist_dispatch' -and
+        [string]$Receipt.lane_kind -eq 'skill_execution' -and
         [bool]$Receipt.degraded -and
         [string]$Receipt.status -eq 'degraded_non_authoritative' -and
         [int]$Receipt.exit_code -eq 0
@@ -930,8 +930,8 @@ function Get-VibePlanDerivedExecutionShadow {
             $inlineCommands = [regex]::Matches($trimmed, '`([^`]+)`') | ForEach-Object { $_.Groups[1].Value }
 
             if ($specialistSections -contains $sectionName) {
-                $classification = 'specialist_dispatch_unit'
-                $reason = if ($sectionName -eq 'Specialist Skill Dispatch Plan') { 'bounded_native_specialist_dispatch_declared' } else { 'skill_routing_usage_declared' }
+                $classification = 'skill_execution_unit'
+                $reason = if ($sectionName -eq 'Specialist Skill Dispatch Plan') { 'bounded_native_skill_execution_declared' } else { 'skill_routing_usage_declared' }
             } elseif (@($inlineCommands).Count -gt 0) {
                 $classification = 'executable_unit'
                 $reason = 'inline_command_detected'
@@ -960,7 +960,7 @@ function Get-VibePlanDerivedExecutionShadow {
         execution_plan_path = $PlanPath
         candidate_unit_count = @($units).Count
         executable_unit_count = @($units | Where-Object { $_.classification -eq 'executable_unit' }).Count
-        specialist_dispatch_unit_count = @($units | Where-Object { $_.classification -eq 'specialist_dispatch_unit' }).Count
+        skill_execution_unit_count = @($units | Where-Object { $_.classification -eq 'skill_execution_unit' }).Count
         advisory_only_unit_count = @($units | Where-Object { $_.classification -eq 'advisory_only_unit' }).Count
         ambiguous_unit_count = @($units | Where-Object { $_.classification -eq 'ambiguous_unit' }).Count
         unsafe_unit_count = @($units | Where-Object { $_.classification -eq 'unsafe_unit' }).Count
@@ -1579,7 +1579,7 @@ foreach ($topologyWave in @($executionTopology.waves)) {
                 $failedUnitCount += 1
             }
 
-            if ([string]$unitReceipt.lane_kind -eq 'specialist_dispatch') {
+            if ([string]$unitReceipt.lane_kind -eq 'skill_execution') {
                 $executedSpecialistUnits += [pscustomobject]@{
                     unit_id = [string]$unitReceipt.unit_id
                     skill_id = [string]$unitReceipt.skill_id
@@ -2009,7 +2009,7 @@ $executionManifest = [pscustomobject]@{
         path = $planShadow.path
         candidate_unit_count = [int]$planShadow.payload.candidate_unit_count
         executable_unit_count = [int]$planShadow.payload.executable_unit_count
-        specialist_dispatch_unit_count = [int]$planShadow.payload.specialist_dispatch_unit_count
+        skill_execution_unit_count = [int]$planShadow.payload.skill_execution_unit_count
         advisory_only_unit_count = [int]$planShadow.payload.advisory_only_unit_count
         ambiguous_unit_count = [int]$planShadow.payload.ambiguous_unit_count
     }
