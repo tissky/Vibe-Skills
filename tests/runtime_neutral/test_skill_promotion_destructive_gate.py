@@ -148,10 +148,10 @@ class SkillPromotionDestructiveGateTests(unittest.TestCase):
 
             specialist_accounting = execution_manifest["specialist_accounting"]
             self.assertEqual([], as_list(specialist_accounting["ghost_match_skill_ids"]))
-            self.assertGreaterEqual(int(specialist_accounting["blocked_specialist_unit_count"]), 1)
-            self.assertEqual(0, int(specialist_accounting["approved_dispatch_count"]))
+            self.assertGreaterEqual(int(specialist_accounting["blocked_skill_execution_unit_count"]), 1)
+            self.assertEqual(0, int(specialist_accounting["selected_skill_execution_count"]))
 
-            blocked_units = list(specialist_accounting["blocked_specialist_units"])
+            blocked_units = list(specialist_accounting["blocked_skill_execution_units"])
             self.assertGreaterEqual(len(blocked_units), 1)
             first_blocked = load_json(blocked_units[0]["result_path"])
             self.assertEqual("blocked", first_blocked["status"])
@@ -174,7 +174,7 @@ class SkillPromotionDestructiveGateTests(unittest.TestCase):
             execution_manifest = load_json(summary["artifacts"]["execution_manifest"])
             specialist_accounting = execution_manifest["specialist_accounting"]
 
-            self.assertGreaterEqual(int(specialist_accounting["approved_dispatch_count"]), 1)
+            self.assertGreaterEqual(int(specialist_accounting["selected_skill_execution_count"]), 1)
             self.assertEqual(0, int(specialist_accounting["executed_specialist_unit_count"]))
-            self.assertGreaterEqual(int(specialist_accounting["direct_routed_specialist_unit_count"]), 1)
+            self.assertGreaterEqual(int(specialist_accounting["direct_routed_skill_execution_unit_count"]), 1)
             self.assertEqual("direct_current_session_routed", specialist_accounting["effective_execution_status"])

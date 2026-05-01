@@ -182,12 +182,6 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
     execution_manifest = load_json(execution_manifest_path)
     runtime_input_packet = load_json(runtime_input_packet_path) if runtime_input_packet_path.exists() else {}
     skill_routing = runtime_input_packet.get("skill_routing") or {}
-    legacy_skill_routing = runtime_input_packet.get("legacy_skill_routing") or {}
-    specialist_dispatch = (
-        runtime_input_packet.get("specialist_dispatch")
-        or legacy_skill_routing.get("specialist_dispatch")
-        or {}
-    )
     specialist_accounting = execution_manifest.get("specialist_accounting") or {}
     skill_usage = _load_skill_usage(session_root, runtime_input_packet, execution_manifest, execute_receipt)
 
@@ -325,16 +319,20 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
     if tdd_evidence_payload_notes:
         code_task_tdd_evidence_notes.append(tdd_evidence_payload_notes)
 
-    if "approved_dispatch" in specialist_accounting:
-        approved_dispatch = specialist_accounting.get("approved_dispatch") or []
-    else:
-        approved_dispatch = specialist_dispatch.get("approved_dispatch") or []
-    approved_dispatch_skill_ids = _normalize_skill_id_list(approved_dispatch)
+    selected_skill_execution = specialist_accounting.get("selected_skill_execution") or []
+    selected_skill_execution_count = int(specialist_accounting.get("selected_skill_execution_count") or 0)
+    selected_skill_execution_skill_ids = _normalize_skill_id_list(selected_skill_execution)
+    if selected_skill_execution_count and selected_skill_execution_count != len(selected_skill_execution_skill_ids):
+        selected_skill_execution_count = len(selected_skill_execution_skill_ids)
+    blocked_skill_execution_units = specialist_accounting.get("blocked_skill_execution_units") or []
+    degraded_skill_execution_units = specialist_accounting.get("degraded_skill_execution_units") or []
+    # Backward report label only; current runtime source is selected_skill_execution.
+    approved_dispatch_skill_ids = selected_skill_execution_skill_ids
     if skill_routing:
         selected_skill_ids = _normalize_skill_id_list(skill_routing.get("selected") or [])
         selected_skill_ids_for_usage_truth = selected_skill_ids
     else:
-        selected_skill_ids = approved_dispatch_skill_ids
+        selected_skill_ids = selected_skill_execution_skill_ids
         selected_skill_ids_for_usage_truth = []
     skill_usage_truth = _evaluate_skill_usage_truth(
         skill_usage,
@@ -356,8 +354,8 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
     if not isinstance(raw_specialist_execution_units, list):
         raw_specialist_execution_units = [raw_specialist_execution_units] if raw_specialist_execution_units else []
 
-    direct_routed_units_key_present = "direct_routed_specialist_units" in specialist_accounting
-    raw_direct_routed_specialist_units = specialist_accounting.get("direct_routed_specialist_units") or []
+    direct_routed_units_key_present = "direct_routed_skill_execution_units" in specialist_accounting
+    raw_direct_routed_specialist_units = specialist_accounting.get("direct_routed_skill_execution_units") or []
     if not direct_routed_units_key_present and raw_specialist_execution_units:
         raw_direct_routed_specialist_units = [
             {
@@ -661,10 +659,10 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
     approved_dispatch_skill_id_set = set(approved_dispatch_skill_ids)
     disclosure_skill_id_set = set(disclosure_skill_ids)
     specialist_degraded_skill_ids = _normalize_skill_id_list(
-        specialist_accounting.get("degraded_skill_ids") or specialist_dispatch.get("degraded_skill_ids")
+        specialist_accounting.get("degraded_skill_ids")
     )
     specialist_blocked_skill_ids = _normalize_skill_id_list(
-        specialist_accounting.get("blocked_skill_ids") or specialist_dispatch.get("blocked_skill_ids")
+        specialist_accounting.get("blocked_skill_ids")
     )
     specialist_activity_skill_ids = _normalize_skill_id_list(
         [
@@ -1195,11 +1193,22 @@ def evaluate_delivery_acceptance(repo_root: Path, session_root: Path) -> dict[st
             "specialist_execution_source_path": specialist_execution_source_path,
             "specialist_execution_sidecar_path": str(session_root / "specialist-execution.json"),
             "approved_dispatch_skill_ids": approved_dispatch_skill_ids,
+            "selected_skill_execution_skill_ids": selected_skill_execution_skill_ids,
+            "selected_skill_execution_count": selected_skill_execution_count,
             "selected_skill_ids": selected_skill_ids,
             "disclosed_specialist_skill_ids": disclosure_skill_ids,
+            "blocked_skill_execution_unit_count": int(
+                specialist_accounting.get("blocked_skill_execution_unit_count") or len(blocked_skill_execution_units)
+            ),
+            "degraded_skill_execution_unit_count": int(
+                specialist_accounting.get("degraded_skill_execution_unit_count") or len(degraded_skill_execution_units)
+            ),
             "direct_routed_specialist_unit_ids": direct_routed_unit_ids,
             "direct_routed_specialist_skill_ids": direct_routed_skill_ids,
             "direct_routed_specialist_units": direct_routed_specialist_units,
+            "direct_routed_skill_execution_unit_ids": direct_routed_unit_ids,
+            "direct_routed_skill_execution_skill_ids": direct_routed_skill_ids,
+            "direct_routed_skill_execution_units": direct_routed_specialist_units,
             "specialist_host_resolution_state": specialist_host_resolution_state,
             "specialist_host_executed_unit_count": specialist_host_executed_unit_count,
             "specialist_host_degraded_unit_count": specialist_host_degraded_unit_count,

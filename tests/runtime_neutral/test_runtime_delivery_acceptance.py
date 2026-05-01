@@ -163,14 +163,18 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
             "failed_unit_count": failed_unit_count,
             "timed_out_unit_count": 0,
         }
-        approved_dispatch_payload = list(approved_dispatch or [])
+        selected_skill_execution_payload = list(approved_dispatch or [])
         if approved_dispatch is not None or specialist_accounting is not None:
             default_specialist_accounting = {
-                "approved_dispatch": approved_dispatch_payload,
-                "approved_dispatch_count": len(approved_dispatch_payload),
+                "selected_skill_execution": selected_skill_execution_payload,
+                "selected_skill_execution_count": len(selected_skill_execution_payload),
+                "blocked_skill_execution_unit_count": 0,
+                "blocked_skill_execution_units": [],
+                "degraded_skill_execution_unit_count": 0,
+                "degraded_skill_execution_units": [],
                 "degraded_skill_ids": [],
                 "blocked_skill_ids": [],
-                "effective_execution_status": "live_native_executed" if approved_dispatch_payload else "none",
+                "effective_execution_status": "live_native_executed" if selected_skill_execution_payload else "none",
             }
             if specialist_accounting:
                 default_specialist_accounting.update(specialist_accounting)
@@ -187,7 +191,7 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
         if approved_dispatch is not None:
             approved_skill_ids = [
                 str(item["skill_id"]).strip()
-                for item in approved_dispatch_payload
+                for item in selected_skill_execution_payload
                 if str(item.get("skill_id", "")).strip()
             ]
             runtime_input_packet_payload["specialist_decision"] = {
@@ -232,7 +236,7 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
         if phase_execute_specialist_decision is not None:
             phase_execute_payload["specialist_decision"] = phase_execute_specialist_decision
         elif not omit_default_specialist_decision and sidecar_specialist_decision is None and not specialist_decision_path:
-            if approved_dispatch_payload:
+            if selected_skill_execution_payload:
                 phase_execute_payload["specialist_decision"] = {
                     "decision_state": "approved_dispatch",
                     "resolution_mode": "approved_dispatch",
@@ -505,8 +509,8 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
         session_root = self._build_session(
             approved_dispatch=approved_dispatch,
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "live_native_executed",
             },
         )
@@ -542,8 +546,8 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "live_native_executed",
             },
         )
@@ -579,8 +583,8 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
             },
         )
@@ -621,10 +625,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -667,10 +671,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -700,8 +704,8 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
         session_root = self._build_session(
             approved_dispatch=stale_runtime_dispatch,
             specialist_accounting={
-                "approved_dispatch": [],
-                "approved_dispatch_count": 0,
+                "selected_skill_execution": [],
+                "selected_skill_execution_count": 0,
                 "effective_execution_status": "none",
             },
             phase_execute_specialist_decision={
@@ -746,10 +750,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -814,10 +818,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -869,8 +873,8 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
             },
             sidecar_specialist_execution={
@@ -917,10 +921,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -975,10 +979,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -1033,10 +1037,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -1093,10 +1097,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -1157,10 +1161,10 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "effective_execution_status": "direct_current_session_routed",
-                "direct_routed_specialist_units": [
+                "direct_routed_skill_execution_units": [
                     {
                         "unit_id": "unit-1",
                         "skill_id": "systematic-debugging",
@@ -1230,8 +1234,8 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 2,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 2,
                 "effective_execution_status": "live_native_executed",
             },
             phase_execute_specialist_decision={
@@ -1275,8 +1279,8 @@ class RuntimeDeliveryAcceptanceTests(unittest.TestCase):
                 ],
             },
             specialist_accounting={
-                "approved_dispatch": approved_dispatch,
-                "approved_dispatch_count": 1,
+                "selected_skill_execution": approved_dispatch,
+                "selected_skill_execution_count": 1,
                 "degraded_skill_ids": ["systematic-debugging"],
                 "effective_execution_status": "explicitly_degraded",
             },
